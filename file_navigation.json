@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-29T22:17:12+03:00",
-  "round": 63,
+  "generated_at": "2026-10-29T22:24:17+03:00",
+  "round": 64,
   "pending": [
     {
       "path": "tests/smoke_plugin_decoupling.py::Server.start",
@@ -13,6 +13,22 @@
     }
   ],
   "decided": [
+    {
+      "path": "file_navigation.json::public-scan-round64",
+      "decision": "公开前文案扫描结论（round 64）",
+      "reason": "扫描 125 个代码/文档文件：必须清理 0 项；建议清理 1 项（plugins/pdf/feature_batch.js:25 示例路径含 WJL，建议替换为 <用户名>）；可接受 164 项（detailstop 3 处为仓库 owner；AI agent 名 161 处为多 AI 协作记录）。绝对路径 0、个人邮箱 0、手机号 0、具体地址 0、真实 token URL 0；money 15 与 sensitive_url 42 为代码/模板误报，不是个人财务值或真实凭据。docs/多AI共建日志.md 的 agent 名为 DSH、DeepSeek Harness、Codex · GPT-5（DeepSeek Harness 扮演），无真实姓名；适合公开。结论：无必须清理项，可考虑转 public；WJL 建议在公开前匿名化。",
+      "status": "done",
+      "round": 64,
+      "at": "2026-10-29T22:24:17+03:00"
+    },
+    {
+      "path": "data/backup/::round61-63_temp",
+      "decision": "清理 round 61–63 临时备份（round 64）",
+      "reason": "round59_docs_post_move（3 文件/304,546 B）、round60_rt_fin（4/119,341 B）、round61_clean_start（10/618,121 B）、round62_git_init（2/303,139 B）、round63_push（2/292,890 B）共 5 个临时目录已清理，释放 1,638,037 B。这些是 round 61–63 的改前快照，commit 均成功、工作区 clean，回滚价值归零。data/ 在 .gitignore，清理不产生 Git 变更；data/backup/ 现为空目录。历史 decided 中 backup_path 指向这些目录的记录保留为历史（路径已不存在）。",
+      "status": "done",
+      "round": 64,
+      "at": "2026-10-29T22:24:17+03:00"
+    },
     {
       "path": ".git::remote",
       "decision": "配置远程仓库并 push（round 63，私有）",
