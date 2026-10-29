@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-29T21:59:19+03:00",
-  "round": 62,
+  "generated_at": "2026-10-29T22:17:12+03:00",
+  "round": 63,
   "pending": [
     {
       "path": "tests/smoke_plugin_decoupling.py::Server.start",
@@ -14,6 +14,15 @@
   ],
   "decided": [
     {
+      "path": ".git::remote",
+      "decision": "配置远程仓库并 push（round 63，私有）",
+      "reason": "remote origin = https://github.com/detailstop/Traveling_Tree.git；本地 commit 9c63178（181 文件）+ c7ffd42（round 62 docs）；用户手动 push 成功，remote HEAD = c7ffd4209dcff0184be2727bc7608443c6a04b9c；agent 环境非交互，无法输入 PAT，故 push 由用户手动完成；PAT 存于 Windows 凭据管理器，后续 agent push 无需交互。",
+      "status": "done",
+      "round": 63,
+      "at": "2026-10-29T22:17:12+03:00",
+      "backup_path": "data/backup/round63_push/"
+    },
+    {
       "path": "data/ai_cobuild.json::round61_two_checkins",
       "decision": "round 61 两次打卡说明（保留，不作废）",
       "reason": "round 61 阶段 6 完成后先打卡（#55，21:49），补完 README 后最终打卡（#56，21:53）。两条均为真实操作记录，内容不同，非重复提交；count 54→56 的 +2 由此解释。按只追加原则保留。",
@@ -24,7 +33,7 @@
     {
       "path": ".git",
       "decision": "初始化 Git 仓库（round 62，私有）",
-      "reason": "git init -b main；首次 commit 哈希 9c63178；181 文件（Python 88 / JS 25 / Markdown 6 / 插件目录 141）；.gitignore 排除 data/、data_path.txt、rt_fin.json、webchat_profile/、__pycache__ 等；git status clean；git ls-tree 确认无敏感路径。远端：待 round 63。",
+      "reason": "git init -b main；首次 commit 哈希 9c63178；181 文件（Python 88 / JS 25 / Markdown 6 / 插件目录 141）；.gitignore 排除 data/、data_path.txt、rt_fin.json、webchat_profile/、__pycache__ 等；git status clean；git ls-tree 确认无敏感路径。远端：待 round 63。 round 63 已配置 remote https://github.com/detailstop/Traveling_Tree.git，用户手动 push 成功（agent 环境无法交互输入 PAT）；remote HEAD = c7ffd4209dcff0184be2727bc7608443c6a04b9c；main 跟踪 origin/main。认证方式：PAT 存于 Windows 凭据管理器。",
       "status": "done",
       "round": 62,
       "at": "2026-10-29T21:59:19+03:00",
