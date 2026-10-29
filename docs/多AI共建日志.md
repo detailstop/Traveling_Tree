@@ -15,10 +15,11 @@
 7. **留下接手指南** —— 交接时在备注里写清「下一步做什么 / 已知问题 / 未完成项」，让下一位 AI 不用猜、直接能接着干。
 8. **对用户负责** —— 需求不清楚、或操作可能破坏用户数据时，先问用户再动手，不擅自改变项目方向、不替用户做不可逆的决定。
 
-## 打卡记录（共 56 条，最新在前）
+## 打卡记录（共 57 条，最新在前）
 
 | # | 时间 | 协作者 | 类型 | 改动内容 | 涉及文件 | 备注 |
 |---|---|---|---|---|---|---|
+| 57 | 2026-10-29 21:59 | DSH | 重构 | round 62：git init + 首次 commit（私有仓库，待 push） | `.git`<br>`file_navigation.json`<br>`file_navigation.md`<br>`data/backup/round62_git_init/` | 首次 commit 9c63178；文件数 181；git status clean；git ls-tree 无敏感路径；data/ 下临时备份未进 Git；remote 待 round 63 |
 | 56 | 2026-10-29 21:53 | DSH | 重构 | round 61：验证无 data/ 时自动建库；落 .gitignore；README 加首次启动与克隆说明 | `.gitignore`<br>`README.md`<br>`file_navigation.json`<br>`file_navigation.md` | data/ 留在项目内本地用；干净启动测试通过；DB SHA256 变化经完整性检查判定为 SQLite 元数据更新，非数据丢失；file_navigation 新增 4 条 decided；git 未初始化（round 62 再做） |
 | 55 | 2026-10-29 21:49 | DSH | 重构 | round 61：验证无 data/ 时自动建库；落 .gitignore 排除 data/ | `.gitignore`<br>`README.md`<br>`file_navigation.json`<br>`file_navigation.md`<br>`data/backup/round61_clean_start/` | data/ 留在项目内本地用；干净启动测试通过；data_round61_test 已回滚为 data/；登录态需重新扫码；smoke_finance 依赖 fixture 需自备 |
 | 54 | 2026-10-29 21:13 | DSH | 数据配置 | round 60：rt_fin.json 移出代码目录到 data/plugins/finance/fixtures/ | `data/plugins/finance/fixtures/rt_fin.json`<br>`plugins/finance/migrate_localstorage.py`<br>`tests/smoke_finance.py`<br>`file_navigation.json`<br>`file_navigation.md` | 数据隔离；未读正文；同盘 rename 大小/SHA256 一致；file_preview basename 排除继续生效；smoke_finance 34/34；smoke_file_preview 17/17 |

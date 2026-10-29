@@ -2,9 +2,9 @@
 
 > 只读摘要，勿手改。本文件由 file_navigation.json 生成；结构与去留决定以 JSON 为准。
 
-- 生成时间：2026-10-29T21:53:13+03:00
-- 轮次：61
-- 待办：1 条；已决定：425 条
+- 生成时间：2026-10-29T21:59:19+03:00
+- 轮次：62
+- 待办：1 条；已决定：427 条
 
 ## 待办
 
@@ -16,6 +16,8 @@
 
 | 路径 | 决定 | 原因 | 状态 | 轮次 | 时间 | 备份路径 |
 | --- | --- | --- | --- | --- | --- | --- |
+| data/ai_cobuild.json::round61_two_checkins | round 61 两次打卡说明（保留，不作废） | round 61 阶段 6 完成后先打卡（#55，21:49），补完 README 后最终打卡（#56，21:53）。两条均为真实操作记录，内容不同，非重复提交；count 54→56 的 +2 由此解释。按只追加原则保留。 | done | 62 | 2026-10-29T21:59:19+03:00 |  |
+| .git | 初始化 Git 仓库（round 62，私有） | git init -b main；首次 commit 哈希 9c63178；181 文件（Python 88 / JS 25 / Markdown 6 / 插件目录 141）；.gitignore 排除 data/、data_path.txt、rt_fin.json、webchat_profile/、__pycache__ 等；git status clean；git ls-tree 确认无敏感路径。远端：待 round 63。 | done | 62 | 2026-10-29T21:59:19+03:00 | data/backup/round62_git_init/ |
 | README.md | round 61 补充数据目录与克隆说明 | 第 6 节加首次启动自动建库说明；第 7 节风险提示加 webchat_profile 克隆后为空需重新登录。 | done | 61 | 2026-10-29T21:53:13+03:00 |  |
 | .gitignore | 新建（round 61） | data/ 留在项目内本地用，.gitignore 排除 data/、rt_fin.json、__pycache__ 等。克隆项目后启动，config.py 自动建 data/，init_db 扫描 plugins/*/schema.sql 建表并播种；干净启动测试已通过。webchat_profile 被忽略，克隆者需重新扫码登录（README 已说明）。不创建 data_path.txt（data/ 不搬家）。 | done | 61 | 2026-10-29T21:53:13+03:00 |  |
 | file_navigation.json::工艺教训-round61 | SQLite 恢复后验证判据修正 | round 61 阶段 5.4 原设计要求恢复后 SHA256 与基线一致，但阶段 5.5 又要求启动服务验证，两者矛盾：SQLite 启动必改 header 元数据。后续同类任务改为：先 PRAGMA integrity_check + 表行数对比，再启动服务；SHA256 仅用于字节级备份完整性（如 rename 前后），不用于 SQLite 恢复判定。 | done | 61 | 2026-10-29T21:53:13+03:00 |  |
