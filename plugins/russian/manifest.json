@@ -1,0 +1,29 @@
+{
+  "schema_version": 2,
+  "id": "russian",
+  "name": "旅行之木",
+  "version": "1.0",
+  "enabled": true,
+  "icon": "🇷🇺",
+  "desc": "卡片学习 · 复习 · 知识库 · 统计",
+  "entries": [
+    {
+      "id": "russian",
+      "name": "旅行之木",
+      "icon": "🇷🇺",
+      "desc": "卡片学习 · 复习 · 知识库 · 统计",
+      "shelf": "gen",
+      "feature": "feature.js"
+    }
+  ],
+  "backend": "backend.py",
+  "db": {
+    "module_key": "russian",
+    "schema": "schema.sql",
+    "migrate": "migrate.py",
+    "seed": "seed.py"
+  },
+  "style": "plugin.css",
+  "provides": [],
+  "consumes": []
+}

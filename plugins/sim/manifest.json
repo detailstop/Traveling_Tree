@@ -1,0 +1,24 @@
+{
+  "schema_version": 2,
+  "id": "sim",
+  "name": "随机模拟器",
+  "version": "1.0",
+  "enabled": true,
+  "icon": "🎲",
+  "desc": "蒙特卡洛 · 醉汉 / 粒子沉积 / 自由运动",
+  "entries": [
+    {
+      "id": "sim",
+      "name": "随机模拟器",
+      "icon": "🎲",
+      "desc": "蒙特卡洛 · 醉汉 / 粒子沉积 / 自由运动",
+      "shelf": "gen",
+      "feature": "feature.js"
+    }
+  ],
+  "backend": null,
+  "db": null,
+  "style": "plugin.css",
+  "provides": [],
+  "consumes": []
+}

@@ -1,0 +1,17 @@
+{
+  "schema_version": 2,
+  "id": "webchat",
+  "name": "网页会话",
+  "icon": "💬",
+  "desc": "Playwright 网页会话后端（无前端卡片）",
+  "version": "1.0",
+  "enabled": true,
+  "entries": [],
+  "backend": "backend.py",
+  "db": null,
+  "style": null,
+  "data_dirs": ["webchat"],
+  "shared_features": [],
+  "provides": [],
+  "consumes": []
+}

@@ -1,0 +1,28 @@
+{
+  "schema_version": 2,
+  "id": "urlarch",
+  "name": "网址归档",
+  "version": "1.0",
+  "enabled": true,
+  "icon": "🔖",
+  "desc": "归档网址信息 · 后续接入网址爬虫",
+  "entries": [
+    {
+      "id": "urlarch",
+      "name": "网址归档",
+      "icon": "🔖",
+      "desc": "归档网址信息 · 后续接入网址爬虫",
+      "shelf": "gen",
+      "feature": "feature.js"
+    }
+  ],
+  "backend": "backend.py",
+  "db": {
+    "module_key": "urlarch",
+    "schema": "schema.sql",
+    "migrate": "migrate.py"
+  },
+  "style": "plugin.css",
+  "provides": [],
+  "consumes": []
+}

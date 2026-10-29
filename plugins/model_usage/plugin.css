@@ -1,0 +1,182 @@
+/* 模型用量与消费（plugins/model_usage）专用样式。
+   由 manifest.style 声明，app.js 在加载 feature.js 前按需注入 <link>。
+   仅 .mu-* 命名空间；.section-title/.m-num 等共享组件来自 app.css。 */
+/* ============================================================
+   模型用量与消费（model-usage）
+   ============================================================ */
+.mu-card .section-title { flex-wrap: wrap; }
+.mu-hint { font-size:12px; color:var(--text-dim); font-weight:400; }
+.mu-note {
+  padding:9px 11px; border-radius:10px; background:rgba(120,100,115,.055);
+  color:var(--text-dim); font-size:12px; line-height:1.7;
+}
+.mu-metrics { margin-top:12px; }
+.mu-metrics .m-num { font-size:22px; }
+.mu-form-grid {
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr));
+  gap:10px 14px; align-items:start;
+}
+.mu-form-grid .input { width:100%; }
+.mu-req { color:#d2455a; font-style:normal; }
+.mu-err { display:block; color:#c0392b; font-size:11.5px; line-height:1.45; min-height:0; }
+.mu-form-grid .field.mu-bad .input {
+  border-color:#d2455a; box-shadow:0 0 0 3px rgba(210,69,90,.12);
+}
+.mu-form-help { margin-top:9px; font-size:11.5px; color:var(--text-dim); line-height:1.65; }
+.mu-form-warn { display:grid; gap:5px; margin-top:8px; }
+.mu-warn {
+  padding:7px 10px; border-radius:8px; background:rgba(236,180,62,.16);
+  color:#815914; font-size:12px; line-height:1.55;
+}
+.mu-form-actions { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:12px; }
+.mu-muted { font-size:11.5px; color:var(--text-dim); }
+.mu-form-msg-error { color:#c0392b; font-weight:600; }
+.mu-switches { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-left:auto; }
+.mu-switches .pill, .mu-group-pills .pill { padding:5px 12px; font-size:12px; }
+.mu-group-pills { margin-left:auto; }
+.mu-chart-lines { display:grid; gap:8px; }
+.mu-trend-row {
+  display:grid; grid-template-columns:96px minmax(0,1fr) 110px;
+  align-items:center; gap:10px;
+}
+.mu-trend-label { font-size:12px; font-weight:650; color:var(--text); text-align:right; white-space:nowrap; }
+.mu-trend-track {
+  height:16px; border-radius:999px; overflow:hidden;
+  background:rgba(255,255,255,.65); box-shadow:inset 0 1px 2px rgba(120,100,115,.08);
+}
+.mu-trend-fill {
+  display:block; height:100%; border-radius:999px;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+  transition:width .5s cubic-bezier(.4,0,.2,1);
+}
+.mu-trend-value { font-size:12px; color:var(--text-dim); font-variant-numeric:tabular-nums; }
+.mu-chart-foot { margin:10px 0 8px; }
+.mu-trend-table { max-height:260px; }
+.mu-group-table { max-height:380px; margin-top:2px; }
+.mu-share { display:flex; align-items:center; gap:8px; min-width:120px; }
+.mu-share-bar {
+  display:block; height:8px; border-radius:999px; min-width:2px;
+  background:linear-gradient(90deg,var(--mint),#9be0c4);
+}
+.mu-share b { font-size:11.5px; color:var(--text-dim); font-weight:600; white-space:nowrap; }
+.mu-total-row td { font-weight:700; background:rgba(255,255,255,.5); }
+.mu-filters {
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:8px 12px; align-items:end; margin-bottom:8px;
+}
+.mu-filters .input { width:100%; padding:7px 9px; font-size:12.5px; }
+.mu-filter-note { font-size:11.5px; color:#a76a12; margin:2px 0 8px; }
+.mu-filter-note:empty { display:none; }
+.mu-detail-wrap { max-height:640px; }
+.mu-detail-table th { white-space:nowrap; }
+.mu-detail-table td { vertical-align:top; }
+.mu-detail-table .mu-num, table.grid .mu-num { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.mu-sort { cursor:pointer; user-select:none; }
+.mu-sort:hover { color:#fff; }
+.mu-clip {
+  display:inline-block; max-width:180px; overflow:hidden; text-overflow:ellipsis;
+  white-space:nowrap; vertical-align:bottom;
+}
+.mu-currency {
+  display:inline-block; padding:1px 7px; border-radius:6px; font-size:11px; font-weight:700;
+  background:rgba(88,201,160,.16); color:#25845b;
+}
+.mu-currency-off { background:rgba(245,162,93,.18); color:#a76a12; }
+.mu-row-noncny { background:rgba(245,162,93,.055); }
+.mu-actions { white-space:nowrap; }
+.mu-actions .mini-btn { margin-right:2px; }
+.mu-empty-error {
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  padding:18px; border-radius:12px; background:rgba(210,69,90,.07); color:#a43d50; font-size:12.5px;
+}
+.mu-empty-error b { font-size:13px; }
+.mu-empty-error span { flex:1; min-width:160px; }
+@media (max-width: 720px) {
+  .mu-trend-row { grid-template-columns:74px minmax(0,1fr) 88px; }
+  .mu-form-grid { grid-template-columns:1fr; }
+  .mu-switches, .mu-group-pills { margin-left:0; }
+}
+
+/* 设置与下载 · 按功能分组 */
+.dl-group-list { display:grid; gap:8px; margin-top:4px; }
+.dl-group-row {
+  display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+  padding:10px 12px; border-radius:10px;
+  background:rgba(255,255,255,.55); border:1px solid rgba(var(--accent-rgb),.12);
+}
+.dl-group-main { display:grid; gap:2px; min-width:200px; flex:1; }
+.dl-group-main b { font-size:13px; }
+.dl-group-main span { font-size:11.5px; color:var(--text-dim); }
+.dl-group-main small { font-size:11.5px; color:var(--text-2); }
+.dl-group-actions { display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
+
+/* 模型用量 · 只读字段 / 价目设置 */
+.mu-readonly {
+  background:rgba(120,100,115,.07) !important;
+  color:var(--text-2);
+  font-variant-numeric:tabular-nums;
+}
+.mu-tier {
+  display:inline-block; margin-left:4px; padding:0 6px; border-radius:6px;
+  font-size:10.5px; font-weight:700; vertical-align:middle;
+}
+.mu-tier.peak { background:rgba(245,162,93,.2); color:#a76a12; }
+.mu-tier.offpeak { background:rgba(88,201,160,.16); color:#25845b; }
+.mu-price-wrap { display:grid; gap:10px; }
+.mu-price-note { margin:0; line-height:1.6; }
+.mu-price-scroll { max-height:360px; }
+.mu-price-table th { white-space:nowrap; font-size:11px; }
+.mu-price-table th, .mu-price-table td { padding:6px 5px; }
+.mu-price-table th:last-child, .mu-price-table td:last-child { width:32px; padding-left:2px; padding-right:2px; text-align:center; }
+.mu-price-input { width:100%; min-width:0; padding:4px 6px; font-size:11px; }
+.mu-price-actions { display:flex; gap:8px; flex-wrap:wrap; }
+.mu-price-error { color:#c0392b; font-size:12px; min-height:0; }
+.mu-holiday-box { border-top:1px dashed rgba(120,100,115,.2); padding-top:8px; }
+.mu-holiday-box h4 { margin:0 0 6px; font-size:13px; }
+.mu-holiday-list { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px; }
+.mu-holiday-chip {
+  display:inline-flex; align-items:center; gap:4px; padding:2px 7px;
+  border-radius:999px; background:rgba(120,100,115,.09); font-size:11.5px;
+}
+.mu-holiday-add { display:flex; gap:6px; flex-wrap:wrap; }
+.mu-holiday-add .input { width:160px; padding:6px 8px; font-size:12px; }
+
+/* 模型用量 · 卡片折叠 / 左右切换 / 日-分钟可视化 */
+.mu-card > .section-title { cursor:pointer; user-select:none; }
+.mu-card.mu-collapsed > :not(.section-title) { display:none; }
+.mu-caret {
+  display:inline-block; margin-left:2px; color:var(--text-dim);
+  font-size:12px; transition:transform .16s ease;
+}
+.mu-card.mu-collapsed .mu-caret { transform:rotate(-90deg); }
+.mu-seg {
+  display:inline-flex; align-items:center; gap:2px; padding:2px;
+  border-radius:999px; background:rgba(120,100,115,.08);
+  border:1px solid rgba(var(--accent-rgb),.18);
+}
+.mu-seg button {
+  border:0; background:transparent; color:var(--text-dim);
+  border-radius:999px; padding:4px 11px; font-size:12px; cursor:pointer;
+  transition:background .15s ease, color .15s ease;
+}
+.mu-seg button.active {
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#fff; font-weight:650; box-shadow:0 2px 7px rgba(var(--accent-rgb),.24);
+}
+.mu-seg.mu-seg-3 button { padding:4px 9px; }
+.mu-viz-controls {
+  display:flex; flex-wrap:wrap; gap:8px 14px; align-items:end; margin-bottom:8px;
+}
+.mu-viz-controls label { display:flex; align-items:center; gap:5px; font-size:12px; color:var(--text-dim); }
+.mu-viz-controls .input { padding:6px 8px; font-size:12px; }
+.mu-viz-note { font-size:11.5px; color:var(--text-dim); margin:2px 0 8px; min-height:16px; }
+.mu-viz-chart-wrap { overflow-x:auto; border-radius:12px; background:rgba(255,255,255,.35); }
+.mu-viz-legend { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+.mu-viz-leg {
+  border:1px solid rgba(var(--accent-rgb),.18); background:rgba(255,255,255,.6);
+  border-radius:999px; padding:3px 9px; font-size:11px; color:var(--text-dim);
+  cursor:pointer; display:inline-flex; align-items:center; gap:5px;
+}
+.mu-viz-leg i { width:9px; height:9px; border-radius:3px; display:inline-block; opacity:.35; }
+.mu-viz-leg.on { color:var(--text); background:#fff; }
+.mu-viz-leg.on i { opacity:1; }

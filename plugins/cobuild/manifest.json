@@ -1,0 +1,17 @@
+{
+  "schema_version": 2,
+  "id": "cobuild",
+  "name": "多 AI 共建",
+  "icon": "🤝",
+  "desc": "多 AI 共建打卡与日志镜像（无前端卡片）",
+  "version": "1.0",
+  "enabled": true,
+  "entries": [],
+  "backend": "backend.py",
+  "db": null,
+  "style": null,
+  "data_dirs": [],
+  "shared_features": [],
+  "provides": [],
+  "consumes": []
+}

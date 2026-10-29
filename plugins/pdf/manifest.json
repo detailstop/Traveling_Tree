@@ -1,0 +1,32 @@
+{
+  "schema_version": 2,
+  "id": "pdf",
+  "name": "PDF 与压缩",
+  "version": "1.0",
+  "enabled": true,
+  "icon": "📄",
+  "desc": "PDF 合并/分割/压缩 · 批量压缩",
+  "entries": [
+    {
+      "id": "pdf",
+      "name": "PDF 工具",
+      "icon": "📄",
+      "desc": "合并/分割/压缩/图片转 PDF",
+      "shelf": "gen",
+      "feature": "feature_pdf.js"
+    },
+    {
+      "id": "batch",
+      "name": "批量压缩",
+      "icon": "🗜️",
+      "desc": "文件夹扫描 + 原位压缩",
+      "shelf": "gen",
+      "feature": "feature_batch.js"
+    }
+  ],
+  "backend": "backend.py",
+  "db": null,
+  "style": "plugin.css",
+  "provides": [],
+  "consumes": []
+}

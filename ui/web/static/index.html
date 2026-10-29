@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>旅行之木</title>
+<link rel="icon" href="/favicon.ico" type="image/x-icon">
+<link rel="icon" href="/favicon.png" type="image/png">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+
+<canvas id="bg-particles"></canvas>
+<canvas id="fx-canvas"></canvas>
+
+<div class="app">
+  <!-- ============ 侧边栏 ============ -->
+  <aside class="sidebar glass">
+    <div class="brand">
+      <div class="brand-icon">🦉</div>
+      <div class="brand-text"><b>旅行之木</b><span>本地工具箱</span></div>
+    </div>
+    <nav id="nav">
+      <button class="nav-item active" data-nav="tools"><span class="ni">🧰</span><span class="nav-label">通用工具</span></button>
+    </nav>
+    <div class="side-foot">
+      <button class="ghost-btn side-toggle" id="side-toggle" title="收起侧栏" aria-label="收起侧栏"><span id="side-toggle-icon">«</span><span class="side-label">收起侧栏</span></button>
+      <button class="ghost-btn" id="side-settings" title="设置"><span class="ni">⚙️</span><span class="side-label">设置</span></button>
+    </div>
+  </aside>
+
+  <!-- ============ 主区域 ============ -->
+  <main class="main">
+    <header class="topbar">
+      <div class="top-left">
+        <h1 id="page-title">通用工具</h1>
+        <div class="top-sub" id="top-sub"></div>
+      </div>
+      <div class="top-right"></div>
+    </header>
+
+    <section class="page" id="page-study"></section>
+    <section class="page hidden" id="page-plan"></section>
+    <section class="page hidden" id="page-tools">
+      <div id="tools-shell"></div>
+    </section>
+    <section class="page hidden" id="page-cobuild"></section>
+    <section class="page hidden" id="page-settings"></section>
+    <section class="page hidden" id="page-review"></section>
+    <section class="page hidden" id="page-add"></section>
+    <section class="page hidden" id="page-import"></section>
+    <section class="page hidden" id="page-kb"></section>
+    <section class="page hidden" id="page-stats"></section>
+    <section class="page hidden" id="page-all"></section>
+  </main>
+</div>
+
+<!-- ============ 全局浮层 ============ -->
+<div id="toasts"></div>
+<div id="modal-root"></div>
+<div id="menu-root"></div>
+<div id="recite-root"></div>
+
+<script src="app.js"></script>
+</body>
+</html>

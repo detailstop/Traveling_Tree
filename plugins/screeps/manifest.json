@@ -1,0 +1,28 @@
+{
+  "schema_version": 2,
+  "id": "screeps",
+  "name": "Screeps Arena",
+  "version": "1.0",
+  "enabled": true,
+  "icon": "🤖",
+  "desc": "编程竞技游戏 · 后续接入游玩代码生成",
+  "entries": [
+    {
+      "id": "screeps",
+      "name": "Screeps Arena",
+      "icon": "🤖",
+      "desc": "编程竞技游戏 · 后续接入游玩代码生成",
+      "shelf": "gen",
+      "feature": "feature.js"
+    }
+  ],
+  "backend": "backend.py",
+  "db": {
+    "module_key": "screeps",
+    "schema": "schema.sql",
+    "migrate": "migrate.py"
+  },
+  "style": "plugin.css",
+  "provides": [],
+  "consumes": []
+}

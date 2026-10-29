@@ -1,0 +1,17 @@
+{
+  "schema_version": 2,
+  "id": "tts",
+  "name": "语音朗读",
+  "icon": "🔊",
+  "desc": "edge-tts 语音合成与缓存（无前端卡片，供各插件共用）",
+  "version": "1.0",
+  "enabled": true,
+  "entries": [],
+  "backend": "backend.py",
+  "db": null,
+  "style": null,
+  "data_dirs": [],
+  "shared_features": [],
+  "provides": ["tts"],
+  "consumes": []
+}

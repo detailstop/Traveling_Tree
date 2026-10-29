@@ -1,0 +1,4 @@
+/* 接口调试器（plugins/aidebug）专用样式。
+   由 manifest.style 声明，app.js 在加载 feature.js 前按需注入 <link>。
+   .adb-pre 为调试结果/原文输出块；.exp-wrap/.exp-ctrl 与 expdata 共享，留在 app.css。 */
+.adb-pre { white-space: pre-wrap; word-break: break-word; font-family: Consolas, 'Courier New', monospace; font-size: 12px; line-height: 1.55; background: rgba(255,255,255,.55); border: 1px solid var(--glass-border); border-radius: 10px; padding: 10px 12px; margin: 0; min-height: 120px; max-height: 420px; overflow: auto; }

@@ -1,0 +1,30 @@
+{
+  "schema_version": 2,
+  "id": "ai",
+  "name": "AI 工作台",
+  "version": "1.0",
+  "enabled": true,
+  "icon": "🤖",
+  "desc": "多平台对话：DeepSeek · Kimi · 豆包待接入",
+  "entries": [
+    {
+      "id": "ai",
+      "name": "AI 工作台",
+      "icon": "🤖",
+      "desc": "多平台对话：DeepSeek · Kimi · 豆包待接入",
+      "shelf": "gen",
+      "feature": "feature.js"
+    }
+  ],
+  "backend": "backend.py",
+  "db": {
+    "module_key": "ai",
+    "schema": "schema.sql"
+  },
+  "style": "plugin.css",
+  "shared_features": [
+    "webchat"
+  ],
+  "provides": [],
+  "consumes": []
+}

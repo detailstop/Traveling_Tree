@@ -1,0 +1,28 @@
+{
+  "schema_version": 2,
+  "id": "project_manager",
+  "name": "项目管理",
+  "version": "1.0",
+  "enabled": true,
+  "icon": "🗂️",
+  "desc": "六阶段项目推进 · 手填提示词 · 结果留档与上下文声明",
+  "entries": [
+    {
+      "id": "project-manager",
+      "name": "项目管理",
+      "icon": "🗂️",
+      "desc": "六阶段项目推进 · 手填提示词 · 结果留档与上下文声明",
+      "shelf": "gen",
+      "feature": "feature.js"
+    }
+  ],
+  "backend": "backend.py",
+  "db": {
+    "module_key": "pm",
+    "schema": "schema.sql",
+    "seed": "seed.py"
+  },
+  "style": "plugin.css",
+  "provides": [],
+  "consumes": []
+}

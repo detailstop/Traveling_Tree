@@ -1,0 +1,36 @@
+{
+  "schema_version": 2,
+  "id": "finance",
+  "name": "记账本与理财量化",
+  "version": "1.0",
+  "enabled": true,
+  "icon": "💰",
+  "desc": "日频快照 · 多账户/多币种 · 资产负债 · 归因",
+  "entries": [
+    {
+      "id": "finance",
+      "name": "记账本",
+      "icon": "💰",
+      "desc": "日频快照 · 多账户/多币种 · 资产负债 · 归因",
+      "shelf": "gen",
+      "feature": "feature_finance.js"
+    },
+    {
+      "id": "finquant",
+      "name": "理财量化",
+      "icon": "📊",
+      "desc": "数据已重置，功能待重构",
+      "shelf": "gen",
+      "feature": "feature_finquant.js"
+    }
+  ],
+  "backend": "backend.py",
+  "db": {
+    "module_key": "finance",
+    "schema": "schema.sql"
+  },
+  "style": "plugin.css",
+  "data_dirs": ["finance"],
+  "provides": [],
+  "consumes": []
+}

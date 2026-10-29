@@ -1,0 +1,28 @@
+# 个人数据（本地保留，不上传）
+data/
+data_path.txt
+
+# 财务 fixture（真实数据，已迁 data/plugins/finance/fixtures/，
+# 此处兜底防止误建回代码目录）
+plugins/finance/fixtures/rt_fin.json
+
+# 旧路径防御（round 59 已迁 data/plugins/webchat/，防止误重建）
+webchat_profile/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+.env
+.venv/
+venv/
+
+# 系统
+.DS_Store
+Thumbs.db
+
+# 临时
+*.tmp
+*.log

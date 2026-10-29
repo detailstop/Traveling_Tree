@@ -1,0 +1,27 @@
+/* 网址归档（plugins/urlarch）专用样式。
+   由 manifest.style 声明，app.js 在加载 feature.js 前按需注入 <link>。
+   仅 .ua-* 命名空间；.gcard/.btn/.input 等共享组件来自 app.css。 */
+/* 网址归档 · 组别 / 拖拽 / 一键启动 */
+.ua-group-create { display:flex; gap:8px; margin-top:8px; flex-wrap:wrap; }
+.ua-global-row { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:8px; font-size:12px; color:var(--text-dim); }
+.ua-global-row label { display:flex; align-items:center; gap:5px; color:var(--text-2); }
+.ua-global-row input { font-size:12px; }
+.ua-group { margin-top:12px; border-top:1px dashed rgba(var(--accent-rgb),.2); padding-top:8px; }
+.ua-group:first-child { border-top:0; margin-top:0; padding-top:0; }
+.ua-group-head { display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-size:13px; }
+.ua-group-head b { font-size:13.5px; }
+.ua-type { font-size:10.5px; padding:1px 7px; border-radius:999px; background:rgba(120,100,115,.1); color:var(--text-dim); }
+.ua-type.functional { background:rgba(var(--accent-rgb),.14); color:var(--accent); }
+.ua-count { font-size:11px; color:var(--text-dim); }
+.ua-group-ops { margin-left:auto; display:flex; gap:3px; }
+.ua-whitelist { font-size:10.5px; color:var(--text-dim); }
+.ua-items { display:grid; gap:1px; margin-top:5px; border-radius:10px; padding:2px; transition:background .15s,box-shadow .15s; }
+.ua-items.dragover { background:rgba(var(--accent-rgb),.1); box-shadow:inset 0 0 0 2px var(--accent); }
+.ua-item { display:flex; align-items:center; gap:9px; flex-wrap:wrap; padding:7px 8px; border-bottom:1px solid rgba(var(--accent-rgb),.10); cursor:grab; }
+.ua-item:active { cursor:grabbing; }
+.ua-item a { color:var(--accent); font-weight:600; text-decoration:none; flex:2; min-width:140px; }
+.ua-item-url { font-size:11.5px; color:var(--text-dim); flex:3; min-width:180px; word-break:break-all; }
+.ua-item-ts { font-size:10.5px; color:var(--text-dim); white-space:nowrap; }
+.ua-empty { font-size:12px; color:var(--text-dim); padding:8px; border:1px dashed rgba(var(--accent-rgb),.22); border-radius:8px; }
+.ua-blocked { margin-top:7px; padding:8px 10px; border-radius:9px; background:rgba(245,162,93,.12); color:#815914; font-size:12px; display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+.ua-blocked a { color:#a76a12; font-weight:600; text-decoration:underline; }

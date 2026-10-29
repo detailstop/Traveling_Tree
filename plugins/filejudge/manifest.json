@@ -1,0 +1,25 @@
+{
+  "schema_version": 2,
+  "id": "filejudge",
+  "name": "文件判官",
+  "version": "1.0",
+  "enabled": true,
+  "icon": "⚖️",
+  "desc": "扫描筛选 · 逐张审判 · 确认删除",
+  "entries": [
+    {
+      "id": "filejudge",
+      "name": "文件判官",
+      "icon": "⚖️",
+      "desc": "扫描筛选 · 逐张审判 · 确认删除",
+      "shelf": "gen",
+      "feature": "feature.js"
+    }
+  ],
+  "backend": "backend.py",
+  "db": null,
+  "style": "plugin.css",
+  "data_dirs": ["filejudge"],
+  "provides": [],
+  "consumes": []
+}

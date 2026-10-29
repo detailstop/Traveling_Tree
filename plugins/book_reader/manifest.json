@@ -1,0 +1,28 @@
+{
+  "schema_version": 2,
+  "id": "book_reader",
+  "name": "俄语书籍阅读",
+  "version": "1.0",
+  "enabled": true,
+  "icon": "📚",
+  "desc": "书籍阅读 · 标注清洗 · 全局词库",
+  "entries": [
+    {
+      "id": "book-reader",
+      "name": "俄语书籍阅读",
+      "icon": "📚",
+      "desc": "书籍阅读 · 标注清洗 · 全局词库",
+      "shelf": "gen",
+      "feature": "feature.js"
+    }
+  ],
+  "backend": "backend.py",
+  "db": {
+    "module_key": "reader",
+    "schema": "schema.sql",
+    "migrate": "migrate.py"
+  },
+  "style": "plugin.css",
+  "provides": [],
+  "consumes": []
+}

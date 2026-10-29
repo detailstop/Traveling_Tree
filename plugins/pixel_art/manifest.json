@@ -1,0 +1,27 @@
+{
+  "schema_version": 2,
+  "id": "pixel_art",
+  "name": "像素画与插件绘制",
+  "version": "1.0",
+  "enabled": true,
+  "icon": "🎨",
+  "desc": "像素画布 · 作品库 · 书签/图标资产 · JSON/PNG/Piskel 导入导出",
+  "entries": [
+    {
+      "id": "pixel-art",
+      "name": "像素画与插件绘制",
+      "icon": "🎨",
+      "desc": "像素画布 · 作品库 · 书签/图标资产 · JSON/PNG/Piskel 导入导出",
+      "shelf": "gen",
+      "feature": "feature.js"
+    }
+  ],
+  "backend": "backend.py",
+  "db": {
+    "module_key": "pixel_art",
+    "schema": "schema.sql"
+  },
+  "style": "plugin.css",
+  "provides": [],
+  "consumes": []
+}

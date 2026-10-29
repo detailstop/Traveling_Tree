@@ -1,0 +1,4 @@
+/* Screeps Arena（plugins/screeps）样式入口。
+   本插件当前没有专属 CSS：界面复用 app.css 的共享 .rv-card / .rv-card-title，
+   其余布局为 feature.js 内联样式。保留空的 plugin.css 以统一 manifest.style 契约，
+   后续新增 .screeps-* 专属规则时直接写在这里。 */
