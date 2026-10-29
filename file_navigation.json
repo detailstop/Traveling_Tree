@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-29T22:28:28+03:00",
+  "generated_at": "2026-10-29T22:53:36+03:00",
   "round": 64,
   "pending": [
     {
@@ -13,6 +13,14 @@
     }
   ],
   "decided": [
+    {
+      "path": ".",
+      "decision": "项目目录改名 russian_tutor → Traveling_Tree（round 64）",
+      "reason": "物理目录 C:\\Users\\<用户名>\\Desktop\\russian_tutor\\ 改为 C:\\Users\\<用户名>\\Desktop\\Traveling_Tree\\。config.BASE_DIR 基于 __file__ 自动跟随；启动脚本用 %~dp0 自动跟随；.git、data/、GitHub remote 均不受影响。数据库文件名仍为 russian_tutor.db（内部文件名，与目录名解耦，不改）。README 中项目名引用已更新；历史 round 记录保留旧名。验证：smoke_plugins 181/181、smoke_startup_once 33/33、smoke_web 74/75（TTS 502 已知）、启动无 Traceback、git push 成功。",
+      "status": "done",
+      "round": 64,
+      "at": "2026-10-29T22:53:36+03:00"
+    },
     {
       "path": "plugins/pdf/feature_batch.js",
       "decision": "示例路径个人用户名替换为 <用户名>（round 64）",

@@ -62,7 +62,7 @@ python -m playwright install chromium
 ## 4. 目录与职责
 
 ```text
-russian_tutor/
+Traveling_Tree/
 ├── main.py                  Web 宿主启动、数据库初始化
 ├── config.py                宿主/插件共享路径与默认设置
 ├── file_navigation.json     文件去留与审查主数据源

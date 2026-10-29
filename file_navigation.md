@@ -2,9 +2,9 @@
 
 > 只读摘要，勿手改。本文件由 file_navigation.json 生成；结构与去留决定以 JSON 为准。
 
-- 生成时间：2026-10-29T22:28:28+03:00
+- 生成时间：2026-10-29T22:53:36+03:00
 - 轮次：64
-- 待办：1 条；已决定：431 条
+- 待办：1 条；已决定：432 条
 
 ## 待办
 
@@ -16,6 +16,7 @@
 
 | 路径 | 决定 | 原因 | 状态 | 轮次 | 时间 | 备份路径 |
 | --- | --- | --- | --- | --- | --- | --- |
+| . | 项目目录改名 russian_tutor → Traveling_Tree（round 64） | 物理目录 C:\Users\<用户名>\Desktop\russian_tutor\ 改为 C:\Users\<用户名>\Desktop\Traveling_Tree\。config.BASE_DIR 基于 __file__ 自动跟随；启动脚本用 %~dp0 自动跟随；.git、data/、GitHub remote 均不受影响。数据库文件名仍为 russian_tutor.db（内部文件名，与目录名解耦，不改）。README 中项目名引用已更新；历史 round 记录保留旧名。验证：smoke_plugins 181/181、smoke_startup_once 33/33、smoke_web 74/75（TTS 502 已知）、启动无 Traceback、git push 成功。 | done | 64 | 2026-10-29T22:53:36+03:00 |  |
 | plugins/pdf/feature_batch.js | 示例路径个人用户名替换为 <用户名>（round 64） | 公开前文案扫描发现唯一建议清理项：示例路径含个人用户名。已替换为 <用户名>，不影响功能。 | done | 64 | 2026-10-29T22:28:28+03:00 |  |
 | file_navigation.json::public-scan-round64 | 公开前文案扫描结论（round 64） | 扫描 125 个代码/文档文件：必须清理 0 项；建议清理 1 项（plugins/pdf/feature_batch.js:25 示例路径含个人用户名，建议替换为 <用户名>）；可接受 164 项（detailstop 3 处为仓库 owner；AI agent 名 161 处为多 AI 协作记录）。绝对路径 0、个人邮箱 0、手机号 0、具体地址 0、真实 token URL 0；money 15 与 sensitive_url 42 为代码/模板误报，不是个人财务值或真实凭据。docs/多AI共建日志.md 的 agent 名为 DSH、DeepSeek Harness、Codex · GPT-5（DeepSeek Harness 扮演），无真实姓名；适合公开。结论：无必须清理项，可考虑转 public；建议在公开前匿名化个人用户名。 | done | 64 | 2026-10-29T22:24:17+03:00 |  |
 | data/backup/::round61-63_temp | 清理 round 61–63 临时备份（round 64） | round59_docs_post_move（3 文件/304,546 B）、round60_rt_fin（4/119,341 B）、round61_clean_start（10/618,121 B）、round62_git_init（2/303,139 B）、round63_push（2/292,890 B）共 5 个临时目录已清理，释放 1,638,037 B。这些是 round 61–63 的改前快照，commit 均成功、工作区 clean，回滚价值归零。data/ 在 .gitignore，清理不产生 Git 变更；data/backup/ 现为空目录。历史 decided 中 backup_path 指向这些目录的记录保留为历史（路径已不存在）。 | done | 64 | 2026-10-29T22:24:17+03:00 |  |

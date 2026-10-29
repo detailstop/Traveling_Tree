@@ -15,10 +15,11 @@
 7. **留下接手指南** —— 交接时在备注里写清「下一步做什么 / 已知问题 / 未完成项」，让下一位 AI 不用猜、直接能接着干。
 8. **对用户负责** —— 需求不清楚、或操作可能破坏用户数据时，先问用户再动手，不擅自改变项目方向、不替用户做不可逆的决定。
 
-## 打卡记录（共 59 条，最新在前）
+## 打卡记录（共 60 条，最新在前）
 
 | # | 时间 | 协作者 | 类型 | 改动内容 | 涉及文件 | 备注 |
 |---|---|---|---|---|---|---|
+| 60 | 2026-10-29 22:29 | DSH | 文档说明 | round 64 阶段 A 补丁：清理 WJL 示例路径 | `plugins/pdf/feature_batch.js`<br>`file_navigation.json`<br>`file_navigation.md` | 扫描唯一建议清理项已处理；无必须清理项；项目可转 public |
 | 59 | 2026-10-29 22:25 | DSH | 重构 | round 64 阶段 A：公开前文案扫描 + 清理 round 61-63 临时备份 | `file_navigation.json`<br>`file_navigation.md` | 扫描结论见 file_navigation::public-scan-round64；清理 5 个临时目录；data/ 未进 Git 无变更；必须清理 0 / 建议清理 1 / 可接受 164 |
 | 58 | 2026-10-29 22:17 | DSH | 重构 | round 63：确认 push 成功、配置 remote、更新 file_navigation | `file_navigation.json`<br>`file_navigation.md`<br>`data/backup/round63_push/` | remote origin = https://github.com/detailstop/Traveling_Tree.git；本地 commit 9c63178 + c7ffd42；用户手动 push 成功；remote HEAD c7ffd42；181 文件；认证 PAT 存于 Windows 凭据管理器；data/ 未进 Git |
 | 57 | 2026-10-29 21:59 | DSH | 重构 | round 62：git init + 首次 commit（私有仓库，待 push） | `.git`<br>`file_navigation.json`<br>`file_navigation.md`<br>`data/backup/round62_git_init/` | 首次 commit 9c63178；文件数 181；git status clean；git ls-tree 无敏感路径；data/ 下临时备份未进 Git；remote 待 round 63 |
