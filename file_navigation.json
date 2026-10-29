@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-29T22:24:17+03:00",
+  "generated_at": "2026-10-29T22:28:28+03:00",
   "round": 64,
   "pending": [
     {
@@ -14,9 +14,17 @@
   ],
   "decided": [
     {
+      "path": "plugins/pdf/feature_batch.js",
+      "decision": "示例路径个人用户名替换为 <用户名>（round 64）",
+      "reason": "公开前文案扫描发现唯一建议清理项：示例路径含个人用户名。已替换为 <用户名>，不影响功能。",
+      "status": "done",
+      "round": 64,
+      "at": "2026-10-29T22:28:28+03:00"
+    },
+    {
       "path": "file_navigation.json::public-scan-round64",
       "decision": "公开前文案扫描结论（round 64）",
-      "reason": "扫描 125 个代码/文档文件：必须清理 0 项；建议清理 1 项（plugins/pdf/feature_batch.js:25 示例路径含 WJL，建议替换为 <用户名>）；可接受 164 项（detailstop 3 处为仓库 owner；AI agent 名 161 处为多 AI 协作记录）。绝对路径 0、个人邮箱 0、手机号 0、具体地址 0、真实 token URL 0；money 15 与 sensitive_url 42 为代码/模板误报，不是个人财务值或真实凭据。docs/多AI共建日志.md 的 agent 名为 DSH、DeepSeek Harness、Codex · GPT-5（DeepSeek Harness 扮演），无真实姓名；适合公开。结论：无必须清理项，可考虑转 public；WJL 建议在公开前匿名化。",
+      "reason": "扫描 125 个代码/文档文件：必须清理 0 项；建议清理 1 项（plugins/pdf/feature_batch.js:25 示例路径含个人用户名，建议替换为 <用户名>）；可接受 164 项（detailstop 3 处为仓库 owner；AI agent 名 161 处为多 AI 协作记录）。绝对路径 0、个人邮箱 0、手机号 0、具体地址 0、真实 token URL 0；money 15 与 sensitive_url 42 为代码/模板误报，不是个人财务值或真实凭据。docs/多AI共建日志.md 的 agent 名为 DSH、DeepSeek Harness、Codex · GPT-5（DeepSeek Harness 扮演），无真实姓名；适合公开。结论：无必须清理项，可考虑转 public；建议在公开前匿名化个人用户名。",
       "status": "done",
       "round": 64,
       "at": "2026-10-29T22:24:17+03:00"

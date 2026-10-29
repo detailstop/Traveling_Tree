@@ -22,7 +22,7 @@ function renderBatchTool() {
           <div class="bf-field bf-path-field">
             <label class="bf-lb">文件夹路径</label>
             <input class="input bf-path" id="bf-path" value="${esc(b.path)}"
-                   placeholder="如 C:\\Users\\WJL\\Desktop\\待压缩" spellcheck="false">
+                   placeholder="如 C:\\Users\\<用户名>\\Desktop\\待压缩" spellcheck="false">
           </div>
         </div>
         <div class="bff-row">

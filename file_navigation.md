@@ -2,9 +2,9 @@
 
 > 只读摘要，勿手改。本文件由 file_navigation.json 生成；结构与去留决定以 JSON 为准。
 
-- 生成时间：2026-10-29T22:24:17+03:00
+- 生成时间：2026-10-29T22:28:28+03:00
 - 轮次：64
-- 待办：1 条；已决定：430 条
+- 待办：1 条；已决定：431 条
 
 ## 待办
 
@@ -16,7 +16,8 @@
 
 | 路径 | 决定 | 原因 | 状态 | 轮次 | 时间 | 备份路径 |
 | --- | --- | --- | --- | --- | --- | --- |
-| file_navigation.json::public-scan-round64 | 公开前文案扫描结论（round 64） | 扫描 125 个代码/文档文件：必须清理 0 项；建议清理 1 项（plugins/pdf/feature_batch.js:25 示例路径含 WJL，建议替换为 <用户名>）；可接受 164 项（detailstop 3 处为仓库 owner；AI agent 名 161 处为多 AI 协作记录）。绝对路径 0、个人邮箱 0、手机号 0、具体地址 0、真实 token URL 0；money 15 与 sensitive_url 42 为代码/模板误报，不是个人财务值或真实凭据。docs/多AI共建日志.md 的 agent 名为 DSH、DeepSeek Harness、Codex · GPT-5（DeepSeek Harness 扮演），无真实姓名；适合公开。结论：无必须清理项，可考虑转 public；WJL 建议在公开前匿名化。 | done | 64 | 2026-10-29T22:24:17+03:00 |  |
+| plugins/pdf/feature_batch.js | 示例路径个人用户名替换为 <用户名>（round 64） | 公开前文案扫描发现唯一建议清理项：示例路径含个人用户名。已替换为 <用户名>，不影响功能。 | done | 64 | 2026-10-29T22:28:28+03:00 |  |
+| file_navigation.json::public-scan-round64 | 公开前文案扫描结论（round 64） | 扫描 125 个代码/文档文件：必须清理 0 项；建议清理 1 项（plugins/pdf/feature_batch.js:25 示例路径含个人用户名，建议替换为 <用户名>）；可接受 164 项（detailstop 3 处为仓库 owner；AI agent 名 161 处为多 AI 协作记录）。绝对路径 0、个人邮箱 0、手机号 0、具体地址 0、真实 token URL 0；money 15 与 sensitive_url 42 为代码/模板误报，不是个人财务值或真实凭据。docs/多AI共建日志.md 的 agent 名为 DSH、DeepSeek Harness、Codex · GPT-5（DeepSeek Harness 扮演），无真实姓名；适合公开。结论：无必须清理项，可考虑转 public；建议在公开前匿名化个人用户名。 | done | 64 | 2026-10-29T22:24:17+03:00 |  |
 | data/backup/::round61-63_temp | 清理 round 61–63 临时备份（round 64） | round59_docs_post_move（3 文件/304,546 B）、round60_rt_fin（4/119,341 B）、round61_clean_start（10/618,121 B）、round62_git_init（2/303,139 B）、round63_push（2/292,890 B）共 5 个临时目录已清理，释放 1,638,037 B。这些是 round 61–63 的改前快照，commit 均成功、工作区 clean，回滚价值归零。data/ 在 .gitignore，清理不产生 Git 变更；data/backup/ 现为空目录。历史 decided 中 backup_path 指向这些目录的记录保留为历史（路径已不存在）。 | done | 64 | 2026-10-29T22:24:17+03:00 |  |
 | .git::remote | 配置远程仓库并 push（round 63，私有） | remote origin = https://github.com/detailstop/Traveling_Tree.git；本地 commit 9c63178（181 文件）+ c7ffd42（round 62 docs）；用户手动 push 成功，remote HEAD = c7ffd4209dcff0184be2727bc7608443c6a04b9c；agent 环境非交互，无法输入 PAT，故 push 由用户手动完成；PAT 存于 Windows 凭据管理器，后续 agent push 无需交互。 | done | 63 | 2026-10-29T22:17:12+03:00 | data/backup/round63_push/ |
 | data/ai_cobuild.json::round61_two_checkins | round 61 两次打卡说明（保留，不作废） | round 61 阶段 6 完成后先打卡（#55，21:49），补完 README 后最终打卡（#56，21:53）。两条均为真实操作记录，内容不同，非重复提交；count 54→56 的 +2 由此解释。按只追加原则保留。 | done | 62 | 2026-10-29T21:59:19+03:00 |  |
