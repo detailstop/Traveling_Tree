@@ -1,4 +1,4 @@
-"""Generate the read-only Markdown summary from file_navigation.json."""
+"""Generate the read-only Markdown summary from docs/appendix/file_navigation.json."""
 from __future__ import annotations
 
 import json
@@ -7,8 +7,8 @@ from typing import Any
 
 
 ROOT = Path(__file__).resolve().parent.parent
-SOURCE = ROOT / "file_navigation.json"
-TARGET = ROOT / "file_navigation.md"
+SOURCE = ROOT / "docs" / "appendix" / "file_navigation.json"
+TARGET = ROOT / "docs" / "appendix" / "file_navigation.md"
 
 
 def cell(value: Any) -> str:
@@ -34,7 +34,7 @@ def render(data: dict[str, Any]) -> str:
     lines = [
         "# 文件导航清单（只读摘要）",
         "",
-        "> 只读摘要，勿手改。本文件由 file_navigation.json 生成；结构与去留决定以 JSON 为准。",
+        "> 只读摘要，勿手改。本文件由 docs/appendix/file_navigation.json 生成；结构与去留决定以 JSON 为准。",
         "",
         f"- 生成时间：{cell(data.get('generated_at'))}",
         f"- 轮次：{cell(data.get('round'))}",
@@ -72,7 +72,7 @@ def render(data: dict[str, Any]) -> str:
         "",
         "## 说明",
         "",
-        "- 本文件由 `tools/gen_file_navigation_md.py` 从 `file_navigation.json` 生成。",
+        "- 本文件由 `tools/gen_file_navigation_md.py` 从 `docs/appendix/file_navigation.json` 生成。",
         "- 结构、历史记录和去留决定以 JSON 主数据源为准；本摘要不承载额外决定。",
         "",
     ])
@@ -82,7 +82,7 @@ def render(data: dict[str, Any]) -> str:
 def main() -> int:
     data = json.loads(SOURCE.read_text(encoding="utf-8"))
     if not isinstance(data, dict):
-        raise ValueError("file_navigation.json 顶层必须是对象")
+        raise ValueError("docs/appendix/file_navigation.json 顶层必须是对象")
     TARGET.write_text(render(data), encoding="utf-8", newline="\n")
     print(f"已生成 {TARGET}：待办 {len(data.get('pending', []))} 条；已决定 {len(data.get('decided', []))} 条")
     return 0

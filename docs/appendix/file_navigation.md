@@ -1,10 +1,10 @@
 # 文件导航清单（只读摘要）
 
-> 只读摘要，勿手改。本文件由 file_navigation.json 生成；结构与去留决定以 JSON 为准。
+> 只读摘要，勿手改。本文件由 docs/appendix/file_navigation.json 生成；结构与去留决定以 JSON 为准。
 
-- 生成时间：2026-10-29T22:53:36+03:00
-- 轮次：64
-- 待办：1 条；已决定：432 条
+- 生成时间：2026-10-30T13:21:38+03:00
+- 轮次：65
+- 待办：1 条；已决定：437 条
 
 ## 待办
 
@@ -16,21 +16,26 @@
 
 | 路径 | 决定 | 原因 | 状态 | 轮次 | 时间 | 备份路径 |
 | --- | --- | --- | --- | --- | --- | --- |
+| docs/appendix/ | 三份说明性文件移入 docs/appendix/ 作为白皮书附件（round 65） | docs/appendix/file_navigation.json、docs/appendix/file_navigation.md、docs/appendix/files_manifest.json 由项目根同盘移动到 docs/appendix/，移动前后字节数与 SHA256 一致（296601 / 175512 / 110376 B）。三者相对项目根的路径语义不变；项目根不再保留同名文件。历史记录中的路径文本已统一为 appendix 路径（见下一条）。 | done | 65 | 2026-10-30T13:21:38+03:00 | data/backup/round65_docs/ |
+| docs/appendix/A-backend-only.md | 白皮书附录 A–D 拆为 appendix 附件（round 65） | 从 docs/plugin-development-whitepaper.md 抽出附录 A–D 全文，分别写入 docs/appendix/A-backend-only.md、B-root-routing.md、C-binary-format.md、D-conventions.md；白皮书正文改为标题 + 一句话 + 相对链接索引，原章节编号与附录语义不变。 | done | 65 | 2026-10-30T13:21:38+03:00 | data/backup/round65_docs/ |
+| docs/plugin-development-whitepaper-v2.1-draft.md | 删除 v2.1 草案与结项报告（round 65） | 核对确认草案的 backend-only、根路由、__binary__ 修正、import 约定已全部并入白皮书附录 A–D；结项报告的 22 插件清单、13 smoke 基线、剩余 pending、交接建议已并入白皮书 §7 与 README §12。两份文件删除，备份于 data/backup/round65_docs/。docs/ 根现仅白皮书 + 多AI共建日志 + appendix/。 | done | 65 | 2026-10-30T13:21:38+03:00 | data/backup/round65_docs/ |
+| tools/gen_file_navigation_md.py | 三文件名硬编码统一为 docs/appendix/ 路径（round 65） | 生成器 SOURCE/TARGET 改为 docs/appendix/file_navigation.json 与 docs/appendix/file_navigation.md；README 链接/目录树、白皮书引用、file_navigation 历史正文、files_manifest 条目与 purpose 均改为 docs/appendix/ 前缀（未重跑导出，仍为快照语义）。files_manifest 的 file_name 保持 basename；file_preview 前端导出下载名保持 files_manifest.json（下载 basename，非项目路径）；docs/多AI共建日志.md 为自动镜像不手改，历史打卡条目保留原文；.gitignore 与 tests 无相关硬编码，无需改。 | done | 65 | 2026-10-30T13:21:38+03:00 | data/backup/round65_docs/ |
+| README.md | README 与白皮书补充文件分工、docs 闭环与项目状态（round 65） | README 新增「说明性文件分工」（§4）与「项目状态与交接」（§12），§9 开发约定写入 docs 临时文件闭环规定，§11 文档补附录与说明性文件链接；另将 3 处指向已归档文件（plugin-standard-v1.md / plugin-css-decision-2026-10-28.md，round 33/34 已移出项目）的死链改为白皮书链接；白皮书新增 §7 项目状态与交接、§8 docs 目录与临时文件闭环、§9 白皮书附件。docs/ 下无未闭环临时文件，故不新增 pending。 | done | 65 | 2026-10-30T13:21:38+03:00 |  |
 | . | 项目目录改名 russian_tutor → Traveling_Tree（round 64） | 物理目录 C:\Users\<用户名>\Desktop\russian_tutor\ 改为 C:\Users\<用户名>\Desktop\Traveling_Tree\。config.BASE_DIR 基于 __file__ 自动跟随；启动脚本用 %~dp0 自动跟随；.git、data/、GitHub remote 均不受影响。数据库文件名仍为 russian_tutor.db（内部文件名，与目录名解耦，不改）。README 中项目名引用已更新；历史 round 记录保留旧名。验证：smoke_plugins 181/181、smoke_startup_once 33/33、smoke_web 74/75（TTS 502 已知）、启动无 Traceback、git push 成功。 | done | 64 | 2026-10-29T22:53:36+03:00 |  |
 | plugins/pdf/feature_batch.js | 示例路径个人用户名替换为 <用户名>（round 64） | 公开前文案扫描发现唯一建议清理项：示例路径含个人用户名。已替换为 <用户名>，不影响功能。 | done | 64 | 2026-10-29T22:28:28+03:00 |  |
-| file_navigation.json::public-scan-round64 | 公开前文案扫描结论（round 64） | 扫描 125 个代码/文档文件：必须清理 0 项；建议清理 1 项（plugins/pdf/feature_batch.js:25 示例路径含个人用户名，建议替换为 <用户名>）；可接受 164 项（detailstop 3 处为仓库 owner；AI agent 名 161 处为多 AI 协作记录）。绝对路径 0、个人邮箱 0、手机号 0、具体地址 0、真实 token URL 0；money 15 与 sensitive_url 42 为代码/模板误报，不是个人财务值或真实凭据。docs/多AI共建日志.md 的 agent 名为 DSH、DeepSeek Harness、Codex · GPT-5（DeepSeek Harness 扮演），无真实姓名；适合公开。结论：无必须清理项，可考虑转 public；建议在公开前匿名化个人用户名。 | done | 64 | 2026-10-29T22:24:17+03:00 |  |
+| docs/appendix/file_navigation.json::public-scan-round64 | 公开前文案扫描结论（round 64） | 扫描 125 个代码/文档文件：必须清理 0 项；建议清理 1 项（plugins/pdf/feature_batch.js:25 示例路径含个人用户名，建议替换为 <用户名>）；可接受 164 项（detailstop 3 处为仓库 owner；AI agent 名 161 处为多 AI 协作记录）。绝对路径 0、个人邮箱 0、手机号 0、具体地址 0、真实 token URL 0；money 15 与 sensitive_url 42 为代码/模板误报，不是个人财务值或真实凭据。docs/多AI共建日志.md 的 agent 名为 DSH、DeepSeek Harness、Codex · GPT-5（DeepSeek Harness 扮演），无真实姓名；适合公开。结论：无必须清理项，可考虑转 public；建议在公开前匿名化个人用户名。 | done | 64 | 2026-10-29T22:24:17+03:00 |  |
 | data/backup/::round61-63_temp | 清理 round 61–63 临时备份（round 64） | round59_docs_post_move（3 文件/304,546 B）、round60_rt_fin（4/119,341 B）、round61_clean_start（10/618,121 B）、round62_git_init（2/303,139 B）、round63_push（2/292,890 B）共 5 个临时目录已清理，释放 1,638,037 B。这些是 round 61–63 的改前快照，commit 均成功、工作区 clean，回滚价值归零。data/ 在 .gitignore，清理不产生 Git 变更；data/backup/ 现为空目录。历史 decided 中 backup_path 指向这些目录的记录保留为历史（路径已不存在）。 | done | 64 | 2026-10-29T22:24:17+03:00 |  |
 | .git::remote | 配置远程仓库并 push（round 63，私有） | remote origin = https://github.com/detailstop/Traveling_Tree.git；本地 commit 9c63178（181 文件）+ c7ffd42（round 62 docs）；用户手动 push 成功，remote HEAD = c7ffd4209dcff0184be2727bc7608443c6a04b9c；agent 环境非交互，无法输入 PAT，故 push 由用户手动完成；PAT 存于 Windows 凭据管理器，后续 agent push 无需交互。 | done | 63 | 2026-10-29T22:17:12+03:00 | data/backup/round63_push/ |
 | data/ai_cobuild.json::round61_two_checkins | round 61 两次打卡说明（保留，不作废） | round 61 阶段 6 完成后先打卡（#55，21:49），补完 README 后最终打卡（#56，21:53）。两条均为真实操作记录，内容不同，非重复提交；count 54→56 的 +2 由此解释。按只追加原则保留。 | done | 62 | 2026-10-29T21:59:19+03:00 |  |
 | .git | 初始化 Git 仓库（round 62，私有） | git init -b main；首次 commit 哈希 9c63178；181 文件（Python 88 / JS 25 / Markdown 6 / 插件目录 141）；.gitignore 排除 data/、data_path.txt、rt_fin.json、webchat_profile/、__pycache__ 等；git status clean；git ls-tree 确认无敏感路径。远端：待 round 63。 round 63 已配置 remote https://github.com/detailstop/Traveling_Tree.git，用户手动 push 成功（agent 环境无法交互输入 PAT）；remote HEAD = c7ffd4209dcff0184be2727bc7608443c6a04b9c；main 跟踪 origin/main。认证方式：PAT 存于 Windows 凭据管理器。 | done | 62 | 2026-10-29T21:59:19+03:00 | data/backup/round62_git_init/ |
 | README.md | round 61 补充数据目录与克隆说明 | 第 6 节加首次启动自动建库说明；第 7 节风险提示加 webchat_profile 克隆后为空需重新登录。 | done | 61 | 2026-10-29T21:53:13+03:00 |  |
 | .gitignore | 新建（round 61） | data/ 留在项目内本地用，.gitignore 排除 data/、rt_fin.json、__pycache__ 等。克隆项目后启动，config.py 自动建 data/，init_db 扫描 plugins/*/schema.sql 建表并播种；干净启动测试已通过。webchat_profile 被忽略，克隆者需重新扫码登录（README 已说明）。不创建 data_path.txt（data/ 不搬家）。 | done | 61 | 2026-10-29T21:53:13+03:00 |  |
-| file_navigation.json::工艺教训-round61 | SQLite 恢复后验证判据修正 | round 61 阶段 5.4 原设计要求恢复后 SHA256 与基线一致，但阶段 5.5 又要求启动服务验证，两者矛盾：SQLite 启动必改 header 元数据。后续同类任务改为：先 PRAGMA integrity_check + 表行数对比，再启动服务；SHA256 仅用于字节级备份完整性（如 rename 前后），不用于 SQLite 恢复判定。 | done | 61 | 2026-10-29T21:53:13+03:00 |  |
+| docs/appendix/file_navigation.json::工艺教训-round61 | SQLite 恢复后验证判据修正 | round 61 阶段 5.4 原设计要求恢复后 SHA256 与基线一致，但阶段 5.5 又要求启动服务验证，两者矛盾：SQLite 启动必改 header 元数据。后续同类任务改为：先 PRAGMA integrity_check + 表行数对比，再启动服务；SHA256 仅用于字节级备份完整性（如 rename 前后），不用于 SQLite 恢复判定。 | done | 61 | 2026-10-29T21:53:13+03:00 |  |
 | data/russian_tutor.db | round 61 启动验证后 SHA256 变化，完整性检查通过（接受当前 DB） | 阶段 5.4 用 SHA256 判定恢复失败，但 SQLite 启动会重写 header 元数据（change counter / schema cookie / checkpoint），字节哈希必然变。完整性检查：PRAGMA integrity_check=ok；83 表；items 23 / item_stats 23 / themes 2 / bg_nodes 81 / file_notes 165 / bg_versions 84 / finance_accounts 15 / finance_snapshots 28，均 >= round 28 基线；items ID 168-190 连续无空洞；page_count 2098 * page_size 4096 = 8,593,408 B 精确等于文件大小；freelist 3 页（0.14%）。无需从备份恢复。 | done | 61 | 2026-10-29T21:53:13+03:00 |  |
 | tests/smoke_finance.py | 迁移测试输入路径同步 | INPUT 由 ROOT/plugins/finance/fixtures/rt_fin.json 改为 ROOT/data/plugins/finance/fixtures/rt_fin.json；smoke_finance 34/34。 | done | 60 | 2026-10-29T21:13:36+03:00 | data/backup/round60_rt_fin/smoke_finance.py.bak |
 | plugins/finance/migrate_localstorage.py | 迁移默认输入改插件数据目录 | INPUT 由 ROOT/plugins/finance/fixtures/rt_fin.json 改为 config.plugin_data_dir("finance")/fixtures/rt_fin.json；dry-run 可定位新文件，未执行 apply。 | done | 60 | 2026-10-29T21:13:36+03:00 | data/backup/round60_rt_fin/migrate_localstorage.py.bak |
 | plugins/finance/fixtures/rt_fin.json | 移出代码目录到 data/plugins/finance/fixtures/（数据隔离） | 含真实财务数据，属个人数据；同盘 rename 到 data/plugins/finance/fixtures/rt_fin.json，99,533 B，SHA256 0dac386c8ed81765324692d86f33562f6097d7cd9ff1d9d454cc12090238094e 前后一致；旧 fixtures/ 已空并删除。file_preview 的 EXCLUDE_FILE_GLOBS 含 rt_fin.json，按 basename 匹配，新路径继续排除。smoke_finance 34/34、smoke_file_preview 17/17；dry-run RC0 定位新路径。 | done | 60 | 2026-10-29T21:13:36+03:00 | data/backup/round60_rt_fin/ |
-| file_navigation.json::historical_paths | 历史路径指针说明（round 59） | round 59 将 归档/ 与 data/backup/ 整体移出项目。decided 中 59 条 backup_path 以 data/backup/ 开头、11 条 new_path 以 归档/ 开头、3 条 path 为 归档/、48 条 reason/decision 正文提及这两路径，均为历史记录，路径已不存在，不再逐条修改。若需追溯，按 round 编号从项目外归档目录取回。 | done | 59 | 2026-10-29T21:03:37+03:00 |  |
+| docs/appendix/file_navigation.json::historical_paths | 历史路径指针说明（round 59） | round 59 将 归档/ 与 data/backup/ 整体移出项目。decided 中 59 条 backup_path 以 data/backup/ 开头、11 条 new_path 以 归档/ 开头、3 条 path 为 归档/、48 条 reason/decision 正文提及这两路径，均为历史记录，路径已不存在，不再逐条修改。若需追溯，按 round 编号从项目外归档目录取回。 | done | 59 | 2026-10-29T21:03:37+03:00 |  |
 | data/backup/ | 整体移出项目（用户手动，round 59） | 用户决定精简项目后初始化 Git。data/backup/ 下 38 个 round 目录（159 文件/48 目录/11,714,956 B）整体移出，含 round59_webchat_profile/keep/（36 个登录态副本）、host_zero_batch8 完整备份、各轮 decoupling/smoke 日志。移出后 data/backup/ 仅保留本任务新建的 round59_docs_post_move/（临时备份）。登录态唯一副本为 data/plugins/webchat/webchat_profile/ 本体，阶段 0 已核对 36/36 哈希一致，用户接受无冗余。file_preview 的 EXCLUDE_REL_DIRS 仍含 "data/backup"，规则保留。历史 decided 中 backup_path 指向 data/backup/ 的 59 条保留为历史，路径已不存在，见任务 1.3 全局说明。 | done | 59 | 2026-10-29T21:03:37+03:00 |  |
 | 归档/ | 整体移出项目（用户手动，round 59） | 用户决定精简项目后初始化 Git。归档/（44 文件/10 目录/12,953,868 B）含 data/、docs/（含 10 个 bg-update-*.json）、modules/ 及历史敏感文件副本，整体移出到项目外。移出后项目根不再有 归档/。file_preview 的 EXCLUDE_DIR_NAMES 仍含 "归档"（规则保留，未来若重建仍排除）。历史 decided 中 new_path 指向 归档/ 的 11 条、path 为 归档/ 的 3 条保留为历史，路径已不存在，见任务 1.3 全局说明。 | done | 59 | 2026-10-29T21:03:37+03:00 |  |
 | data/plugins/webchat/ | file_preview 呈现检查（round 59） | file_preview state 返回 200；树中出现 data/plugins/webchat 目录节点，children=0（webchat_profile 被 EXCLUDE_DIR_NAMES 排除，父目录显示为空属预期）；扫描 counts.files=188，与 files_manifest items=188 一致；未修改 file_preview.py，未加新排除。 | reviewed | 59 | 2026-10-29T20:42:25+03:00 |  |
@@ -105,7 +110,7 @@
 | data/backup/round43_decoupling/ | 保留为 decoupling 长期基线目录 | 保存 10 次修前日志 run_01..10 与 10 次修后日志 after_fix_run_01..10，后续复现/比较不覆盖历史文件。 | done | 43 | 2026-10-29T17:24:57+03:00 |  |
 | tests/smoke_plugin_decoupling.py | 稳定性修复（连接关闭 + 窄化 socket 日志过滤） | 10 次基线 1/10 FAIL（run_08，451/452）：bg_library 阶段2 日志出现 http.server 的 ConnectionResetError/WinError 10054 客户端断连 traceback。该异常不是业务错误，但被 log_errors 误判。仅改测试：HTTP 请求加 Connection: close；log_errors 仅忽略包含 ConnectionResetError/WinError 10054 的请求处理断连块；未改任何业务断言，仍为 452 条。修后 after_fix_run_01..10 全部 452/452 PASS。 | done | 43 | 2026-10-29T17:24:57+03:00 |  |
 | modules/settings_store.py::MODULES | 调查完成·暂缓收缩（decoupling 不稳定） | MODULES/module_enabled 无插件/测试调用；db.connection 使用自身 _module_enabled 直接读 modules.enabled，russian/pixel 可移除，pixel_art→pixel 特判无调用方。但执行收缩后 smoke_plugin_decoupling 首次 451/452，重跑 452/452；按铁律已从 data/backup/round42_modules/settings_store.py 回滚，MODULES 仍保留 russian/pixel 与特判。需先稳定 decoupling 再收缩。 | reviewed | 42 | 2026-10-29T16:52:43+03:00 |  |
-| file_navigation.json::round41-stage4 | 报告表述修正（round 41） | round 41 报告阶段 4 段落误写“旧宿主业务键已删除”；实际 data/backup/round41_settings/settings.json 与 settings.after_split.json SHA256 完全相同（cbc616fe...），证明阶段 4 未删键，阶段 6 才删。流程合规，仅报告表述错位，状态不回滚。 | done | 42 | 2026-10-29T16:52:43+03:00 |  |
+| docs/appendix/file_navigation.json::round41-stage4 | 报告表述修正（round 41） | round 41 报告阶段 4 段落误写“旧宿主业务键已删除”；实际 data/backup/round41_settings/settings.json 与 settings.after_split.json SHA256 完全相同（cbc616fe...），证明阶段 4 未删键，阶段 6 才删。流程合规，仅报告表述错位，状态不回滚。 | done | 42 | 2026-10-29T16:52:43+03:00 |  |
 | tests/smoke_plugin_decoupling.py | round 42 基线通过 | 完整输出已保存 data/backup/round42_decoupling/baseline.txt；RESULT 452/452 PASS，耗时约 80.3 秒。 | done | 42 | 2026-10-29T16:52:43+03:00 |  |
 | data/settings.json | 拆分完成（宿主仅保留 download_groups/modules） | data/plugins/russian/settings.json 持有 ru_family/ru_size/new_quota/review_quota；data/plugins/model_usage/settings.json 持有 model_pricing。宿主 settings.json 仅保留 download_groups 与 modules.enabled，旧业务键已删除；迁移脚本保留旧键读取兼容。 | done | 41 | 2026-10-29T13:36:31+03:00 |  |
 | modules/settings_store.py | 路径参数化，旧函数保留 | 新增 DEFAULT_SETTINGS_PATH、plugin_settings_path、read_at/write_at/update_at；旧 path/read/write/update 转发到默认宿主路径；modules_enabled/module_enabled/MODULES 本轮未改。 | done | 41 | 2026-10-29T13:36:31+03:00 | data/backup/round41_settings/settings_store.py |
@@ -140,9 +145,9 @@
 | tests/smoke_file_preview.py | 回归通过（round 35 排除规则修改后） | round 35 在 plugins/bg_library/file_preview.py 的 EXCLUDE_DIR_NAMES 加入“归档”；本轮 smoke_file_preview 17/17 PASS，确认排除列表变更未破坏扫描/DB 识别/规则 CRUD/越界拒绝。 | done | 36 | 2026-10-29T00:31:40+03:00 |  |
 | 归档/ | 排除（file_preview 规则） | 用户决定归档目录不进 files_manifest；round 34 的“纳入文件预览”决定被推翻。已在 plugins/bg_library/file_preview.py 的 EXCLUDE_DIR_NAMES 加入“归档”，目录级生效，未来 modules/plugins/ui/db 归档后自动排除。manifest 从 202 回 178。 | done | 35 | 2026-10-29T00:28:35+03:00 |  |
 | 归档/ | 归档进行中（data、docs 已完成；modules/plugins/ui/db 待归档） | 用户确认：归档/ 当前仅含 data/ 与 docs/ 两个子目录；modules/、plugins/、ui/、db/ 等尚未归档，是后续任务。本记录供后续轮次参考，避免误判归档为完整镜像。 | reviewed | 35 | 2026-10-29T00:28:35+03:00 |  |
-| files_manifest.json | 口径表述修正 | round 34 的“181 = 202 - 24 + 3”数学成立但语义易误读。round 35 排除归档后：主目录 manifest 条目 = 178；主目录实际文件 = 178 + 3（敏感：ai_keys.json、webchat_sessions.json、plugins/finance/fixtures/rt_fin.json）= 181。归档文件 24 个不计入 manifest。 | done | 35 | 2026-10-29T00:28:35+03:00 |  |
+| docs/appendix/files_manifest.json | 口径表述修正 | round 34 的“181 = 202 - 24 + 3”数学成立但语义易误读。round 35 排除归档后：主目录 manifest 条目 = 178；主目录实际文件 = 178 + 3（敏感：ai_keys.json、webchat_sessions.json、plugins/finance/fixtures/rt_fin.json）= 181。归档文件 24 个不计入 manifest。 | done | 35 | 2026-10-29T00:28:35+03:00 |  |
 | 归档/ | 纳入文件预览（未命中排除规则） | file_preview 的 EXCLUDE_DIR_NAMES / EXCLUDE_REL_DIRS / EXCLUDE_FILE_GLOBS 不排除 归档/；已将 24 个非敏感归档文件加入 files_manifest，敏感归档文件不进入。 | done | 34 | 2026-10-29T00:23:13+03:00 |  |
-| files_manifest.json | 口径校验 | 主目录实际文件 N=181；manifest M=202（含 归档/ 下 24 个非敏感文件）；主目录排除敏感 K=3（data/ai_keys.json、data/webchat_sessions.json、plugins/finance/fixtures/rt_fin.json）；181 = 202 - 24 + 3。归档/data/doubao_archive.json 与归档/data/doubao_history.json 属于敏感文件，未进入 manifest。 | reviewed | 34 | 2026-10-29T00:23:13+03:00 |  |
+| docs/appendix/files_manifest.json | 口径校验 | 主目录实际文件 N=181；manifest M=202（含 归档/ 下 24 个非敏感文件）；主目录排除敏感 K=3（data/ai_keys.json、data/webchat_sessions.json、plugins/finance/fixtures/rt_fin.json）；181 = 202 - 24 + 3。归档/data/doubao_archive.json 与归档/data/doubao_history.json 属于敏感文件，未进入 manifest。 | reviewed | 34 | 2026-10-29T00:23:13+03:00 |  |
 | data/rivet.json | 归档（用户手动，覆盖第 21 轮“旧文件保留只读”） | 第 21 轮约定旧文件只读保留；用户本轮确认已手动归档到 归档/data/rivet.json，新文件 data/plugins/rivet/rivet.json 在位。本记录覆盖第 21 轮的“旧文件保留”语义，历史记录不修改。 | done | 34 | 2026-10-29T00:23:13+03:00 |  |
 | data/filejudge_keep.json | 归档（用户手动，迁移目标已知） | 第 22 轮已约定 data/plugins/filejudge/keep.json 为读写目标、旧文件只读；用户本轮确认旧文件已手动归档。round 33 记为“位置待确认”过保守，本轮回填迁移关系。 | done | 34 | 2026-10-29T00:23:13+03:00 |  |
 | docs/poc-sim-card-2026-10-28.png | 归档（用户手动，位置已确认） | 用户手动归档；`归档/` 按主目录相对结构存放，按相对路径匹配确认在位（归档/docs/poc-sim-card-2026-10-28.png）。本轮回填 new_path，未改动文件系统。 | done | 34 | 2026-10-29T00:23:13+03:00 |  |
@@ -277,9 +282,9 @@
 | main.py | 保留 | 三入口启动；bootstrap 执行 init_db 与首次种子；import modules.pm_templates 触发 seed 回调注册，db 不再反向 import modules。 | done | 25 | 2026-10-28T14:02:44+03:00 |  |
 | README.md | 更新 schema 模块说明 | db/schema/*.sql + settings.modules.enabled 说明；默认全启用。 | updated | 28 | 2026-10-28T18:45:00+03:00 |  |
 | 启动旅行之木.cmd | 保留 | Windows 便捷启动脚本，使用 %~dp0 与 PATH；保留并同步 file_notes。 | done | 11 | 2026-10-27T17:37:14+03:00 |  |
-| file_navigation.json | 追加第 24 轮决定记录 | 记录 prompt_template 修复、pixel 下线、插件路由表与两个插件迁移；pixel 动画历史 decided 条目标记删除，历史审计材料引用保留。 | updated | 11 | 2026-10-27T17:37:14+03:00 |  |
-| file_navigation.md | 新建指南 | 由 file_navigation.json 生成的只读摘要，标注“只读摘要，勿手改”；与 JSON 同步。 | done | 11 | 2026-10-27T17:37:14+03:00 |  |
-| files_manifest.json | 重导出文件预览清单 | 按文件预览导出能力重生成；清除已删动画/Godot 文件条目并纳入新插件与路由表。 | updated | 11 | 2026-10-27T17:37:14+03:00 |  |
+| docs/appendix/file_navigation.json | 追加第 24 轮决定记录 | 记录 prompt_template 修复、pixel 下线、插件路由表与两个插件迁移；pixel 动画历史 decided 条目标记删除，历史审计材料引用保留。 | updated | 11 | 2026-10-27T17:37:14+03:00 |  |
+| docs/appendix/file_navigation.md | 新建指南 | 由 docs/appendix/file_navigation.json 生成的只读摘要，标注“只读摘要，勿手改”；与 JSON 同步。 | done | 11 | 2026-10-27T17:37:14+03:00 |  |
+| docs/appendix/files_manifest.json | 重导出文件预览清单 | 按文件预览导出能力重生成；清除已删动画/Godot 文件条目并纳入新插件与路由表。 | updated | 11 | 2026-10-27T17:37:14+03:00 |  |
 | core/__init__.py | 保留 | 包初始化文件，空实现避免副作用；无替代必要性，保留。 | reviewed | 11 | 2026-10-27T17:37:14+03:00 |  |
 | core/models.py | 保留 | 领域数据结构 Item/ItemStat；被 repository、importer、seed、cli、gui、server 使用；保留。 | reviewed | 11 | 2026-10-27T17:37:14+03:00 |  |
 | core/planner.py | 保留 | 今日计划与配额分配；被 cli/gui/server 调用；保留。 | reviewed | 11 | 2026-10-27T17:37:14+03:00 |  |
@@ -423,7 +428,7 @@
 | plugins/pixel_art/manifest.json | 新增 pixel_art 插件清单 | 插件 id 使用 pixel_art；保留像素画卡片 entry 与展示元数据。 | added | 24 | 2026-10-28T11:45:13+03:00 |  |
 | plugins/pixel_art/backend.py | 新增 pixel_art 插件后端 | 承接 /api/pixel/* 子路径插件化处理，并暴露 reader assets 解析函数；不依赖 book_reader。 | added | 24 | 2026-10-28T11:45:13+03:00 |  |
 | plugins/pixel_art/feature.js | 新增 pixel_art 插件前端 | 承接原像素画界面并改用 /api/plugin/pixel_art/*；历史动画/Godot 引用保留在审计记录。 | added | 24 | 2026-10-28T11:45:13+03:00 |  |
-| tools/gen_file_navigation_md.py | 新增 file_navigation.md 生成器 | 标准库脚本以 file_navigation.json 为主数据源生成只读摘要；不得手改 Markdown。 | added | 24 | 2026-10-28T11:45:13+03:00 |  |
+| tools/gen_file_navigation_md.py | 新增 docs/appendix/file_navigation.md 生成器 | 标准库脚本以 docs/appendix/file_navigation.json 为主数据源生成只读摘要；不得手改 Markdown。 | added | 24 | 2026-10-28T11:45:13+03:00 |  |
 | ui/web/static/finance_migration.html | 删除 | 一次性 rt_fin 导出页，迁移验证后删除；备份保留。 | deleted | 26 | 2026-10-28T17:21:22+03:00 | data/backup/file_cleanup_20261028/ui__web__static__finance_migration.html |
 | plugins/finance/manifest.json | 新增 finance 插件清单 | 一个插件两个 entry（finance/finquant）；backend=backend.py；finquant 为数据重置占位。 | added | 26 | 2026-10-28T17:21:22+03:00 |  |
 | plugins/finance/backend.py | finance 解冻·恢复后端 | 数据确认无丢失；归因明细为实时计算，无需恢复数据；已用冻结前备份还原，恢复正常 API 读写。 | restored | 27 | 2026-10-28T18:05:36+03:00 |  |
@@ -472,7 +477,7 @@
 | modules/ai_bridge.py | 宿主 modules 调查 | 宿主 AI 集成 | 保留为宿主能力；密钥文件不导出正文 | 中 | ui/web/server.py | 中 |
 | modules/__init__.py | 宿主 modules 调查 | 宿主基础设施 | 保留 | 中 | Python 包 | 低 |
 | 归档/ | 归档进度 | 归档目录状态 | 后续按 modules/plugins/ui/db 顺序决策后再归档，禁止提前整体搬入。 | 低 | file_navigation 后续轮次 |  |
-| files_manifest.json | 文档清单口径 | 文件预览清单一致性校验 | 保持 181 主目录文件 + 24 个非敏感归档文件 = 202 条清单；敏感 3 条不导出。 | 低 | plugins/bg_library/file_preview.py 的扫描规则 | 低 |
+| docs/appendix/files_manifest.json | 文档清单口径 | 文件预览清单一致性校验 | 保持 181 主目录文件 + 24 个非敏感归档文件 = 202 条清单；敏感 3 条不导出。 | 低 | plugins/bg_library/file_preview.py 的扫描规则 | 低 |
 | tests/smoke_pdf.py | 测试 | PDF 插件冒烟测试 | 保留为 PDF 插件回归测试，不归入白皮书第六节解耦红线。 | 低 | tests/smoke_pdf.py | 中 |
 | modules/visual_settings.py | 宿主模块 / SQL 访问 | 业务残留（共享 SQL 访问） | 按白皮书下沉到对应插件（如 plugins/pixel_art/ 或独立 visual 插件），保留兼容导出后再移除宿主实现。 | 中 | modules/pixel_art.py 直接引用；plugins/book_reader/book_reader.py 经 pixel_art 间接引用。 | 中 |
 | tests/smoke_plugin_module_off.py | 新增/补齐 | 冒烟测试/插件解耦红线。 | 保留并纳入当前插件/测试/文档结构。 | 低 | 测试 | 中 |
@@ -580,9 +585,9 @@
 | main.py | 功能项 | 启动入口：bootstrap 初始化数据库/首次播种，分发 --cli、--gui、默认 Web。 | 保留。 | 无：启动入口不可替代。 | 调用 config、core.repository、db.connection、modules.seed、ui.cli、ui.gui、ui.web.server。 | 低：init_db 失败会 SystemExit；Web 启动异常回退 GUI。 |
 | README.md | 功能项 | 项目主说明：定位、真实依赖、三入口、目录职责、功能、数据/备份、风险、共建与开发约定。 | 保留并随实现更新。 | 无：项目主文档。 | 面向用户与接手 AI；内容人工维护，不参与运行。 | 低：说明可能滞后；已避免引用临时备份目录。 |
 | 启动旅行之木.cmd | 功能项 | Windows 一键启动：切到脚本所在项目根，优先 pythonw，缺失回退 python 并提示。 | 保留。 | 部分：可直接运行 python main.py。 | 调用 Windows cmd、PATH 中的 pythonw/python 与 main.py。 | 低：缺少 Python 时明确失败。 |
-| file_navigation.json | 拓展项 | 文件导航主数据源：待办与已决定去留，含第二批 core/db/tests 审查摘要。 | 保留；后续轮次继续追加。 | 无：唯一结构化主数据源。 | 供人/AI 读取；file_navigation.md 由它生成；不参与运行时逻辑。 | 低：需与 file_navigation.md 同步，避免手工漂移。 |
-| file_navigation.md | 拓展项 | 文件导航只读摘要：待办、已决定、第二批审查表。 | 保留；仅通过生成脚本更新。 | 无：面向快速浏览。 | 由 file_navigation.json 生成；不参与运行时逻辑。 | 低：手工修改会与 JSON 漂移。 |
-| files_manifest.json | 拓展项 | 文件预览导出清单：全部可见文件的相对路径、说明字段与归属节点。 | 保留；文件变化后重新导出。 | 无：现有前端导出的标准产物。 | 由 /api/files/state 的前端逻辑生成；不参与运行时逻辑。 | 低：说明来自 file_notes.details 标签文本，手工改写可能导致字段缺失。 |
+| docs/appendix/file_navigation.json | 拓展项 | 文件导航主数据源：待办与已决定去留，含第二批 core/db/tests 审查摘要。 | 保留；后续轮次继续追加。 | 无：唯一结构化主数据源。 | 供人/AI 读取；docs/appendix/file_navigation.md 由它生成；不参与运行时逻辑。 | 低：需与 docs/appendix/file_navigation.md 同步，避免手工漂移。 |
+| docs/appendix/file_navigation.md | 拓展项 | 文件导航只读摘要：待办、已决定、第二批审查表。 | 保留；仅通过生成脚本更新。 | 无：面向快速浏览。 | 由 docs/appendix/file_navigation.json 生成；不参与运行时逻辑。 | 低：手工修改会与 JSON 漂移。 |
+| docs/appendix/files_manifest.json | 拓展项 | 文件预览导出清单：全部可见文件的相对路径、说明字段与归属节点。 | 保留；文件变化后重新导出。 | 无：现有前端导出的标准产物。 | 由 /api/files/state 的前端逻辑生成；不参与运行时逻辑。 | 低：说明来自 file_notes.details 标签文本，手工改写可能导致字段缺失。 |
 | core/__init__.py | 拓展项 | 标记 core 为 Python 包，保持空实现以避免导入副作用。 | 保留。 | 无：可用命名空间包替代，但会改变导入约定。 | 被 from core import ... 隐式加载；不调用其他模块。 | 低：加入导入语句可能引入循环依赖或启动副作用。 |
 | core/models.py | 数据项 | 定义 Item 与 ItemStat 两个 dataclass，承载学习条目与记忆状态字段。 | 保留。 | 部分：可用 dict/sqlite3.Row 传递，但会丢失类型提示与字段边界。 | 被 core.repository、modules.importer、modules.seed、ui.cli、ui.gui、ui.web.server 使用；不调用其他模块。 | 低：字段与 schema 需人工同步，当前无自动校验。 |
 | core/planner.py | 功能项 | 按配额与权重挑选今日新学条目，组装到期复习计划。 | 保留。 | 无：计划规则唯一实现。 | 被 ui.cli、ui.gui、ui.web.server 调用；调用 core.repository 与 config。 | 中：分配循环最多 200 次，配额极大或可用数异常时可能分配不足；依赖 repository 查询性能。 |
@@ -692,5 +697,5 @@
 
 ## 说明
 
-- 本文件由 `tools/gen_file_navigation_md.py` 从 `file_navigation.json` 生成。
+- 本文件由 `tools/gen_file_navigation_md.py` 从 `docs/appendix/file_navigation.json` 生成。
 - 结构、历史记录和去留决定以 JSON 主数据源为准；本摘要不承载额外决定。

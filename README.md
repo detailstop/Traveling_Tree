@@ -2,7 +2,7 @@
 
 本机运行的旅行之木：学习核心与可插件化工具均以插件形式加载，宿主只负责 Web 服务、插件发现/分发与共享设置。业务内容数据保存在本机 SQLite，只有 UI 偏好保留在浏览器 localStorage，不需要账号，也不做云同步。
 
-> 根目录的早期整理稿与一次性调试/变更残留已于 2026-10-27 清理，去留与审查记录见 `file_navigation.json`（`file_navigation.md` 为只读摘要）；本 README 为当前主说明。`webchat_probe.py` 是网页会话通道的最小验证脚本，非运行必需；若后续确需保留，建议迁至 `tools/`。
+> 根目录的早期整理稿与一次性调试/变更残留已于 2026-10-27 清理，去留与审查记录见 `docs/appendix/file_navigation.json`（`docs/appendix/file_navigation.md` 为只读摘要）；本 README 为当前主说明。`webchat_probe.py` 是网页会话通道的最小验证脚本，非运行必需；若后续确需保留，建议迁至 `tools/`。
 
 ## 1. 快速开始
 
@@ -65,8 +65,6 @@ python -m playwright install chromium
 Traveling_Tree/
 ├── main.py                  Web 宿主启动、数据库初始化
 ├── config.py                宿主/插件共享路径与默认设置
-├── file_navigation.json     文件去留与审查主数据源
-├── file_navigation.md       文件导航只读摘要（由 JSON 生成）
 ├── webchat_probe.py         网页会话最小验证脚本（非运行必需）
 ├── 启动旅行之木.cmd          Windows 便捷启动（相对路径）
 ├── db/
@@ -78,11 +76,26 @@ Traveling_Tree/
 │   └── web/static/          原生前端；features/*.js 按需加载
 ├── plugins/                 22 个插件目录：19 个有卡片插件（russian/、book_reader/、project_manager/、bg_library/、promptgen/、ai/、aidebug/、sim/、expdata/、schedule/、screeps/、urlarch/、netexp/、rivet/、filejudge/、pdf/、model_usage/、pixel_art/、finance/）+ 3 个 backend-only（webchat/、cobuild/、tts/）；manifest + backend.py，有卡片的另有 feature.js + plugin.css，有表的另有 schema.sql
 ├── data/                    运行时数据：SQLite、settings、缓存、会话、备份
-├── docs/                    多 AI 共建日志、截图与开发记录
+├── docs/
+│   ├── plugin-development-whitepaper.md   开发白皮书（最高准则）
+│   ├── 多AI共建日志.md                    多 AI 打卡镜像（自动生成，勿手改）
+│   └── appendix/                          白皮书附件：附录 A–D + 三份说明性文件
 └── tests/                   冒烟测试（多数使用临时数据库）
 ```
 
 分层约定：`ui/` 通过 `/api/plugin/<id>/*` 动态分发到各插件 backend；宿主不再有 `core/`，全部 SQL 在插件内（model_usage/pixel_art/finance/bg_library/book_reader/russian/project_manager）；`db/schema/` 为空，新增表只写 `plugins/<id>/schema.sql` 并由 manifest 的 `db` 声明，`db/connection.py` 启动时扫描执行；`data/settings.json` 的 `modules.enabled` 控制按模块建表，默认全启用。
+
+### 说明性文件分工
+
+三份说明性文件统一放在 `docs/appendix/`，作为白皮书附件，不并入白皮书正文：
+
+| 文件 | 性质 | 使用规则 |
+| --- | --- | --- |
+| `docs/appendix/file_navigation.json` | 文件去留与审查决策主数据源（pending/decided） | 新增决定只追加；历史语义保留；不改 schema |
+| `docs/appendix/file_navigation.md` | 由 JSON 生成的只读摘要 | **严禁手改**；修改 JSON 后运行 `python tools/gen_file_navigation_md.py` |
+| `docs/appendix/files_manifest.json` | 文件预览导出的工作区文件清单快照 | 只读参考；不是实时索引，文件变动后需重新导出 |
+
+白皮书附录 A–D 亦在 `docs/appendix/`（`A-backend-only.md`、`B-root-routing.md`、`C-binary-format.md`、`D-conventions.md`）。
 
 ## 5. 主要功能
 
@@ -98,13 +111,13 @@ Traveling_Tree/
 
 ### 通用工具
 
-以 `ui/web/static/app.js` 的内置 `TOOLS` + `GET /api/plugins/list` 为准。像素动画/Godot 功能已整体下线；模型用量与消费、像素画、记账本与理财量化、AI 工作台、接口调试器、项目管理、俄语书籍阅读、背景库/文件预览、提示词生成器已分别迁为 `plugins/model_usage/`、`plugins/pixel_art/`、`plugins/finance/`、`plugins/ai/`、`plugins/aidebug/`、`plugins/project_manager/`、`plugins/book_reader/`、`plugins/bg_library/`、`plugins/promptgen/`。共享的 `ui/web/static/features/webchat.js` 是唯一内置前端依赖，通过 manifest 的 `shared_features` 在插件 feature 前加载。随机模拟器、实验数据获取、计划表、Screeps Arena、网址归档、网络与互联探索、铆钉点、文件判官、PDF 工具、批量压缩、模型用量与消费、像素画、记账本、理财量化、AI 工作台、接口调试器、项目管理、书籍阅读、背景库/文件预览、提示词生成器均已迁为插件；PDF 工具与批量压缩共用 `plugins/pdf` 的两个 entry。插件入口、backend、建表语句、数据目录与样式统一由各插件 `manifest.json` 声明，主程序按 `entries[].feature` 动态 `import()`、按 `/api/plugin/<id>/*` 动态分发，启动时扫描 `manifest.db` 执行 `plugins/<id>/schema.sql`、按 `data_dirs` 创建 `data/plugins/<id>/`，不再维护 `plugin_routes.py` 式的硬编码路由表（全部 22 个插件目录已升级 manifest v2）。插件卡片可在「所有功能」中禁用（`rt_plugins_disabled` 按插件 id，禁用后该插件所有 entry 一起消失），隐藏仍用工具架子 `hidden`（只影响显示）。当前内置 0 + 19 个有卡片插件（21 个 entry）= 21 张卡片；另有 3 个 backend-only 插件（webchat/cobuild/tts）。v2 插件样式随插件放 `plugins/<id>/plugin.css`（22 个 v2 插件目录已迁移/占位）。插件规范见 [docs/plugin-standard-v1.md](docs/plugin-standard-v1.md)，CSS 重开条件见 [docs/plugin-css-decision-2026-10-28.md](docs/plugin-css-decision-2026-10-28.md)。
+以 `ui/web/static/app.js` 的内置 `TOOLS` + `GET /api/plugins/list` 为准。像素动画/Godot 功能已整体下线；模型用量与消费、像素画、记账本与理财量化、AI 工作台、接口调试器、项目管理、俄语书籍阅读、背景库/文件预览、提示词生成器已分别迁为 `plugins/model_usage/`、`plugins/pixel_art/`、`plugins/finance/`、`plugins/ai/`、`plugins/aidebug/`、`plugins/project_manager/`、`plugins/book_reader/`、`plugins/bg_library/`、`plugins/promptgen/`。共享的 `ui/web/static/features/webchat.js` 是唯一内置前端依赖，通过 manifest 的 `shared_features` 在插件 feature 前加载。随机模拟器、实验数据获取、计划表、Screeps Arena、网址归档、网络与互联探索、铆钉点、文件判官、PDF 工具、批量压缩、模型用量与消费、像素画、记账本、理财量化、AI 工作台、接口调试器、项目管理、书籍阅读、背景库/文件预览、提示词生成器均已迁为插件；PDF 工具与批量压缩共用 `plugins/pdf` 的两个 entry。插件入口、backend、建表语句、数据目录与样式统一由各插件 `manifest.json` 声明，主程序按 `entries[].feature` 动态 `import()`、按 `/api/plugin/<id>/*` 动态分发，启动时扫描 `manifest.db` 执行 `plugins/<id>/schema.sql`、按 `data_dirs` 创建 `data/plugins/<id>/`，不再维护 `plugin_routes.py` 式的硬编码路由表（全部 22 个插件目录已升级 manifest v2）。插件卡片可在「所有功能」中禁用（`rt_plugins_disabled` 按插件 id，禁用后该插件所有 entry 一起消失），隐藏仍用工具架子 `hidden`（只影响显示）。当前内置 0 + 19 个有卡片插件（21 个 entry）= 21 张卡片；另有 3 个 backend-only 插件（webchat/cobuild/tts）。v2 插件样式随插件放 `plugins/<id>/plugin.css`（22 个 v2 插件目录已迁移/占位）。插件规范见[白皮书](docs/plugin-development-whitepaper.md)（附录 A–D）；CSS 约定见本节与 [§9 开发约定](#9-开发约定)。
 
 其中：
 - **批量压缩**会原位改写/替换所选目录中的原文件；**文件判官**可按确认删除文件。使用前先预览。文件判官的图片/PDF/DOCX 预览分别依赖 Pillow/PyPDF2/python-docx，缺失时返回 `missing_dependency` 提示，不影响插件加载。
 - **记账本**数据存于主库 `finance_*` 表（经 `/api/plugin/finance/*`），旧 `rt_fin` 仅保留为只读历史备份；提示词工作流、周计划、网址库、Screeps 工作区已迁入 SQLite，页面通过插件 API 读写；仅 UI 偏好仍存浏览器 localStorage。**理财量化**数据已重置，当前仅保留占位入口，待后续重构。
 - **网址归档**的组别、网址与启动间隔已迁入 SQLite（`urlarch_*` 表，经 `/api/plugin/urlarch/*`）。
-- **项目优化与当前综述**提供树形背景库、导入/导出、历史归档与手动变更留痕；其「文件预览与说明卡片」可浏览工作区文件树、标注数据库文件、维护 `file_notes` / `db_rules`，并导出 `files_manifest.json`。文件预览只写说明元数据，不改源码。
+- **项目优化与当前综述**提供树形背景库、导入/导出、历史归档与手动变更留痕；其「文件预览与说明卡片」可浏览工作区文件树、标注数据库文件、维护 `file_notes` / `db_rules`，并导出 `docs/appendix/files_manifest.json`。文件预览只写说明元数据，不改源码。
 
 ## 6. 数据保存与备份
 
@@ -176,11 +189,13 @@ result = cobuild.checkin(
 - 插件建表（可选）：`manifest.json` 声明 `"db": {"module_key": "model_usage", "schema": "schema.sql", "migrate": "migrate.py"}`；schema 在 `plugins/<id>/schema.sql`，migrate 暴露 `migrate(conn)`；`modules.enabled.<module_key>=false` 时两者都跳过。无表插件写 `"db": null`。
 - 插件数据目录（可选）：`manifest.json` 声明 `"data_dirs": ["rivet"]`；主程序启动时创建 `data/plugins/rivet/`，后端用 `config.plugin_data_dir()` 读写，不再自行拼接绝对路径。
 - finance 的 rt_fin 一次性迁移逻辑在 `plugins/finance/migrate_localstorage.py`；旧 `tools/migrate_finance_localstorage.py` 兼容入口已删除。
-- 插件 CSS：v2 插件写入 `plugins/<id>/plugin.css` 并在 manifest 中声明 `"style": "plugin.css"`；共享 `.fin-note`（sim/filejudge/finance）、`.rv-card`（screeps/rivet）、`.pi-check`/`.pi-badge` 留在 `app.css`。规则见 [插件规范](docs/plugin-standard-v1.md) 与 [CSS 决策](docs/plugin-css-decision-2026-10-28.md)。
+- 插件 CSS：v2 插件写入 `plugins/<id>/plugin.css` 并在 manifest 中声明 `"style": "plugin.css"`；共享 `.fin-note`（sim/filejudge/finance）、`.rv-card`（screeps/rivet）、`.pi-check`/`.pi-badge` 留在 `app.css`。规则见[白皮书](docs/plugin-development-whitepaper.md)与本节约定。
 - 新增 Web API：在 `ui/web/server.py` 按现有路由方式接入；不要绕过 repository 写 SQL。
 - 文件路径一律相对项目根（`config.BASE_DIR`）；需要外部路径时放 `data/settings.json` 的 `paths.<名称>`，缺失时明确报错，不静默回退。
 - 修改数据库结构：插件表同步 `plugins/<id>/schema.sql` 与插件 migration；`db/schema/` 不再放任何表；不要改 `bg_nodes` / `bg_versions` 的结构字段与 id/path/node_type/version_tag 规则。
 - 新增可持久化前端内容时，优先写 SQLite 插件表并保留 `raw_json` 兜底；只有纯 UI 偏好才使用 localStorage。
+- `docs/` 目录只允许长期存放三类内容：白皮书、`多AI共建日志.md`（自动镜像）、`appendix/` 附件；其他说明性/一次性材料一律视为临时文件。
+- docs 临时文件必须走闭环：**提出 → 确定 → 并入主文件 → 删除**。未闭环视为违规，下次接手的 AI 优先处理或先询问用户；未闭环项登记到 `docs/appendix/file_navigation.json` 的 `pending[]`，处理完并入主文件并删除临时文件后移入 `decided[]`。
 
 ## 10. 验证
 
@@ -200,4 +215,13 @@ python tests/smoke_pm.py
 ## 11. 文档
 
 - [旅行之木 · 微内核架构与插件开发白皮书 (v2.0)](docs/plugin-development-whitepaper.md)
-- [插件规范 v1](docs/plugin-standard-v1.md)
+- 白皮书附录：[A backend-only](docs/appendix/A-backend-only.md) · [B 根路由](docs/appendix/B-root-routing.md) · [C 二进制格式](docs/appendix/C-binary-format.md) · [D 其他约定](docs/appendix/D-conventions.md)
+- 说明性文件：[file_navigation.json](docs/appendix/file_navigation.json) · [file_navigation.md](docs/appendix/file_navigation.md) · [files_manifest.json](docs/appendix/files_manifest.json)
+
+## 12. 项目状态与交接（2026-10-30）
+
+- **插件**：22 个插件目录——19 个有前端卡片（ai、aidebug、bg_library、book_reader、expdata、filejudge、finance、model_usage、netexp、pdf、pixel_art、project_manager、promptgen、rivet、russian、schedule、screeps、sim、urlarch）+ 3 个 backend-only（webchat、cobuild、tts）。
+- **13 smoke 基线**：smoke_plugins 181/181、smoke_startup_once 33/33、smoke_web 74/75（TTS 502 已知）、smoke_plugin_decoupling 452/452、smoke_finance 34/34、smoke_model_usage 49/49、smoke_reader_range 25/25、smoke_pm 23/23、smoke_books 11/11、smoke_file_preview 17/17、smoke_pdf 17/17、smoke_plugin_data_dirs 13/13、smoke_plugin_module_off 10/10。
+- **剩余 pending**：`tests/smoke_plugin_decoupling.py::Server.start` 的 `stop()` 异常保护（低概率进程竞态，三次 452/452 通过，留观察）。
+- **交接建议**：新功能进 `plugins/<id>/`，不碰宿主；改现有功能直接改对应插件；每轮下沉、改 settings 或改 API 后跑全量 13 个 smoke；`/api/plugin/<id>/*` 必须用语义子路径；二进制响应按附录 C。
+- 完整状态、数据资产与 docs 闭环规则见白皮书 [§7 项目状态与交接](docs/plugin-development-whitepaper.md) 与 [§8 docs 目录与临时文件闭环](docs/plugin-development-whitepaper.md)。

@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-29T22:53:36+03:00",
-  "round": 64,
+  "generated_at": "2026-10-30T13:21:38+03:00",
+  "round": 65,
   "pending": [
     {
       "path": "tests/smoke_plugin_decoupling.py::Server.start",
@@ -13,6 +13,50 @@
     }
   ],
   "decided": [
+    {
+  "path": "docs/appendix/",
+  "decision": "三份说明性文件移入 docs/appendix/ 作为白皮书附件（round 65）",
+  "reason": "docs/appendix/file_navigation.json、docs/appendix/file_navigation.md、docs/appendix/files_manifest.json 由项目根同盘移动到 docs/appendix/，移动前后字节数与 SHA256 一致（296601 / 175512 / 110376 B）。三者相对项目根的路径语义不变；项目根不再保留同名文件。历史记录中的路径文本已统一为 appendix 路径（见下一条）。",
+  "status": "done",
+  "round": 65,
+  "at": "2026-10-30T13:21:38+03:00",
+  "backup_path": "data/backup/round65_docs/"
+},
+    {
+  "path": "docs/appendix/A-backend-only.md",
+  "decision": "白皮书附录 A–D 拆为 appendix 附件（round 65）",
+  "reason": "从 docs/plugin-development-whitepaper.md 抽出附录 A–D 全文，分别写入 docs/appendix/A-backend-only.md、B-root-routing.md、C-binary-format.md、D-conventions.md；白皮书正文改为标题 + 一句话 + 相对链接索引，原章节编号与附录语义不变。",
+  "status": "done",
+  "round": 65,
+  "at": "2026-10-30T13:21:38+03:00",
+  "backup_path": "data/backup/round65_docs/"
+},
+    {
+  "path": "docs/plugin-development-whitepaper-v2.1-draft.md",
+  "decision": "删除 v2.1 草案与结项报告（round 65）",
+  "reason": "核对确认草案的 backend-only、根路由、__binary__ 修正、import 约定已全部并入白皮书附录 A–D；结项报告的 22 插件清单、13 smoke 基线、剩余 pending、交接建议已并入白皮书 §7 与 README §12。两份文件删除，备份于 data/backup/round65_docs/。docs/ 根现仅白皮书 + 多AI共建日志 + appendix/。",
+  "status": "done",
+  "round": 65,
+  "at": "2026-10-30T13:21:38+03:00",
+  "backup_path": "data/backup/round65_docs/"
+},
+    {
+  "path": "tools/gen_file_navigation_md.py",
+  "decision": "三文件名硬编码统一为 docs/appendix/ 路径（round 65）",
+  "reason": "生成器 SOURCE/TARGET 改为 docs/appendix/file_navigation.json 与 docs/appendix/file_navigation.md；README 链接/目录树、白皮书引用、file_navigation 历史正文、files_manifest 条目与 purpose 均改为 docs/appendix/ 前缀（未重跑导出，仍为快照语义）。files_manifest 的 file_name 保持 basename；file_preview 前端导出下载名保持 files_manifest.json（下载 basename，非项目路径）；docs/多AI共建日志.md 为自动镜像不手改，历史打卡条目保留原文；.gitignore 与 tests 无相关硬编码，无需改。",
+  "status": "done",
+  "round": 65,
+  "at": "2026-10-30T13:21:38+03:00",
+  "backup_path": "data/backup/round65_docs/"
+},
+    {
+  "path": "README.md",
+  "decision": "README 与白皮书补充文件分工、docs 闭环与项目状态（round 65）",
+  "reason": "README 新增「说明性文件分工」（§4）与「项目状态与交接」（§12），§9 开发约定写入 docs 临时文件闭环规定，§11 文档补附录与说明性文件链接；另将 3 处指向已归档文件（plugin-standard-v1.md / plugin-css-decision-2026-10-28.md，round 33/34 已移出项目）的死链改为白皮书链接；白皮书新增 §7 项目状态与交接、§8 docs 目录与临时文件闭环、§9 白皮书附件。docs/ 下无未闭环临时文件，故不新增 pending。",
+  "status": "done",
+  "round": 65,
+  "at": "2026-10-30T13:21:38+03:00"
+},
     {
       "path": ".",
       "decision": "项目目录改名 russian_tutor → Traveling_Tree（round 64）",
@@ -30,7 +74,7 @@
       "at": "2026-10-29T22:28:28+03:00"
     },
     {
-      "path": "file_navigation.json::public-scan-round64",
+      "path": "docs/appendix/file_navigation.json::public-scan-round64",
       "decision": "公开前文案扫描结论（round 64）",
       "reason": "扫描 125 个代码/文档文件：必须清理 0 项；建议清理 1 项（plugins/pdf/feature_batch.js:25 示例路径含个人用户名，建议替换为 <用户名>）；可接受 164 项（detailstop 3 处为仓库 owner；AI agent 名 161 处为多 AI 协作记录）。绝对路径 0、个人邮箱 0、手机号 0、具体地址 0、真实 token URL 0；money 15 与 sensitive_url 42 为代码/模板误报，不是个人财务值或真实凭据。docs/多AI共建日志.md 的 agent 名为 DSH、DeepSeek Harness、Codex · GPT-5（DeepSeek Harness 扮演），无真实姓名；适合公开。结论：无必须清理项，可考虑转 public；建议在公开前匿名化个人用户名。",
       "status": "done",
@@ -88,7 +132,7 @@
       "at": "2026-10-29T21:53:13+03:00"
     },
     {
-      "path": "file_navigation.json::工艺教训-round61",
+      "path": "docs/appendix/file_navigation.json::工艺教训-round61",
       "decision": "SQLite 恢复后验证判据修正",
       "reason": "round 61 阶段 5.4 原设计要求恢复后 SHA256 与基线一致，但阶段 5.5 又要求启动服务验证，两者矛盾：SQLite 启动必改 header 元数据。后续同类任务改为：先 PRAGMA integrity_check + 表行数对比，再启动服务；SHA256 仅用于字节级备份完整性（如 rename 前后），不用于 SQLite 恢复判定。",
       "status": "done",
@@ -134,7 +178,7 @@
       "backup_path": "data/backup/round60_rt_fin/"
     },
     {
-      "path": "file_navigation.json::historical_paths",
+      "path": "docs/appendix/file_navigation.json::historical_paths",
       "decision": "历史路径指针说明（round 59）",
       "reason": "round 59 将 归档/ 与 data/backup/ 整体移出项目。decided 中 59 条 backup_path 以 data/backup/ 开头、11 条 new_path 以 归档/ 开头、3 条 path 为 归档/、48 条 reason/decision 正文提及这两路径，均为历史记录，路径已不存在，不再逐条修改。若需追溯，按 round 编号从项目外归档目录取回。",
       "status": "done",
@@ -805,7 +849,7 @@
       }
     },
     {
-      "path": "file_navigation.json::round41-stage4",
+      "path": "docs/appendix/file_navigation.json::round41-stage4",
       "decision": "报告表述修正（round 41）",
       "reason": "round 41 报告阶段 4 段落误写“旧宿主业务键已删除”；实际 data/backup/round41_settings/settings.json 与 settings.after_split.json SHA256 完全相同（cbc616fe...），证明阶段 4 未删键，阶段 6 才删。流程合规，仅报告表述错位，状态不回滚。",
       "status": "done",
@@ -1206,7 +1250,7 @@
       }
     },
     {
-      "path": "files_manifest.json",
+      "path": "docs/appendix/files_manifest.json",
       "decision": "口径表述修正",
       "reason": "round 34 的“181 = 202 - 24 + 3”数学成立但语义易误读。round 35 排除归档后：主目录 manifest 条目 = 178；主目录实际文件 = 178 + 3（敏感：ai_keys.json、webchat_sessions.json、plugins/finance/fixtures/rt_fin.json）= 181。归档文件 24 个不计入 manifest。",
       "status": "done",
@@ -1222,7 +1266,7 @@
       "at": "2026-10-29T00:23:13+03:00"
     },
     {
-      "path": "files_manifest.json",
+      "path": "docs/appendix/files_manifest.json",
       "decision": "口径校验",
       "reason": "主目录实际文件 N=181；manifest M=202（含 归档/ 下 24 个非敏感文件）；主目录排除敏感 K=3（data/ai_keys.json、data/webchat_sessions.json、plugins/finance/fixtures/rt_fin.json）；181 = 202 - 24 + 3。归档/data/doubao_archive.json 与归档/data/doubao_history.json 属于敏感文件，未进入 manifest。",
       "status": "reviewed",
@@ -3306,7 +3350,7 @@
       }
     },
     {
-      "path": "file_navigation.json",
+      "path": "docs/appendix/file_navigation.json",
       "decision": "追加第 24 轮决定记录",
       "reason": "记录 prompt_template 修复、pixel 下线、插件路由表与两个插件迁移；pixel 动画历史 decided 条目标记删除，历史审计材料引用保留。",
       "status": "updated",
@@ -3315,30 +3359,30 @@
       "review": {
         "role": "文件导航主数据源：待办与已决定去留，含第二批 core/db/tests 审查摘要。",
         "substitutability": "无：唯一结构化主数据源。",
-        "integration": "供人/AI 读取；file_navigation.md 由它生成；不参与运行时逻辑。",
+        "integration": "供人/AI 读取；docs/appendix/file_navigation.md 由它生成；不参与运行时逻辑。",
         "category": "拓展项",
         "recommendation": "保留；后续轮次继续追加。",
-        "risk": "低：需与 file_navigation.md 同步，避免手工漂移。"
+        "risk": "低：需与 docs/appendix/file_navigation.md 同步，避免手工漂移。"
       }
     },
     {
-      "path": "file_navigation.md",
+      "path": "docs/appendix/file_navigation.md",
       "decision": "新建指南",
-      "reason": "由 file_navigation.json 生成的只读摘要，标注“只读摘要，勿手改”；与 JSON 同步。",
+      "reason": "由 docs/appendix/file_navigation.json 生成的只读摘要，标注“只读摘要，勿手改”；与 JSON 同步。",
       "status": "done",
       "round": 11,
       "at": "2026-10-27T17:37:14+03:00",
       "review": {
         "role": "文件导航只读摘要：待办、已决定、第二批审查表。",
         "substitutability": "无：面向快速浏览。",
-        "integration": "由 file_navigation.json 生成；不参与运行时逻辑。",
+        "integration": "由 docs/appendix/file_navigation.json 生成；不参与运行时逻辑。",
         "category": "拓展项",
         "recommendation": "保留；仅通过生成脚本更新。",
         "risk": "低：手工修改会与 JSON 漂移。"
       }
     },
     {
-      "path": "files_manifest.json",
+      "path": "docs/appendix/files_manifest.json",
       "decision": "重导出文件预览清单",
       "reason": "按文件预览导出能力重生成；清除已删动画/Godot 文件条目并纳入新插件与路由表。",
       "status": "updated",
@@ -5574,8 +5618,8 @@
     },
     {
       "path": "tools/gen_file_navigation_md.py",
-      "decision": "新增 file_navigation.md 生成器",
-      "reason": "标准库脚本以 file_navigation.json 为主数据源生成只读摘要；不得手改 Markdown。",
+      "decision": "新增 docs/appendix/file_navigation.md 生成器",
+      "reason": "标准库脚本以 docs/appendix/file_navigation.json 为主数据源生成只读摘要；不得手改 Markdown。",
       "status": "added",
       "round": 24,
       "at": "2026-10-28T11:45:13+03:00"
@@ -5744,7 +5788,7 @@
     {
       "path": "config.py",
       "move_plan": "本轮不迁移，保留项目根原位；不新增配置文件。",
-      "guide_plan": "若后续配置项继续增多，再评估在 README 增加配置项索引或补充 file_navigation.md 指南；本轮只完善 file_notes。",
+      "guide_plan": "若后续配置项继续增多，再评估在 README 增加配置项索引或补充 docs/appendix/file_navigation.md 指南；本轮只完善 file_notes。",
       "summary": "全局可调参数集中点（路径、SRS 间隔、配额、卡片规则、默认主题、共建日志路径）。",
       "round": 29,
       "created_at": "2026-10-27T17:37:14+03:00",

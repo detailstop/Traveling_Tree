@@ -211,7 +211,7 @@
       "note": "用户确认保留原位；多 AI 共建打卡的自动生成 Markdown 镜像，当前 49 条记录；数据源 data/ai_cobuild.json。"
     },
     {
-      "relative_path": "file_navigation.json",
+      "relative_path": "docs/appendix/file_navigation.json",
       "file_name": "file_navigation.json",
       "purpose": "文件导航主数据源：pending/decided 与历史审查记录。",
       "owner_node_path": "旅行之木/工程与协作",
@@ -219,25 +219,25 @@
       "substitutability": "中",
       "depends_on": "项目运行环境",
       "depended_by": "开发与维护",
-      "modularization": "保持当前位置。",
+      "modularization": "round 65 移入 docs/appendix/；相对项目根路径同步。",
       "risk_level": "低",
       "note": "当前文件预览清单按实际文件系统重建。"
     },
     {
-      "relative_path": "file_navigation.md",
+      "relative_path": "docs/appendix/file_navigation.md",
       "file_name": "file_navigation.md",
-      "purpose": "file_navigation.json 的只读 Markdown 摘要（生成器产出）。",
+      "purpose": "docs/appendix/file_navigation.json 的只读 Markdown 摘要（生成器产出）。",
       "owner_node_path": "旅行之木/工程与协作",
       "category": "工程",
       "substitutability": "中",
       "depends_on": "项目运行环境",
       "depended_by": "开发与维护",
-      "modularization": "保持当前位置。",
+      "modularization": "round 65 移入 docs/appendix/；相对项目根路径同步。",
       "risk_level": "低",
       "note": "当前文件预览清单按实际文件系统重建。"
     },
     {
-      "relative_path": "files_manifest.json",
+      "relative_path": "docs/appendix/files_manifest.json",
       "file_name": "files_manifest.json",
       "purpose": "文件预览导出的工作区文件清单（本文件）。",
       "owner_node_path": "旅行之木/工程与协作",
@@ -245,7 +245,7 @@
       "substitutability": "低（运行/迁移需要）",
       "depends_on": "项目运行环境",
       "depended_by": "开发与维护",
-      "modularization": "保持当前位置。",
+      "modularization": "round 65 移入 docs/appendix/；相对项目根路径同步。",
       "risk_level": "高",
       "note": "当前文件预览清单按实际文件系统重建。"
     },
@@ -2293,7 +2293,7 @@
     {
       "relative_path": "tools/gen_file_navigation_md.py",
       "file_name": "gen_file_navigation_md.py",
-      "purpose": "file_navigation.md 生成器；只读 file_navigation.json。",
+      "purpose": "docs/appendix/file_navigation.md 生成器；只读 docs/appendix/file_navigation.json。",
       "owner_node_path": "旅行之木/工程与协作/工具",
       "category": "工具",
       "substitutability": "中",
