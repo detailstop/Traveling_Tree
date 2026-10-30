@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-30T13:35:18+03:00",
-  "round": 66,
+  "generated_at": "2026-10-30T14:49:23+03:00",
+  "round": 67,
   "pending": [
     {
       "path": "tests/smoke_plugin_decoupling.py::Server.start",
@@ -13,6 +13,54 @@
     }
   ],
   "decided": [
+    {
+      "path": "plugins/lib.json",
+      "decision": "新增插件分类清单（22 条，round 67）",
+      "reason": "按「有卡片=functional、无卡片=library、cobuild 例外归 functional」生成 22 条（functional 20 / library 2，has_ui=true 19），字段 id/kind/has_ui/called_by/notes。因 tests/smoke_plugins.py 把 plugins/ 下任意目录计入插件目录数（要求恰好 22），经用户确认改用单文件 plugins/lib.json；原计划的 plugins/lib/manifest.json 会使目录数变 23 并触发 manifest 缺失/目录数 FAIL。未改宿主扫描/import/路由与任何测试；该文件仅作文档索引，宿主、测试与插件运行时不读取。验证：smoke_plugins 181/181、smoke_file_preview 17/17。",
+      "status": "done",
+      "round": 67,
+      "at": "2026-10-30T14:49:23+03:00"
+    },
+    {
+      "path": "docs/plugin-development-whitepaper.md",
+      "decision": "新增附录 E：底层下沉插件（round 67）",
+      "reason": "附录 E 记录分类口径、当前清单（webchat、tts；cobuild 例外）、调用关系摘要、单插件文档索引、未来物理移动风险（仅说明不执行）；未改附录 A–D 内容与原章节编号，仅开头索引提及附录 E。",
+      "status": "done",
+      "round": 67,
+      "at": "2026-10-30T14:49:23+03:00"
+    },
+    {
+      "path": "docs/appendix/lib/webchat.md",
+      "decision": "新增 webchat 底层插件说明（round 67）",
+      "reason": "记录职责、8 条 /api/plugin/webchat/* 子路径、调用方（ai/aidebug/finance/promptgen + 宿主 app.js 与共享 webchat.js）、依赖（Playwright/浏览器二进制/profile）、注意事项与不面向用户说明；与 plugins/lib.json 的 called_by 一致。",
+      "status": "done",
+      "round": 67,
+      "at": "2026-10-30T14:49:23+03:00"
+    },
+    {
+      "path": "docs/appendix/lib/tts.md",
+      "decision": "新增 tts 底层插件说明（round 67）",
+      "reason": "记录职责、/speak 与 /clear-cache 接口、调用方（app.js；russian 间接）、依赖（edge-tts/系统语音/data/voice_cache）、注意事项（TTS 502 已知、__binary__ 格式）与不面向用户说明；与 plugins/lib.json 的 called_by 一致。",
+      "status": "done",
+      "round": 67,
+      "at": "2026-10-30T14:49:23+03:00"
+    },
+    {
+      "path": "README.md",
+      "decision": "README 增加插件分类指引（round 67）",
+      "reason": "§4 新增「插件分类」小节：分类口径、plugins/lib.json 链接、webchat/tts 文档链接、白皮书附录 E 链接；不展开长表，未改无关章节。",
+      "status": "done",
+      "round": 67,
+      "at": "2026-10-30T14:49:23+03:00"
+    },
+    {
+      "path": "data/bg_import/::round67-none",
+      "decision": "本次无背景库数据（round 67）",
+      "reason": "用户未提供「项目优化与当前综述」导出 json；背景库当前不可用，本轮未执行 mode:\"update\" 导入、未写入任何背景库数据。分类依据为 plugins/*/manifest.json 与 import/API 调用行。",
+      "status": "done",
+      "round": 67,
+      "at": "2026-10-30T14:49:23+03:00"
+    },
     {
       "path": "docs/plugin-development-whitepaper.md",
       "decision": "补 round 65 删除前核对结论（round 66）",

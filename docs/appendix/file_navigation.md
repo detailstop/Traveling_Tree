@@ -2,9 +2,9 @@
 
 > 只读摘要，勿手改。本文件由 docs/appendix/file_navigation.json 生成；结构与去留决定以 JSON 为准。
 
-- 生成时间：2026-10-30T13:35:18+03:00
-- 轮次：66
-- 待办：1 条；已决定：441 条
+- 生成时间：2026-10-30T14:49:23+03:00
+- 轮次：67
+- 待办：1 条；已决定：447 条
 
 ## 待办
 
@@ -16,6 +16,12 @@
 
 | 路径 | 决定 | 原因 | 状态 | 轮次 | 时间 | 备份路径 |
 | --- | --- | --- | --- | --- | --- | --- |
+| plugins/lib.json | 新增插件分类清单（22 条，round 67） | 按「有卡片=functional、无卡片=library、cobuild 例外归 functional」生成 22 条（functional 20 / library 2，has_ui=true 19），字段 id/kind/has_ui/called_by/notes。因 tests/smoke_plugins.py 把 plugins/ 下任意目录计入插件目录数（要求恰好 22），经用户确认改用单文件 plugins/lib.json；原计划的 plugins/lib/manifest.json 会使目录数变 23 并触发 manifest 缺失/目录数 FAIL。未改宿主扫描/import/路由与任何测试；该文件仅作文档索引，宿主、测试与插件运行时不读取。验证：smoke_plugins 181/181、smoke_file_preview 17/17。 | done | 67 | 2026-10-30T14:49:23+03:00 |  |
+| docs/plugin-development-whitepaper.md | 新增附录 E：底层下沉插件（round 67） | 附录 E 记录分类口径、当前清单（webchat、tts；cobuild 例外）、调用关系摘要、单插件文档索引、未来物理移动风险（仅说明不执行）；未改附录 A–D 内容与原章节编号，仅开头索引提及附录 E。 | done | 67 | 2026-10-30T14:49:23+03:00 |  |
+| docs/appendix/lib/webchat.md | 新增 webchat 底层插件说明（round 67） | 记录职责、8 条 /api/plugin/webchat/* 子路径、调用方（ai/aidebug/finance/promptgen + 宿主 app.js 与共享 webchat.js）、依赖（Playwright/浏览器二进制/profile）、注意事项与不面向用户说明；与 plugins/lib.json 的 called_by 一致。 | done | 67 | 2026-10-30T14:49:23+03:00 |  |
+| docs/appendix/lib/tts.md | 新增 tts 底层插件说明（round 67） | 记录职责、/speak 与 /clear-cache 接口、调用方（app.js；russian 间接）、依赖（edge-tts/系统语音/data/voice_cache）、注意事项（TTS 502 已知、__binary__ 格式）与不面向用户说明；与 plugins/lib.json 的 called_by 一致。 | done | 67 | 2026-10-30T14:49:23+03:00 |  |
+| README.md | README 增加插件分类指引（round 67） | §4 新增「插件分类」小节：分类口径、plugins/lib.json 链接、webchat/tts 文档链接、白皮书附录 E 链接；不展开长表，未改无关章节。 | done | 67 | 2026-10-30T14:49:23+03:00 |  |
+| data/bg_import/::round67-none | 本次无背景库数据（round 67） | 用户未提供「项目优化与当前综述」导出 json；背景库当前不可用，本轮未执行 mode:"update" 导入、未写入任何背景库数据。分类依据为 plugins/*/manifest.json 与 import/API 调用行。 | done | 67 | 2026-10-30T14:49:23+03:00 |  |
 | docs/plugin-development-whitepaper.md | 补 round 65 删除前核对结论（round 66） | 逐项核对：v2.1 草案 backend-only → docs/appendix/A-backend-only.md（A.1–A.4）；根路由 → B-root-routing.md；__binary__ 格式 → C-binary-format.md；import 约定 → D-conventions.md（shared_features/db.migrate 仍标待确认）。结项报告 22 插件清单 → 白皮书 §7.1；13 smoke 基线 → §7.2；剩余 pending → §7.3；交接建议 → §7.4。未发现未覆盖项，未恢复已删文档；核对表落在白皮书 §7.6，README §12 加摘要。 | done | 66 | 2026-10-30T13:35:18+03:00 |  |
 | docs/appendix/file_navigation.json | 更正 round 65「无 resolved[]」的错误说法（round 66） | 核实顶层 keys = schema_version / generated_at / round / pending / decided / resolved；resolved[] 现有 29 条，字段为 path、move_plan、guide_plan、summary、round、created_at、resolved_at、resolved_round、resolution。round 65 汇报「schema 只有 pending/decided」有误。本次无新增 resolved 项，原因是 docs/ 下无未闭环临时文件，而非 schema 缺失；未改 schema，未改历史记录。 | done | 66 | 2026-10-30T13:35:18+03:00 |  |
 | docs/appendix/files_manifest.json | files_manifest 保持快照，不重导出（round 66） | 按用户选择 A：保持 2026-10-29 导出的快照，不重跑 file_preview 导出，不手写清单。README §4 与白皮书 §9 已标注「非实时索引，文件变动后需重新导出」。快照仍含已删的两份文档条目、不含新增 appendix 文件，属预期；字段结构未改。 | done | 66 | 2026-10-30T13:35:18+03:00 |  |

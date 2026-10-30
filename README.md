@@ -97,6 +97,13 @@ Traveling_Tree/
 
 白皮书附录 A–D 亦在 `docs/appendix/`（`A-backend-only.md`、`B-root-routing.md`、`C-binary-format.md`、`D-conventions.md`）。
 
+### 插件分类
+
+- **口径**：有卡片（`manifest.entries` 非空）= 功能性；无卡片 = 底层下沉；`cobuild` 例外归功能性（无卡片，但用户直接使用打卡入口）。
+- **清单**：[plugins/lib.json](plugins/lib.json)（22 条：id / kind / has_ui / called_by / notes，仅作文档索引，宿主与测试不读取）。
+- **当前底层下沉**：`webchat`、`tts`；说明见 [lib/webchat.md](docs/appendix/lib/webchat.md)、[lib/tts.md](docs/appendix/lib/tts.md)。
+- 分类口径、调用关系与未来物理移动风险见白皮书 [附录 E](docs/plugin-development-whitepaper.md)。
+
 ## 5. 主要功能
 
 ### 旅行之木

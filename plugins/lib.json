@@ -1,0 +1,172 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-10-30T14:48:46+03:00",
+  "classification_rule": "有前端卡片（manifest.entries 非空）= functional（功能性）；无卡片（entries 为空）= library（底层下沉）；cobuild 例外归 functional（backend-only，但用户直接使用打卡入口）。本文件仅作文档索引，宿主、测试与插件运行时不读取。",
+  "plugins": [
+    {
+      "id": "ai",
+      "kind": "functional",
+      "has_ui": true,
+      "called_by": [],
+      "notes": "AI 工作台；有卡片；调用 webchat 插件；API Key 在 data/ai_keys.json（不读正文）。"
+    },
+    {
+      "id": "aidebug",
+      "kind": "functional",
+      "has_ui": true,
+      "called_by": [],
+      "notes": "接口调试器；有卡片；经共享 features/webchat.js 使用网页会话。"
+    },
+    {
+      "id": "bg_library",
+      "kind": "functional",
+      "has_ui": true,
+      "called_by": [],
+      "notes": "项目优化与当前综述（背景库 + 文件预览）；有卡片；背景库当前不可用，本次未导入、未写背景库数据。"
+    },
+    {
+      "id": "book_reader",
+      "kind": "functional",
+      "has_ui": true,
+      "called_by": [],
+      "notes": "俄语书籍阅读；有卡片；调用 plugins.pixel_art.service（跨插件 import）。"
+    },
+    {
+      "id": "cobuild",
+      "kind": "functional",
+      "has_ui": false,
+      "called_by": [],
+      "notes": "多 AI 共建；backend-only 无卡片；例外归功能性：用户直接使用打卡入口（首页多 AI 共建声明 → 打卡）。"
+    },
+    {
+      "id": "expdata",
+      "kind": "functional",
+      "has_ui": true,
+      "called_by": [],
+      "notes": "实验数据获取；有卡片；无后端。"
+    },
+    {
+      "id": "filejudge",
+      "kind": "functional",
+      "has_ui": true,
+      "called_by": [],
+      "notes": "文件判官；有卡片；data_dirs=filejudge；可确认删除本地文件，使用前先预览。"
+    },
+    {
+      "id": "finance",
+      "kind": "functional",
+      "has_ui": true,
+      "called_by": [],
+      "notes": "记账本与理财量化；有卡片（2 entries）；调用 webchat 插件。"
+    },
+    {
+      "id": "model_usage",
+      "kind": "functional",
+      "has_ui": true,
+      "called_by": [],
+      "notes": "模型用量与消费；有卡片。"
+    },
+    {
+      "id": "netexp",
+      "kind": "functional",
+      "has_ui": true,
+      "called_by": [],
+      "notes": "网络与互联探索；有卡片；无后端。"
+    },
+    {
+      "id": "pdf",
+      "kind": "functional",
+      "has_ui": true,
+      "called_by": [],
+      "notes": "PDF 与压缩；有卡片（2 entries）；二进制响应用 __binary__ 协议。"
+    },
+    {
+      "id": "pixel_art",
+      "kind": "functional",
+      "has_ui": true,
+      "called_by": [
+        "plugins/book_reader"
+      ],
+      "notes": "像素画与插件绘制；有卡片；被 plugins/book_reader 直接 import service。"
+    },
+    {
+      "id": "project_manager",
+      "kind": "functional",
+      "has_ui": true,
+      "called_by": [],
+      "notes": "项目管理；有卡片。"
+    },
+    {
+      "id": "promptgen",
+      "kind": "functional",
+      "has_ui": true,
+      "called_by": [],
+      "notes": "提示词生成器；有卡片；shared_features 含 webchat，经共享脚本调用网页会话。"
+    },
+    {
+      "id": "rivet",
+      "kind": "functional",
+      "has_ui": true,
+      "called_by": [],
+      "notes": "铆钉点；有卡片；data_dirs=rivet。"
+    },
+    {
+      "id": "russian",
+      "kind": "functional",
+      "has_ui": true,
+      "called_by": [],
+      "notes": "旅行之木学习核心；有卡片；朗读经宿主 app.js speakBtn 间接使用 tts。"
+    },
+    {
+      "id": "schedule",
+      "kind": "functional",
+      "has_ui": true,
+      "called_by": [],
+      "notes": "计划表；有卡片。"
+    },
+    {
+      "id": "screeps",
+      "kind": "functional",
+      "has_ui": true,
+      "called_by": [],
+      "notes": "Screeps Arena；有卡片。"
+    },
+    {
+      "id": "sim",
+      "kind": "functional",
+      "has_ui": true,
+      "called_by": [],
+      "notes": "随机模拟器；有卡片；无后端。"
+    },
+    {
+      "id": "tts",
+      "kind": "library",
+      "has_ui": false,
+      "called_by": [
+        "ui/web/static/app.js"
+      ],
+      "notes": "语音朗读（底层下沉）；无卡片；直接调用方为宿主 app.js（speakBtn/clear-cache），russian 经 speakBtn 间接使用；依赖 edge-tts 联网，失败回落系统语音。详见 docs/appendix/lib/tts.md。"
+    },
+    {
+      "id": "urlarch",
+      "kind": "functional",
+      "has_ui": true,
+      "called_by": [],
+      "notes": "网址归档；有卡片。"
+    },
+    {
+      "id": "webchat",
+      "kind": "library",
+      "has_ui": false,
+      "called_by": [
+        "plugins/ai",
+        "plugins/aidebug",
+        "plugins/finance",
+        "plugins/promptgen",
+        "ui/web/static/app.js",
+        "ui/web/static/features/webchat.js"
+      ],
+      "notes": "网页会话（底层下沉）；无卡片；被 ai/aidebug/finance/promptgen 与宿主共享脚本调用；依赖 Playwright 浏览器与登录态 data/plugins/webchat/webchat_profile/（敏感，不读正文）。详见 docs/appendix/lib/webchat.md。"
+    }
+  ]
+}

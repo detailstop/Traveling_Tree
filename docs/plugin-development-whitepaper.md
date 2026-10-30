@@ -1,6 +1,6 @@
 # 旅行之木 · 微内核架构与插件开发白皮书 (v2.0)
 
-> v2.1 补充见文末附录 A–D 索引（2026-10-29）；附录全文已拆到 `docs/appendix/` 下的四个附件文件。附录 A 为 backend-only 插件规范；附录 B 为根路由约定；附录 C 修正二进制响应格式；附录 D 为其他约定。原章节编号不变。
+> v2.1 补充见文末附录 A–D 索引（2026-10-29）；附录全文已拆到 `docs/appendix/` 下的四个附件文件。附录 A 为 backend-only 插件规范；附录 B 为根路由约定；附录 C 修正二进制响应格式；附录 D 为其他约定。原章节编号不变。附录 E 为底层下沉插件分类（round 67）。
 
 本文档是“旅行之木”项目的最高开发准则，涵盖了微内核架构设计、插件生命周期管理以及数据安全铁律。任何新增功能的开发都必须严格遵守本白皮书。
 
@@ -174,3 +174,34 @@ round 65 删除 `plugin-development-whitepaper-v2.1-draft.md` 与 `project-closu
 ## 附录 D：其他约定（v2.1）
 
 全文见 [appendix/D-conventions.md](appendix/D-conventions.md)：插件内部 import、`data_dirs`、`shared_features` 与 `db.migrate` 的待确认项。
+
+## 附录 E：底层下沉插件（round 67）
+
+### E.1 分类口径
+- **functional（功能性）**：`manifest.entries` 非空，渲染前端卡片，用户可直接进入。
+- **library（底层下沉）**：`entries` 为空，不渲染卡片，只通过 `/api/plugin/<id>/*` 被其他插件或宿主前端调用。
+- **例外**：`cobuild` 为 backend-only（无卡片），但用户直接使用「多 AI 共建 → 打卡」入口，归 functional。
+- 机器可读清单：`plugins/lib.json`（22 条，字段 `id`/`kind`/`has_ui`/`called_by`/`notes`）。该文件仅作文档索引，宿主、测试与插件运行时不读取。
+
+### E.2 当前清单
+| 插件 | kind | has_ui | 直接调用方 | 文档 |
+|---|---|---|---|---|
+| webchat | library | 否 | ai、aidebug、finance、promptgen、`ui/web/static/app.js`、`ui/web/static/features/webchat.js` | [lib/webchat.md](appendix/lib/webchat.md) |
+| tts | library | 否 | `ui/web/static/app.js`（russian 经此间接使用） | [lib/tts.md](appendix/lib/tts.md) |
+| cobuild | functional（例外） | 否 | 用户打卡入口 | — |
+
+其余 19 个有卡片插件均为 functional。
+
+### E.3 调用关系摘要
+- `webchat`：AI 工作台、接口调试器、记账本/理财量化、提示词生成器与宿主中断逻辑共用；依赖 Playwright 与登录态 profile。
+- `tts`：宿主 `speakBtn()` 与缓存清理调用；russian 朗读经宿主函数间接使用；依赖 edge-tts，失败回落系统语音。
+- `pixel_art` 虽为 functional，但被 `book_reader` 直接 import（`plugins.book_reader.book_reader` → `plugins.pixel_art.service`）；分类仍按「有卡片」判定。
+
+### E.4 单插件文档索引
+- [docs/appendix/lib/webchat.md](appendix/lib/webchat.md)
+- [docs/appendix/lib/tts.md](appendix/lib/tts.md)
+
+### E.5 未来物理移动的风险（仅说明，不执行）
+- 宿主只扫描 `plugins/<目录>/manifest.json` 且要求 `id == 目录名`；把插件移出 `plugins/` 或改变目录名会导致它不再被发现、其 API 404。
+- `tests/smoke_plugins.py` 把 `plugins/` 下**任意目录**计入插件目录数（当前 22）；新增或移动目录会改变该计数，需同步调整测试，否则 smoke 失败。
+- 因此本轮不移动任何插件目录；`plugins/lib.json` 用单文件而非 `plugins/lib/` 子目录，正是为了避免被计为第 23 个插件目录。
