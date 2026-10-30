@@ -2,9 +2,9 @@
 
 > 只读摘要，勿手改。本文件由 docs/appendix/file_navigation.json 生成；结构与去留决定以 JSON 为准。
 
-- 生成时间：2026-10-30T13:21:38+03:00
-- 轮次：65
-- 待办：1 条；已决定：437 条
+- 生成时间：2026-10-30T13:35:18+03:00
+- 轮次：66
+- 待办：1 条；已决定：441 条
 
 ## 待办
 
@@ -16,6 +16,10 @@
 
 | 路径 | 决定 | 原因 | 状态 | 轮次 | 时间 | 备份路径 |
 | --- | --- | --- | --- | --- | --- | --- |
+| docs/plugin-development-whitepaper.md | 补 round 65 删除前核对结论（round 66） | 逐项核对：v2.1 草案 backend-only → docs/appendix/A-backend-only.md（A.1–A.4）；根路由 → B-root-routing.md；__binary__ 格式 → C-binary-format.md；import 约定 → D-conventions.md（shared_features/db.migrate 仍标待确认）。结项报告 22 插件清单 → 白皮书 §7.1；13 smoke 基线 → §7.2；剩余 pending → §7.3；交接建议 → §7.4。未发现未覆盖项，未恢复已删文档；核对表落在白皮书 §7.6，README §12 加摘要。 | done | 66 | 2026-10-30T13:35:18+03:00 |  |
+| docs/appendix/file_navigation.json | 更正 round 65「无 resolved[]」的错误说法（round 66） | 核实顶层 keys = schema_version / generated_at / round / pending / decided / resolved；resolved[] 现有 29 条，字段为 path、move_plan、guide_plan、summary、round、created_at、resolved_at、resolved_round、resolution。round 65 汇报「schema 只有 pending/decided」有误。本次无新增 resolved 项，原因是 docs/ 下无未闭环临时文件，而非 schema 缺失；未改 schema，未改历史记录。 | done | 66 | 2026-10-30T13:35:18+03:00 |  |
+| docs/appendix/files_manifest.json | files_manifest 保持快照，不重导出（round 66） | 按用户选择 A：保持 2026-10-29 导出的快照，不重跑 file_preview 导出，不手写清单。README §4 与白皮书 §9 已标注「非实时索引，文件变动后需重新导出」。快照仍含已删的两份文档条目、不含新增 appendix 文件，属预期；字段结构未改。 | done | 66 | 2026-10-30T13:35:18+03:00 |  |
+| .git | round 65 改动提交并 push（round 66 确认） | 按用户选择 A：git add -A 让 Git 识别 rename（file_navigation.json R098、file_navigation.md R095、files_manifest.json R099），提交 0aa8b21（13 files changed、263 insertions、308 deletions），push a521afd..0aa8b21 成功，origin/main = 0aa8b21。提交前确认无 data/、ai_keys、webchat_profile、.db、rt_fin；round 66 的文档更新与打卡镜像在该提交之后产生，暂未提交。 | done | 66 | 2026-10-30T13:35:18+03:00 |  |
 | docs/appendix/ | 三份说明性文件移入 docs/appendix/ 作为白皮书附件（round 65） | docs/appendix/file_navigation.json、docs/appendix/file_navigation.md、docs/appendix/files_manifest.json 由项目根同盘移动到 docs/appendix/，移动前后字节数与 SHA256 一致（296601 / 175512 / 110376 B）。三者相对项目根的路径语义不变；项目根不再保留同名文件。历史记录中的路径文本已统一为 appendix 路径（见下一条）。 | done | 65 | 2026-10-30T13:21:38+03:00 | data/backup/round65_docs/ |
 | docs/appendix/A-backend-only.md | 白皮书附录 A–D 拆为 appendix 附件（round 65） | 从 docs/plugin-development-whitepaper.md 抽出附录 A–D 全文，分别写入 docs/appendix/A-backend-only.md、B-root-routing.md、C-binary-format.md、D-conventions.md；白皮书正文改为标题 + 一句话 + 相对链接索引，原章节编号与附录语义不变。 | done | 65 | 2026-10-30T13:21:38+03:00 | data/backup/round65_docs/ |
 | docs/plugin-development-whitepaper-v2.1-draft.md | 删除 v2.1 草案与结项报告（round 65） | 核对确认草案的 backend-only、根路由、__binary__ 修正、import 约定已全部并入白皮书附录 A–D；结项报告的 22 插件清单、13 smoke 基线、剩余 pending、交接建议已并入白皮书 §7 与 README §12。两份文件删除，备份于 data/backup/round65_docs/。docs/ 根现仅白皮书 + 多AI共建日志 + appendix/。 | done | 65 | 2026-10-30T13:21:38+03:00 | data/backup/round65_docs/ |

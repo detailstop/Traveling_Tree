@@ -124,6 +124,22 @@ live_json TEXT NOT NULL DEFAULT '' -- 当前编辑状态
 - `data/settings.json`：`download_groups` + `modules.enabled`；插件 settings 在 `data/plugins/<id>/settings.json`。
 - 敏感文件：`data/ai_keys.json`、`data/webchat_sessions.json`、`data/plugins/webchat/webchat_profile/`、`data/plugins/finance/fixtures/rt_fin.json`；只按路径处理，不读正文、不进 Git。
 
+### 7.6 round 65 删除前核对结论（round 66 补记）
+round 65 删除 `plugin-development-whitepaper-v2.1-draft.md` 与 `project-closure-2026-10-29.md` 前，逐项核对结论如下；两份源文档未恢复。
+
+| 来源 | 核对项 | 结论 | 落点 |
+|---|---|---|---|
+| v2.1 草案 | backend-only 插件规范 | 已覆盖 | `docs/appendix/A-backend-only.md`（A.1–A.4） |
+| v2.1 草案 | 根路由约定 | 已覆盖 | `docs/appendix/B-root-routing.md` |
+| v2.1 草案 | `__binary__` 二进制格式修正 | 已覆盖 | `docs/appendix/C-binary-format.md` |
+| v2.1 草案 | 插件内部 import 约定 | 已覆盖 | `docs/appendix/D-conventions.md`（`shared_features`/`db.migrate` 仍标待确认） |
+| 结项报告 | 22 插件清单 | 已覆盖 | 白皮书 §7.1 |
+| 结项报告 | 13 smoke 基线 | 已覆盖 | 白皮书 §7.2 |
+| 结项报告 | 剩余 pending | 已覆盖 | 白皮书 §7.3 |
+| 结项报告 | 交接建议 | 已覆盖 | 白皮书 §7.4 |
+
+未发现未覆盖项，故未恢复源文档、未新增补写内容；仅补本核对表。
+
 ## 八、docs 目录与临时文件闭环
 
 - `docs/` 只允许长期存放三类内容：白皮书（本文件）、`多AI共建日志.md`（自动镜像，勿手改）、`appendix/`（白皮书附件）。

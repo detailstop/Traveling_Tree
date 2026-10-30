@@ -225,3 +225,4 @@ python tests/smoke_pm.py
 - **剩余 pending**：`tests/smoke_plugin_decoupling.py::Server.start` 的 `stop()` 异常保护（低概率进程竞态，三次 452/452 通过，留观察）。
 - **交接建议**：新功能进 `plugins/<id>/`，不碰宿主；改现有功能直接改对应插件；每轮下沉、改 settings 或改 API 后跑全量 13 个 smoke；`/api/plugin/<id>/*` 必须用语义子路径；二进制响应按附录 C。
 - 完整状态、数据资产与 docs 闭环规则见白皮书 [§7 项目状态与交接](docs/plugin-development-whitepaper.md) 与 [§8 docs 目录与临时文件闭环](docs/plugin-development-whitepaper.md)。
+- **round 65 删除核对**：v2.1 草案四项（backend-only / 根路由 / `__binary__` / import 约定）已分别落在 `docs/appendix/A–D`；结项报告的 22 插件清单、13 smoke 基线、剩余 pending、交接建议已落在白皮书 §7.1–7.4。核对表见白皮书 §7.6；两份源文档未恢复。
