@@ -115,7 +115,7 @@
       "kind": "functional",
       "has_ui": true,
       "called_by": [],
-      "notes": "旅行之木学习核心；有卡片；朗读经宿主 app.js speakBtn 间接使用 tts。"
+      "notes": "俄语单词背诵学习核心；有卡片；朗读经宿主 app.js speakBtn 间接使用 tts。"
     },
     {
       "id": "schedule",

@@ -266,7 +266,7 @@ async function renderRussianHub() {
   box.innerHTML = `
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
       <button class="btn soft sm" id="tool-back">← 返回工具</button>
-      <div style="font-size:15px;font-weight:700;">🇷🇺 旅行之木</div>
+      <div style="font-size:15px;font-weight:700;">🇷🇺 俄语单词背诵</div>
     </div>
     <div class="pills" id="ru-nav">${RU_TABS.map(([id, lb]) =>
       `<button class="pill" data-ru="${id}">${lb}</button>`).join('')}</div>

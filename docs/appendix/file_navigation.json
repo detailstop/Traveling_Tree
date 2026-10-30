@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-30T14:49:23+03:00",
-  "round": 67,
+  "generated_at": "2026-10-30T16:50:33+03:00",
+  "round": 68,
   "pending": [
     {
       "path": "tests/smoke_plugin_decoupling.py::Server.start",
@@ -13,6 +13,70 @@
     }
   ],
   "decided": [
+    {
+      "path": "plugins/russian/manifest.json",
+      "decision": "插件展示名由「旅行之木」改为「俄语单词背诵」（round 68）",
+      "reason": "manifest.name 与 entries[0].name 改为「俄语单词背诵」；插件 id=russian、entry id、feature/backend/db/style/data_dirs 均未改。插件卡片与页面标题随之显示新名。项目整体名「旅行之木 / Traveling_Tree」不变。",
+      "status": "done",
+      "round": 68,
+      "at": "2026-10-30T16:50:33+03:00"
+    },
+    {
+      "path": "plugins/russian/feature.js",
+      "decision": "russian 插件页面品牌文案更新（round 68）",
+      "reason": "仅改用户可见标题「🇷🇺 旅行之木」→「🇷🇺 俄语单词背诵」；文件头与模块分隔注释未改，函数名、变量名、localStorage 键、导出名与数据标识均未改。",
+      "status": "done",
+      "round": 68,
+      "at": "2026-10-30T16:50:33+03:00"
+    },
+    {
+      "path": "plugins/russian/plugin.css",
+      "decision": "russian 插件样式注释更新（round 68）",
+      "reason": "仅注释「旅行之木学习核心」→「俄语单词背诵学习核心」；选择器、类名、变量名与样式规则未改。",
+      "status": "done",
+      "round": 68,
+      "at": "2026-10-30T16:50:33+03:00"
+    },
+    {
+      "path": "README.md",
+      "decision": "README 中插件名与项目名区分（round 68）",
+      "reason": "逐处判定 6 处「旅行之木」：标题、项目简介、启动脚本名（2 处）、白皮书标题保留为项目名；§5 功能小节标题改为「俄语单词背诵」（指 russian 插件）。未做全局替换；链接 0 失效。",
+      "status": "done",
+      "round": 68,
+      "at": "2026-10-30T16:50:33+03:00"
+    },
+    {
+      "path": "plugins/lib.json",
+      "decision": "分类清单同步插件新名（round 68）",
+      "reason": "russian 条目 notes 由「旅行之木学习核心」改为「俄语单词背诵学习核心」；kind=functional、has_ui=true、called_by 不变。",
+      "status": "done",
+      "round": 68,
+      "at": "2026-10-30T16:50:33+03:00"
+    },
+    {
+      "path": "docs/appendix/file_navigation.json",
+      "decision": "历史名称文本统一为「俄语单词背诵」（round 68）",
+      "reason": "历史 decided 中仅 1 条（2 处文本）指 russian 插件 UI 的「旅行之木 hub」（ui/web/static/features/russian.js）改为「俄语单词背诵 hub」；其余「旅行之木」均指项目整体或启动脚本名（启动旅行之木.cmd），保留。历史 round/at/status 字段未改。",
+      "status": "done",
+      "round": 68,
+      "at": "2026-10-30T16:50:33+03:00"
+    },
+    {
+      "path": "docs/plugin-development-whitepaper.md",
+      "decision": "白皮书核对：无插件旧名需改（round 68）",
+      "reason": "全文 3 处「旅行之木」（标题、最高准则、核心理念）均指项目整体，保留；§7.1 与附录 E 仅列插件 id=russian，不使用中文展示名。本次未改白皮书。",
+      "status": "done",
+      "round": 68,
+      "at": "2026-10-30T16:50:33+03:00"
+    },
+    {
+      "path": "data/bg_import/::round68-none",
+      "decision": "本次无背景库数据（round 68）",
+      "reason": "用户未提供「项目优化与当前综述」导出 json；背景库当前不可用，本轮未执行 mode:\"update\" 导入、未写入背景库数据。名称判定依据为代码与说明性文档上下文。",
+      "status": "done",
+      "round": 68,
+      "at": "2026-10-30T16:50:33+03:00"
+    },
     {
       "path": "plugins/lib.json",
       "decision": "新增插件分类清单（22 条，round 67）",
@@ -4973,12 +5037,12 @@
       "path": "ui/web/static/features/russian.js",
       "category": "功能项",
       "decision": "审查完成·保留",
-      "reason": "第六批 ui 只读审查；旅行之木 hub：闪卡/计划/复习/导入/知识库/统计 8 视图。 建议：保留；拆分子模块",
+      "reason": "第六批 ui 只读审查；俄语单词背诵 hub：闪卡/计划/复习/导入/知识库/统计 8 视图。 建议：保留；拆分子模块",
       "status": "reviewed",
       "round": 16,
       "at": "2026-10-27T22:37:48+03:00",
       "review": {
-        "role": "旅行之木 hub：闪卡/计划/复习/导入/知识库/统计 8 视图。",
+        "role": "俄语单词背诵 hub：闪卡/计划/复习/导入/知识库/统计 8 视图。",
         "substitutability": "无；学习主前端。",
         "integration": "/api/items、/plan、/review、/stats、/settings。",
         "category": "功能项",

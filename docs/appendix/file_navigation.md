@@ -2,9 +2,9 @@
 
 > 只读摘要，勿手改。本文件由 docs/appendix/file_navigation.json 生成；结构与去留决定以 JSON 为准。
 
-- 生成时间：2026-10-30T14:49:23+03:00
-- 轮次：67
-- 待办：1 条；已决定：447 条
+- 生成时间：2026-10-30T16:50:33+03:00
+- 轮次：68
+- 待办：1 条；已决定：455 条
 
 ## 待办
 
@@ -16,6 +16,14 @@
 
 | 路径 | 决定 | 原因 | 状态 | 轮次 | 时间 | 备份路径 |
 | --- | --- | --- | --- | --- | --- | --- |
+| plugins/russian/manifest.json | 插件展示名由「旅行之木」改为「俄语单词背诵」（round 68） | manifest.name 与 entries[0].name 改为「俄语单词背诵」；插件 id=russian、entry id、feature/backend/db/style/data_dirs 均未改。插件卡片与页面标题随之显示新名。项目整体名「旅行之木 / Traveling_Tree」不变。 | done | 68 | 2026-10-30T16:50:33+03:00 |  |
+| plugins/russian/feature.js | russian 插件页面品牌文案更新（round 68） | 仅改用户可见标题「🇷🇺 旅行之木」→「🇷🇺 俄语单词背诵」；文件头与模块分隔注释未改，函数名、变量名、localStorage 键、导出名与数据标识均未改。 | done | 68 | 2026-10-30T16:50:33+03:00 |  |
+| plugins/russian/plugin.css | russian 插件样式注释更新（round 68） | 仅注释「旅行之木学习核心」→「俄语单词背诵学习核心」；选择器、类名、变量名与样式规则未改。 | done | 68 | 2026-10-30T16:50:33+03:00 |  |
+| README.md | README 中插件名与项目名区分（round 68） | 逐处判定 6 处「旅行之木」：标题、项目简介、启动脚本名（2 处）、白皮书标题保留为项目名；§5 功能小节标题改为「俄语单词背诵」（指 russian 插件）。未做全局替换；链接 0 失效。 | done | 68 | 2026-10-30T16:50:33+03:00 |  |
+| plugins/lib.json | 分类清单同步插件新名（round 68） | russian 条目 notes 由「旅行之木学习核心」改为「俄语单词背诵学习核心」；kind=functional、has_ui=true、called_by 不变。 | done | 68 | 2026-10-30T16:50:33+03:00 |  |
+| docs/appendix/file_navigation.json | 历史名称文本统一为「俄语单词背诵」（round 68） | 历史 decided 中仅 1 条（2 处文本）指 russian 插件 UI 的「旅行之木 hub」（ui/web/static/features/russian.js）改为「俄语单词背诵 hub」；其余「旅行之木」均指项目整体或启动脚本名（启动旅行之木.cmd），保留。历史 round/at/status 字段未改。 | done | 68 | 2026-10-30T16:50:33+03:00 |  |
+| docs/plugin-development-whitepaper.md | 白皮书核对：无插件旧名需改（round 68） | 全文 3 处「旅行之木」（标题、最高准则、核心理念）均指项目整体，保留；§7.1 与附录 E 仅列插件 id=russian，不使用中文展示名。本次未改白皮书。 | done | 68 | 2026-10-30T16:50:33+03:00 |  |
+| data/bg_import/::round68-none | 本次无背景库数据（round 68） | 用户未提供「项目优化与当前综述」导出 json；背景库当前不可用，本轮未执行 mode:"update" 导入、未写入背景库数据。名称判定依据为代码与说明性文档上下文。 | done | 68 | 2026-10-30T16:50:33+03:00 |  |
 | plugins/lib.json | 新增插件分类清单（22 条，round 67） | 按「有卡片=functional、无卡片=library、cobuild 例外归 functional」生成 22 条（functional 20 / library 2，has_ui=true 19），字段 id/kind/has_ui/called_by/notes。因 tests/smoke_plugins.py 把 plugins/ 下任意目录计入插件目录数（要求恰好 22），经用户确认改用单文件 plugins/lib.json；原计划的 plugins/lib/manifest.json 会使目录数变 23 并触发 manifest 缺失/目录数 FAIL。未改宿主扫描/import/路由与任何测试；该文件仅作文档索引，宿主、测试与插件运行时不读取。验证：smoke_plugins 181/181、smoke_file_preview 17/17。 | done | 67 | 2026-10-30T14:49:23+03:00 |  |
 | docs/plugin-development-whitepaper.md | 新增附录 E：底层下沉插件（round 67） | 附录 E 记录分类口径、当前清单（webchat、tts；cobuild 例外）、调用关系摘要、单插件文档索引、未来物理移动风险（仅说明不执行）；未改附录 A–D 内容与原章节编号，仅开头索引提及附录 E。 | done | 67 | 2026-10-30T14:49:23+03:00 |  |
 | docs/appendix/lib/webchat.md | 新增 webchat 底层插件说明（round 67） | 记录职责、8 条 /api/plugin/webchat/* 子路径、调用方（ai/aidebug/finance/promptgen + 宿主 app.js 与共享 webchat.js）、依赖（Playwright/浏览器二进制/profile）、注意事项与不面向用户说明；与 plugins/lib.json 的 called_by 一致。 | done | 67 | 2026-10-30T14:49:23+03:00 |  |
@@ -386,7 +394,7 @@
 | ui/web/static/features/promptgen.js | 审查完成·保留 | 第六批 ui 只读审查；提示词生成器四界面前端。 建议：保留；拆分 175KB 单文件 | reviewed | 16 | 2026-10-27T22:37:48+03:00 |  |
 | ui/web/static/features/reader_screen.js | 审查完成·保留 | 第六批 ui 只读审查；书籍阅读内部全屏阅读屏（三阅读层级/遮挡/高亮/折叠）。 建议：保留；与 book_reader 共享状态 | reviewed | 16 | 2026-10-27T22:37:48+03:00 |  |
 | ui/web/static/features/rivet.js | 删除（迁为插件 feature） | P3 批 1：前端迁至 plugins/rivet/feature.js，仅 API 路径改为 /api/plugin/rivet/*；原件备份后删除。 | done | 21 | 2026-10-28T00:48:28+03:00 | data/backup/file_cleanup_2026-10-28 |
-| ui/web/static/features/russian.js | 审查完成·保留 | 第六批 ui 只读审查；旅行之木 hub：闪卡/计划/复习/导入/知识库/统计 8 视图。 建议：保留；拆分子模块 | reviewed | 16 | 2026-10-27T22:37:48+03:00 |  |
+| ui/web/static/features/russian.js | 审查完成·保留 | 第六批 ui 只读审查；俄语单词背诵 hub：闪卡/计划/复习/导入/知识库/统计 8 视图。 建议：保留；拆分子模块 | reviewed | 16 | 2026-10-27T22:37:48+03:00 |  |
 | ui/web/static/features/schedule.js | 迁移到插件·删除原件 | P2 批 1：计划表原内置前端；已迁移为 plugins/schedule/feature.js。 旧文件验证后删除；原件已备份。 | done | 18 | 2026-10-27T23:41:19+03:00 | data/backup/file_cleanup_2026-10-27 |
 | ui/web/static/features/screeps.js | 迁移到插件·删除原件 | P2 批 2：Screeps Arena 原内置前端；已迁移为 plugins/screeps/feature.js。 旧文件验证后删除；原件已备份。 | done | 19 | 2026-10-28T00:00:36+03:00 | data/backup/file_cleanup_2026-10-27 |
 | ui/web/static/features/sim.js | 迁移到插件·删除原件 | P1 插件化：sim 已原样迁至 plugins/sim/feature.js；旧内置 feature 验证后删除，原件备份在 data/backup/file_cleanup_2026-10-27/。 | done | 17 | 2026-10-27T23:16:44+03:00 | data/backup/file_cleanup_2026-10-27 |
@@ -672,7 +680,7 @@
 | ui/web/static/features/promptgen.js | 功能项 | 提示词生成器四界面前端。 | 保留；拆分 175KB 单文件 | 无；提示词生成主前端。 | /api/bg/export、/api/books、/api/reader/*、__webchat；localStorage。 | 高：175KB、状态多。 |
 | ui/web/static/features/reader_screen.js | 功能项 | 书籍阅读内部全屏阅读屏（三阅读层级/遮挡/高亮/折叠）。 | 保留；与 book_reader 共享状态 | 部分；书内层级视图可替代部分。 | /api/books/*、/api/reader/*；localStorage 键类别。 | 中：会话状态/书签键分离；无独立首页入口。 |
 | ui/web/static/features/rivet.js | 功能项 | 铆钉点原前端；已迁 plugins/rivet/feature.js。 | 删除；交互与统计展示原样保留。 | 无（迁移后由插件 feature 替代）。 | app.js 动态 import /plugins/rivet/feature.js。 | 低（备份保留）。 |
-| ui/web/static/features/russian.js | 功能项 | 旅行之木 hub：闪卡/计划/复习/导入/知识库/统计 8 视图。 | 保留；拆分子模块 | 无；学习主前端。 | /api/items、/plan、/review、/stats、/settings。 | 中：48KB 单文件。 |
+| ui/web/static/features/russian.js | 功能项 | 俄语单词背诵 hub：闪卡/计划/复习/导入/知识库/统计 8 视图。 | 保留；拆分子模块 | 无；学习主前端。 | /api/items、/plan、/review、/stats、/settings。 | 中：48KB 单文件。 |
 | ui/web/static/features/schedule.js | 功能项 | 计划表原内置前端；已迁移为 plugins/schedule/feature.js。 | 迁移后删除原件；保留备份。 | 无；迁移后由插件 feature.js 替代。 | 原 app.js TOOLS/TOOL_FEATURE_FILES；现由 /api/plugins/list + 动态 import。 | 低：原样迁移，未改功能。 |
 | ui/web/static/features/screeps.js | 功能项 | Screeps Arena 原内置前端；已迁移为 plugins/screeps/feature.js。 | 迁移后删除原件；保留备份。 | 无；迁移后由插件 feature.js 替代。 | 原 app.js TOOLS/TOOL_FEATURE_FILES；现由 /api/plugins/list + 动态 import。 | 低：原样/拆分迁移，未改业务。 |
 | ui/web/static/features/sim.js | 功能项 | 随机模拟器原内置前端；已迁移为 plugins/sim/feature.js。 | 迁移后删除原件；保留备份。 | 无；迁移后由插件 feature.js 替代。 | 原 app.js TOOLS/TOOL_FEATURE_FILES；现由 /api/plugins/list + 动态 import。 | 低：迁移未改逻辑；旧 rt_sim 保持。 |

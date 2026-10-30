@@ -1,7 +1,7 @@
 {
   "schema_version": 2,
   "id": "russian",
-  "name": "旅行之木",
+  "name": "俄语单词背诵",
   "version": "1.0",
   "enabled": true,
   "icon": "🇷🇺",
@@ -9,7 +9,7 @@
   "entries": [
     {
       "id": "russian",
-      "name": "旅行之木",
+      "name": "俄语单词背诵",
       "icon": "🇷🇺",
       "desc": "卡片学习 · 复习 · 知识库 · 统计",
       "shelf": "gen",
