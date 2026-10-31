@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-30T16:50:33+03:00",
-  "round": 68,
+  "generated_at": "2026-10-31T13:29:56+03:00",
+  "round": 69,
   "pending": [
     {
       "path": "tests/smoke_plugin_decoupling.py::Server.start",
@@ -13,6 +13,42 @@
     }
   ],
   "decided": [
+    {
+      "path": "webchat_probe.py",
+      "decision": "删除（round 59 后路径失效，正式通道为 plugins/webchat/）",
+      "reason": "删除前核实：脚本 PROFILE 仍指向项目根 webchat_profile/（round 59 已迁 data/plugins/webchat/webchat_profile/），并硬编码示例会话 URL 与旧选择器；无运行入口、config 或启动脚本引用，正式网页会话通道为 plugins/webchat/。确认失效后删除。备份 data/backup/round69_cleanup/webchat_probe.py.bak（4330 B，SHA256 243DF7E2BFB55A5609D2A4F1604E5A48215EC4EA15DFE0BBBA33E7B385302F6A）。历史 decided 中 webchat_probe 旧记录保留不改。",
+      "status": "deleted",
+      "round": 69,
+      "at": "2026-10-31T13:29:56+03:00",
+      "backup_path": "data/backup/round69_cleanup/webchat_probe.py.bak"
+    },
+    {
+      "path": "tools/启动旅行之木.cmd",
+      "old_path": "启动旅行之木.cmd",
+      "new_path": "tools/启动旅行之木.cmd",
+      "decision": "启动脚本迁至 tools/ 并修正相对路径（round 69）",
+      "reason": "同盘移动，文件名不变；cd /d \"%~dp0\" → \"%~dp0..\"；两处 main.py 路径 → \"%~dp0..\\main.py\"；pythonw 优先/python 回退逻辑与失败提示未改；无盘符/用户名硬编码。验证：cmd /c tools\\启动旅行之木.cmd 后 8765 成功监听。历史 decided 中指向项目根该脚本的 path 字段与正文提及已统一为 tools/启动旅行之木.cmd，仅指该脚本处；历史 round/at/status 未改。 tools/启动旅行之木.cmd 必须保持 CRLF 行尾；LF 行尾会导致 cmd 解析异常（本轮已复测并恢复 CRLF）。",
+      "status": "done",
+      "round": 69,
+      "at": "2026-10-31T13:29:56+03:00",
+      "backup_path": "data/backup/round69_cleanup/"
+    },
+    {
+      "path": "README.md",
+      "decision": "README 同步启动脚本新路径并移除 webchat_probe 表述（round 69）",
+      "reason": "快速开始改为 tools\\启动旅行之木.cmd 并说明 %~dp0..；目录树移除根目录 webchat_probe.py 与根启动脚本、新增 tools/；删除 webchat_probe 保留建议。白皮书与 plugins/lib.json grep 无 webchat_probe / 启动旅行之木 命中，未改；.gitignore 未列两者，未改。files_manifest 为快照未重导出，仍含旧条目。链接 0 失效。",
+      "status": "done",
+      "round": 69,
+      "at": "2026-10-31T13:29:56+03:00"
+    },
+    {
+      "path": "data/bg_import/::round69-none",
+      "decision": "本次无背景库数据（round 69）",
+      "reason": "用户未提供「项目优化与当前综述」导出 json；背景库当前不可用，本轮未执行 mode:\"update\" 导入、未写入背景库数据。",
+      "status": "done",
+      "round": 69,
+      "at": "2026-10-31T13:29:56+03:00"
+    },
     {
       "path": "plugins/russian/manifest.json",
       "decision": "插件展示名由「旅行之木」改为「俄语单词背诵」（round 68）",
@@ -56,7 +92,7 @@
     {
       "path": "docs/appendix/file_navigation.json",
       "decision": "历史名称文本统一为「俄语单词背诵」（round 68）",
-      "reason": "历史 decided 中仅 1 条（2 处文本）指 russian 插件 UI 的「旅行之木 hub」（ui/web/static/features/russian.js）改为「俄语单词背诵 hub」；其余「旅行之木」均指项目整体或启动脚本名（启动旅行之木.cmd），保留。历史 round/at/status 字段未改。",
+      "reason": "历史 decided 中仅 1 条（2 处文本）指 russian 插件 UI 的「旅行之木 hub」（ui/web/static/features/russian.js）改为「俄语单词背诵 hub」；其余「旅行之木」均指项目整体或启动脚本名（tools/启动旅行之木.cmd），保留。历史 round/at/status 字段未改。",
       "status": "done",
       "round": 68,
       "at": "2026-10-30T16:50:33+03:00"
@@ -3478,14 +3514,14 @@
       "backup_path": ""
     },
     {
-      "path": "启动旅行之木.cmd",
+      "path": "tools/启动旅行之木.cmd",
       "decision": "保留",
-      "reason": "Windows 便捷启动脚本，使用 %~dp0 与 PATH；保留并同步 file_notes。",
+      "reason": "Windows 便捷启动脚本，使用 %~dp0.. 与 PATH；保留并同步 file_notes。",
       "status": "done",
       "round": 11,
       "at": "2026-10-27T17:37:14+03:00",
       "review": {
-        "role": "Windows 一键启动：切到脚本所在项目根，优先 pythonw，缺失回退 python 并提示。",
+        "role": "Windows 一键启动：切到脚本上一级（项目根），优先 pythonw，缺失回退 python 并提示。",
         "substitutability": "部分：可直接运行 python main.py。",
         "integration": "调用 Windows cmd、PATH 中的 pythonw/python 与 main.py。",
         "category": "功能项",

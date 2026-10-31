@@ -2,9 +2,9 @@
 
 > 只读摘要，勿手改。本文件由 docs/appendix/file_navigation.json 生成；结构与去留决定以 JSON 为准。
 
-- 生成时间：2026-10-30T16:50:33+03:00
-- 轮次：68
-- 待办：1 条；已决定：455 条
+- 生成时间：2026-10-31T13:29:56+03:00
+- 轮次：69
+- 待办：1 条；已决定：459 条
 
 ## 待办
 
@@ -16,12 +16,16 @@
 
 | 路径 | 决定 | 原因 | 状态 | 轮次 | 时间 | 备份路径 |
 | --- | --- | --- | --- | --- | --- | --- |
+| webchat_probe.py | 删除（round 59 后路径失效，正式通道为 plugins/webchat/） | 删除前核实：脚本 PROFILE 仍指向项目根 webchat_profile/（round 59 已迁 data/plugins/webchat/webchat_profile/），并硬编码示例会话 URL 与旧选择器；无运行入口、config 或启动脚本引用，正式网页会话通道为 plugins/webchat/。确认失效后删除。备份 data/backup/round69_cleanup/webchat_probe.py.bak（4330 B，SHA256 243DF7E2BFB55A5609D2A4F1604E5A48215EC4EA15DFE0BBBA33E7B385302F6A）。历史 decided 中 webchat_probe 旧记录保留不改。 | deleted | 69 | 2026-10-31T13:29:56+03:00 | data/backup/round69_cleanup/webchat_probe.py.bak |
+| tools/启动旅行之木.cmd | 启动脚本迁至 tools/ 并修正相对路径（round 69） | 同盘移动，文件名不变；cd /d "%~dp0" → "%~dp0.."；两处 main.py 路径 → "%~dp0..\main.py"；pythonw 优先/python 回退逻辑与失败提示未改；无盘符/用户名硬编码。验证：cmd /c tools\启动旅行之木.cmd 后 8765 成功监听。历史 decided 中指向项目根该脚本的 path 字段与正文提及已统一为 tools/启动旅行之木.cmd，仅指该脚本处；历史 round/at/status 未改。 tools/启动旅行之木.cmd 必须保持 CRLF 行尾；LF 行尾会导致 cmd 解析异常（本轮已复测并恢复 CRLF）。 | done | 69 | 2026-10-31T13:29:56+03:00 | data/backup/round69_cleanup/ |
+| README.md | README 同步启动脚本新路径并移除 webchat_probe 表述（round 69） | 快速开始改为 tools\启动旅行之木.cmd 并说明 %~dp0..；目录树移除根目录 webchat_probe.py 与根启动脚本、新增 tools/；删除 webchat_probe 保留建议。白皮书与 plugins/lib.json grep 无 webchat_probe / 启动旅行之木 命中，未改；.gitignore 未列两者，未改。files_manifest 为快照未重导出，仍含旧条目。链接 0 失效。 | done | 69 | 2026-10-31T13:29:56+03:00 |  |
+| data/bg_import/::round69-none | 本次无背景库数据（round 69） | 用户未提供「项目优化与当前综述」导出 json；背景库当前不可用，本轮未执行 mode:"update" 导入、未写入背景库数据。 | done | 69 | 2026-10-31T13:29:56+03:00 |  |
 | plugins/russian/manifest.json | 插件展示名由「旅行之木」改为「俄语单词背诵」（round 68） | manifest.name 与 entries[0].name 改为「俄语单词背诵」；插件 id=russian、entry id、feature/backend/db/style/data_dirs 均未改。插件卡片与页面标题随之显示新名。项目整体名「旅行之木 / Traveling_Tree」不变。 | done | 68 | 2026-10-30T16:50:33+03:00 |  |
 | plugins/russian/feature.js | russian 插件页面品牌文案更新（round 68） | 仅改用户可见标题「🇷🇺 旅行之木」→「🇷🇺 俄语单词背诵」；文件头与模块分隔注释未改，函数名、变量名、localStorage 键、导出名与数据标识均未改。 | done | 68 | 2026-10-30T16:50:33+03:00 |  |
 | plugins/russian/plugin.css | russian 插件样式注释更新（round 68） | 仅注释「旅行之木学习核心」→「俄语单词背诵学习核心」；选择器、类名、变量名与样式规则未改。 | done | 68 | 2026-10-30T16:50:33+03:00 |  |
 | README.md | README 中插件名与项目名区分（round 68） | 逐处判定 6 处「旅行之木」：标题、项目简介、启动脚本名（2 处）、白皮书标题保留为项目名；§5 功能小节标题改为「俄语单词背诵」（指 russian 插件）。未做全局替换；链接 0 失效。 | done | 68 | 2026-10-30T16:50:33+03:00 |  |
 | plugins/lib.json | 分类清单同步插件新名（round 68） | russian 条目 notes 由「旅行之木学习核心」改为「俄语单词背诵学习核心」；kind=functional、has_ui=true、called_by 不变。 | done | 68 | 2026-10-30T16:50:33+03:00 |  |
-| docs/appendix/file_navigation.json | 历史名称文本统一为「俄语单词背诵」（round 68） | 历史 decided 中仅 1 条（2 处文本）指 russian 插件 UI 的「旅行之木 hub」（ui/web/static/features/russian.js）改为「俄语单词背诵 hub」；其余「旅行之木」均指项目整体或启动脚本名（启动旅行之木.cmd），保留。历史 round/at/status 字段未改。 | done | 68 | 2026-10-30T16:50:33+03:00 |  |
+| docs/appendix/file_navigation.json | 历史名称文本统一为「俄语单词背诵」（round 68） | 历史 decided 中仅 1 条（2 处文本）指 russian 插件 UI 的「旅行之木 hub」（ui/web/static/features/russian.js）改为「俄语单词背诵 hub」；其余「旅行之木」均指项目整体或启动脚本名（tools/启动旅行之木.cmd），保留。历史 round/at/status 字段未改。 | done | 68 | 2026-10-30T16:50:33+03:00 |  |
 | docs/plugin-development-whitepaper.md | 白皮书核对：无插件旧名需改（round 68） | 全文 3 处「旅行之木」（标题、最高准则、核心理念）均指项目整体，保留；§7.1 与附录 E 仅列插件 id=russian，不使用中文展示名。本次未改白皮书。 | done | 68 | 2026-10-30T16:50:33+03:00 |  |
 | data/bg_import/::round68-none | 本次无背景库数据（round 68） | 用户未提供「项目优化与当前综述」导出 json；背景库当前不可用，本轮未执行 mode:"update" 导入、未写入背景库数据。名称判定依据为代码与说明性文档上下文。 | done | 68 | 2026-10-30T16:50:33+03:00 |  |
 | plugins/lib.json | 新增插件分类清单（22 条，round 67） | 按「有卡片=functional、无卡片=library、cobuild 例外归 functional」生成 22 条（functional 20 / library 2，has_ui=true 19），字段 id/kind/has_ui/called_by/notes。因 tests/smoke_plugins.py 把 plugins/ 下任意目录计入插件目录数（要求恰好 22），经用户确认改用单文件 plugins/lib.json；原计划的 plugins/lib/manifest.json 会使目录数变 23 并触发 manifest 缺失/目录数 FAIL。未改宿主扫描/import/路由与任何测试；该文件仅作文档索引，宿主、测试与插件运行时不读取。验证：smoke_plugins 181/181、smoke_file_preview 17/17。 | done | 67 | 2026-10-30T14:49:23+03:00 |  |
@@ -299,7 +303,7 @@
 | config.py | 保留 | 全局可调参数集中点，main.py、db/connection.py、core/*、ui/*、modules/* 均读取；保留原位不迁移，file_notes 完善结构化说明；配置项索引/指南需求记入 pending。 | done | 11 | 2026-10-27T17:37:14+03:00 |  |
 | main.py | 保留 | 三入口启动；bootstrap 执行 init_db 与首次种子；import modules.pm_templates 触发 seed 回调注册，db 不再反向 import modules。 | done | 25 | 2026-10-28T14:02:44+03:00 |  |
 | README.md | 更新 schema 模块说明 | db/schema/*.sql + settings.modules.enabled 说明；默认全启用。 | updated | 28 | 2026-10-28T18:45:00+03:00 |  |
-| 启动旅行之木.cmd | 保留 | Windows 便捷启动脚本，使用 %~dp0 与 PATH；保留并同步 file_notes。 | done | 11 | 2026-10-27T17:37:14+03:00 |  |
+| tools/启动旅行之木.cmd | 保留 | Windows 便捷启动脚本，使用 %~dp0.. 与 PATH；保留并同步 file_notes。 | done | 11 | 2026-10-27T17:37:14+03:00 |  |
 | docs/appendix/file_navigation.json | 追加第 24 轮决定记录 | 记录 prompt_template 修复、pixel 下线、插件路由表与两个插件迁移；pixel 动画历史 decided 条目标记删除，历史审计材料引用保留。 | updated | 11 | 2026-10-27T17:37:14+03:00 |  |
 | docs/appendix/file_navigation.md | 新建指南 | 由 docs/appendix/file_navigation.json 生成的只读摘要，标注“只读摘要，勿手改”；与 JSON 同步。 | done | 11 | 2026-10-27T17:37:14+03:00 |  |
 | docs/appendix/files_manifest.json | 重导出文件预览清单 | 按文件预览导出能力重生成；清除已删动画/Godot 文件条目并纳入新插件与路由表。 | updated | 11 | 2026-10-27T17:37:14+03:00 |  |
@@ -602,7 +606,7 @@
 | config.py | 拓展项 | 全局配置常量：BASE_DIR/DATA_DIR/DB_PATH、SRS 间隔、配额、卡片规则、字体、默认主题、共建日志路径。 | 保留；不迁移。 | 无：项目约定新参数统一放此。 | 被 main.py、db/connection.py、core/*、ui/*、modules/* 读取；仅依赖 pathlib。 | 中：路径/配额/卡片规则变化会影响学习行为；PLAYWRIGHT_BROWSERS_DIR 仅默认值，可被 settings 覆盖。 |
 | main.py | 功能项 | 启动入口：bootstrap 初始化数据库/首次播种，分发 --cli、--gui、默认 Web。 | 保留。 | 无：启动入口不可替代。 | 调用 config、core.repository、db.connection、modules.seed、ui.cli、ui.gui、ui.web.server。 | 低：init_db 失败会 SystemExit；Web 启动异常回退 GUI。 |
 | README.md | 功能项 | 项目主说明：定位、真实依赖、三入口、目录职责、功能、数据/备份、风险、共建与开发约定。 | 保留并随实现更新。 | 无：项目主文档。 | 面向用户与接手 AI；内容人工维护，不参与运行。 | 低：说明可能滞后；已避免引用临时备份目录。 |
-| 启动旅行之木.cmd | 功能项 | Windows 一键启动：切到脚本所在项目根，优先 pythonw，缺失回退 python 并提示。 | 保留。 | 部分：可直接运行 python main.py。 | 调用 Windows cmd、PATH 中的 pythonw/python 与 main.py。 | 低：缺少 Python 时明确失败。 |
+| tools/启动旅行之木.cmd | 功能项 | Windows 一键启动：切到脚本上一级（项目根），优先 pythonw，缺失回退 python 并提示。 | 保留。 | 部分：可直接运行 python main.py。 | 调用 Windows cmd、PATH 中的 pythonw/python 与 main.py。 | 低：缺少 Python 时明确失败。 |
 | docs/appendix/file_navigation.json | 拓展项 | 文件导航主数据源：待办与已决定去留，含第二批 core/db/tests 审查摘要。 | 保留；后续轮次继续追加。 | 无：唯一结构化主数据源。 | 供人/AI 读取；docs/appendix/file_navigation.md 由它生成；不参与运行时逻辑。 | 低：需与 docs/appendix/file_navigation.md 同步，避免手工漂移。 |
 | docs/appendix/file_navigation.md | 拓展项 | 文件导航只读摘要：待办、已决定、第二批审查表。 | 保留；仅通过生成脚本更新。 | 无：面向快速浏览。 | 由 docs/appendix/file_navigation.json 生成；不参与运行时逻辑。 | 低：手工修改会与 JSON 漂移。 |
 | docs/appendix/files_manifest.json | 拓展项 | 文件预览导出清单：全部可见文件的相对路径、说明字段与归属节点。 | 保留；文件变化后重新导出。 | 无：现有前端导出的标准产物。 | 由 /api/files/state 的前端逻辑生成；不参与运行时逻辑。 | 低：说明来自 file_notes.details 标签文本，手工改写可能导致字段缺失。 |

@@ -2,7 +2,7 @@
 
 本机运行的旅行之木：学习核心与可插件化工具均以插件形式加载，宿主只负责 Web 服务、插件发现/分发与共享设置。业务内容数据保存在本机 SQLite，只有 UI 偏好保留在浏览器 localStorage，不需要账号，也不做云同步。
 
-> 根目录的早期整理稿与一次性调试/变更残留已于 2026-10-27 清理，去留与审查记录见 `docs/appendix/file_navigation.json`（`docs/appendix/file_navigation.md` 为只读摘要）；本 README 为当前主说明。`webchat_probe.py` 是网页会话通道的最小验证脚本，非运行必需；若后续确需保留，建议迁至 `tools/`。
+> 根目录的早期整理稿与一次性调试/变更残留已于 2026-10-27 清理，去留与审查记录见 `docs/appendix/file_navigation.json`（`docs/appendix/file_navigation.md` 为只读摘要）；本 README 为当前主说明。
 
 ## 1. 快速开始
 
@@ -12,7 +12,7 @@
 python main.py          :: 启动 127.0.0.1:8765 的本地 Web 界面并尝试打开浏览器
 ```
 
-Windows 也可双击 `启动旅行之木.cmd`。该脚本用 `%~dp0` 定位项目根，优先使用 PATH 中的 `pythonw.exe`，没有时回退 `python.exe`；不再写死盘符、用户名或 Conda 环境路径。
+Windows 也可双击 `tools\启动旅行之木.cmd`。该脚本用 `%~dp0..` 定位项目根，优先使用 PATH 中的 `pythonw.exe`，没有时回退 `python.exe`；不再写死盘符、用户名或 Conda 环境路径。
 
 首次启动时创建数据库表、执行插件迁移并导入插件种子；数据库文件已存在时不会因为条目被删空而重新播种。若检测到 8765 已有实例，会提示复用；Web 启动失败会直接报错退出，不再回退旧 GUI。
 
@@ -65,8 +65,6 @@ python -m playwright install chromium
 Traveling_Tree/
 ├── main.py                  Web 宿主启动、数据库初始化
 ├── config.py                宿主/插件共享路径与默认设置
-├── webchat_probe.py         网页会话最小验证脚本（非运行必需）
-├── 启动旅行之木.cmd          Windows 便捷启动（相对路径）
 ├── db/
 │   ├── connection.py        线程本地连接；启动时显式 init_db 一次
 │   └── schema/              空目录：宿主不再持有任何 DDL
@@ -80,6 +78,7 @@ Traveling_Tree/
 │   ├── plugin-development-whitepaper.md   开发白皮书（最高准则）
 │   ├── 多AI共建日志.md                    多 AI 打卡镜像（自动生成，勿手改）
 │   └── appendix/                          白皮书附件：附录 A–D + 三份说明性文件
+├── tools/                   生成器与启动脚本（启动旅行之木.cmd 等）
 └── tests/                   冒烟测试（多数使用临时数据库）
 ```
 
