@@ -2,9 +2,9 @@
 
 > 只读摘要，勿手改。本文件由 docs/appendix/file_navigation.json 生成；结构与去留决定以 JSON 为准。
 
-- 生成时间：2026-10-31T23:48:12+03:00
-- 轮次：86
-- 待办：0 条；已决定：558 条
+- 生成时间：2026-11-01T00:06:25+03:00
+- 轮次：87
+- 待办：0 条；已决定：563 条
 
 ## 待办
 
@@ -15,6 +15,11 @@
 
 | 路径 | 决定 | 原因 | 状态 | 轮次 | 时间 | 备份路径 |
 | --- | --- | --- | --- | --- | --- | --- |
+| plugins/market/feature.js | 模板缺失时前端不再误报未设置下载地址（round 87） | 新增 devErrorCode；template_missing 时按钮保持可点、title 指向模板路径，展开面板展示后端真实错误；not_configured 仍置灰并提示先设置 download_dir。未改后端错误码与生成逻辑。 | done | 87 | 2026-11-01T00:06:25+03:00 |  |
+| ui/web/static/app.js | 设置页 help 补浏览器下载独立性说明（round 87） | 通用下载地址（本地路径）帮助文案补：该路径仅用于插件服务端写盘；浏览器下载仍走浏览器/统一下载句柄，与该项相互独立。 | done | 87 | 2026-11-01T00:06:25+03:00 |  |
+| docs/plugin-development-whitepaper.md | 白皮书 §7.5 补浏览器下载独立性（round 87） | download_dir 条目补同句，与设置页/README 口径一致。 | done | 87 | 2026-11-01T00:06:25+03:00 |  |
+| plugins/market/README.md | 市场 README 补 download_dir 语义（round 87） | 开发插件写盘说明标注仅用于服务端写盘，浏览器下载仍走浏览器/统一下载句柄。 | done | 87 | 2026-11-01T00:06:25+03:00 |  |
+| data/bg_import/::round87-none | 本次无背景库数据（round 87） | 用户未提供「项目优化与当前综述」导出 json；背景库不可用，本轮未执行 update 导入、未写背景库数据。 | done | 87 | 2026-11-01T00:06:25+03:00 |  |
 | plugins/market/scaffold.py | 插件开发提示词生成并入市场（round 86） | 迁移模板解析/严格替换/残留检测；10 个占位符动态字段；写盘由 backend 统一处理；模板唯一源 docs/appendix/prompts/plugin-dev-prompt.md。 | done | 86 | 2026-10-31T23:48:12+03:00 |  |
 | plugins/market/backend.py | 新增 /scaffold/fields 与 /scaffold/generate（round 86） | GET 返回字段与下载地址配置；POST 严格校验 id/占位符后写盘 scaffold-<id>-<时间戳>.md；未设置/非绝对/目录不存在/无权限/模板缺失均明确错误；模板缺失不影响 /list 等既有接口。 | done | 86 | 2026-10-31T23:48:12+03:00 |  |
 | plugins/market/feature.js | 市场顶部“开发插件”按钮与动态表单（round 86） | 按后端字段渲染 input（全部短参数）；未设置 download_dir 时按钮置灰；缺失项标红；成功展示可复制路径；不改卡片/搜索/过滤逻辑。 | done | 86 | 2026-10-31T23:48:12+03:00 |  |

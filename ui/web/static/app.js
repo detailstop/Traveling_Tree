@@ -954,7 +954,7 @@ function settingsPageHTML() {
       </section>
       <section class="settings-section">
         <h3>通用下载地址（本地路径）</h3>
-        <p class="settings-desc">供市场「开发插件」等后端写盘使用；必须是已存在的绝对路径，未设置或不可写时后端明确报错。</p>
+        <p class="settings-desc">供市场「开发插件」等后端写盘使用；必须是已存在的绝对路径，未设置或不可写时后端明确报错。该路径仅用于插件服务端写盘；浏览器下载仍走浏览器/统一下载句柄，与该项相互独立。</p>
         <div class="settings-row">
           <input id="set-download-dir" class="mk-search" style="max-width:420px" placeholder="例如 D:\\Downloads" value="${esc((S.settings && S.settings.download_dir) || '')}">
           <button class="btn sm" id="set-download-dir-save">保存路径</button>

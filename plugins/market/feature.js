@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   let STATE = { items: [], search: '', kind: '', expanded: null, busy: false,
-    devOpen: false, devFields: [], devConfigured: false, devError: '', devValues: {}, devResult: null };
+    devOpen: false, devFields: [], devConfigured: false, devError: '', devErrorCode: '', devValues: {}, devResult: null };
 
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
@@ -76,7 +76,11 @@
     const panel = host.querySelector('#mk-dev-panel');
     const btn = host.querySelector('#mk-dev');
     if (!panel || !btn) return;
-    btn.disabled = !STATE.devConfigured;
+    const templateMissing = STATE.devErrorCode === 'template_missing';
+    btn.disabled = !STATE.devConfigured && !templateMissing;
+    btn.title = templateMissing
+      ? '模板缺失：docs/appendix/prompts/plugin-dev-prompt.md'
+      : (STATE.devConfigured ? '填写参数并生成开发提示词' : '请先在设置页填写通用下载地址');
     panel.hidden = !STATE.devOpen;
     if (!STATE.devOpen) return;
     if (STATE.devError) {
@@ -154,10 +158,12 @@
           const f = await api('/api/plugin/market/scaffold/fields');
           STATE.devFields = f.fields || [];
           STATE.devConfigured = !!f.configured;
+          STATE.devErrorCode = f.ok ? '' : (f.error || '');
           STATE.devError = f.ok ? '' : (f.message || f.error || '');
         } catch (e) {
           STATE.devFields = [];
           STATE.devConfigured = false;
+          STATE.devErrorCode = '';
           STATE.devError = e.message || '开发插件不可用';
         }
         await loadList();
@@ -202,7 +208,9 @@
       });
     }
     host.querySelector('#mk-dev').onclick = () => {
-      if (!STATE.devConfigured) { toast('请先在设置页填写通用下载地址', 'warn'); return; }
+      if (!STATE.devConfigured && STATE.devErrorCode !== 'template_missing') {
+        toast('请先在设置页填写通用下载地址', 'warn'); return;
+      }
       STATE.devOpen = !STATE.devOpen;
       drawDev(host);
     };

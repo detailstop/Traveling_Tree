@@ -1,9 +1,49 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-31T23:48:12+03:00",
-  "round": 86,
+  "generated_at": "2026-11-01T00:06:25+03:00",
+  "round": 87,
   "pending": [],
   "decided": [
+    {
+      "path": "plugins/market/feature.js",
+      "decision": "模板缺失时前端不再误报未设置下载地址（round 87）",
+      "reason": "新增 devErrorCode；template_missing 时按钮保持可点、title 指向模板路径，展开面板展示后端真实错误；not_configured 仍置灰并提示先设置 download_dir。未改后端错误码与生成逻辑。",
+      "status": "done",
+      "round": 87,
+      "at": "2026-11-01T00:06:25+03:00"
+    },
+    {
+      "path": "ui/web/static/app.js",
+      "decision": "设置页 help 补浏览器下载独立性说明（round 87）",
+      "reason": "通用下载地址（本地路径）帮助文案补：该路径仅用于插件服务端写盘；浏览器下载仍走浏览器/统一下载句柄，与该项相互独立。",
+      "status": "done",
+      "round": 87,
+      "at": "2026-11-01T00:06:25+03:00"
+    },
+    {
+      "path": "docs/plugin-development-whitepaper.md",
+      "decision": "白皮书 §7.5 补浏览器下载独立性（round 87）",
+      "reason": "download_dir 条目补同句，与设置页/README 口径一致。",
+      "status": "done",
+      "round": 87,
+      "at": "2026-11-01T00:06:25+03:00"
+    },
+    {
+      "path": "plugins/market/README.md",
+      "decision": "市场 README 补 download_dir 语义（round 87）",
+      "reason": "开发插件写盘说明标注仅用于服务端写盘，浏览器下载仍走浏览器/统一下载句柄。",
+      "status": "done",
+      "round": 87,
+      "at": "2026-11-01T00:06:25+03:00"
+    },
+    {
+      "path": "data/bg_import/::round87-none",
+      "decision": "本次无背景库数据（round 87）",
+      "reason": "用户未提供「项目优化与当前综述」导出 json；背景库不可用，本轮未执行 update 导入、未写背景库数据。",
+      "status": "done",
+      "round": 87,
+      "at": "2026-11-01T00:06:25+03:00"
+    },
     {
       "path": "plugins/market/scaffold.py",
       "decision": "插件开发提示词生成并入市场（round 86）",

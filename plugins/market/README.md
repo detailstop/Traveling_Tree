@@ -16,7 +16,7 @@
 
 ## 开发插件
 - 市场页顶部「开发插件」→ `/api/plugin/market/scaffold/fields` 取占位符，动态渲染表单（全部短参数 input）。
-- 提交 `/api/plugin/market/scaffold/generate`：严格校验全部占位符（缺失/残留 `{{...}}` 拒绝），写盘到 `data/settings.json` 的 `download_dir`（通用下载地址，绝对路径），文件名 `scaffold-<id>-<时间戳>.md`，不覆盖。
+- 提交 `/api/plugin/market/scaffold/generate`：严格校验全部占位符（缺失/残留 `{{...}}` 拒绝），写盘到 `data/settings.json` 的 `download_dir`（通用下载地址，绝对路径；仅用于插件服务端写盘，浏览器下载仍走浏览器/统一下载句柄），文件名 `scaffold-<id>-<时间戳>.md`，不覆盖。
 - 未设置/目录不存在/无权限/模板缺失均返回明确错误；模板缺失只影响本功能，市场列表/安装/卸载照常。
 
 ## 依赖
