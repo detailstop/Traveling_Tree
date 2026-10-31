@@ -84,6 +84,8 @@ Traveling_Tree/
 
 分层约定：`ui/` 通过 `/api/plugin/<id>/*` 动态分发到各插件 backend；宿主不再有 `core/`，全部 SQL 在插件内（model_usage/pixel_art/finance/bg_library/book_reader/russian/project_manager）；`db/schema/` 为空，新增表只写 `plugins/<id>/schema.sql` 并由 manifest 的 `db` 声明，`db/connection.py` 启动时扫描执行；`data/settings.json` 的 `modules.enabled` 控制按模块建表，默认全启用。
 
+插件可有/无业务表：无表插件不声明 `db` 或声明 `"db": null`。当前 22 个插件中 **13 个有 `schema.sql`、9 个无表**（cobuild、expdata、filejudge、netexp、pdf、rivet、sim、tts、webchat）。
+
 ### 说明性文件分工
 
 三份说明性文件统一放在 `docs/appendix/`，作为白皮书附件，不并入白皮书正文：
@@ -233,5 +235,6 @@ python tests/smoke_pm.py
 - **剩余 pending**：`tests/smoke_plugin_decoupling.py::Server.start` 的 `stop()` 异常保护（低概率进程竞态，三次 452/452 通过，留观察）。
 - **交接建议**：新功能进 `plugins/<id>/`，不碰宿主；改现有功能直接改对应插件；每轮下沉、改 settings 或改 API 后跑全量 13 个 smoke；`/api/plugin/<id>/*` 必须用语义子路径；二进制响应按附录 C。
 - 完整状态、数据资产与 docs 闭环规则见白皮书 [§7 项目状态与交接](docs/plugin-development-whitepaper.md) 与 [§8 docs 目录与临时文件闭环](docs/plugin-development-whitepaper.md)。
-- **schema 合规（round 79）**：round 75–78 完成 22 插件表结构收口——67 张表全部合规（9 张豁免 live 且有注释），61 个触发器；矩阵见 [plugin-schema-compliance-matrix.md](docs/appendix/plugin-schema-compliance-matrix.md)。当前 pending 仅 `Server.start`（低概率竞态，留观察）。
+- **schema 合规（round 79）**：round 75–78 完成 22 插件表结构收口——67 张表全部合规（9 张豁免 live 且有注释），61 个触发器；矩阵见 [plugin-schema-compliance-matrix.md](docs/appendix/plugin-schema-compliance-matrix.md)。
+- **round 80 收口**：`Server.start` 已修复（健康检查捕获 `BadStatusLine`/`HTTPException`，`stop()` 包裹进程退出竞态），连续 20 次 452/452 通过；**pending 清零**。触发器维护约定见守则 §4.2，无表插件说明见 §4。
 - **round 65 删除核对**：v2.1 草案四项（backend-only / 根路由 / `__binary__` / import 约定）已分别落在 `docs/appendix/A–D`；结项报告的 22 插件清单、13 smoke 基线、剩余 pending、交接建议已落在白皮书 §7.1–7.4。核对表见白皮书 §7.6；两份源文档未恢复。

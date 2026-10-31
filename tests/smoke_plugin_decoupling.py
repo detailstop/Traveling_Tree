@@ -16,6 +16,7 @@
 from __future__ import annotations
 
 import json
+import http.client
 import os
 import re
 import shutil
@@ -90,6 +91,10 @@ def http_get(url: str, timeout: float = 10):
     except urllib.error.HTTPError as exc:
         return exc.code, exc.read()
     except urllib.error.URLError:
+        return 0, b""
+    except http.client.HTTPException:
+        # 启动瞬间可能出现空/半截状态行（BadStatusLine、RemoteDisconnected 等）；
+        # 视为“暂不可用”，由调用方继续重试，不冒泡中断测试。
         return 0, b""
 
 
@@ -168,23 +173,39 @@ class Server:
                     status, _ = http_get(self.base + "/api/health", timeout=1)
                     if status == 200:
                         return True
-                except (urllib.error.URLError, ConnectionError, TimeoutError):
+                except (urllib.error.URLError, ConnectionError, TimeoutError,
+                        http.client.HTTPException):
                     pass
                 time.sleep(0.1)
             self.stop()
         return False
 
     def stop(self) -> None:
-        if self.proc is not None and self.proc.poll() is None:
-            self.proc.terminate()
-            try:
-                self.proc.wait(timeout=10)
-            except subprocess.TimeoutExpired:
-                self.proc.kill()
-                self.proc.wait(timeout=5)
+        proc = self.proc
         self.proc = None
+        if proc is not None and proc.poll() is None:
+            try:
+                proc.terminate()
+            except OSError as exc:  # 进程可能已退出：记录但不中断清理
+                print(f"[warn] stop terminate 失败：{exc}", file=sys.stderr)
+            try:
+                proc.wait(timeout=10)
+            except subprocess.TimeoutExpired:
+                try:
+                    proc.kill()
+                except OSError as exc:
+                    print(f"[warn] stop kill 失败：{exc}", file=sys.stderr)
+                try:
+                    proc.wait(timeout=5)
+                except (subprocess.TimeoutExpired, OSError) as exc:
+                    print(f"[warn] stop wait 失败：{exc}", file=sys.stderr)
+            except OSError as exc:
+                print(f"[warn] stop wait 失败：{exc}", file=sys.stderr)
         if self.log_file is not None:
-            self.log_file.close()
+            try:
+                self.log_file.close()
+            except OSError as exc:
+                print(f"[warn] stop close 日志失败：{exc}", file=sys.stderr)
             self.log_file = None
 
     def tail(self, lines: int = 8) -> str:

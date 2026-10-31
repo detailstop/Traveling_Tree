@@ -74,6 +74,14 @@ plugins/<id>/
 
 README 不写实现细节，不复制代码；事实以 manifest/schema/backend 为准。
 
+### 4.2 触发器维护约定（round 80）
+
+- 采用触发器的插件：`book_reader`（22 个）、`finance`（29 个）、`project_manager`（10 个）；其余插件用显式列名写入。
+- 触发器统一由各插件 `migrate.py` 创建（**不写入 `schema.sql`**）：迁移时先删除旧触发器，按 `PRAGMA table_info` 当前列生成 `AFTER INSERT`（填 raw/live）与 `AFTER UPDATE`（刷 live、保留 raw）。
+- 给上述插件**加列后必须跑一次 migrate**（启动 `init_db` 即会执行），重建触发器以纳入新列；否则 JSON 快照缺字段。
+- 触发器依赖 SQLite JSON1（≥3.38，本机 3.45）；新插件如采用该方案，须在 README「数据表」与 `migrate.py` 中说明。
+- 合规状态与触发器覆盖见 [plugin-schema-compliance-matrix.md](appendix/plugin-schema-compliance-matrix.md)。
+
 > `provides` 示例（round 73 核实）：`webchat` → `["webchat"]`；`ai` → `["ai"]`；`pixel_art` → `["pixel_assets"]`。`cobuild` 不声明 `provides`：它面向用户打卡入口，没有被其他插件调用。`consumes` 可选。
 
 ## 5. 接口索引（只列路由与调用方，不抄签名）

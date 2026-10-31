@@ -2,20 +2,24 @@
 
 > 只读摘要，勿手改。本文件由 docs/appendix/file_navigation.json 生成；结构与去留决定以 JSON 为准。
 
-- 生成时间：2026-10-31T17:03:32+03:00
-- 轮次：79
-- 待办：1 条；已决定：513 条
+- 生成时间：2026-10-31T17:50:51+03:00
+- 轮次：80
+- 待办：0 条；已决定：518 条
 
 ## 待办
 
 | 路径 | 移动计划 | 指南计划 | 摘要 | 轮次 | 创建时间 |
 | --- | --- | --- | --- | --- | --- |
-| tests/smoke_plugin_decoupling.py::Server.start |  |  |  | 54 | 2026-10-29T19:48:41+03:00 |
 
 ## 已决定去留
 
 | 路径 | 决定 | 原因 | 状态 | 轮次 | 时间 | 备份路径 |
 | --- | --- | --- | --- | --- | --- | --- |
+| tests/smoke_plugin_decoupling.py | 修复 Server.start 健康检查与 stop() 竞态（round 80） | 根因不同源：BadStatusLine 未被 http_get 捕获导致启动检查崩溃；stop() 进程退出竞态可抛 OSError。修复仅加异常捕获/日志与有限重试，不改 452 条断言、不改加载逻辑；连续 20 次 452/452 PASS。 | done | 80 | 2026-10-31T17:50:51+03:00 |  |
+| docs/plugin-development-guide.md | 新增触发器维护约定（round 80） | 守则 §4.2：book_reader/finance/project_manager 触发器由各插件 migrate.py 生成（不写入 schema.sql）；加列后必须跑一次 migrate 重建；依赖 JSON1；新插件采用时需 README+migrate 说明；链接合规矩阵。 | done | 80 | 2026-10-31T17:50:51+03:00 |  |
+| README.md | README 补无表插件说明与 round 80 收口状态（round 80） | §4 说明 13 个有 schema、9 个无表（cobuild/expdata/filejudge/netexp/pdf/rivet/sim/tts/webchat）；§12 标记 Server.start 修复、20 次通过、pending 清零。 | done | 80 | 2026-10-31T17:50:51+03:00 |  |
+| tests/smoke_plugin_decoupling.py::Server.start | Server.start 连续 20 次验证（round 80） | 修复后 20/20 次 452/452 PASS，单次 104.6–129.1s，无 FAIL/超时；pending 清零。 | done | 80 | 2026-10-31T17:50:51+03:00 |  |
+| data/bg_import/::round80-none | 本次无背景库数据（round 80） | 用户未提供「项目优化与当前综述」导出 json；背景库不可用，本轮未执行 update 导入、未写背景库数据。 | done | 80 | 2026-10-31T17:50:51+03:00 |  |
 | docs/appendix/plugin-schema-compliance-matrix.md | 新增 22 插件 schema 合规矩阵（round 79） | 13 个有 schema 的插件共 67 表全部合规；9 张豁免 live 均有 raw+注释；触发器覆盖 book_reader 22、finance 29、project_manager 10（按表 33 张）；无待修表。扫描曾误判 item_stats 注释，已改为按列定义解析。 | done | 79 | 2026-10-31T17:03:32+03:00 |  |
 | plugins/project_manager/seed.py | 确认 pm seed/migrate 执行顺序与 seed 行 raw（round 79） | init_db 顺序：schema → 插件 migrate（创建触发器）→ 模块迁移 → seed；全新临时库验证 6 条模板行 raw/live 均非空、10 触发器，seed 行合规。 | done | 79 | 2026-10-31T17:03:32+03:00 |  |
 | tests/smoke_plugin_decoupling.py::Server.start | 补 Server.start 根因待核实说明（round 79） | pending 描述补“两现象（健康检查超时、stop() 异常）是否同根因待核实；round 79 未修，留观察”；未改测试代码。 | done | 79 | 2026-10-31T17:03:32+03:00 |  |
