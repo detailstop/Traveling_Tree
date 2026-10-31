@@ -2,9 +2,9 @@
 
 > 只读摘要，勿手改。本文件由 docs/appendix/file_navigation.json 生成；结构与去留决定以 JSON 为准。
 
-- 生成时间：2026-10-31T17:50:51+03:00
-- 轮次：80
-- 待办：0 条；已决定：518 条
+- 生成时间：2026-10-31T17:57:52+03:00
+- 轮次：81
+- 待办：0 条；已决定：522 条
 
 ## 待办
 
@@ -15,6 +15,10 @@
 
 | 路径 | 决定 | 原因 | 状态 | 轮次 | 时间 | 备份路径 |
 | --- | --- | --- | --- | --- | --- | --- |
+| docs/appendix/project-acceptance-round80.md | 新增项目验收与结项文档（round 81） | 汇总验收结论、定位、架构、schema 合规（67/67、9 豁免、61 触发器）、13 项测试基线、round 65–80 提交链、round 75–81 备份、已知限制、未来方向与验收清单；数据来自已有文档与 round 80 实测，不读插件实现。 | done | 81 | 2026-10-31T17:57:52+03:00 |  |
+| README.md | README 项目状态标记验收完成（round 81） | §12 增加验收完成条目，链接验收报告与合规矩阵；保留 round 79/80 历史条目。 | done | 81 | 2026-10-31T17:57:52+03:00 |  |
+| tests/ | 验收轮全量 13 结果（round 81） | 12 项全 PASS；smoke_web 74/75（TTS 502 已知）；smoke_plugin_decoupling 452/452；合计 939/940。未改测试。 | done | 81 | 2026-10-31T17:57:52+03:00 |  |
+| data/bg_import/::round81-none | 本次无背景库数据（round 81） | 用户未提供「项目优化与当前综述」导出 json；背景库不可用，本轮未执行 update 导入、未写背景库数据。 | done | 81 | 2026-10-31T17:57:52+03:00 |  |
 | tests/smoke_plugin_decoupling.py | 修复 Server.start 健康检查与 stop() 竞态（round 80） | 根因不同源：BadStatusLine 未被 http_get 捕获导致启动检查崩溃；stop() 进程退出竞态可抛 OSError。修复仅加异常捕获/日志与有限重试，不改 452 条断言、不改加载逻辑；连续 20 次 452/452 PASS。 | done | 80 | 2026-10-31T17:50:51+03:00 |  |
 | docs/plugin-development-guide.md | 新增触发器维护约定（round 80） | 守则 §4.2：book_reader/finance/project_manager 触发器由各插件 migrate.py 生成（不写入 schema.sql）；加列后必须跑一次 migrate 重建；依赖 JSON1；新插件采用时需 README+migrate 说明；链接合规矩阵。 | done | 80 | 2026-10-31T17:50:51+03:00 |  |
 | README.md | README 补无表插件说明与 round 80 收口状态（round 80） | §4 说明 13 个有 schema、9 个无表（cobuild/expdata/filejudge/netexp/pdf/rivet/sim/tts/webchat）；§12 标记 Server.start 修复、20 次通过、pending 清零。 | done | 80 | 2026-10-31T17:50:51+03:00 |  |

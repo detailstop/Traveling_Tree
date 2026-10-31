@@ -1,9 +1,41 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-31T17:50:51+03:00",
-  "round": 80,
+  "generated_at": "2026-10-31T17:57:52+03:00",
+  "round": 81,
   "pending": [],
   "decided": [
+    {
+      "path": "docs/appendix/project-acceptance-round80.md",
+      "decision": "新增项目验收与结项文档（round 81）",
+      "reason": "汇总验收结论、定位、架构、schema 合规（67/67、9 豁免、61 触发器）、13 项测试基线、round 65–80 提交链、round 75–81 备份、已知限制、未来方向与验收清单；数据来自已有文档与 round 80 实测，不读插件实现。",
+      "status": "done",
+      "round": 81,
+      "at": "2026-10-31T17:57:52+03:00"
+    },
+    {
+      "path": "README.md",
+      "decision": "README 项目状态标记验收完成（round 81）",
+      "reason": "§12 增加验收完成条目，链接验收报告与合规矩阵；保留 round 79/80 历史条目。",
+      "status": "done",
+      "round": 81,
+      "at": "2026-10-31T17:57:52+03:00"
+    },
+    {
+      "path": "tests/",
+      "decision": "验收轮全量 13 结果（round 81）",
+      "reason": "12 项全 PASS；smoke_web 74/75（TTS 502 已知）；smoke_plugin_decoupling 452/452；合计 939/940。未改测试。",
+      "status": "done",
+      "round": 81,
+      "at": "2026-10-31T17:57:52+03:00"
+    },
+    {
+      "path": "data/bg_import/::round81-none",
+      "decision": "本次无背景库数据（round 81）",
+      "reason": "用户未提供「项目优化与当前综述」导出 json；背景库不可用，本轮未执行 update 导入、未写背景库数据。",
+      "status": "done",
+      "round": 81,
+      "at": "2026-10-31T17:57:52+03:00"
+    },
     {
       "path": "tests/smoke_plugin_decoupling.py",
       "decision": "修复 Server.start 健康检查与 stop() 竞态（round 80）",

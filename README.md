@@ -237,4 +237,5 @@ python tests/smoke_pm.py
 - 完整状态、数据资产与 docs 闭环规则见白皮书 [§7 项目状态与交接](docs/plugin-development-whitepaper.md) 与 [§8 docs 目录与临时文件闭环](docs/plugin-development-whitepaper.md)。
 - **schema 合规（round 79）**：round 75–78 完成 22 插件表结构收口——67 张表全部合规（9 张豁免 live 且有注释），61 个触发器；矩阵见 [plugin-schema-compliance-matrix.md](docs/appendix/plugin-schema-compliance-matrix.md)。
 - **round 80 收口**：`Server.start` 已修复（健康检查捕获 `BadStatusLine`/`HTTPException`，`stop()` 包裹进程退出竞态），连续 20 次 452/452 通过；**pending 清零**。触发器维护约定见守则 §4.2，无表插件说明见 §4。
+- **验收完成（round 81）**：项目验收通过——schema 合规 67/67、测试稳定、pending 清零、备份齐全；验收报告见 [project-acceptance-round80.md](docs/appendix/project-acceptance-round80.md)，合规矩阵见 [plugin-schema-compliance-matrix.md](docs/appendix/plugin-schema-compliance-matrix.md)。
 - **round 65 删除核对**：v2.1 草案四项（backend-only / 根路由 / `__binary__` / import 约定）已分别落在 `docs/appendix/A–D`；结项报告的 22 插件清单、13 smoke 基线、剩余 pending、交接建议已落在白皮书 §7.1–7.4。核对表见白皮书 §7.6；两份源文档未恢复。
