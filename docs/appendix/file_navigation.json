@@ -1,18 +1,58 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-31T16:57:49+03:00",
-  "round": 78,
+  "generated_at": "2026-10-31T17:03:32+03:00",
+  "round": 79,
   "pending": [
     {
       "path": "tests/smoke_plugin_decoupling.py::Server.start",
       "decision": "TOCTOU 修复代码待审查",
-      "reason": "启动健康检查超时 + stop() 异常保护，低概率竞态；round 78 连续 10 次 452/452 通过（106–133s/次），累计未触发；留观察。",
+      "reason": "启动健康检查超时 + stop() 异常保护，低概率竞态；round 78 连续 10 次 452/452 通过（106–133s/次），累计未触发；留观察。 两现象（健康检查超时、stop() 异常）是否同根因待核实；round 79 未修，留观察。",
       "status": "pending",
       "round": 54,
       "created_at": "2026-10-29T19:48:41+03:00"
     }
   ],
   "decided": [
+    {
+      "path": "docs/appendix/plugin-schema-compliance-matrix.md",
+      "decision": "新增 22 插件 schema 合规矩阵（round 79）",
+      "reason": "13 个有 schema 的插件共 67 表全部合规；9 张豁免 live 均有 raw+注释；触发器覆盖 book_reader 22、finance 29、project_manager 10（按表 33 张）；无待修表。扫描曾误判 item_stats 注释，已改为按列定义解析。",
+      "status": "done",
+      "round": 79,
+      "at": "2026-10-31T17:03:32+03:00"
+    },
+    {
+      "path": "plugins/project_manager/seed.py",
+      "decision": "确认 pm seed/migrate 执行顺序与 seed 行 raw（round 79）",
+      "reason": "init_db 顺序：schema → 插件 migrate（创建触发器）→ 模块迁移 → seed；全新临时库验证 6 条模板行 raw/live 均非空、10 触发器，seed 行合规。",
+      "status": "done",
+      "round": 79,
+      "at": "2026-10-31T17:03:32+03:00"
+    },
+    {
+      "path": "tests/smoke_plugin_decoupling.py::Server.start",
+      "decision": "补 Server.start 根因待核实说明（round 79）",
+      "reason": "pending 描述补“两现象（健康检查超时、stop() 异常）是否同根因待核实；round 79 未修，留观察”；未改测试代码。",
+      "status": "done",
+      "round": 79,
+      "at": "2026-10-31T17:03:32+03:00"
+    },
+    {
+      "path": "README.md",
+      "decision": "README 项目状态标记 schema 收口（round 79）",
+      "reason": "§12 增加 round 79 条目：67 表合规、9 豁免、61 触发器、矩阵链接；pending 仅 Server.start。",
+      "status": "done",
+      "round": 79,
+      "at": "2026-10-31T17:03:32+03:00"
+    },
+    {
+      "path": "data/bg_import/::round79-none",
+      "decision": "本次无背景库数据（round 79）",
+      "reason": "用户未提供「项目优化与当前综述」导出 json；背景库不可用，本轮未执行 update 导入、未写背景库数据。",
+      "status": "done",
+      "round": 79,
+      "at": "2026-10-31T17:03:32+03:00"
+    },
     {
       "path": "plugins/finance/README.md",
       "decision": "finance README 补触发器三点说明（round 78 确认）",

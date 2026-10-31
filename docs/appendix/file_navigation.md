@@ -2,9 +2,9 @@
 
 > 只读摘要，勿手改。本文件由 docs/appendix/file_navigation.json 生成；结构与去留决定以 JSON 为准。
 
-- 生成时间：2026-10-31T16:57:49+03:00
-- 轮次：78
-- 待办：1 条；已决定：508 条
+- 生成时间：2026-10-31T17:03:32+03:00
+- 轮次：79
+- 待办：1 条；已决定：513 条
 
 ## 待办
 
@@ -16,6 +16,11 @@
 
 | 路径 | 决定 | 原因 | 状态 | 轮次 | 时间 | 备份路径 |
 | --- | --- | --- | --- | --- | --- | --- |
+| docs/appendix/plugin-schema-compliance-matrix.md | 新增 22 插件 schema 合规矩阵（round 79） | 13 个有 schema 的插件共 67 表全部合规；9 张豁免 live 均有 raw+注释；触发器覆盖 book_reader 22、finance 29、project_manager 10（按表 33 张）；无待修表。扫描曾误判 item_stats 注释，已改为按列定义解析。 | done | 79 | 2026-10-31T17:03:32+03:00 |  |
+| plugins/project_manager/seed.py | 确认 pm seed/migrate 执行顺序与 seed 行 raw（round 79） | init_db 顺序：schema → 插件 migrate（创建触发器）→ 模块迁移 → seed；全新临时库验证 6 条模板行 raw/live 均非空、10 触发器，seed 行合规。 | done | 79 | 2026-10-31T17:03:32+03:00 |  |
+| tests/smoke_plugin_decoupling.py::Server.start | 补 Server.start 根因待核实说明（round 79） | pending 描述补“两现象（健康检查超时、stop() 异常）是否同根因待核实；round 79 未修，留观察”；未改测试代码。 | done | 79 | 2026-10-31T17:03:32+03:00 |  |
+| README.md | README 项目状态标记 schema 收口（round 79） | §12 增加 round 79 条目：67 表合规、9 豁免、61 触发器、矩阵链接；pending 仅 Server.start。 | done | 79 | 2026-10-31T17:03:32+03:00 |  |
+| data/bg_import/::round79-none | 本次无背景库数据（round 79） | 用户未提供「项目优化与当前综述」导出 json；背景库不可用，本轮未执行 update 导入、未写背景库数据。 | done | 79 | 2026-10-31T17:03:32+03:00 |  |
 | plugins/finance/README.md | finance README 补触发器三点说明（round 78 确认） | 与 book_reader 对齐：JSON1 依赖（≥3.38）、加列需重建触发器、raw/live 由触发器维护业务 SQL 不显式写；原 README 缺此三点。 | done | 78 | 2026-10-31T16:57:49+03:00 |  |
 | data/backup/round78_db/ | 迁移前备份真实库（round 78） | 19255296 B，SHA256 F8DC093538660029ADD8F0A32DF4AA4028660C11D0A9573D66BC294BC49EBBFD，integrity_check=ok。 | done | 78 | 2026-10-31T16:57:49+03:00 |  |
 | plugins/pixel_art/schema.sql | pixel_art 3 表补 raw/live（round 78） | pixel_artworks raw+live；pixel_asset_refs/visual_settings 仅 raw（豁免 live，注释可重建）；写入 4 处显式同步（artworks insert/update、asset_refs upsert、visual_settings upsert）；新增 migrate 并声明；真实库 0 空 raw。 | done | 78 | 2026-10-31T16:57:49+03:00 |  |
