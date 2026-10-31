@@ -17,7 +17,9 @@ CREATE TABLE IF NOT EXISTS bg_nodes (
   version_tag TEXT NOT NULL,
   source      TEXT NOT NULL DEFAULT 'import' CHECK(source IN ('import','manual')),
   created_at  TEXT NOT NULL,
-  updated_at  TEXT NOT NULL
+  updated_at  TEXT NOT NULL,
+  raw_json    TEXT NOT NULL DEFAULT '',
+  live_json   TEXT NOT NULL DEFAULT ''
 );
 CREATE INDEX IF NOT EXISTS idx_bg_nodes_parent ON bg_nodes(parent_id, path);
 CREATE INDEX IF NOT EXISTS idx_bg_nodes_status ON bg_nodes(status);
@@ -29,7 +31,9 @@ CREATE TABLE IF NOT EXISTS bg_versions (
   node_id   TEXT,
   summary   TEXT NOT NULL DEFAULT '',
   data      TEXT NOT NULL DEFAULT '{}',
-  at        TEXT NOT NULL
+  at        TEXT NOT NULL,
+  raw_json  TEXT NOT NULL DEFAULT '',
+  live_json TEXT NOT NULL DEFAULT ''
 );
 CREATE INDEX IF NOT EXISTS idx_bg_versions_at ON bg_versions(at DESC);
 CREATE INDEX IF NOT EXISTS idx_bg_versions_node ON bg_versions(node_id);
@@ -49,7 +53,9 @@ CREATE TABLE IF NOT EXISTS file_notes (
   rules      TEXT NOT NULL DEFAULT '',   -- 规则 / 约束
   source     TEXT NOT NULL DEFAULT 'manual' CHECK(source IN ('suggested','manual')),
   created_at TEXT NOT NULL,
-  updated_at TEXT NOT NULL
+  updated_at TEXT NOT NULL,
+  raw_json   TEXT NOT NULL DEFAULT '',
+  live_json  TEXT NOT NULL DEFAULT ''
 );
 
 CREATE TABLE IF NOT EXISTS db_rules (
@@ -63,6 +69,8 @@ CREATE TABLE IF NOT EXISTS db_rules (
   version        TEXT NOT NULL DEFAULT '', -- 版本或更新时间说明
   created_at     TEXT NOT NULL,
   updated_at     TEXT NOT NULL,
+  raw_json       TEXT NOT NULL DEFAULT '',
+  live_json      TEXT NOT NULL DEFAULT '',
   UNIQUE(db_path, table_name)
 );
 CREATE INDEX IF NOT EXISTS idx_db_rules_db_path ON db_rules(db_path);

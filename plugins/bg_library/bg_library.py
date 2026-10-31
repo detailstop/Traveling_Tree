@@ -150,10 +150,11 @@ def _insert(node: dict) -> None:
     node["version_tag"] = _version_tag(node)
     conn.execute(
         "INSERT INTO bg_nodes(id,parent_id,path,node_type,name,status,summary,payload,"
-        "version_tag,source,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)",
+        "version_tag,source,created_at,updated_at,raw_json,live_json) "
+        "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
         (node["id"], node["parent_id"], node["path"], node["node_type"], node["name"],
          node["status"], node["summary"], _payload(node), node["version_tag"],
-         node["source"], node["created_at"], node["updated_at"]))
+         node["source"], node["created_at"], node["updated_at"], _json(node), _json(node)))
 
 
 def _update(node: dict, source: str = "import") -> None:
@@ -163,10 +164,10 @@ def _update(node: dict, source: str = "import") -> None:
     node["source"] = source
     conn.execute(
         "UPDATE bg_nodes SET parent_id=?,path=?,node_type=?,name=?,status=?,summary=?,"
-        "payload=?,version_tag=?,source=?,updated_at=? WHERE id=?",
+        "payload=?,version_tag=?,source=?,updated_at=?,live_json=? WHERE id=?",
         (node["parent_id"], node["path"], node["node_type"], node["name"], node["status"],
          node["summary"], _payload(node), node["version_tag"], node["source"],
-         node["updated_at"], node["id"]))
+         node["updated_at"], _json(node), node["id"]))
 
 
 # ------------------------------------------------------------
@@ -1451,8 +1452,8 @@ def delete_node(node_id: str, data: dict) -> dict:
 def _record_version(conn, *, kind: str, mode: str, node_id: str | None,
                     summary: str, data: dict) -> int:
     cur = conn.execute(
-        "INSERT INTO bg_versions(kind,mode,node_id,summary,data,at) VALUES(?,?,?,?,?,?)",
-        (kind, mode, node_id, summary, _json(data), _now()))
+        "INSERT INTO bg_versions(kind,mode,node_id,summary,data,at,raw_json,live_json) VALUES(?,?,?,?,?,?,?,?)",
+        (kind, mode, node_id, summary, _json(data), _now(), _json(data), _json(data)))
     return cur.lastrowid
 
 

@@ -2,26 +2,29 @@
 
 > 只读摘要，勿手改。本文件由 docs/appendix/file_navigation.json 生成；结构与去留决定以 JSON 为准。
 
-- 生成时间：2026-10-31T15:08:46+03:00
-- 轮次：74
-- 待办：7 条；已决定：485 条
+- 生成时间：2026-10-31T15:20:57+03:00
+- 轮次：75
+- 待办：5 条；已决定：490 条
 
 ## 待办
 
 | 路径 | 移动计划 | 指南计划 | 摘要 | 轮次 | 创建时间 |
 | --- | --- | --- | --- | --- | --- |
 | tests/smoke_plugin_decoupling.py::Server.start |  |  |  | 54 | 2026-10-29T19:48:41+03:00 |
-| plugins/bg_library |  |  |  | 71 | 2026-10-31T14:42:02+03:00 |
 | plugins/book_reader |  |  |  | 71 | 2026-10-31T14:42:02+03:00 |
 | plugins/finance |  |  |  | 71 | 2026-10-31T14:42:02+03:00 |
 | plugins/pixel_art |  |  |  | 71 | 2026-10-31T14:42:02+03:00 |
 | plugins/project_manager |  |  |  | 71 | 2026-10-31T14:42:02+03:00 |
-| plugins/russian |  |  |  | 71 | 2026-10-31T14:42:02+03:00 |
 
 ## 已决定去留
 
 | 路径 | 决定 | 原因 | 状态 | 轮次 | 时间 | 备份路径 |
 | --- | --- | --- | --- | --- | --- | --- |
+| docs/appendix/plugin-audit-round74-schema-inventory.md | 6 插件 schema 全量盘点（round 75 阶段 A） | 49 表逐表核实：有 raw 4、缺 raw 45；有 live 3、缺 live 46；豁免 live 9（placeholders、item_stats、4 快照、finance_settings、pixel_asset_refs、visual_settings）。用户确认配置表豁免 live；第一批仅 bg_library+russian，book_reader 因位置式 INSERT 留 round 76。 | done | 75 | 2026-10-31T15:20:57+03:00 |  |
+| data/backup/round75_db/ | 迁移前备份真实库（round 75） | SQLite 在线备份到 data/backup/round75_db/russian_tutor.db.bak，9023488 B，SHA256 8E526BB9C678EFE9AAC367CF71A6EA764195BA8EFA492A0A3FADF393CD6A6F58，integrity_check=ok；未读 DB 正文。 | done | 75 | 2026-10-31T15:20:57+03:00 |  |
+| plugins/bg_library/schema.sql | bg_library + russian 第一批迁移（round 75 阶段 B） | bg_library 4 表补 raw+live、新增 migrate 并在 manifest 声明；russian 5 表补 raw，items/themes/review_logs/daily_logs 补 live，item_stats 豁免 live；写入路径同步（bg 4 处、russian items/review_logs/daily_logs/themes 等）；旧库迁移两次幂等、写路径实测 live==raw；真实库迁移后 8 表 0 空 raw。 | done | 75 | 2026-10-31T15:20:57+03:00 |  |
+| docs/appendix/file_navigation.json | round 75 pending 闭环：bg_library/russian resolved，4 条留 round 76（round 75） | 关闭 bg_library、russian；保留 book_reader、finance、pixel_art、project_manager 与 Server.start；全量 13 通过（12 全 PASS，smoke_web 74/75 TTS 502）。 | done | 75 | 2026-10-31T15:20:57+03:00 |  |
+| data/bg_import/::round75-none | 本次无背景库数据（round 75） | 用户未提供「项目优化与当前综述」导出 json；背景库当前不可用，本轮未执行 mode:"update" 导入、未写入背景库数据。 | done | 75 | 2026-10-31T15:20:57+03:00 |  |
 | docs/appendix/plugin-audit-round71.md | 审查报告追加 round 73 状态段（round 74） | 记录 G3 扩展结论（ai/pixel_art/webchat 补 provides，cobuild 不补）、4 插件写入路径结论（assets 双写；非 assets 表补 INSERT live_json）、model_usage_logs 原缺 raw/live 已补、pending 变化与全量 13 结果；未改其他段落。 | done | 74 | 2026-10-31T15:08:46+03:00 |  |
 | plugins/schedule/repo.py | 4 插件保存回归通过（round 74 阶段 A） | 临时库写入→读回：schedule（assets/week_plans/tasks）、screeps（assets/units/modules）、urlarch（assets/groups/links）、promptgen（assets/flows/modules/tasks/flow_groups）均验证 live_json 非空且与 raw_json 一致；未写真实库，临时库用完即弃。 | done | 74 | 2026-10-31T15:08:46+03:00 |  |
 | plugins/russian | 阶段 B 前置核实：核心表缺 raw_json，暂缓迁移（round 74） | B1 逐表核实 bg_library（4 表）、book_reader（11 表）、russian（5 表）均无 raw_json（book_reader 的 reader_placeholders 仅 raw、reader_bookmarks 双列），共 20 表。需先为结构化行/日志定义 raw 快照与回填规则并评估写入路径，超出本轮安全范围；阶段 B 留 round 75，未改任何 blocker schema。 | done | 74 | 2026-10-31T15:08:46+03:00 |  |

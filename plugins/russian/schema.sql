@@ -10,7 +10,9 @@ CREATE TABLE IF NOT EXISTS items (
     theme       TEXT,
     notes       TEXT,
     tag         TEXT,
-    created_at  TEXT    NOT NULL DEFAULT (datetime('now'))
+    created_at  TEXT    NOT NULL DEFAULT (datetime('now')),
+    raw_json    TEXT    NOT NULL DEFAULT '',
+    live_json   TEXT    NOT NULL DEFAULT ''
 );
 
 CREATE TABLE IF NOT EXISTS item_stats (
@@ -22,7 +24,9 @@ CREATE TABLE IF NOT EXISTS item_stats (
     last_review     TEXT,
     next_review     TEXT    NOT NULL,
     total_reviews   INTEGER NOT NULL DEFAULT 0,
-    correct_reviews INTEGER NOT NULL DEFAULT 0
+    correct_reviews INTEGER NOT NULL DEFAULT 0,
+    raw_json        TEXT    NOT NULL DEFAULT ''
+    -- live_json 豁免：SRS 派生状态，可由 items + review_logs 重建
 );
 
 CREATE TABLE IF NOT EXISTS review_logs (
@@ -31,7 +35,9 @@ CREATE TABLE IF NOT EXISTS review_logs (
     reviewed_at  TEXT    NOT NULL DEFAULT (datetime('now')),
     result       INTEGER NOT NULL,
     old_level    TEXT    NOT NULL,
-    new_level    TEXT    NOT NULL
+    new_level    TEXT    NOT NULL,
+    raw_json     TEXT    NOT NULL DEFAULT '',
+    live_json    TEXT    NOT NULL DEFAULT ''
 );
 
 CREATE TABLE IF NOT EXISTS daily_logs (
@@ -40,7 +46,9 @@ CREATE TABLE IF NOT EXISTS daily_logs (
     daily_theme    TEXT,
     academic_theme TEXT,
     note           TEXT,
-    created_at     TEXT    NOT NULL DEFAULT (datetime('now'))
+    created_at     TEXT    NOT NULL DEFAULT (datetime('now')),
+    raw_json       TEXT    NOT NULL DEFAULT '',
+    live_json      TEXT    NOT NULL DEFAULT ''
 );
 
 CREATE TABLE IF NOT EXISTS themes (
@@ -48,5 +56,7 @@ CREATE TABLE IF NOT EXISTS themes (
     name         TEXT    NOT NULL UNIQUE,
     category     TEXT    NOT NULL CHECK(category IN ('daily','academic')),
     default_type TEXT    NOT NULL DEFAULT 'daily'
-                          CHECK(default_type IN ('daily','term','pattern'))
+                          CHECK(default_type IN ('daily','term','pattern')),
+    raw_json     TEXT    NOT NULL DEFAULT '',
+    live_json    TEXT    NOT NULL DEFAULT ''
 );

@@ -17,7 +17,7 @@
     }
   ],
   "backend": "backend.py",
-  "db": {"module_key": "bg", "schema": "schema.sql"},
+  "db": {"module_key": "bg", "schema": "schema.sql", "migrate": "migrate.py"},
   "style": "plugin.css",
   "provides": [],
   "consumes": []

@@ -13,6 +13,20 @@ from plugins.russian.models import Item, ItemStat
 from plugins.russian import srs
 
 
+def _json_text(data: dict) -> str:
+    return json.dumps(data, ensure_ascii=False, default=str)
+
+
+def _refresh_live(conn, table: str, key_col: str, key_val) -> None:
+    """把当前行业务列写成 live_json 快照（raw_json 保留插入时快照）。"""
+    row = conn.execute(f"SELECT * FROM {table} WHERE {key_col}=?", (key_val,)).fetchone()
+    if not row:
+        return
+    data = {k: row[k] for k in row.keys() if k not in ("raw_json", "live_json")}
+    conn.execute(f"UPDATE {table} SET live_json=? WHERE {key_col}=?",
+                 (_json_text(data), key_val))
+
+
 # ============================================================
 # items
 # ============================================================
@@ -42,15 +56,19 @@ def add_item(item: Item) -> int:
             eff_type = dt          # 主题已存在：类型归并到主题
         else:
             _register_theme(conn, item.theme, item.item_type)
+    payload = _json_text({"item_type": eff_type, "russian": item.russian, "chinese": item.chinese,
+                          "theme": item.theme, "notes": item.notes, "tag": item.tag})
     cur = conn.execute(
-        "INSERT INTO items (item_type, russian, chinese, theme, notes, tag) "
-        "VALUES (?, ?, ?, ?, ?, ?)",
-        (eff_type, item.russian, item.chinese, item.theme, item.notes, item.tag),
+        "INSERT INTO items (item_type, russian, chinese, theme, notes, tag, raw_json, live_json) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        (eff_type, item.russian, item.chinese, item.theme, item.notes, item.tag, payload, payload),
     )
     item_id = cur.lastrowid
+    stats_payload = _json_text({"item_id": item_id, "level": "C",
+                                "next_review": srs.next_review(srs.Level.C).isoformat()})
     conn.execute(
-        "INSERT INTO item_stats (item_id, level, next_review) VALUES (?, 'C', ?)",
-        (item_id, srs.next_review(srs.Level.C).isoformat()),
+        "INSERT INTO item_stats (item_id, level, next_review, raw_json) VALUES (?, 'C', ?, ?)",
+        (item_id, srs.next_review(srs.Level.C).isoformat(), stats_payload),
     )
     conn.commit()
     return item_id
@@ -81,15 +99,19 @@ def add_items_bulk(items: list[Item]) -> int:
             else:
                 theme_types[item.theme] = item.item_type
                 _register_theme(conn, item.theme, item.item_type)
+        payload = _json_text({"item_type": eff_type, "russian": item.russian, "chinese": item.chinese,
+                              "theme": item.theme, "notes": item.notes, "tag": item.tag})
         cur.execute(
-            "INSERT INTO items (item_type, russian, chinese, theme, notes, tag) "
-            "VALUES (?, ?, ?, ?, ?, ?)",
-            (eff_type, item.russian, item.chinese, item.theme, item.notes, item.tag),
+            "INSERT INTO items (item_type, russian, chinese, theme, notes, tag, raw_json, live_json) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            (eff_type, item.russian, item.chinese, item.theme, item.notes, item.tag, payload, payload),
         )
         item_id = cur.lastrowid
+        stats_payload = _json_text({"item_id": item_id, "level": "C",
+                                    "next_review": srs.next_review(srs.Level.C).isoformat()})
         cur.execute(
-            "INSERT INTO item_stats (item_id, level, next_review) VALUES (?, 'C', ?)",
-            (item_id, srs.next_review(srs.Level.C).isoformat()),
+            "INSERT INTO item_stats (item_id, level, next_review, raw_json) VALUES (?, 'C', ?, ?)",
+            (item_id, srs.next_review(srs.Level.C).isoformat(), stats_payload),
         )
         added += 1
     conn.commit()
@@ -101,10 +123,12 @@ def update_item(item_id: int, item: Item) -> None:
     conn = get_conn()
     if item.theme:
         _register_theme(conn, item.theme, item.item_type)
+    payload = _json_text({"item_type": item.item_type, "russian": item.russian, "chinese": item.chinese,
+                          "theme": item.theme, "notes": item.notes, "tag": item.tag})
     conn.execute(
-        "UPDATE items SET item_type=?, russian=?, chinese=?, theme=?, notes=?, tag=? "
+        "UPDATE items SET item_type=?, russian=?, chinese=?, theme=?, notes=?, tag=?, live_json=? "
         "WHERE id=?",
-        (item.item_type, item.russian, item.chinese, item.theme, item.notes, item.tag, item_id),
+        (item.item_type, item.russian, item.chinese, item.theme, item.notes, item.tag, payload, item_id),
     )
     conn.commit()
 
@@ -120,6 +144,7 @@ def set_item_type(item_id: int, item_type: str) -> None:
     """调整条目的内容类型（daily/term/pattern）。"""
     conn = get_conn()
     conn.execute("UPDATE items SET item_type=? WHERE id=?", (item_type, item_id))
+    _refresh_live(conn, "items", "id", item_id)
     conn.commit()
 
 
@@ -130,6 +155,7 @@ def set_item_created_date(item_id: int, iso_date: str) -> None:
         "UPDATE items SET created_at=? WHERE id=?",
         (f"{iso_date} 00:00:00", item_id),
     )
+    _refresh_live(conn, "items", "id", item_id)
     conn.commit()
 
 
@@ -263,10 +289,12 @@ def record_review(item_id: int, passed: bool) -> tuple[str, str]:
             item_id,
         ),
     )
+    log_payload = _json_text({"item_id": item_id, "result": 1 if passed else 0,
+                              "old_level": old_level, "new_level": new_level})
     conn.execute(
-        "INSERT INTO review_logs (item_id, result, old_level, new_level) "
-        "VALUES (?, ?, ?, ?)",
-        (item_id, 1 if passed else 0, old_level, new_level),
+        "INSERT INTO review_logs (item_id, result, old_level, new_level, raw_json, live_json) "
+        "VALUES (?, ?, ?, ?, ?, ?)",
+        (item_id, 1 if passed else 0, old_level, new_level, log_payload, log_payload),
     )
     conn.commit()
     return old_level, new_level
@@ -353,10 +381,12 @@ def activity_stats() -> dict:
 def log_daily(log_date: str, daily_theme: str, academic_theme: str, note: str = "") -> None:
     """写入一条每日学习日志。"""
     conn = get_conn()
+    payload = _json_text({"log_date": log_date, "daily_theme": daily_theme,
+                          "academic_theme": academic_theme, "note": note})
     conn.execute(
-        "INSERT INTO daily_logs (log_date, daily_theme, academic_theme, note) "
-        "VALUES (?, ?, ?, ?)",
-        (log_date, daily_theme, academic_theme, note),
+        "INSERT INTO daily_logs (log_date, daily_theme, academic_theme, note, raw_json, live_json) "
+        "VALUES (?, ?, ?, ?, ?, ?)",
+        (log_date, daily_theme, academic_theme, note, payload, payload),
     )
     conn.commit()
 
@@ -365,9 +395,11 @@ def add_theme(name: str, category: str, default_type: str = "daily") -> None:
     """注册主题（category: 'daily' | 'academic'；default_type: daily/term/pattern）。重复则忽略。"""
     dt = default_type if default_type in ("daily", "term", "pattern") else "daily"
     conn = get_conn()
+    payload = _json_text({"name": name, "category": category, "default_type": dt})
     conn.execute(
-        "INSERT OR IGNORE INTO themes (name, category, default_type) VALUES (?, ?, ?)",
-        (name, category, dt),
+        "INSERT OR IGNORE INTO themes (name, category, default_type, raw_json, live_json) "
+        "VALUES (?, ?, ?, ?, ?)",
+        (name, category, dt, payload, payload),
     )
     conn.commit()
 
@@ -403,6 +435,7 @@ def rename_theme(old: str, new: str) -> None:
     conn = get_conn()
     conn.execute("UPDATE themes SET name=? WHERE name=?", (new, old))
     conn.execute("UPDATE items SET theme=? WHERE theme=?", (new, old))
+    _refresh_live(conn, "themes", "name", new)
     conn.commit()
 
 
@@ -429,6 +462,7 @@ def set_theme_type(name: str, item_type: str) -> int:
     item_type = item_type if item_type in ("daily", "term", "pattern") else "daily"
     conn = get_conn()
     conn.execute("UPDATE themes SET default_type=? WHERE name=?", (item_type, name))
+    _refresh_live(conn, "themes", "name", name)
     cur = conn.execute("UPDATE items SET item_type=? WHERE theme=?", (item_type, name))
     conn.commit()
     return cur.rowcount

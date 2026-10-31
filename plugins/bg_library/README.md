@@ -14,7 +14,7 @@
 - `file_notes`
 - `db_rules`
 
-- raw/live 状态：4 表缺 `raw_json`/`live_json`（round 71 blocker，按 G2 待 round 73 处理）
+- raw/live 状态：round 75 已补 `raw_json`+`live_json`（迁移时快照，live=raw；写入同步）；4 表无豁免
 
 ## 依赖
 - `file_preview.py` 提供文件预览/说明

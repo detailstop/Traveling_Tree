@@ -1,5 +1,6 @@
 """bg_library 插件数据访问层：file_notes / db_rules。"""
 
+import json
 from datetime import datetime
 
 from db.connection import get_conn
@@ -26,12 +27,15 @@ def upsert_file_note(path: str, feature: str = "", details: str = "",
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     source = source if source in ("suggested", "manual") else "manual"
     conn = get_conn()
+    payload = json.dumps({"path": path, "feature": feature or "", "details": details or "",
+                          "rules": rules or "", "source": source,
+                          "created_at": now, "updated_at": now}, ensure_ascii=False)
     conn.execute(
-        "INSERT INTO file_notes(path, feature, details, rules, source, created_at, updated_at) "
-        "VALUES(?,?,?,?,?,?,?) "
+        "INSERT INTO file_notes(path, feature, details, rules, source, created_at, updated_at, raw_json, live_json) "
+        "VALUES(?,?,?,?,?,?,?,?,?) "
         "ON CONFLICT(path) DO UPDATE SET feature=excluded.feature, details=excluded.details, "
-        "rules=excluded.rules, source=excluded.source, updated_at=excluded.updated_at",
-        (path, feature or "", details or "", rules or "", source, now, now),
+        "rules=excluded.rules, source=excluded.source, updated_at=excluded.updated_at, live_json=excluded.live_json",
+        (path, feature or "", details or "", rules or "", source, now, now, payload, payload),
     )
     conn.commit()
     return get_file_note(path) or {}
@@ -67,21 +71,24 @@ def upsert_db_rule(rule: dict) -> dict:
     rid = rule.get("id")
     if rid:
         assignments = ", ".join(f"{k}=?" for k in fields)
+        payload = json.dumps(dict(zip(fields, values)), ensure_ascii=False)
         conn.execute(
-            f"UPDATE db_rules SET {assignments}, updated_at=? WHERE id=?",
-            (*values, now, int(rid)),
+            f"UPDATE db_rules SET {assignments}, updated_at=?, live_json=? WHERE id=?",
+            (*values, now, payload, int(rid)),
         )
         conn.commit()
         row = conn.execute("SELECT * FROM db_rules WHERE id=?", (int(rid),)).fetchone()
         return dict(row) if row else {}
+    payload = json.dumps(dict(zip(fields, values)), ensure_ascii=False)
     conn.execute(
         "INSERT INTO db_rules(db_path, table_name, key_fields, writers, readers, "
-        "migration_rule, version, created_at, updated_at) VALUES(?,?,?,?,?,?,?,?,?) "
+        "migration_rule, version, created_at, updated_at, raw_json, live_json) "
+        "VALUES(?,?,?,?,?,?,?,?,?,?,?) "
         "ON CONFLICT(db_path, table_name) DO UPDATE SET key_fields=excluded.key_fields, "
         "writers=excluded.writers, readers=excluded.readers, "
         "migration_rule=excluded.migration_rule, version=excluded.version, "
-        "updated_at=excluded.updated_at",
-        (*values, now, now),
+        "updated_at=excluded.updated_at, live_json=excluded.live_json",
+        (*values, now, now, payload, payload),
     )
     conn.commit()
     row = conn.execute(
