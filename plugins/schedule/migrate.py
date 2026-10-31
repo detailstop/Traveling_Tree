@@ -2,6 +2,13 @@
 from __future__ import annotations
 
 
+def _add_live_json(conn, table: str) -> None:
+    cols = {r["name"] for r in conn.execute(f"PRAGMA table_info({table})")}
+    if "live_json" not in cols:
+        conn.execute(f"ALTER TABLE {table} ADD COLUMN live_json TEXT NOT NULL DEFAULT ''")
+    conn.execute(f"UPDATE {table} SET live_json=raw_json WHERE live_json IS NULL OR live_json=''")
+
+
 def migrate(conn) -> None:
     row = conn.execute(
         "SELECT sql FROM sqlite_master WHERE type='table' AND name='schedule_tasks'"
@@ -26,8 +33,6 @@ def migrate(conn) -> None:
             )
             conn.execute("DROP TABLE schedule_tasks_old")
             conn.execute("CREATE INDEX IF NOT EXISTS idx_schedule_tasks_week ON schedule_tasks(week_key, day_key)")
-    cols = {r["name"] for r in conn.execute("PRAGMA table_info(schedule_assets)")}
-    if "live_json" not in cols:
-        conn.execute("ALTER TABLE schedule_assets ADD COLUMN live_json TEXT NOT NULL DEFAULT ''")
-    conn.execute("UPDATE schedule_assets SET live_json=raw_json WHERE live_json IS NULL OR live_json=''")
+    for table in ("schedule_assets", "schedule_week_plans", "schedule_tasks"):
+        _add_live_json(conn, table)
     conn.commit()

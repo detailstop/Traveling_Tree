@@ -2,20 +2,45 @@
 
 > 只读摘要，勿手改。本文件由 docs/appendix/file_navigation.json 生成；结构与去留决定以 JSON 为准。
 
-- 生成时间：2026-10-31T13:29:56+03:00
-- 轮次：69
-- 待办：1 条；已决定：459 条
+- 生成时间：2026-10-31T14:51:28+03:00
+- 轮次：72
+- 待办：9 条；已决定：476 条
 
 ## 待办
 
 | 路径 | 移动计划 | 指南计划 | 摘要 | 轮次 | 创建时间 |
 | --- | --- | --- | --- | --- | --- |
 | tests/smoke_plugin_decoupling.py::Server.start |  |  |  | 54 | 2026-10-29T19:48:41+03:00 |
+| plugins/bg_library |  |  |  | 71 | 2026-10-31T14:42:02+03:00 |
+| plugins/book_reader |  |  |  | 71 | 2026-10-31T14:42:02+03:00 |
+| plugins/finance |  |  |  | 71 | 2026-10-31T14:42:02+03:00 |
+| plugins/model_usage |  |  |  | 71 | 2026-10-31T14:42:02+03:00 |
+| plugins/pixel_art |  |  |  | 71 | 2026-10-31T14:42:02+03:00 |
+| plugins/project_manager |  |  |  | 71 | 2026-10-31T14:42:02+03:00 |
+| plugins/russian |  |  |  | 71 | 2026-10-31T14:42:02+03:00 |
+| plugins/webchat |  |  |  | 71 | 2026-10-31T14:42:02+03:00 |
 
 ## 已决定去留
 
 | 路径 | 决定 | 原因 | 状态 | 轮次 | 时间 | 备份路径 |
 | --- | --- | --- | --- | --- | --- | --- |
+| docs/plugin-development-guide.md | G1–G6 口径落地守则（round 72） | G1 新增 §4.1 插件 README 格式（职责/入口与路由/数据表/依赖/注意事项）并加入检查清单；G2 检查清单要求豁免表列 raw_json/来源；G3 provides 必须、consumes 可选；G4 跨插件 import 需 README+lib.json notes 标注；G5 共享缓存例外与 G6 多入口命名在白皮书 §十.6/§十.7；§6 常见错误补两行。未改 §5 接口索引。 | done | 72 | 2026-10-31T14:51:28+03:00 |  |
+| docs/plugin-development-whitepaper.md | 白皮书补 G2–G6 规则与 README 要求（round 72） | §五补 G2 派生/日志/快照表口径；§十新增 10.4 provides 必须/consumes 可选、10.5 跨插件调用与标注、10.6 共享缓存例外、10.7 多入口 feature 命名建议；§十一补插件 README 强制条款。未改附录 A–E 语义。 | done | 72 | 2026-10-31T14:51:28+03:00 |  |
+| plugins/*/README.md | 补 22 个插件 README（round 72 G1） | 22/22 按固定五节生成：职责、入口与路由、数据表、依赖、注意事项；内容来自 manifest/schema 表名/backend handle 位置/lib.json；未读无关插件实现；未满足 G2 的表在 README 标注待 round 73。 | done | 72 | 2026-10-31T14:51:28+03:00 |  |
+| plugins/*/schema.sql::round72-live-json | 4 个插件补 live_json 与幂等 migrate（round 72 阶段 A5） | schedule（week_plans/tasks）、screeps（units/modules）、urlarch（groups/links）、promptgen（flows/modules/tasks/flow_groups）补 live_json TEXT NOT NULL DEFAULT ''；migrate 用 PRAGMA 检查 + ALTER + live=raw，临时旧库连跑两次幂等通过；全量 13 通过（仅 TTS 502）。 | done | 72 | 2026-10-31T14:51:28+03:00 |  |
+| docs/appendix/file_navigation.json | round 72 pending 闭环：7 条 resolved、8 条保留，阶段 B 留 round 73（round 72） | 已修复：schedule/screeps/urlarch/promptgen（schema+migrate）、cobuild/pdf/tts（README）共 7 条移入 resolved；保留 bg_library/book_reader/finance/model_usage/pixel_art/project_manager/russian/webchat 共 8 条并更新原因（README 已补，schema/provides 待 round 73）；Server.start 不变。阶段 B（6 blocker + webchat provides + model_usage 日志表）未执行。 | done | 72 | 2026-10-31T14:51:28+03:00 |  |
+| data/bg_import/::round72-none | 本次无背景库数据（round 72） | 用户未提供「项目优化与当前综述」导出 json；背景库当前不可用，本轮未执行 mode:"update" 导入、未写入背景库数据。 | done | 72 | 2026-10-31T14:51:28+03:00 |  |
+| docs/appendix/plugin-audit-round71.md | 新增 22 插件规范性审查报告（round 71） | 依据守则第 4 节、白皮书正文与附录 A–E、plugins/lib.json；逐插件给出合规/缺失（blocker/should/nice）/建议/规则缺口。结论：blocker 插件 10 个、should-only 5 个、需 round 72 修复 15 个、无需修复 7 个；规则缺口 6 条（G1–G6）。仅通读 webchat/tts/ai/cobuild 四个 backend.py；其余 18 个只核对 def handle 存在性，未读正文。 | done | 71 | 2026-10-31T14:42:02+03:00 |  |
+| docs/appendix/interfaces/ | 新增 4 份插件接口契约（round 71） | webchat（8 子路径）、tts（2，含 __binary__ 音频响应）、ai（keys/chat/state）、cobuild（data/checkin/void）；含方法、入参、返回概要、错误码与调用方；无法从代码确认的返回字段标“需执行 Agent 核实”。 | done | 71 | 2026-10-31T14:42:02+03:00 |  |
+| docs/plugin-development-guide.md | 守则第 5 节接口索引改指向契约（round 71） | 接口表新增 ai/cobuild 两行并把“接口正文”改为 docs/appendix/interfaces/<id>.md；约定改为优先读契约、无契约读 backend.py::handle；未改其他章节与检查清单。 | done | 71 | 2026-10-31T14:42:02+03:00 |  |
+| data/bg_import/::round71-none | 本次无背景库数据（round 71） | 用户未提供「项目优化与当前综述」导出 json；背景库当前不可用，本轮未执行 mode:"update" 导入、未写入背景库数据。 | done | 71 | 2026-10-31T14:42:02+03:00 |  |
+| docs/plugin-development-guide.md | 新增插件开发守则（round 70） | 按开发者动线组织 7 节（快速开始/信息导航/开发流程/检查清单/接口索引/常见错误/参考实现）；规则引用白皮书 §二–§六、附录 A–E、§十，不重复条文；接口索引只列路由前缀与 called_by，不抄签名；常见错误含 plugins/lib/ 扫描（round 67）与批处理 LF（round 69）教训。 | done | 70 | 2026-10-31T14:21:54+03:00 |  |
+| docs/appendix/prompts/plugin-dev-prompt.md | 新增插件开发提示词模板（round 70） | 含目录与 10 个占位符（PLUGIN_ID/PLUGIN_NAME/PLUGIN_KIND/HAS_UI/ENTRY_OR_BACKEND/DEPENDS_ON_LIB/NEEDS_DB/NEEDS_DATA_DIR/PROVIDES/TARGET_DIR）；要求先列假设与待确认项、确认后再写代码；涉及下沉/平级插件先读接口索引；不复制白皮书全文。 | done | 70 | 2026-10-31T14:21:54+03:00 |  |
+| tools/scaffold_plugin.py | 新增插件脚手架脚本（仅占位符替换，round 70） | 读取模板并替换占位符；参数含 --id/--name/--kind/--has-ui/--entry-or-backend/--depends-on/--needs-db/--needs-data-dir/--provides/--target-dir/--out；--id 校验 ^[a-z][a-z0-9_]*$；未知占位符保留并警告；缺失必填报错退出非零；默认输出 data/backup/scaffold/<id>-prompt.md，--out - 输出 stdout；拒绝写入 plugins/；不 import 项目模块、不跑 smoke。验证：--help 可用、示例运行占位符全部替换、非法 id 退出 2。 | done | 70 | 2026-10-31T14:21:54+03:00 |  |
+| docs/appendix/plugin-market-schema-draft.md | 新增插件市场数据库设计草案（round 70） | 标注草案、未建表；未来落 plugins/market/schema.sql，内容表须含 raw_json/live_json；数据来源本地优先、远端可选，预留 source/source_url/fetched_at；草案含 market_plugins、market_versions、market_interfaces、market_deps、market_categories 五表字段级定义与来源标注；id/kind/has_ui/called_by 以 plugins/lib.json 为单一真相；待定项含存储位置、是否复用 lib.json、远端协议。未建插件、未写 SQL。 | done | 70 | 2026-10-31T14:21:54+03:00 |  |
+| docs/plugin-development-whitepaper.md | 白皮书补工程约束并加开发者文档索引（round 70） | 核对后补缺失规则：新增 §十（provides/consumes 可选声明与“需执行 Agent 核实”的宿主强制程度；plugins/ 目录扫描边界与 plugins/lib.json 单文件；批处理必须 CRLF）；新增 §十一 索引（守则、提示词模板、脚手架、市场草案、plugins/lib.json）。未改 §一–§九 与附录 A–E 语义。 | done | 70 | 2026-10-31T14:21:54+03:00 |  |
+| README.md | README 增加插件开发入口（round 70） | §9 开发约定首条指向守则/提示词模板/脚手架/市场草案；§11 文档新增守则、模板、市场草案链接；链接 0 失效。 | done | 70 | 2026-10-31T14:21:54+03:00 |  |
+| data/bg_import/::round70-none | 本次无背景库数据（round 70） | 用户未提供「项目优化与当前综述」导出 json；背景库当前不可用，本轮未执行 mode:"update" 导入、未写入背景库数据。 | done | 70 | 2026-10-31T14:21:54+03:00 |  |
 | webchat_probe.py | 删除（round 59 后路径失效，正式通道为 plugins/webchat/） | 删除前核实：脚本 PROFILE 仍指向项目根 webchat_profile/（round 59 已迁 data/plugins/webchat/webchat_profile/），并硬编码示例会话 URL 与旧选择器；无运行入口、config 或启动脚本引用，正式网页会话通道为 plugins/webchat/。确认失效后删除。备份 data/backup/round69_cleanup/webchat_probe.py.bak（4330 B，SHA256 243DF7E2BFB55A5609D2A4F1604E5A48215EC4EA15DFE0BBBA33E7B385302F6A）。历史 decided 中 webchat_probe 旧记录保留不改。 | deleted | 69 | 2026-10-31T13:29:56+03:00 | data/backup/round69_cleanup/webchat_probe.py.bak |
 | tools/启动旅行之木.cmd | 启动脚本迁至 tools/ 并修正相对路径（round 69） | 同盘移动，文件名不变；cd /d "%~dp0" → "%~dp0.."；两处 main.py 路径 → "%~dp0..\main.py"；pythonw 优先/python 回退逻辑与失败提示未改；无盘符/用户名硬编码。验证：cmd /c tools\启动旅行之木.cmd 后 8765 成功监听。历史 decided 中指向项目根该脚本的 path 字段与正文提及已统一为 tools/启动旅行之木.cmd，仅指该脚本处；历史 round/at/status 未改。 tools/启动旅行之木.cmd 必须保持 CRLF 行尾；LF 行尾会导致 cmd 解析异常（本轮已复测并恢复 CRLF）。 | done | 69 | 2026-10-31T13:29:56+03:00 | data/backup/round69_cleanup/ |
 | README.md | README 同步启动脚本新路径并移除 webchat_probe 表述（round 69） | 快速开始改为 tools\启动旅行之木.cmd 并说明 %~dp0..；目录树移除根目录 webchat_probe.py 与根启动脚本、新增 tools/；删除 webchat_probe 保留建议。白皮书与 plugins/lib.json grep 无 webchat_probe / 启动旅行之木 命中，未改；.gitignore 未列两者，未改。files_manifest 为快照未重导出，仍含旧条目。链接 0 失效。 | done | 69 | 2026-10-31T13:29:56+03:00 |  |

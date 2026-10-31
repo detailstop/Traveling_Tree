@@ -76,6 +76,8 @@ live_json TEXT NOT NULL DEFAULT '' -- 当前编辑状态
 
   前端读取优先使用 `live_json`，为空时回退 `raw_json`。迁移脚本必须打印“原始条目数 / 成功入库条目数”并校验一致，以防静默丢失数据。
 
+- **派生/日志/快照表口径（round 72 G2）**：内容表、日志/事件表必须同时含 `raw_json` 与 `live_json`；纯派生/缓存/快照表可豁免 `live_json`，但必须保留 `raw_json`，或在 `schema.sql` 注释中写明可重建来源。豁免表必须在插件 README 的「数据表」中列出，未标注视为违规。
+
 - **SQL 集中与隔离**：插件的 SQL 必须集中在自己的 `repo.py` 或 `backend.py` 中，严禁跨插件 JOIN，严禁去宿主里找 SQL。表名必须以插件 ID 或功能为前缀。
 
 ## 六、 测试与解耦红线
@@ -156,6 +158,51 @@ round 65 删除 `plugin-development-whitepaper-v2.1-draft.md` 与 `project-closu
 | `docs/appendix/file_navigation.json` | 文件去留与审查决策主数据源（pending/decided） | 新增决定追加；历史语义保留；不改 schema |
 | `docs/appendix/file_navigation.md` | 由 JSON 生成的只读摘要 | 严禁手改；改 JSON 后运行 `python tools/gen_file_navigation_md.py` |
 | `docs/appendix/files_manifest.json` | file_preview 导出的工作区文件清单快照 | 只读参考；不是实时索引，文件变动后需重新导出 |
+
+## 十、工程约束补充（round 70）
+
+### 10.1 `provides` / `consumes`
+- 两者为 manifest v2 的**可选能力声明**数组，用于描述“提供/消费的能力名”；不替代运行时分发或鉴权。
+- 当前宿主对这两个字段的强制程度：**需执行 Agent 核实**（实现见 `ui/web/server.py`）；文档与未来市场索引只把它们当作声明信息。
+- 声明应保持稳定、可读（如 `["webchat"]`），不要写临时路径或版本号。
+
+### 10.2 `plugins/` 目录扫描边界
+- 宿主只扫描 `plugins/<目录>/manifest.json`，并要求 `manifest.id == 目录名`；把插件移出 `plugins/` 或改目录名会导致其不再被发现、API 404。
+- `tests/smoke_plugins.py` 会把 `plugins/` 下**任意子目录**计入插件目录数（当前 22）；因此不要把索引/文档放在 `plugins/lib/` 之类的子目录，统一用单文件 `plugins/lib.json`（宿主与测试不读取该文件）。
+- 插件目录内可自由增加实现文件，但不要新增会被误认为插件的子目录。
+
+### 10.3 Windows 批处理必须 CRLF
+- `.cmd` 脚本必须保存为 CRLF 行尾；LF 行尾会导致 `cmd.exe` 解析异常（round 69 实测）。
+- 当前启动脚本 `tools/启动旅行之木.cmd` 必须保持 CRLF；编辑后请复核行尾。
+
+### 10.4 `provides` 必须、`consumes` 可选（round 72 G3）
+- 插件向其他插件或宿主前端提供能力时，必须在 manifest 声明 `provides`（能力名数组，如 `["webchat"]`）。
+- `consumes` 为可选声明；跨插件调用仍以 HTTP `/api/plugin/<id>/*` 为主。
+- 宿主是否强制消费这两个字段：**需执行 Agent 核实**；规则层面按声明要求执行。
+
+### 10.5 跨插件调用与标注（round 72 G4）
+- 跨插件调用优先走 HTTP；不把其他插件的 backend/业务模块当作库直接 import。
+- 历史实现若确需直接 import（如 `book_reader` → `pixel_art.service`），必须在该插件 README 的「依赖」与 `plugins/lib.json` 的 `notes` 中标注，作为已知耦合。
+- 新增直接 import 需在代码评审中说明理由。
+
+### 10.6 共享缓存路径例外（round 72 G5）
+- 插件私有数据默认放 `data/plugins/<id>/`（`data_dirs`）。
+- 跨插件共享的缓存（当前仅 `tts` 的 `data/voice_cache/`）保留为共享缓存例外；必须在插件 README 与 `plugins/lib.json` notes 说明，不要求迁入插件私有目录。
+
+### 10.7 多入口 feature 命名（round 72 G6，建议）
+- 推荐多入口插件使用 `feature_<entry>.js`（如 `feature_pdf.js`）；manifest 的 `entries[].feature` 是唯一事实来源，文件名不强制。
+- 采用自定义命名时，在 README「入口与路由」列出 entry 与文件对应关系。
+
+## 十一、开发者文档索引（round 70）
+
+- 插件开发守则（7 节开发者动线）：[docs/plugin-development-guide.md](plugin-development-guide.md)
+- 提示词模板（含占位符）：[docs/appendix/prompts/plugin-dev-prompt.md](appendix/prompts/plugin-dev-prompt.md)
+- 脚手架（只做占位符替换，不写 `plugins/`）：`tools/scaffold_plugin.py`
+- 插件市场数据库设计草案（未建表）：[docs/appendix/plugin-market-schema-draft.md](appendix/plugin-market-schema-draft.md)
+- 插件分类清单（只读）：`plugins/lib.json`
+- 每个插件目录必须提供 `plugins/<id>/README.md`，固定小节：职责 / 入口与路由 / 数据表 / 依赖 / 注意事项；格式见守则 §4.1（round 72 G1）。
+
+规则本体仍以本文 §二–§六、附录 A–E 与 §十 为准；守则与模板只做引用与流程引导，不重复条文。
 
 ---
 

@@ -11,11 +11,13 @@ CREATE TABLE IF NOT EXISTS screeps_units (
   id         TEXT PRIMARY KEY,
   name       TEXT NOT NULL DEFAULT '',
   role_name  TEXT NOT NULL DEFAULT '',
-  raw_json   TEXT NOT NULL
+  raw_json   TEXT NOT NULL,
+  live_json  TEXT NOT NULL DEFAULT ''
 );
 
 CREATE TABLE IF NOT EXISTS screeps_modules (
   path       TEXT PRIMARY KEY,
   content    TEXT NOT NULL DEFAULT '',
-  raw_json   TEXT NOT NULL
+  raw_json   TEXT NOT NULL,
+  live_json  TEXT NOT NULL DEFAULT ''
 );

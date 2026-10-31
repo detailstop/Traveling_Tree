@@ -12,7 +12,8 @@ CREATE TABLE IF NOT EXISTS urlarch_groups (
   name        TEXT NOT NULL DEFAULT '',
   group_type  TEXT NOT NULL DEFAULT 'normal',
   order_index INTEGER NOT NULL DEFAULT 0,
-  raw_json    TEXT NOT NULL
+  raw_json    TEXT NOT NULL,
+  live_json   TEXT NOT NULL DEFAULT ''
 );
 
 CREATE TABLE IF NOT EXISTS urlarch_links (
@@ -22,6 +23,7 @@ CREATE TABLE IF NOT EXISTS urlarch_links (
   note       TEXT NOT NULL DEFAULT '',
   ts         TEXT NOT NULL DEFAULT '',
   group_id   TEXT NOT NULL DEFAULT 'ungrouped',
-  raw_json   TEXT NOT NULL
+  raw_json   TEXT NOT NULL,
+  live_json  TEXT NOT NULL DEFAULT ''
 );
 CREATE INDEX IF NOT EXISTS idx_urlarch_links_group ON urlarch_links(group_id);

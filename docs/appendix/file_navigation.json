@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-31T13:29:56+03:00",
-  "round": 69,
+  "generated_at": "2026-10-31T14:51:28+03:00",
+  "round": 72,
   "pending": [
     {
       "path": "tests/smoke_plugin_decoupling.py::Server.start",
@@ -10,9 +10,209 @@
       "status": "pending",
       "round": 54,
       "created_at": "2026-10-29T19:48:41+03:00"
+    },
+    {
+      "path": "plugins/bg_library",
+      "decision": "round 71 审查缺失项待修",
+      "reason": "blocker：4 张表（bg_nodes、bg_versions、file_notes、db_rules）缺双列；README 已补；按 G2 待 round 73 迁移。",
+      "status": "pending",
+      "round": 71,
+      "created_at": "2026-10-31T14:42:02+03:00"
+    },
+    {
+      "path": "plugins/book_reader",
+      "decision": "round 71 审查缺失项待修",
+      "reason": "blocker：12 张表缺双列；README 已补并标注 pixel_art 直接 import（G4）；待 round 73 迁移。",
+      "status": "pending",
+      "round": 71,
+      "created_at": "2026-10-31T14:42:02+03:00"
+    },
+    {
+      "path": "plugins/finance",
+      "decision": "round 71 审查缺失项待修",
+      "reason": "blocker：17 张表缺双列；README 已补；待 round 73 迁移。",
+      "status": "pending",
+      "round": 71,
+      "created_at": "2026-10-31T14:42:02+03:00"
+    },
+    {
+      "path": "plugins/model_usage",
+      "decision": "round 71 审查缺失项待修",
+      "reason": "should：model_usage_logs 日志表缺双列；README 已补；G2 已定日志表双列，待 round 73 迁移。",
+      "status": "pending",
+      "round": 71,
+      "created_at": "2026-10-31T14:42:02+03:00"
+    },
+    {
+      "path": "plugins/pixel_art",
+      "decision": "round 71 审查缺失项待修",
+      "reason": "blocker：pixel_artworks、pixel_asset_refs、visual_settings 缺双列；README 已补；待 round 73。",
+      "status": "pending",
+      "round": 71,
+      "created_at": "2026-10-31T14:42:02+03:00"
+    },
+    {
+      "path": "plugins/project_manager",
+      "decision": "round 71 审查缺失项待修",
+      "reason": "blocker：5 张 pm_* 表缺双列；README 已补；待 round 73。",
+      "status": "pending",
+      "round": 71,
+      "created_at": "2026-10-31T14:42:02+03:00"
+    },
+    {
+      "path": "plugins/russian",
+      "decision": "round 71 审查缺失项待修",
+      "reason": "blocker：5 张表缺双列；README 已补；待 round 73。",
+      "status": "pending",
+      "round": 71,
+      "created_at": "2026-10-31T14:42:02+03:00"
+    },
+    {
+      "path": "plugins/webchat",
+      "decision": "round 71 审查缺失项待修",
+      "reason": "should：provides 未声明（README 已补）；G3 已定 provides 必须，待 round 73 补 manifest。",
+      "status": "pending",
+      "round": 71,
+      "created_at": "2026-10-31T14:42:02+03:00"
     }
   ],
   "decided": [
+    {
+      "path": "docs/plugin-development-guide.md",
+      "decision": "G1–G6 口径落地守则（round 72）",
+      "reason": "G1 新增 §4.1 插件 README 格式（职责/入口与路由/数据表/依赖/注意事项）并加入检查清单；G2 检查清单要求豁免表列 raw_json/来源；G3 provides 必须、consumes 可选；G4 跨插件 import 需 README+lib.json notes 标注；G5 共享缓存例外与 G6 多入口命名在白皮书 §十.6/§十.7；§6 常见错误补两行。未改 §5 接口索引。",
+      "status": "done",
+      "round": 72,
+      "at": "2026-10-31T14:51:28+03:00"
+    },
+    {
+      "path": "docs/plugin-development-whitepaper.md",
+      "decision": "白皮书补 G2–G6 规则与 README 要求（round 72）",
+      "reason": "§五补 G2 派生/日志/快照表口径；§十新增 10.4 provides 必须/consumes 可选、10.5 跨插件调用与标注、10.6 共享缓存例外、10.7 多入口 feature 命名建议；§十一补插件 README 强制条款。未改附录 A–E 语义。",
+      "status": "done",
+      "round": 72,
+      "at": "2026-10-31T14:51:28+03:00"
+    },
+    {
+      "path": "plugins/*/README.md",
+      "decision": "补 22 个插件 README（round 72 G1）",
+      "reason": "22/22 按固定五节生成：职责、入口与路由、数据表、依赖、注意事项；内容来自 manifest/schema 表名/backend handle 位置/lib.json；未读无关插件实现；未满足 G2 的表在 README 标注待 round 73。",
+      "status": "done",
+      "round": 72,
+      "at": "2026-10-31T14:51:28+03:00"
+    },
+    {
+      "path": "plugins/*/schema.sql::round72-live-json",
+      "decision": "4 个插件补 live_json 与幂等 migrate（round 72 阶段 A5）",
+      "reason": "schedule（week_plans/tasks）、screeps（units/modules）、urlarch（groups/links）、promptgen（flows/modules/tasks/flow_groups）补 live_json TEXT NOT NULL DEFAULT ''；migrate 用 PRAGMA 检查 + ALTER + live=raw，临时旧库连跑两次幂等通过；全量 13 通过（仅 TTS 502）。",
+      "status": "done",
+      "round": 72,
+      "at": "2026-10-31T14:51:28+03:00"
+    },
+    {
+      "path": "docs/appendix/file_navigation.json",
+      "decision": "round 72 pending 闭环：7 条 resolved、8 条保留，阶段 B 留 round 73（round 72）",
+      "reason": "已修复：schedule/screeps/urlarch/promptgen（schema+migrate）、cobuild/pdf/tts（README）共 7 条移入 resolved；保留 bg_library/book_reader/finance/model_usage/pixel_art/project_manager/russian/webchat 共 8 条并更新原因（README 已补，schema/provides 待 round 73）；Server.start 不变。阶段 B（6 blocker + webchat provides + model_usage 日志表）未执行。",
+      "status": "done",
+      "round": 72,
+      "at": "2026-10-31T14:51:28+03:00"
+    },
+    {
+      "path": "data/bg_import/::round72-none",
+      "decision": "本次无背景库数据（round 72）",
+      "reason": "用户未提供「项目优化与当前综述」导出 json；背景库当前不可用，本轮未执行 mode:\"update\" 导入、未写入背景库数据。",
+      "status": "done",
+      "round": 72,
+      "at": "2026-10-31T14:51:28+03:00"
+    },
+    {
+      "path": "docs/appendix/plugin-audit-round71.md",
+      "decision": "新增 22 插件规范性审查报告（round 71）",
+      "reason": "依据守则第 4 节、白皮书正文与附录 A–E、plugins/lib.json；逐插件给出合规/缺失（blocker/should/nice）/建议/规则缺口。结论：blocker 插件 10 个、should-only 5 个、需 round 72 修复 15 个、无需修复 7 个；规则缺口 6 条（G1–G6）。仅通读 webchat/tts/ai/cobuild 四个 backend.py；其余 18 个只核对 def handle 存在性，未读正文。",
+      "status": "done",
+      "round": 71,
+      "at": "2026-10-31T14:42:02+03:00"
+    },
+    {
+      "path": "docs/appendix/interfaces/",
+      "decision": "新增 4 份插件接口契约（round 71）",
+      "reason": "webchat（8 子路径）、tts（2，含 __binary__ 音频响应）、ai（keys/chat/state）、cobuild（data/checkin/void）；含方法、入参、返回概要、错误码与调用方；无法从代码确认的返回字段标“需执行 Agent 核实”。",
+      "status": "done",
+      "round": 71,
+      "at": "2026-10-31T14:42:02+03:00"
+    },
+    {
+      "path": "docs/plugin-development-guide.md",
+      "decision": "守则第 5 节接口索引改指向契约（round 71）",
+      "reason": "接口表新增 ai/cobuild 两行并把“接口正文”改为 docs/appendix/interfaces/<id>.md；约定改为优先读契约、无契约读 backend.py::handle；未改其他章节与检查清单。",
+      "status": "done",
+      "round": 71,
+      "at": "2026-10-31T14:42:02+03:00"
+    },
+    {
+      "path": "data/bg_import/::round71-none",
+      "decision": "本次无背景库数据（round 71）",
+      "reason": "用户未提供「项目优化与当前综述」导出 json；背景库当前不可用，本轮未执行 mode:\"update\" 导入、未写入背景库数据。",
+      "status": "done",
+      "round": 71,
+      "at": "2026-10-31T14:42:02+03:00"
+    },
+    {
+      "path": "docs/plugin-development-guide.md",
+      "decision": "新增插件开发守则（round 70）",
+      "reason": "按开发者动线组织 7 节（快速开始/信息导航/开发流程/检查清单/接口索引/常见错误/参考实现）；规则引用白皮书 §二–§六、附录 A–E、§十，不重复条文；接口索引只列路由前缀与 called_by，不抄签名；常见错误含 plugins/lib/ 扫描（round 67）与批处理 LF（round 69）教训。",
+      "status": "done",
+      "round": 70,
+      "at": "2026-10-31T14:21:54+03:00"
+    },
+    {
+      "path": "docs/appendix/prompts/plugin-dev-prompt.md",
+      "decision": "新增插件开发提示词模板（round 70）",
+      "reason": "含目录与 10 个占位符（PLUGIN_ID/PLUGIN_NAME/PLUGIN_KIND/HAS_UI/ENTRY_OR_BACKEND/DEPENDS_ON_LIB/NEEDS_DB/NEEDS_DATA_DIR/PROVIDES/TARGET_DIR）；要求先列假设与待确认项、确认后再写代码；涉及下沉/平级插件先读接口索引；不复制白皮书全文。",
+      "status": "done",
+      "round": 70,
+      "at": "2026-10-31T14:21:54+03:00"
+    },
+    {
+      "path": "tools/scaffold_plugin.py",
+      "decision": "新增插件脚手架脚本（仅占位符替换，round 70）",
+      "reason": "读取模板并替换占位符；参数含 --id/--name/--kind/--has-ui/--entry-or-backend/--depends-on/--needs-db/--needs-data-dir/--provides/--target-dir/--out；--id 校验 ^[a-z][a-z0-9_]*$；未知占位符保留并警告；缺失必填报错退出非零；默认输出 data/backup/scaffold/<id>-prompt.md，--out - 输出 stdout；拒绝写入 plugins/；不 import 项目模块、不跑 smoke。验证：--help 可用、示例运行占位符全部替换、非法 id 退出 2。",
+      "status": "done",
+      "round": 70,
+      "at": "2026-10-31T14:21:54+03:00"
+    },
+    {
+      "path": "docs/appendix/plugin-market-schema-draft.md",
+      "decision": "新增插件市场数据库设计草案（round 70）",
+      "reason": "标注草案、未建表；未来落 plugins/market/schema.sql，内容表须含 raw_json/live_json；数据来源本地优先、远端可选，预留 source/source_url/fetched_at；草案含 market_plugins、market_versions、market_interfaces、market_deps、market_categories 五表字段级定义与来源标注；id/kind/has_ui/called_by 以 plugins/lib.json 为单一真相；待定项含存储位置、是否复用 lib.json、远端协议。未建插件、未写 SQL。",
+      "status": "done",
+      "round": 70,
+      "at": "2026-10-31T14:21:54+03:00"
+    },
+    {
+      "path": "docs/plugin-development-whitepaper.md",
+      "decision": "白皮书补工程约束并加开发者文档索引（round 70）",
+      "reason": "核对后补缺失规则：新增 §十（provides/consumes 可选声明与“需执行 Agent 核实”的宿主强制程度；plugins/ 目录扫描边界与 plugins/lib.json 单文件；批处理必须 CRLF）；新增 §十一 索引（守则、提示词模板、脚手架、市场草案、plugins/lib.json）。未改 §一–§九 与附录 A–E 语义。",
+      "status": "done",
+      "round": 70,
+      "at": "2026-10-31T14:21:54+03:00"
+    },
+    {
+      "path": "README.md",
+      "decision": "README 增加插件开发入口（round 70）",
+      "reason": "§9 开发约定首条指向守则/提示词模板/脚手架/市场草案；§11 文档新增守则、模板、市场草案链接；链接 0 失效。",
+      "status": "done",
+      "round": 70,
+      "at": "2026-10-31T14:21:54+03:00"
+    },
+    {
+      "path": "data/bg_import/::round70-none",
+      "decision": "本次无背景库数据（round 70）",
+      "reason": "用户未提供「项目优化与当前综述」导出 json；背景库当前不可用，本轮未执行 mode:\"update\" 导入、未写入背景库数据。",
+      "status": "done",
+      "round": 70,
+      "at": "2026-10-31T14:21:54+03:00"
+    },
     {
       "path": "webchat_probe.py",
       "decision": "删除（round 59 后路径失效，正式通道为 plugins/webchat/）",
@@ -6063,6 +6263,83 @@
     }
   ],
   "resolved": [
+    {
+      "path": "plugins/cobuild",
+      "move_plan": "",
+      "guide_plan": "",
+      "summary": "should：README 缺失（backend-only 打卡入口需说明）。",
+      "round": 71,
+      "created_at": "2026-10-31T14:42:02+03:00",
+      "resolved_at": "2026-10-31T14:51:28+03:00",
+      "resolved_round": 72,
+      "resolution": "round 72 已补 plugins/cobuild/README.md（固定五节）；should 关闭。"
+    },
+    {
+      "path": "plugins/pdf",
+      "move_plan": "",
+      "guide_plan": "",
+      "summary": "should：README 缺失（多入口，需说明二进制与批量改写风险）。",
+      "round": 71,
+      "created_at": "2026-10-31T14:42:02+03:00",
+      "resolved_at": "2026-10-31T14:51:28+03:00",
+      "resolved_round": 72,
+      "resolution": "round 72 已补 plugins/pdf/README.md（固定五节）；should 关闭。"
+    },
+    {
+      "path": "plugins/promptgen",
+      "move_plan": "",
+      "guide_plan": "",
+      "summary": "blocker：pg_flows、pg_modules、pg_tasks、pg_flow_groups 缺 live_json（有 raw）；nice：README/consumes。",
+      "round": 71,
+      "created_at": "2026-10-31T14:42:02+03:00",
+      "resolved_at": "2026-10-31T14:51:28+03:00",
+      "resolved_round": 72,
+      "resolution": "round 72 已为 pg_flows、pg_modules、pg_tasks、pg_flow_groups 补 live_json 并加幂等 migrate；全量 13 通过。"
+    },
+    {
+      "path": "plugins/schedule",
+      "move_plan": "",
+      "guide_plan": "",
+      "summary": "blocker：schedule_week_plans、schedule_tasks 缺 live_json；nice：README。",
+      "round": 71,
+      "created_at": "2026-10-31T14:42:02+03:00",
+      "resolved_at": "2026-10-31T14:51:28+03:00",
+      "resolved_round": 72,
+      "resolution": "round 72 已为 schedule_week_plans、schedule_tasks 补 live_json 并加幂等 migrate；全量 13 通过。"
+    },
+    {
+      "path": "plugins/screeps",
+      "move_plan": "",
+      "guide_plan": "",
+      "summary": "blocker：screeps_units、screeps_modules 缺 live_json；nice：README。",
+      "round": 71,
+      "created_at": "2026-10-31T14:42:02+03:00",
+      "resolved_at": "2026-10-31T14:51:28+03:00",
+      "resolved_round": 72,
+      "resolution": "round 72 已为 screeps_units、screeps_modules 补 live_json 并加幂等 migrate；全量 13 通过。"
+    },
+    {
+      "path": "plugins/tts",
+      "move_plan": "",
+      "guide_plan": "",
+      "summary": "should：README 缺失；语音缓存 data/voice_cache 未走 data_dirs；nice：依赖说明。",
+      "round": 71,
+      "created_at": "2026-10-31T14:42:02+03:00",
+      "resolved_at": "2026-10-31T14:51:28+03:00",
+      "resolved_round": 72,
+      "resolution": "round 72 已补 README；G5 决定保留 data/voice_cache 为共享缓存例外并在 README/白皮书注明；should 关闭。"
+    },
+    {
+      "path": "plugins/urlarch",
+      "move_plan": "",
+      "guide_plan": "",
+      "summary": "blocker：urlarch_groups、urlarch_links 缺 live_json；nice：README。",
+      "round": 71,
+      "created_at": "2026-10-31T14:42:02+03:00",
+      "resolved_at": "2026-10-31T14:51:28+03:00",
+      "resolved_round": 72,
+      "resolution": "round 72 已为 urlarch_groups、urlarch_links 补 live_json 并加幂等 migrate；全量 13 通过。"
+    },
     {
       "path": "docs/archive/download-export-feasibility-2026-10-24.md",
       "move_plan": "待用户确认：恢复、迁移或正式删除；本轮不操作文件系统。",
