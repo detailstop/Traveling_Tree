@@ -1,9 +1,75 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-31T20:23:16+03:00",
-  "round": 85,
+  "generated_at": "2026-10-31T23:48:12+03:00",
+  "round": 86,
   "pending": [],
   "decided": [
+    {
+      "path": "plugins/market/scaffold.py",
+      "decision": "插件开发提示词生成并入市场（round 86）",
+      "reason": "迁移模板解析/严格替换/残留检测；10 个占位符动态字段；写盘由 backend 统一处理；模板唯一源 docs/appendix/prompts/plugin-dev-prompt.md。",
+      "status": "done",
+      "round": 86,
+      "at": "2026-10-31T23:48:12+03:00"
+    },
+    {
+      "path": "plugins/market/backend.py",
+      "decision": "新增 /scaffold/fields 与 /scaffold/generate（round 86）",
+      "reason": "GET 返回字段与下载地址配置；POST 严格校验 id/占位符后写盘 scaffold-<id>-<时间戳>.md；未设置/非绝对/目录不存在/无权限/模板缺失均明确错误；模板缺失不影响 /list 等既有接口。",
+      "status": "done",
+      "round": 86,
+      "at": "2026-10-31T23:48:12+03:00"
+    },
+    {
+      "path": "plugins/market/feature.js",
+      "decision": "市场顶部“开发插件”按钮与动态表单（round 86）",
+      "reason": "按后端字段渲染 input（全部短参数）；未设置 download_dir 时按钮置灰；缺失项标红；成功展示可复制路径；不改卡片/搜索/过滤逻辑。",
+      "status": "done",
+      "round": 86,
+      "at": "2026-10-31T23:48:12+03:00"
+    },
+    {
+      "path": "ui/web/server.py",
+      "decision": "通用下载地址改为后端本地存储（round 86）",
+      "reason": "data/settings.json 新增 download_dir（绝对路径）；/api/settings 读写；设置页新增输入与保存。未设置/不可用时市场生成明确报错，不自动建目录。",
+      "status": "done",
+      "round": 86,
+      "at": "2026-10-31T23:48:12+03:00"
+    },
+    {
+      "path": "tools/scaffold_plugin.py",
+      "decision": "CLI 脚手架退役（round 86）",
+      "reason": "删除 CLI；解析/替换逻辑迁入 plugins/market/scaffold.py；守则 §3 第 3 步、README/白皮书引用改为市场页“开发插件”。",
+      "status": "done",
+      "round": 86,
+      "at": "2026-10-31T23:48:12+03:00",
+      "old_path": "tools/scaffold_plugin.py",
+      "new_path": "plugins/market/scaffold.py"
+    },
+    {
+      "path": "tests/smoke_market.py",
+      "decision": "smoke_market 增补开发插件用例（round 86）",
+      "reason": "字段清单、生成文件名格式、缺值/路径穿越/未设置拒绝、模板缺失时市场其余接口正常；34/34。",
+      "status": "done",
+      "round": 86,
+      "at": "2026-10-31T23:48:12+03:00"
+    },
+    {
+      "path": "README.md",
+      "decision": "补通用下载地址与开发插件文档、基线修正（round 86）",
+      "reason": "§6 写明 download_dir 键名/位置/用途/未设置行为；开发插件入口与模板依赖；smoke_market 34/34，合计 986/987；白皮书 §7.2/§7.5、守则 §3/§4 同步。",
+      "status": "done",
+      "round": 86,
+      "at": "2026-10-31T23:48:12+03:00"
+    },
+    {
+      "path": "data/bg_import/::round86-none",
+      "decision": "本次无背景库数据（round 86）",
+      "reason": "用户未提供「项目优化与当前综述」导出 json；背景库不可用，本轮未执行 update 导入、未写背景库数据。",
+      "status": "done",
+      "round": 86,
+      "at": "2026-10-31T23:48:12+03:00"
+    },
     {
       "path": "docs/appendix/plugin-info-card-template.md",
       "decision": "新增插件信息卡模板（round 85）",

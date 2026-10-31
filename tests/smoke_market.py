@@ -202,6 +202,41 @@ summary: 无包源信息卡
     expect_error("禁删非 test_ 表", lambda: packaging.drop_test_tables(
         dbp, ["keep_me"]), "forbidden")
 
+    # ---- 开发插件：字段/严格校验/写盘/模板缺失 ----
+    sc = backend.scaffold
+    fields = backend.handle("GET", "/scaffold/fields", {}, {})
+    keys = [f["key"] for f in fields.get("fields", [])]
+    check("开发插件字段清单", fields.get("ok") is True and len(keys) == 10
+          and all(f["required"] and not f["multiline"] for f in fields["fields"]))
+    dl = tmp / "dl"; dl.mkdir()
+    sc.output_dir = lambda: dl
+    vals = {k: "demo-value" for k in keys}
+    vals.update({"PLUGIN_ID": "demo", "PLUGIN_NAME": "演示", "PLUGIN_KIND": "functional",
+                 "HAS_UI": "是", "NEEDS_DB": "否", "NEEDS_DATA_DIR": "否",
+                 "TARGET_DIR": "plugins/demo/"})
+    ok = backend.handle("POST", "/scaffold/generate", {}, {"id": "demo", "values": vals})
+    import re as _re
+    check("生成写盘文件名格式", ok.get("ok") is True
+          and _re.fullmatch(r"scaffold-demo-\d{8}-\d{6}\.md", ok.get("filename", ""))
+          and Path(ok["path"]).is_file() and not _re.search(r"\{\{[A-Za-z0-9_]+\}\}", Path(ok["path"]).read_text(encoding="utf-8")))
+    bad = dict(vals); bad.pop("PLUGIN_NAME")
+    check("缺值拒绝", backend.handle("POST", "/scaffold/generate", {},
+          {"id": "demo", "values": bad}).get("error") == "missing_values")
+    check("路径穿越 id 拒绝", backend.handle("POST", "/scaffold/generate", {},
+          {"id": "../evil", "values": vals}).get("error") == "bad_id")
+    sc.output_dir = lambda: None
+    check("未设置下载地址拒绝", backend.handle("POST", "/scaffold/generate", {},
+          {"id": "demo", "values": vals}).get("error") == "not_configured")
+    old_tpl = sc.TEMPLATE
+    sc.TEMPLATE = tmp / "missing.md"
+    try:
+        miss = backend.handle("GET", "/scaffold/fields", {}, {})
+        still = backend.handle("GET", "/list", {}, {})
+    finally:
+        sc.TEMPLATE = old_tpl
+    check("模板缺失时市场其余接口正常", miss.get("error") == "template_missing"
+          and still.get("ok") is True)
+
     shutil.rmtree(tmp, ignore_errors=True)
     print(f"\nRESULT: {results.count(True)}/{len(results)} PASS")
     return 0 if all(results) else 1

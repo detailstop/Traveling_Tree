@@ -37,3 +37,16 @@
 .mk-grid .mono { font-family: ui-monospace, Consolas, monospace; }
 .mk-danger { font-size: 11px; color: #b04a5a; display: flex; gap: 6px; align-items: center; }
 .mk-empty { padding: 30px; text-align: center; color: var(--text-dim, #8a7480); grid-column: 1 / -1; }
+
+/* 开发插件面板 */
+.mk-dev-panel { border: 1px solid rgba(120,90,110,.22); border-radius: 14px; padding: 12px 14px; background: rgba(255,255,255,.55); display: flex; flex-direction: column; gap: 10px; }
+.mk-dev-head { display: flex; flex-direction: column; gap: 3px; font-size: 13px; }
+.mk-dev-head span { font-size: 11px; color: var(--text-dim, #8a7480); }
+.mk-dev-form { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
+.mk-field { display: flex; flex-direction: column; gap: 4px; font-size: 12px; }
+.mk-field span i { font-style: normal; font-size: 10px; color: var(--text-dim, #8a7480); }
+.mk-field input { padding: 7px 10px; border-radius: 9px; border: 1px solid rgba(120,90,110,.25); background: rgba(255,255,255,.75); }
+.mk-field.bad input { border-color: #d2455a; background: #fff0f2; }
+.mk-dev-actions { display: flex; justify-content: flex-end; }
+.mk-dev-result { font-size: 12px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.mk-dev-result code { font-family: ui-monospace, Consolas, monospace; word-break: break-all; }

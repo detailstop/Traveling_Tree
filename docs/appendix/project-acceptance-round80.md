@@ -101,7 +101,7 @@
 ## 9. 未来方向
 
 - **插件市场**：设计草案见 [plugin-market-schema-draft.md](plugin-market-schema-draft.md)（未建表）；后续可落 `plugins/market/`。
-- **脚手架可视化入口**：`tools/scaffold_plugin.py` 已能生成提示词；可加本地页面/CLI 参数向导。
+- **脚手架可视化入口**：已由市场「开发插件」实现（round 86；原 `tools/scaffold_plugin.py` 退役）。
 - **按需新增功能插件**：遵循守则 7 节动线与 G1–G6 口径；新插件必须自包含、零 Traceback、有 README。
 - **触发器等基础设施**：若新增 raw/live 表，优先显式列名（写入点少）或按 §4.2 触发器方案。
 

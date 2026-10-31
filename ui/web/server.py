@@ -432,7 +432,8 @@ apply_settings()
 def api_settings() -> dict:
     host = _read_settings()
     plugin = settings_store.read_at(_russian_settings_path())
-    out = {"download_groups": _download_groups(host.get("download_groups"))}
+    out = {"download_groups": _download_groups(host.get("download_groups")),
+           "download_dir": str(host.get("download_dir") or "")}
     for key in ("new_quota", "review_quota"):
         if key in plugin:
             out[key] = plugin[key]
@@ -455,6 +456,11 @@ def api_settings_save(data: dict) -> dict:
             plugin_patch["review_quota"] = max(0, int(data["review_quota"]))
         except (TypeError, ValueError):
             return {"ok": False, "error": "review_quota 必须是非负整数"}
+    if "download_dir" in data:
+        value = str(data.get("download_dir") or "").strip().replace("\x00", "")
+        if len(value) > 500:
+            return {"ok": False, "error": "download_dir 过长"}
+        d["download_dir"] = value
     if "download_groups" in data:
         groups = _download_groups(d.get("download_groups"))
         groups.update(_download_groups(data.get("download_groups")))

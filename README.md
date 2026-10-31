@@ -143,6 +143,8 @@ Traveling_Tree/
 
 首次启动：若 `data/` 不存在，`config.py` 自动创建；`db/connection.py` 的 `init_db()` 扫描 `plugins/*/manifest.json` 的 `db` 声明，执行 `schema.sql` 建表、`seed.py` 播种、`migrate.py` 迁移；`manifest.data_dirs` 声明的目录自动创建。克隆本项目后直接 `python main.py` 即可，无需手动建库。`data/` 不进 Git（见 `.gitignore`），备份需单独保存。
 
+设置页「通用下载地址（本地路径）」对应 `data/settings.json` 的 `download_dir`（绝对路径）；供市场「开发插件」等后端写盘使用。未设置、路径不是绝对路径或目录不存在/不可写时，后端明确报错，不自动创建目录、不静默回退；浏览器下载句柄与该项相互独立，原有下载分组不受影响。
+
 备份应保存 `data/`（尤其 SQLite、settings、ai_keys、webchat_sessions、`data/plugins/`、各工具 JSON）以及浏览器 localStorage。`归档/` 与 `data/backup/` 为 round 制历史快照，已于 round 59 整体移出项目；如需恢复历史版本，从项目外归档目录取回，勿放回项目根或 `data/backup/`（会被 file_preview 与未来 .gitignore 排除）。
 
 ## 7. 风险提示（重要）
@@ -187,7 +189,7 @@ result = cobuild.checkin(
 
 ## 9. 开发约定
 
-- 开发新插件先读[插件开发守则](docs/plugin-development-guide.md)（7 节动线，规则引用白皮书）；AI 提示词模板见 [plugin-dev-prompt.md](docs/appendix/prompts/plugin-dev-prompt.md)，可用 `python tools/scaffold_plugin.py` 填充占位符；市场数据库草案见 [plugin-market-schema-draft.md](docs/appendix/plugin-market-schema-draft.md)（未建表）。
+- 开发新插件先读[插件开发守则](docs/plugin-development-guide.md)（7 节动线，规则引用白皮书）；AI 提示词模板见 [plugin-dev-prompt.md](docs/appendix/prompts/plugin-dev-prompt.md)，在市场页「开发插件」按字段生成并写盘；市场数据库草案见 [plugin-market-schema-draft.md](docs/appendix/plugin-market-schema-draft.md)（未建表）。
 - 不引入 Web 框架；接口保持本地 JSON；前端不引入框架/构建步骤。
 - SQL 分层：全部 SQL 在插件内（`plugins/russian/repo.py`、`plugins/project_manager/pm_repository.py`、`plugins/book_reader/book_reader.py`、`plugins/bg_library/`、`plugins/model_usage/repo.py`、`plugins/pixel_art/repo.py`、`plugins/finance/repo.py`）；宿主 `db/schema/` 为空，新增表只写 `plugins/<id>/schema.sql`，由 manifest 的 `db` 声明，`db/connection.py` 启动时扫描执行；`data/settings.json` 的 `modules.enabled.<module_key>` 可关闭对应建表（默认全启用）。
 - 新增工具：在 `ui/web/static/features/` 放按需模块，通过 `window.__toolRenderers` 注册；入口/架子在 `app.js`。
@@ -232,7 +234,7 @@ python tests/smoke_pm.py
 
 - **插件**：22 个插件目录——19 个有前端卡片（ai、aidebug、bg_library、book_reader、expdata、filejudge、finance、market、model_usage、netexp、pdf、pixel_art、project_manager、promptgen、rivet、russian、schedule、screeps、urlarch）+ 3 个 backend-only（webchat、cobuild、tts）；`sim` 试点包不常驻 `plugins/`。
 - **插件市场（round 82）**：左侧栏「插件市场」；预置 5 个（market/cobuild/webchat/tts/pixel_art）不可卸载；本地包由 `tools/build_market_packages.py` 生成到 `market/packages/*.zip`（不进 Git），`market/index.json` 进 Git；安装/卸载重启生效；卡片信息来自 `plugins/*/INFO.md` 与 `market/sources/*/INFO.md`，包级字段来自 `market/index.json`（三源合并）；卸载默认保留 `data/plugins/<id>/`，勾选删除会先备份到 `data/backup/uninstall_<id>_<ts>/`。克隆后先运行 `python tools/build_market_packages.py` 生成 `market/packages/sim.zip`，否则 sim 不可安装。`market/sources/` 进 Git 意味着试点插件源码可见；B3 已决定接受源码公开：`market/sources/` 与未来市场仓库源码可见，无敏感内容。
-- **15 项 smoke 基线**：smoke_plugins 183/183、smoke_startup_once 34/34、smoke_web 74/75（TTS 502 已知）、smoke_plugin_decoupling 454/454、smoke_finance 34/34、smoke_model_usage 49/49、smoke_reader_range 25/25、smoke_pm 23/23、smoke_books 11/11、smoke_file_preview 17/17、smoke_pdf 17/17、smoke_plugin_data_dirs 13/13、smoke_plugin_module_off 10/10、smoke_market 28/28、smoke_info_cards 8/8（合计 980/981）。
+- **15 项 smoke 基线**：smoke_plugins 183/183、smoke_startup_once 34/34、smoke_web 74/75（TTS 502 已知）、smoke_plugin_decoupling 454/454、smoke_finance 34/34、smoke_model_usage 49/49、smoke_reader_range 25/25、smoke_pm 23/23、smoke_books 11/11、smoke_file_preview 17/17、smoke_pdf 17/17、smoke_plugin_data_dirs 13/13、smoke_plugin_module_off 10/10、smoke_market 34/34、smoke_info_cards 8/8（合计 986/987）。
 - **剩余 pending**：无（`Server.start` 已在 round 80 修复并连续 20 次通过）。
 - **交接建议**：新功能进 `plugins/<id>/`，不碰宿主；改现有功能直接改对应插件；每轮下沉、改 settings 或改 API 后跑全量 13 个 smoke；`/api/plugin/<id>/*` 必须用语义子路径；二进制响应按附录 C。
 - 完整状态、数据资产与 docs 闭环规则见白皮书 [§7 项目状态与交接](docs/plugin-development-whitepaper.md) 与 [§8 docs 目录与临时文件闭环](docs/plugin-development-whitepaper.md)。

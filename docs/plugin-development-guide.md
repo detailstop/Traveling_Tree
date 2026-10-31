@@ -26,14 +26,14 @@ plugins/<id>/
 | 需求 | 去哪 |
 |---|---|
 | 基础必需信息 | 本守则 §1、§4；白皮书 §二–§六；附录 A–E；工程约束 §十 |
-| 提示词模板 | `docs/appendix/prompts/plugin-dev-prompt.md`；批量替换用 `tools/scaffold_plugin.py` |
+| 提示词模板 | `docs/appendix/prompts/plugin-dev-prompt.md`；在市场页「开发插件」生成 |
 | 对接接口 | 本守则 §5；`plugins/lib.json`（只读索引）；`docs/appendix/plugin-market-schema-draft.md`（未来市场接口索引草案） |
 
 ## 3. 开发流程（每步都有检查点）
 
 1. **提出**：写清用户场景、卡片还是 backend-only、是否持久化、是否被其他插件调用。检查点：`kind`（functional/library）与 `has_ui` 已定，能对应附录 E 口径。
 2. **设计**：列出目录、manifest 字段、路由子路径、表与数据目录。检查点：`id` 与目录名一致；根路由有语义子路径（附录 B）；schema 含 `raw_json`/`live_json`（§五）。
-3. **脚手架**：`python tools/scaffold_plugin.py --id ... --name ... --kind ... --has-ui ...` 生成 AI 提示词。检查点：生成的 prompt 无未替换占位符；脚本不写 `plugins/`。
+3. **市场生成提示词**：在市场页点「开发插件」，按表单填写全部占位符后生成并写盘（或按模板手动替换）。检查点：生成的 prompt 无未替换占位符；不写 `plugins/`。
 4. **实现**：按 feature/backend/schema 分文件落地。检查点：import 用 `from plugins.<id> import <module>`（附录 D）；二进制用 `__binary__: True` + `body`/`mime`/`filename`/`headers`（附录 C）；不在插件里写宿主业务。
 5. **自测**：`python tests/smoke_plugins.py` + 相关功能 smoke（§六、§七.2）。检查点：全绿或仅已知 TTS 502。
 6. **接入**：卡片由 `GET /api/plugins/list` 自动发现；如新增数据目录，确认 `data/plugins/<id>/` 自动创建（§四、附录 D）。检查点：清单数量与目录一致，宿主无 Traceback。
@@ -60,6 +60,7 @@ plugins/<id>/
 - [ ] 派生/缓存/快照表按 G2 口径豁免时，已在 README「数据表」列出，且保留 `raw_json` 或来源说明（白皮书 §五）
 - [ ] 跨插件直接 import 已在该插件 README 与 `plugins/lib.json` notes 标注（§十.5）
 - [ ] `plugins/<id>/INFO.md` 存在且通过 `smoke_info_cards`（front matter 必需 9 项）
+- [ ] 市场「开发插件」可用：模板存在、`download_dir` 已设置；未设置/缺值/路径穿越均明确报错
 - [ ] 打卡：`cobuild.checkin` 成功
 - [ ] 导航：`file_navigation.json` 已登记并重生成 md
 

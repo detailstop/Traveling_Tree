@@ -108,10 +108,10 @@ live_json TEXT NOT NULL DEFAULT '' -- 当前编辑状态
 | smoke_plugin_module_off.py | 模块关闭 503/不建表 | 10/10 |
 | smoke_plugins.py | manifest/清单/静态资源/后端 | 183/183 |
 | smoke_startup_once.py | 首次启动建表/API | 34/34 |
-| smoke_market.py | 市场安全/安装卸载/预置保护 | 28/28 |
+| smoke_market.py | 市场安全/安装/开发插件 | 34/34 |
 | smoke_info_cards.py | 22+1 份 INFO.md 字段/一致性 | 8/8 |
 
-合计 **980/981**（14 项全 PASS；`smoke_web` 74/75，TTS 502 为唯一允许 FAIL）。
+合计 **986/987**（14 项全 PASS；`smoke_web` 74/75，TTS 502 为唯一允许 FAIL）。
 
 已知 FAIL：`smoke_web` 的 TTS 502 来自 edge-tts 外部网络不可用，不阻塞其他断言；出现非 TTS 的 FAIL 按回滚规则处理。
 
@@ -131,6 +131,7 @@ live_json TEXT NOT NULL DEFAULT '' -- 当前编辑状态
 - `data/settings.json`：`download_groups` + `modules.enabled`；插件 settings 在 `data/plugins/<id>/settings.json`。
 - 敏感文件：`data/ai_keys.json`、`data/webchat_sessions.json`、`data/plugins/webchat/webchat_profile/`、`data/plugins/finance/fixtures/rt_fin.json`；只按路径处理，不读正文、不进 Git。
 - 市场资产：`market/index.json`（进 Git，包清单/SHA256）、`market/packages/*.zip`（不进 Git）、`market/sources/<id>/`（试点源码，进 Git）、`market/.trash/`（卸载备份，不进 Git）；安装记录在 `market_installed` 表。
+- 通用下载地址：`data/settings.json` 的 `download_dir`（绝对路径）；市场「开发插件」写盘使用，未设置/目录不存在/无权限时明确报错。
 - 市场源：`data/plugins/market/settings.json` 的 `market_source` 只读默认 `market/packages/`（A 阶段）；B3 已决定接受源码公开：`market/sources/` 与未来市场仓库源码可见，无敏感内容。
 
 ### 7.6 round 65 删除前核对结论（round 66 补记）
@@ -206,7 +207,7 @@ round 65 删除 `plugin-development-whitepaper-v2.1-draft.md` 与 `project-closu
 
 - 插件开发守则（7 节开发者动线）：[docs/plugin-development-guide.md](plugin-development-guide.md)
 - 提示词模板（含占位符）：[docs/appendix/prompts/plugin-dev-prompt.md](appendix/prompts/plugin-dev-prompt.md)
-- 脚手架（只做占位符替换，不写 `plugins/`）：`tools/scaffold_plugin.py`
+- 开发提示词（只做占位符替换，不写 `plugins/`）：市场页「开发插件」→ `/api/plugin/market/scaffold/*`（原 CLI 已退役）
 - 插件市场数据库设计草案（未建表）：[docs/appendix/plugin-market-schema-draft.md](appendix/plugin-market-schema-draft.md)
 - 插件分类清单（只读）：`plugins/lib.json`
 - 每个插件目录必须提供 `plugins/<id>/README.md`，固定小节：职责 / 入口与路由 / 数据表 / 依赖 / 注意事项；格式见守则 §4.1（round 72 G1）。

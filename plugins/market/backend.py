@@ -14,6 +14,7 @@ import config
 from db.connection import get_conn
 from plugins.market import packaging
 from plugins.market.info import InfoError, read_info
+from plugins.market import scaffold
 
 PRESETS = ("market", "cobuild", "webchat", "tts", "pixel_art")
 _ID_RE = re.compile(r"^[a-z][a-z0-9_]{1,31}$")
@@ -290,8 +291,17 @@ def handle(method: str, subpath: str, query: dict, body: dict):
         if method == "POST" and route == "uninstall":
             return uninstall(body.get("id"), bool(body.get("delete_data")),
                              bool(body.get("delete_tables")))
+        if method == "GET" and route == "scaffold/fields":
+            out = scaffold.output_dir()
+            return {"ok": True, "fields": scaffold.fields(),
+                    "download_dir": str(out or ""), "configured": out is not None}
+        if method == "POST" and route == "scaffold/generate":
+            return {"ok": True, **scaffold.generate(body.get("id"), body.get("values") or {})}
     except packaging.MarketError as exc:
         return {"ok": False, "error": exc.code, "message": exc.message}
-    if route in {"list", "index", "status", "install", "uninstall"}:
+    except scaffold.ScaffoldError as exc:
+        return {"ok": False, "error": exc.code, "message": exc.message}
+    if route in {"list", "index", "status", "install", "uninstall",
+                 "scaffold/fields", "scaffold/generate"}:
         return {"ok": False, "error": "method_not_allowed", "__status__": 405}
     return {"ok": False, "error": "not_found", "__status__": 404}

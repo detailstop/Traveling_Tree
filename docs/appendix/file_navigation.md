@@ -2,9 +2,9 @@
 
 > 只读摘要，勿手改。本文件由 docs/appendix/file_navigation.json 生成；结构与去留决定以 JSON 为准。
 
-- 生成时间：2026-10-31T20:23:16+03:00
-- 轮次：85
-- 待办：0 条；已决定：550 条
+- 生成时间：2026-10-31T23:48:12+03:00
+- 轮次：86
+- 待办：0 条；已决定：558 条
 
 ## 待办
 
@@ -15,6 +15,14 @@
 
 | 路径 | 决定 | 原因 | 状态 | 轮次 | 时间 | 备份路径 |
 | --- | --- | --- | --- | --- | --- | --- |
+| plugins/market/scaffold.py | 插件开发提示词生成并入市场（round 86） | 迁移模板解析/严格替换/残留检测；10 个占位符动态字段；写盘由 backend 统一处理；模板唯一源 docs/appendix/prompts/plugin-dev-prompt.md。 | done | 86 | 2026-10-31T23:48:12+03:00 |  |
+| plugins/market/backend.py | 新增 /scaffold/fields 与 /scaffold/generate（round 86） | GET 返回字段与下载地址配置；POST 严格校验 id/占位符后写盘 scaffold-<id>-<时间戳>.md；未设置/非绝对/目录不存在/无权限/模板缺失均明确错误；模板缺失不影响 /list 等既有接口。 | done | 86 | 2026-10-31T23:48:12+03:00 |  |
+| plugins/market/feature.js | 市场顶部“开发插件”按钮与动态表单（round 86） | 按后端字段渲染 input（全部短参数）；未设置 download_dir 时按钮置灰；缺失项标红；成功展示可复制路径；不改卡片/搜索/过滤逻辑。 | done | 86 | 2026-10-31T23:48:12+03:00 |  |
+| ui/web/server.py | 通用下载地址改为后端本地存储（round 86） | data/settings.json 新增 download_dir（绝对路径）；/api/settings 读写；设置页新增输入与保存。未设置/不可用时市场生成明确报错，不自动建目录。 | done | 86 | 2026-10-31T23:48:12+03:00 |  |
+| tools/scaffold_plugin.py | CLI 脚手架退役（round 86） | 删除 CLI；解析/替换逻辑迁入 plugins/market/scaffold.py；守则 §3 第 3 步、README/白皮书引用改为市场页“开发插件”。 | done | 86 | 2026-10-31T23:48:12+03:00 |  |
+| tests/smoke_market.py | smoke_market 增补开发插件用例（round 86） | 字段清单、生成文件名格式、缺值/路径穿越/未设置拒绝、模板缺失时市场其余接口正常；34/34。 | done | 86 | 2026-10-31T23:48:12+03:00 |  |
+| README.md | 补通用下载地址与开发插件文档、基线修正（round 86） | §6 写明 download_dir 键名/位置/用途/未设置行为；开发插件入口与模板依赖；smoke_market 34/34，合计 986/987；白皮书 §7.2/§7.5、守则 §3/§4 同步。 | done | 86 | 2026-10-31T23:48:12+03:00 |  |
+| data/bg_import/::round86-none | 本次无背景库数据（round 86） | 用户未提供「项目优化与当前综述」导出 json；背景库不可用，本轮未执行 update 导入、未写背景库数据。 | done | 86 | 2026-10-31T23:48:12+03:00 |  |
 | docs/appendix/plugin-info-card-template.md | 新增插件信息卡模板（round 85） | front matter 必需 9 项/可选 10 项、格式约定、正文固定结构、示例、校验口径；README 与 INFO.md 分工明确。 | done | 85 | 2026-10-31T20:23:16+03:00 |  |
 | plugins/*/INFO.md | 22 个插件目录 + sim 源共 23 份 INFO.md（round 85） | 每个插件 INFO.md 的 id/name/version/kind/has_ui/has_backend/db_module_key/routes_prefix/summary 与 manifest 一致，tables 与 schema 一致；sim 位于 market/sources/sim/INFO.md；敏感字段仅写路径类别。 | done | 85 | 2026-10-31T20:23:16+03:00 |  |
 | tools/gen_plugin_info_cards.py | 新增 INFO.md 生成/校验工具（round 85） | --check 校验必需字段、id、manifest/schema/backend 一致性与可选字段；生成模式不覆盖已有文件（--force 才覆盖）；无第三方依赖。 | done | 85 | 2026-10-31T20:23:16+03:00 |  |

@@ -1,7 +1,8 @@
 /* 插件市场：本地包浏览/搜索/过滤/安装/卸载。无框架，挂到 window.__toolRenderers.market。 */
 (function () {
   'use strict';
-  let STATE = { items: [], search: '', kind: '', expanded: null, busy: false };
+  let STATE = { items: [], search: '', kind: '', expanded: null, busy: false,
+    devOpen: false, devFields: [], devConfigured: false, devError: '', devValues: {}, devResult: null };
 
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
@@ -71,6 +72,57 @@
     </div>`;
   }
 
+  function drawDev(host) {
+    const panel = host.querySelector('#mk-dev-panel');
+    const btn = host.querySelector('#mk-dev');
+    if (!panel || !btn) return;
+    btn.disabled = !STATE.devConfigured;
+    panel.hidden = !STATE.devOpen;
+    if (!STATE.devOpen) return;
+    if (STATE.devError) {
+      panel.innerHTML = `<div class="mk-empty">${esc(STATE.devError)}</div>`;
+      return;
+    }
+    const inputs = STATE.devFields.map(f => `<label class="mk-field" data-field="${esc(f.key)}">
+        <span>${esc(f.label)} <i>${esc(f.hint)}</i></span>
+        <input data-dev="${esc(f.key)}" value="${esc(STATE.devValues[f.key] || '')}" placeholder="${esc(f.example)}">
+      </label>`).join('');
+    const result = STATE.devResult
+      ? `<div class="mk-dev-result">已生成：<code>${esc(STATE.devResult.path)}</code>
+         <button class="btn soft sm" data-copy="${esc(STATE.devResult.path)}">复制路径</button></div>` : '';
+    panel.innerHTML = `<div class="mk-dev-head"><b>开发插件 · 生成提示词</b>
+      <span>模板：docs/appendix/prompts/plugin-dev-prompt.md；写盘到通用下载地址</span></div>
+      <div class="mk-dev-form">${inputs}</div>
+      <div class="mk-dev-actions"><button class="btn sm" data-dev-submit>生成并写盘</button></div>
+      ${result}`;
+    panel.querySelectorAll('[data-dev]').forEach(el => {
+      el.oninput = () => { STATE.devValues[el.dataset.dev] = el.value; };
+    });
+    panel.querySelector('[data-dev-submit]').onclick = async () => {
+      panel.querySelectorAll('.mk-field').forEach(x => x.classList.remove('bad'));
+      const missing = STATE.devFields.filter(f => !String(STATE.devValues[f.key] || '').trim());
+      missing.forEach(f => {
+        const row = panel.querySelector(`[data-field="${f.key}"]`);
+        if (row) row.classList.add('bad');
+      });
+      if (missing.length) { toast('请填写全部参数（红色标记）', 'warn'); return; }
+      try {
+        const r = await api('/api/plugin/market/scaffold/generate', {
+          body: { id: STATE.devValues.PLUGIN_ID, values: STATE.devValues },
+        });
+        if (!r.ok) throw new Error(r.message || r.error);
+        STATE.devResult = r;
+        toast('提示词已生成', 'success');
+        drawDev(host);
+      } catch (e) { toast('生成失败：' + e.message, 'error'); }
+    };
+    const copy = panel.querySelector('[data-copy]');
+    if (copy) copy.onclick = async () => {
+      try { await navigator.clipboard.writeText(copy.dataset.copy); toast('路径已复制', 'success'); }
+      catch (e) { toast('复制失败，请手动选择路径', 'warn'); }
+    };
+  }
+
   function render(container) {
     const host = container || document.querySelector('#nav-view');
     if (!host) return;
@@ -79,7 +131,9 @@
         <input id="mk-search" class="mk-search" placeholder="搜索插件名称 / 简介 / id" value="${esc(STATE.search)}">
         <select id="mk-kind" class="mk-kind-sel"><option value="">全部类型</option></select>
         <span id="mk-count" class="mk-count"></span>
+        <button id="mk-dev" class="btn sm" title="${STATE.devConfigured ? '填写参数并生成开发提示词' : '请先在设置页填写通用下载地址'}">🛠 开发插件</button>
       </div>
+      <div id="mk-dev-panel" class="mk-dev-panel"${STATE.devOpen ? '' : ' hidden'}></div>
       <div id="mk-grid" class="mk-grid"></div>
     </div>`;
     const draw = () => {
@@ -95,8 +149,21 @@
       bind();
     };
     const refresh = async () => {
-      try { await loadList(); draw(); }
-      catch (e) { toast('市场加载失败：' + e.message, 'error'); }
+      try {
+        try {
+          const f = await api('/api/plugin/market/scaffold/fields');
+          STATE.devFields = f.fields || [];
+          STATE.devConfigured = !!f.configured;
+          STATE.devError = f.ok ? '' : (f.message || f.error || '');
+        } catch (e) {
+          STATE.devFields = [];
+          STATE.devConfigured = false;
+          STATE.devError = e.message || '开发插件不可用';
+        }
+        await loadList();
+        draw();
+        drawDev(host);
+      } catch (e) { toast('市场加载失败：' + e.message, 'error'); }
     };
     function bind() {
       host.querySelectorAll('[data-toggle]').forEach(el => {
@@ -134,6 +201,11 @@
         };
       });
     }
+    host.querySelector('#mk-dev').onclick = () => {
+      if (!STATE.devConfigured) { toast('请先在设置页填写通用下载地址', 'warn'); return; }
+      STATE.devOpen = !STATE.devOpen;
+      drawDev(host);
+    };
     host.querySelector('#mk-search').oninput = e => { STATE.search = e.target.value; draw(); };
     host.querySelector('#mk-kind').onchange = e => { STATE.kind = e.target.value; draw(); };
     refresh();

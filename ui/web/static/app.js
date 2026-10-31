@@ -953,6 +953,14 @@ function settingsPageHTML() {
         <p class="settings-note">自定义目录使用浏览器 File System Access API（需 Chrome / Edge 并在弹窗中授权）。未设置、浏览器不支持或授权失败时会回退浏览器默认下载；不会改变文件名与文件内容。</p>
       </section>
       <section class="settings-section">
+        <h3>通用下载地址（本地路径）</h3>
+        <p class="settings-desc">供市场「开发插件」等后端写盘使用；必须是已存在的绝对路径，未设置或不可写时后端明确报错。</p>
+        <div class="settings-row">
+          <input id="set-download-dir" class="mk-search" style="max-width:420px" placeholder="例如 D:\\Downloads" value="${esc((S.settings && S.settings.download_dir) || '')}">
+          <button class="btn sm" id="set-download-dir-save">保存路径</button>
+        </div>
+      </section>
+      <section class="settings-section">
         <h3>按功能分组下载地址</h3>
         <p class="settings-desc">为已接入的功能单独指定目录；未配置、权限失效或浏览器不支持时回退上方统一下载地址。分组配置存后端 <code>data/settings.json</code>，目录授权句柄仍由浏览器 IndexedDB 保存。</p>
         <div class="dl-group-list">
@@ -1373,6 +1381,15 @@ function switchPage(name) {
     $('#set-back').onclick = () => switchPage('tools');
     $('#set-theme').onclick = openThemeModal;
     $('#set-clear-cache').onclick = clearVoiceCache;
+    $('#set-download-dir-save').onclick = async () => {
+      const value = ($('#set-download-dir').value || '').trim();
+      try {
+        const r = await api('/api/settings', { body: { download_dir: value } });
+        if (!r || !r.ok) throw new Error((r && r.error) || '保存失败');
+        S.settings = { ...(S.settings || {}), download_dir: value };
+        toast('通用下载地址已保存', 'success');
+      } catch (e) { toast('保存失败：' + e.message, 'error'); }
+    };
     $('#dl-pick').onclick = async () => {
       try {
         await rtDlPickDirectory();
