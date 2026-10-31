@@ -2,9 +2,9 @@
 
 > 只读摘要，勿手改。本文件由 docs/appendix/file_navigation.json 生成；结构与去留决定以 JSON 为准。
 
-- 生成时间：2026-10-31T15:01:10+03:00
-- 轮次：73
-- 待办：7 条；已决定：481 条
+- 生成时间：2026-10-31T15:08:46+03:00
+- 轮次：74
+- 待办：7 条；已决定：485 条
 
 ## 待办
 
@@ -22,6 +22,10 @@
 
 | 路径 | 决定 | 原因 | 状态 | 轮次 | 时间 | 备份路径 |
 | --- | --- | --- | --- | --- | --- | --- |
+| docs/appendix/plugin-audit-round71.md | 审查报告追加 round 73 状态段（round 74） | 记录 G3 扩展结论（ai/pixel_art/webchat 补 provides，cobuild 不补）、4 插件写入路径结论（assets 双写；非 assets 表补 INSERT live_json）、model_usage_logs 原缺 raw/live 已补、pending 变化与全量 13 结果；未改其他段落。 | done | 74 | 2026-10-31T15:08:46+03:00 |  |
+| plugins/schedule/repo.py | 4 插件保存回归通过（round 74 阶段 A） | 临时库写入→读回：schedule（assets/week_plans/tasks）、screeps（assets/units/modules）、urlarch（assets/groups/links）、promptgen（assets/flows/modules/tasks/flow_groups）均验证 live_json 非空且与 raw_json 一致；未写真实库，临时库用完即弃。 | done | 74 | 2026-10-31T15:08:46+03:00 |  |
+| plugins/russian | 阶段 B 前置核实：核心表缺 raw_json，暂缓迁移（round 74） | B1 逐表核实 bg_library（4 表）、book_reader（11 表）、russian（5 表）均无 raw_json（book_reader 的 reader_placeholders 仅 raw、reader_bookmarks 双列），共 20 表。需先为结构化行/日志定义 raw 快照与回填规则并评估写入路径，超出本轮安全范围；阶段 B 留 round 75，未改任何 blocker schema。 | done | 74 | 2026-10-31T15:08:46+03:00 |  |
+| data/bg_import/::round74-none | 本次无背景库数据（round 74） | 用户未提供「项目优化与当前综述」导出 json；背景库当前不可用，本轮未执行 mode:"update" 导入、未写入背景库数据。 | done | 74 | 2026-10-31T15:08:46+03:00 |  |
 | plugins/lib.json | G3 扩展核实：ai/pixel_art/webchat 补 provides，cobuild 不补（round 73） | ai 被 finance 调 keys/chat → provides=[ai]；pixel_art 被 book_reader 直接 import assets_payload → provides=[pixel_assets]；webchat 被 ai/aidebug/finance/promptgen 调用 → provides=[webchat]；cobuild 无插件调用、仅用户入口 → 不声明。manifest 已补三处；守则 §4 加示例；lib.json notes 同步。 | done | 73 | 2026-10-31T15:01:10+03:00 |  |
 | plugins/schedule/repo.py | 4 插件 live_json 写入路径核实与补齐（round 73） | 结论：assets 均为 A（已双写）；week_plans/tasks、screeps units/modules、urlarch groups/links、promptgen flows/modules/tasks/flow_groups 为 B（只写 raw），已在 INSERT 中补 live_json（与 raw 同值）；读取仍沿用既有逻辑。未发现 C 类。 | done | 73 | 2026-10-31T15:01:10+03:00 |  |
 | plugins/model_usage/schema.sql | model_usage_logs 补双列与写入（round 73） | 原表无 raw_json/live_json；已补两列（NOT NULL DEFAULT ''），migrate 幂等 ALTER+回填（临时旧库连跑两次通过），repo insert 写 raw/live、update 更新 live 保留 raw；smoke_model_usage 49/49。 | done | 73 | 2026-10-31T15:01:10+03:00 |  |

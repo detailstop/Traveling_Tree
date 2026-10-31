@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-31T15:01:10+03:00",
-  "round": 73,
+  "generated_at": "2026-10-31T15:08:46+03:00",
+  "round": 74,
   "pending": [
     {
       "path": "tests/smoke_plugin_decoupling.py::Server.start",
@@ -14,7 +14,7 @@
     {
       "path": "plugins/bg_library",
       "decision": "round 71 审查缺失项待修",
-      "reason": "blocker 未修（阶段 B 留 round 74）；README 已补。",
+      "reason": "blocker 待 round 75：4 表（bg_nodes/bg_versions/file_notes/db_rules）连 raw_json 都没有，需先定 raw 快照回填方案。",
       "status": "pending",
       "round": 71,
       "created_at": "2026-10-31T14:42:02+03:00"
@@ -22,7 +22,7 @@
     {
       "path": "plugins/book_reader",
       "decision": "round 71 审查缺失项待修",
-      "reason": "blocker 未修（阶段 B 留 round 74）；README 已补并标注 pixel_art 直接 import。",
+      "reason": "blocker 待 round 75：11 表缺 raw_json（reader_placeholders 仅 raw、reader_bookmarks 双列），需定回填方案。",
       "status": "pending",
       "round": 71,
       "created_at": "2026-10-31T14:42:02+03:00"
@@ -30,7 +30,7 @@
     {
       "path": "plugins/finance",
       "decision": "round 71 审查缺失项待修",
-      "reason": "blocker 未修（阶段 B 留 round 74）；README 已补。",
+      "reason": "blocker 待 round 75：round 71 记录 17 表缺双列，本轮未逐表核实 raw 存在性。",
       "status": "pending",
       "round": 71,
       "created_at": "2026-10-31T14:42:02+03:00"
@@ -38,7 +38,7 @@
     {
       "path": "plugins/pixel_art",
       "decision": "round 71 审查缺失项待修",
-      "reason": "blocker 未修（阶段 B 留 round 74）；README 已补并标注 provides=[pixel_assets]。",
+      "reason": "blocker 待 round 75：3 表缺双列，需逐表核实 raw 并定回填方案。",
       "status": "pending",
       "round": 71,
       "created_at": "2026-10-31T14:42:02+03:00"
@@ -46,7 +46,7 @@
     {
       "path": "plugins/project_manager",
       "decision": "round 71 审查缺失项待修",
-      "reason": "blocker 未修（阶段 B 留 round 74）；README 已补。",
+      "reason": "blocker 待 round 75：5 表缺双列，需逐表核实 raw 并定回填方案。",
       "status": "pending",
       "round": 71,
       "created_at": "2026-10-31T14:42:02+03:00"
@@ -54,13 +54,45 @@
     {
       "path": "plugins/russian",
       "decision": "round 71 审查缺失项待修",
-      "reason": "blocker 未修（阶段 B 留 round 74）；README 已补。",
+      "reason": "blocker 待 round 75：5 表（items/item_stats/review_logs/daily_logs/themes）连 raw_json 都没有，需定回填与写入方案。",
       "status": "pending",
       "round": 71,
       "created_at": "2026-10-31T14:42:02+03:00"
     }
   ],
   "decided": [
+    {
+      "path": "docs/appendix/plugin-audit-round71.md",
+      "decision": "审查报告追加 round 73 状态段（round 74）",
+      "reason": "记录 G3 扩展结论（ai/pixel_art/webchat 补 provides，cobuild 不补）、4 插件写入路径结论（assets 双写；非 assets 表补 INSERT live_json）、model_usage_logs 原缺 raw/live 已补、pending 变化与全量 13 结果；未改其他段落。",
+      "status": "done",
+      "round": 74,
+      "at": "2026-10-31T15:08:46+03:00"
+    },
+    {
+      "path": "plugins/schedule/repo.py",
+      "decision": "4 插件保存回归通过（round 74 阶段 A）",
+      "reason": "临时库写入→读回：schedule（assets/week_plans/tasks）、screeps（assets/units/modules）、urlarch（assets/groups/links）、promptgen（assets/flows/modules/tasks/flow_groups）均验证 live_json 非空且与 raw_json 一致；未写真实库，临时库用完即弃。",
+      "status": "done",
+      "round": 74,
+      "at": "2026-10-31T15:08:46+03:00"
+    },
+    {
+      "path": "plugins/russian",
+      "decision": "阶段 B 前置核实：核心表缺 raw_json，暂缓迁移（round 74）",
+      "reason": "B1 逐表核实 bg_library（4 表）、book_reader（11 表）、russian（5 表）均无 raw_json（book_reader 的 reader_placeholders 仅 raw、reader_bookmarks 双列），共 20 表。需先为结构化行/日志定义 raw 快照与回填规则并评估写入路径，超出本轮安全范围；阶段 B 留 round 75，未改任何 blocker schema。",
+      "status": "done",
+      "round": 74,
+      "at": "2026-10-31T15:08:46+03:00"
+    },
+    {
+      "path": "data/bg_import/::round74-none",
+      "decision": "本次无背景库数据（round 74）",
+      "reason": "用户未提供「项目优化与当前综述」导出 json；背景库当前不可用，本轮未执行 mode:\"update\" 导入、未写入背景库数据。",
+      "status": "done",
+      "round": 74,
+      "at": "2026-10-31T15:08:46+03:00"
+    },
     {
       "path": "plugins/lib.json",
       "decision": "G3 扩展核实：ai/pixel_art/webchat 补 provides，cobuild 不补（round 73）",

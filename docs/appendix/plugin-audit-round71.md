@@ -222,3 +222,11 @@
 - 已修复并移入 resolved：`schedule`、`screeps`、`urlarch`、`promptgen`（schema 补 `live_json` + 幂等 migrate）；`cobuild`、`pdf`、`tts`（README / G5 共享缓存决定）。
 - 仍保留 pending（round 73）：`bg_library`、`book_reader`、`finance`、`model_usage`、`pixel_art`、`project_manager`、`russian`、`webchat`。
 - 阶段 A 全量 13 通过：12 个全 PASS，`smoke_web` 74/75（TTS 502 已知）。
+
+## 7. round 73 状态（追加）
+
+- **G3 扩展**：`ai` 补 `provides: ["ai"]`（finance 调用）；`pixel_art` 补 `["pixel_assets"]`（book_reader 直接 import）；`webchat` 补 `["webchat"]`（ai/aidebug/finance/promptgen 与宿主调用）；`cobuild` 不补（仅用户打卡入口，无插件调用）。守则 §4 与 `plugins/lib.json` notes 已同步。
+- **4 插件写入路径**：`schedule`/`screeps`/`urlarch`/`promptgen` 的 assets 表已双写（A）；`schedule_week_plans`/`schedule_tasks`、`screeps_units`/`screeps_modules`、`urlarch_groups`/`urlarch_links`、`pg_flows`/`pg_modules`/`pg_tasks`/`pg_flow_groups` 原只写 `raw_json`（B），round 73 已在 INSERT 补 `live_json`（与 raw 同值）；无 C 类。
+- **model_usage**：`model_usage_logs` 原表**连 `raw_json` 都没有**，round 73 补 `raw_json`+`live_json`、幂等 migrate 回填、repo insert/update 写 live（update 保留 raw）；`smoke_model_usage` 49/49。
+- **pending**：`model_usage`、`webchat` 移入 resolved；剩余 6 个 blocker（bg_library、book_reader、finance、pixel_art、project_manager、russian）留 round 74。
+- round 73 全量 13：12 项全 PASS，`smoke_web` 74/75（TTS 502 已知）。
