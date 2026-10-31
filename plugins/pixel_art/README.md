@@ -17,6 +17,7 @@
 
 ## 依赖
 - 被 `book_reader` 直接 import `service`（G4 已标注）
+- 对外提供能力：`provides: ["pixel_assets"]`（round 73）
 
 ## 注意事项
 - `visual_settings` 若为纯 UI 偏好可按 G2 豁免 `live_json`。

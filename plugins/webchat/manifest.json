@@ -12,6 +12,6 @@
   "style": null,
   "data_dirs": ["webchat"],
   "shared_features": [],
-  "provides": [],
+  "provides": ["webchat"],
   "consumes": []
 }

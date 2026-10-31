@@ -52,9 +52,9 @@ def import_state(raw: str) -> dict:
             if not isinstance(group, dict) or not group.get("id"):
                 continue
             conn.execute(
-                "INSERT INTO urlarch_groups(id,name,group_type,order_index,raw_json) VALUES(?,?,?,?,?)",
+                "INSERT INTO urlarch_groups(id,name,group_type,order_index,raw_json,live_json) VALUES(?,?,?,?,?,?)",
                 (str(group["id"]), str(group.get("name") or ""),
-                 str(group.get("type") or "normal"), int(group.get("order") or 0), _canon(group)),
+                 str(group.get("type") or "normal"), int(group.get("order") or 0), _canon(group), _canon(group)),
             )
             groups += 1
         for idx, item in enumerate(data.get("items") or []):
@@ -62,11 +62,11 @@ def import_state(raw: str) -> dict:
                 continue
             group_id = str(item.get("groupId") or "ungrouped")
             conn.execute(
-                "INSERT INTO urlarch_links(link_id,title,url,note,ts,group_id,raw_json) "
-                "VALUES(?,?,?,?,?,?,?)",
+                "INSERT INTO urlarch_links(link_id,title,url,note,ts,group_id,raw_json,live_json) "
+                "VALUES(?,?,?,?,?,?,?,?)",
                 (_link_id(group_id, idx, str(item["url"])), str(item.get("title") or ""),
                  str(item["url"]), str(item.get("note") or ""), str(item.get("ts") or ""),
-                 group_id, _canon(item)),
+                 group_id, _canon(item), _canon(item)),
             )
             links += 1
         conn.commit()

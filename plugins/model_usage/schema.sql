@@ -22,6 +22,8 @@ CREATE TABLE IF NOT EXISTS model_usage_logs (
   price_tier           TEXT    NOT NULL CHECK(price_tier IN ('peak','offpeak')),
   currency             TEXT    NOT NULL DEFAULT 'CNY',
   interval_seconds     INTEGER CHECK(interval_seconds IS NULL OR interval_seconds >= 0),
+  raw_json             TEXT    NOT NULL DEFAULT '',
+  live_json            TEXT    NOT NULL DEFAULT '',
   created_at           TEXT    NOT NULL,
   updated_at           TEXT    NOT NULL
 );

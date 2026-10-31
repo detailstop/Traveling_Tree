@@ -22,6 +22,8 @@
     "schema": "schema.sql"
   },
   "style": "plugin.css",
-  "provides": [],
+  "provides": [
+    "pixel_assets"
+  ],
   "consumes": []
 }

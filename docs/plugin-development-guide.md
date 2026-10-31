@@ -74,6 +74,8 @@ plugins/<id>/
 
 README 不写实现细节，不复制代码；事实以 manifest/schema/backend 为准。
 
+> `provides` 示例（round 73 核实）：`webchat` → `["webchat"]`；`ai` → `["ai"]`；`pixel_art` → `["pixel_assets"]`。`cobuild` 不声明 `provides`：它面向用户打卡入口，没有被其他插件调用。`consumes` 可选。
+
 ## 5. 接口索引（只列路由与调用方，不抄签名）
 
 | 插件 | 路由前缀 | 直接调用方（`plugins/lib.json` 的 `called_by`） | 接口契约 |

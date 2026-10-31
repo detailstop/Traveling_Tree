@@ -2,9 +2,9 @@
 
 > 只读摘要，勿手改。本文件由 docs/appendix/file_navigation.json 生成；结构与去留决定以 JSON 为准。
 
-- 生成时间：2026-10-31T14:51:28+03:00
-- 轮次：72
-- 待办：9 条；已决定：476 条
+- 生成时间：2026-10-31T15:01:10+03:00
+- 轮次：73
+- 待办：7 条；已决定：481 条
 
 ## 待办
 
@@ -14,16 +14,19 @@
 | plugins/bg_library |  |  |  | 71 | 2026-10-31T14:42:02+03:00 |
 | plugins/book_reader |  |  |  | 71 | 2026-10-31T14:42:02+03:00 |
 | plugins/finance |  |  |  | 71 | 2026-10-31T14:42:02+03:00 |
-| plugins/model_usage |  |  |  | 71 | 2026-10-31T14:42:02+03:00 |
 | plugins/pixel_art |  |  |  | 71 | 2026-10-31T14:42:02+03:00 |
 | plugins/project_manager |  |  |  | 71 | 2026-10-31T14:42:02+03:00 |
 | plugins/russian |  |  |  | 71 | 2026-10-31T14:42:02+03:00 |
-| plugins/webchat |  |  |  | 71 | 2026-10-31T14:42:02+03:00 |
 
 ## 已决定去留
 
 | 路径 | 决定 | 原因 | 状态 | 轮次 | 时间 | 备份路径 |
 | --- | --- | --- | --- | --- | --- | --- |
+| plugins/lib.json | G3 扩展核实：ai/pixel_art/webchat 补 provides，cobuild 不补（round 73） | ai 被 finance 调 keys/chat → provides=[ai]；pixel_art 被 book_reader 直接 import assets_payload → provides=[pixel_assets]；webchat 被 ai/aidebug/finance/promptgen 调用 → provides=[webchat]；cobuild 无插件调用、仅用户入口 → 不声明。manifest 已补三处；守则 §4 加示例；lib.json notes 同步。 | done | 73 | 2026-10-31T15:01:10+03:00 |  |
+| plugins/schedule/repo.py | 4 插件 live_json 写入路径核实与补齐（round 73） | 结论：assets 均为 A（已双写）；week_plans/tasks、screeps units/modules、urlarch groups/links、promptgen flows/modules/tasks/flow_groups 为 B（只写 raw），已在 INSERT 中补 live_json（与 raw 同值）；读取仍沿用既有逻辑。未发现 C 类。 | done | 73 | 2026-10-31T15:01:10+03:00 |  |
+| plugins/model_usage/schema.sql | model_usage_logs 补双列与写入（round 73） | 原表无 raw_json/live_json；已补两列（NOT NULL DEFAULT ''），migrate 幂等 ALTER+回填（临时旧库连跑两次通过），repo insert 写 raw/live、update 更新 live 保留 raw；smoke_model_usage 49/49。 | done | 73 | 2026-10-31T15:01:10+03:00 |  |
+| docs/appendix/file_navigation.json | round 73 阶段 A 完成、阶段 B 留 round 74（round 73） | 阶段 A 全量 13 通过（12 全 PASS，smoke_web 74/75 TTS 502）；model_usage/webchat 两条 pending 关闭；保留 bg_library/book_reader/finance/pixel_art/project_manager/russian 6 条 blocker + Server.start。阶段 B（6 插件多表迁移与写入路径）未执行，留 round 74。 | done | 73 | 2026-10-31T15:01:10+03:00 |  |
+| data/bg_import/::round73-none | 本次无背景库数据（round 73） | 用户未提供「项目优化与当前综述」导出 json；背景库当前不可用，本轮未执行 mode:"update" 导入、未写入背景库数据。 | done | 73 | 2026-10-31T15:01:10+03:00 |  |
 | docs/plugin-development-guide.md | G1–G6 口径落地守则（round 72） | G1 新增 §4.1 插件 README 格式（职责/入口与路由/数据表/依赖/注意事项）并加入检查清单；G2 检查清单要求豁免表列 raw_json/来源；G3 provides 必须、consumes 可选；G4 跨插件 import 需 README+lib.json notes 标注；G5 共享缓存例外与 G6 多入口命名在白皮书 §十.6/§十.7；§6 常见错误补两行。未改 §5 接口索引。 | done | 72 | 2026-10-31T14:51:28+03:00 |  |
 | docs/plugin-development-whitepaper.md | 白皮书补 G2–G6 规则与 README 要求（round 72） | §五补 G2 派生/日志/快照表口径；§十新增 10.4 provides 必须/consumes 可选、10.5 跨插件调用与标注、10.6 共享缓存例外、10.7 多入口 feature 命名建议；§十一补插件 README 强制条款。未改附录 A–E 语义。 | done | 72 | 2026-10-31T14:51:28+03:00 |  |
 | plugins/*/README.md | 补 22 个插件 README（round 72 G1） | 22/22 按固定五节生成：职责、入口与路由、数据表、依赖、注意事项；内容来自 manifest/schema 表名/backend handle 位置/lib.json；未读无关插件实现；未满足 G2 的表在 README 标注待 round 73。 | done | 72 | 2026-10-31T14:51:28+03:00 |  |

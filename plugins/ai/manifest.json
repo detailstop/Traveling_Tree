@@ -25,6 +25,8 @@
   "shared_features": [
     "webchat"
   ],
-  "provides": [],
+  "provides": [
+    "ai"
+  ],
   "consumes": []
 }

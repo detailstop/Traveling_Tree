@@ -46,8 +46,8 @@ def import_state(raw: str) -> dict:
                 continue
             weeks += 1
             conn.execute(
-                "INSERT INTO schedule_week_plans(week_key,raw_json,updated_at) VALUES(?,?,?)",
-                (str(week_key), _canon(plan), now),
+                "INSERT INTO schedule_week_plans(week_key,raw_json,live_json,updated_at) VALUES(?,?,?,?)",
+                (str(week_key), _canon(plan), _canon(plan), now),
             )
             for day_key, arr in plan.items():
                 if not isinstance(arr, list):
@@ -57,10 +57,10 @@ def import_state(raw: str) -> dict:
                         continue
                     task_id = str(task.get("id") or f"{week_key}:{day_key}:{idx}")
                     conn.execute(
-                        "INSERT OR REPLACE INTO schedule_tasks(task_id,week_key,day_key,title,note,done,raw_json) "
-                        "VALUES(?,?,?,?,?,?,?)",
+                        "INSERT OR REPLACE INTO schedule_tasks(task_id,week_key,day_key,title,note,done,raw_json,live_json) "
+                        "VALUES(?,?,?,?,?,?,?,?)",
                         (task_id, str(week_key), str(day_key), str(task.get("t") or ""),
-                         str(task.get("note") or ""), 1 if task.get("done") else 0, _canon(task)),
+                         str(task.get("note") or ""), 1 if task.get("done") else 0, _canon(task), _canon(task)),
                     )
                     tasks += 1
         conn.commit()

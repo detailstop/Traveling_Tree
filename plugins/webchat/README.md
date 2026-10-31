@@ -18,4 +18,4 @@
 
 ## 注意事项
 - profile 为敏感登录态，不读正文、不进 Git。
-- 请求串行，可用 `/restart` 打断；`provides` 尚未声明（G3，round 73）。
+- 请求串行，可用 `/restart` 打断；`provides` 已声明 `["webchat"]`（round 73）。

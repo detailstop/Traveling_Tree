@@ -46,34 +46,34 @@ def import_state(raw: str) -> dict:
             if not isinstance(flow, dict) or not flow.get("id"):
                 continue
             conn.execute(
-                "INSERT INTO pg_flows(id,name,description,archived,created,updated,raw_json) "
-                "VALUES(?,?,?,?,?,?,?)",
+                "INSERT INTO pg_flows(id,name,description,archived,created,updated,raw_json,live_json) "
+                "VALUES(?,?,?,?,?,?,?,?)",
                 (str(flow["id"]), str(flow.get("name") or ""), str(flow.get("desc") or flow.get("description") or ""),
                  1 if flow.get("archived") else 0, str(flow.get("created") or ""),
-                 str(flow.get("updated") or ""), _canon(flow)),
+                 str(flow.get("updated") or ""), _canon(flow), _canon(flow)),
             )
         for mod in data.get("modules") or []:
             if not isinstance(mod, dict) or not mod.get("id"):
                 continue
             conn.execute(
-                "INSERT INTO pg_modules(id,name,description,raw_json) VALUES(?,?,?,?)",
+                "INSERT INTO pg_modules(id,name,description,raw_json,live_json) VALUES(?,?,?,?,?)",
                 (str(mod["id"]), str(mod.get("name") or ""), str(mod.get("desc") or mod.get("description") or ""),
-                 _canon(mod)),
+                 _canon(mod), _canon(mod)),
             )
         for task in data.get("tasks") or []:
             if not isinstance(task, dict) or not task.get("id"):
                 continue
             conn.execute(
-                "INSERT INTO pg_tasks(id,name,raw_json) VALUES(?,?,?)",
-                (str(task["id"]), str(task.get("name") or task.get("title") or ""), _canon(task)),
+                "INSERT INTO pg_tasks(id,name,raw_json,live_json) VALUES(?,?,?,?)",
+                (str(task["id"]), str(task.get("name") or task.get("title") or ""), _canon(task), _canon(task)),
             )
         for group in data.get("flowGroups") or []:
             if not isinstance(group, dict) or not group.get("id"):
                 continue
             conn.execute(
-                "INSERT INTO pg_flow_groups(id,name,order_index,raw_json) VALUES(?,?,?,?)",
+                "INSERT INTO pg_flow_groups(id,name,order_index,raw_json,live_json) VALUES(?,?,?,?,?)",
                 (str(group["id"]), str(group.get("name") or ""),
-                 int(group.get("order") or 0), _canon(group)),
+                 int(group.get("order") or 0), _canon(group), _canon(group)),
             )
         conn.commit()
     except Exception:

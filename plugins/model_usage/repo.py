@@ -1,5 +1,6 @@
 """model_usage 插件 SQL 层：model_usage_logs。"""
 
+import json
 from datetime import datetime
 
 from db.connection import get_conn
@@ -58,14 +59,15 @@ def add_model_usage(record: dict) -> int:
     """插入一条模型调用记录，返回新记录 id。字段由 modules/model_usage.py 校验后传入。"""
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     values = [record.get(k) for k in _USAGE_FIELDS]
+    payload = json.dumps({k: record.get(k) for k in _USAGE_FIELDS}, ensure_ascii=False, default=str)
     conn = get_conn()
     cur = conn.execute(
         "INSERT INTO model_usage_logs ("
         + ", ".join(_USAGE_FIELDS)
-        + ", created_at, updated_at) VALUES ("
+        + ", raw_json, live_json, created_at, updated_at) VALUES ("
         + ", ".join("?" for _ in _USAGE_FIELDS)
-        + ", ?, ?)",
-        (*values, now, now),
+        + ", ?, ?, ?, ?)",
+        (*values, payload, payload, now, now),
     )
     conn.commit()
     return int(cur.lastrowid)
@@ -76,10 +78,11 @@ def update_model_usage(record_id: int, record: dict) -> bool:
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     assignments = ", ".join(f"{k}=?" for k in _USAGE_FIELDS)
     values = [record.get(k) for k in _USAGE_FIELDS]
+    payload = json.dumps({k: record.get(k) for k in _USAGE_FIELDS}, ensure_ascii=False, default=str)
     conn = get_conn()
     cur = conn.execute(
-        f"UPDATE model_usage_logs SET {assignments}, updated_at=? WHERE id=?",
-        (*values, now, int(record_id)),
+        f"UPDATE model_usage_logs SET {assignments}, live_json=?, updated_at=? WHERE id=?",
+        (*values, payload, now, int(record_id)),
     )
     conn.commit()
     return cur.rowcount > 0

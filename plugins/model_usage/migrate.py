@@ -6,11 +6,37 @@
 """
 from __future__ import annotations
 
+import json
 import sqlite3
 from datetime import datetime
 from pathlib import Path
 
 _SCHEMA_PATH = Path(__file__).with_name("schema.sql")
+
+
+def _ensure_raw_live_json(conn: sqlite3.Connection) -> None:
+    """为旧 model_usage_logs 补 raw_json/live_json（G2 日志表双列），并回填当前行。"""
+    cols = {r["name"] for r in conn.execute("PRAGMA table_info(model_usage_logs)")}
+    if not cols:
+        return
+    added = False
+    for column in ("raw_json", "live_json"):
+        if column not in cols:
+            conn.execute(f"ALTER TABLE model_usage_logs ADD COLUMN {column} TEXT NOT NULL DEFAULT ''")
+            added = True
+    if not added:
+        return
+    data_cols = [c for c in (r["name"] for r in conn.execute("PRAGMA table_info(model_usage_logs)"))
+                 if c not in ("raw_json", "live_json")]
+    rows = conn.execute(
+        "SELECT id, " + ", ".join(data_cols) + " FROM model_usage_logs"
+    ).fetchall()
+    for row in rows:
+        text = json.dumps({c: row[c] for c in data_cols}, ensure_ascii=False, default=str)
+        conn.execute(
+            "UPDATE model_usage_logs SET raw_json=?, live_json=? WHERE id=?",
+            (text, text, row["id"]),
+        )
 
 
 def _supports_drop_column() -> bool:
@@ -37,6 +63,7 @@ def _rebuild_from_schema(conn: sqlite3.Connection) -> None:
 
 def migrate(conn: sqlite3.Connection) -> None:
     """升级旧 model_usage_logs；新结构或表不存在时直接返回。"""
+    _ensure_raw_live_json(conn)
     usage_cols = {r["name"] for r in conn.execute("PRAGMA table_info(model_usage_logs)")}
     if not usage_cols or "uncached_input_tokens" in usage_cols:
         return

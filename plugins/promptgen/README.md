@@ -15,7 +15,7 @@
 - `pg_tasks`
 - `pg_flow_groups`
 
-- raw/live 状态：全部表含 `raw_json` + `live_json`（round 72 补齐）
+- raw/live 状态：全部表含 `raw_json` + `live_json`（round 72 补齐；round 73 核实写入路径同时写 `live_json`）
 
 ## 依赖
 - `shared_features: ["webchat"]`

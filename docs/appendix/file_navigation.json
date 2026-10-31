@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-31T14:51:28+03:00",
-  "round": 72,
+  "generated_at": "2026-10-31T15:01:10+03:00",
+  "round": 73,
   "pending": [
     {
       "path": "tests/smoke_plugin_decoupling.py::Server.start",
@@ -14,7 +14,7 @@
     {
       "path": "plugins/bg_library",
       "decision": "round 71 审查缺失项待修",
-      "reason": "blocker：4 张表（bg_nodes、bg_versions、file_notes、db_rules）缺双列；README 已补；按 G2 待 round 73 迁移。",
+      "reason": "blocker 未修（阶段 B 留 round 74）；README 已补。",
       "status": "pending",
       "round": 71,
       "created_at": "2026-10-31T14:42:02+03:00"
@@ -22,7 +22,7 @@
     {
       "path": "plugins/book_reader",
       "decision": "round 71 审查缺失项待修",
-      "reason": "blocker：12 张表缺双列；README 已补并标注 pixel_art 直接 import（G4）；待 round 73 迁移。",
+      "reason": "blocker 未修（阶段 B 留 round 74）；README 已补并标注 pixel_art 直接 import。",
       "status": "pending",
       "round": 71,
       "created_at": "2026-10-31T14:42:02+03:00"
@@ -30,15 +30,7 @@
     {
       "path": "plugins/finance",
       "decision": "round 71 审查缺失项待修",
-      "reason": "blocker：17 张表缺双列；README 已补；待 round 73 迁移。",
-      "status": "pending",
-      "round": 71,
-      "created_at": "2026-10-31T14:42:02+03:00"
-    },
-    {
-      "path": "plugins/model_usage",
-      "decision": "round 71 审查缺失项待修",
-      "reason": "should：model_usage_logs 日志表缺双列；README 已补；G2 已定日志表双列，待 round 73 迁移。",
+      "reason": "blocker 未修（阶段 B 留 round 74）；README 已补。",
       "status": "pending",
       "round": 71,
       "created_at": "2026-10-31T14:42:02+03:00"
@@ -46,7 +38,7 @@
     {
       "path": "plugins/pixel_art",
       "decision": "round 71 审查缺失项待修",
-      "reason": "blocker：pixel_artworks、pixel_asset_refs、visual_settings 缺双列；README 已补；待 round 73。",
+      "reason": "blocker 未修（阶段 B 留 round 74）；README 已补并标注 provides=[pixel_assets]。",
       "status": "pending",
       "round": 71,
       "created_at": "2026-10-31T14:42:02+03:00"
@@ -54,7 +46,7 @@
     {
       "path": "plugins/project_manager",
       "decision": "round 71 审查缺失项待修",
-      "reason": "blocker：5 张 pm_* 表缺双列；README 已补；待 round 73。",
+      "reason": "blocker 未修（阶段 B 留 round 74）；README 已补。",
       "status": "pending",
       "round": 71,
       "created_at": "2026-10-31T14:42:02+03:00"
@@ -62,21 +54,53 @@
     {
       "path": "plugins/russian",
       "decision": "round 71 审查缺失项待修",
-      "reason": "blocker：5 张表缺双列；README 已补；待 round 73。",
-      "status": "pending",
-      "round": 71,
-      "created_at": "2026-10-31T14:42:02+03:00"
-    },
-    {
-      "path": "plugins/webchat",
-      "decision": "round 71 审查缺失项待修",
-      "reason": "should：provides 未声明（README 已补）；G3 已定 provides 必须，待 round 73 补 manifest。",
+      "reason": "blocker 未修（阶段 B 留 round 74）；README 已补。",
       "status": "pending",
       "round": 71,
       "created_at": "2026-10-31T14:42:02+03:00"
     }
   ],
   "decided": [
+    {
+      "path": "plugins/lib.json",
+      "decision": "G3 扩展核实：ai/pixel_art/webchat 补 provides，cobuild 不补（round 73）",
+      "reason": "ai 被 finance 调 keys/chat → provides=[ai]；pixel_art 被 book_reader 直接 import assets_payload → provides=[pixel_assets]；webchat 被 ai/aidebug/finance/promptgen 调用 → provides=[webchat]；cobuild 无插件调用、仅用户入口 → 不声明。manifest 已补三处；守则 §4 加示例；lib.json notes 同步。",
+      "status": "done",
+      "round": 73,
+      "at": "2026-10-31T15:01:10+03:00"
+    },
+    {
+      "path": "plugins/schedule/repo.py",
+      "decision": "4 插件 live_json 写入路径核实与补齐（round 73）",
+      "reason": "结论：assets 均为 A（已双写）；week_plans/tasks、screeps units/modules、urlarch groups/links、promptgen flows/modules/tasks/flow_groups 为 B（只写 raw），已在 INSERT 中补 live_json（与 raw 同值）；读取仍沿用既有逻辑。未发现 C 类。",
+      "status": "done",
+      "round": 73,
+      "at": "2026-10-31T15:01:10+03:00"
+    },
+    {
+      "path": "plugins/model_usage/schema.sql",
+      "decision": "model_usage_logs 补双列与写入（round 73）",
+      "reason": "原表无 raw_json/live_json；已补两列（NOT NULL DEFAULT ''），migrate 幂等 ALTER+回填（临时旧库连跑两次通过），repo insert 写 raw/live、update 更新 live 保留 raw；smoke_model_usage 49/49。",
+      "status": "done",
+      "round": 73,
+      "at": "2026-10-31T15:01:10+03:00"
+    },
+    {
+      "path": "docs/appendix/file_navigation.json",
+      "decision": "round 73 阶段 A 完成、阶段 B 留 round 74（round 73）",
+      "reason": "阶段 A 全量 13 通过（12 全 PASS，smoke_web 74/75 TTS 502）；model_usage/webchat 两条 pending 关闭；保留 bg_library/book_reader/finance/pixel_art/project_manager/russian 6 条 blocker + Server.start。阶段 B（6 插件多表迁移与写入路径）未执行，留 round 74。",
+      "status": "done",
+      "round": 73,
+      "at": "2026-10-31T15:01:10+03:00"
+    },
+    {
+      "path": "data/bg_import/::round73-none",
+      "decision": "本次无背景库数据（round 73）",
+      "reason": "用户未提供「项目优化与当前综述」导出 json；背景库当前不可用，本轮未执行 mode:\"update\" 导入、未写入背景库数据。",
+      "status": "done",
+      "round": 73,
+      "at": "2026-10-31T15:01:10+03:00"
+    },
     {
       "path": "docs/plugin-development-guide.md",
       "decision": "G1–G6 口径落地守则（round 72）",
@@ -6263,6 +6287,28 @@
     }
   ],
   "resolved": [
+    {
+      "path": "plugins/model_usage",
+      "move_plan": "",
+      "guide_plan": "",
+      "summary": "should：model_usage_logs 日志表缺双列；README 已补；G2 已定日志表双列，待 round 73 迁移。",
+      "round": 71,
+      "created_at": "2026-10-31T14:42:02+03:00",
+      "resolved_at": "2026-10-31T15:01:10+03:00",
+      "resolved_round": 73,
+      "resolution": "round 73 为 model_usage_logs 补 raw_json+live_json（G2 日志表双列），migrate 幂等回填，repo insert/update 写 live；smoke_model_usage 49/49，全量 13 通过。"
+    },
+    {
+      "path": "plugins/webchat",
+      "move_plan": "",
+      "guide_plan": "",
+      "summary": "should：provides 未声明（README 已补）；G3 已定 provides 必须，待 round 73 补 manifest。",
+      "round": 71,
+      "created_at": "2026-10-31T14:42:02+03:00",
+      "resolved_at": "2026-10-31T15:01:10+03:00",
+      "resolved_round": 73,
+      "resolution": "round 73 补 manifest provides=[webchat]；smoke_plugins 181/181，全量 13 通过。"
+    },
     {
       "path": "plugins/cobuild",
       "move_plan": "",

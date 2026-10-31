@@ -11,10 +11,10 @@
 ## 数据表
 - `model_usage_logs`
 
-- raw/live 状态：缺 `raw_json`/`live_json`（日志表口径待 G2，round 73）
+- raw/live 状态：含 `raw_json` + `live_json`（round 73 补齐；写入同时更新 `live_json`）
 
 ## 依赖
 - 无跨插件依赖
 
 ## 注意事项
-- 日志表是否属内容表需按 G2 判定；勿手工补数。
+- round 73 已按 G2 日志表双列补齐，并加幂等 migrate。

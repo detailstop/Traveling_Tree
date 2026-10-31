@@ -45,15 +45,16 @@ def import_state(raw: str) -> dict:
             if not isinstance(unit, dict) or not unit.get("id"):
                 continue
             conn.execute(
-                "INSERT INTO screeps_units(id,name,role_name,raw_json) VALUES(?,?,?,?)",
+                "INSERT INTO screeps_units(id,name,role_name,raw_json,live_json) VALUES(?,?,?,?,?)",
                 (str(unit["id"]), str(unit.get("name") or ""),
-                 str(unit.get("roleName") or ""), _canon(unit)),
+                 str(unit.get("roleName") or ""), _canon(unit), _canon(unit)),
             )
             units += 1
         for path, content in (data.get("modules") or {}).items():
             conn.execute(
-                "INSERT INTO screeps_modules(path,content,raw_json) VALUES(?,?,?)",
-                (str(path), str(content or ""), _canon({"path": path, "content": content})),
+                "INSERT INTO screeps_modules(path,content,raw_json,live_json) VALUES(?,?,?,?)",
+                (str(path), str(content or ""), _canon({"path": path, "content": content}),
+                 _canon({"path": path, "content": content})),
             )
             modules += 1
         conn.commit()
