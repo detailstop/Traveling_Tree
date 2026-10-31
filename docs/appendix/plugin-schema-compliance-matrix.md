@@ -2,6 +2,8 @@
 
 ## 0. 依据与范围
 
+- INFO.md：22 个插件目录 + `sim` 源共 23 份；字段/一致性由 `smoke_info_cards` 校验（round 85）。
+
 - 依据：白皮书 §五（G2）、9 张豁免清单（round 75–78）、各插件 `schema.sql` 与 `migrate.py`。
 - 扫描：14 个有 `schema.sql` 的插件、共 68 张表；8 个插件无业务表（cobuild/expdata/filejudge/netexp/pdf/rivet/tts/webchat）。`sim` 试点源码在 `market/sources/sim/`，安装后进入 `plugins/`。
 - 触发器统计取自真实库 `sqlite_master`（book_reader 22、finance 29、project_manager 10，共 61 个；按表计 33 张）。

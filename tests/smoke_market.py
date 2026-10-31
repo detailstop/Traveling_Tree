@@ -104,6 +104,17 @@ def main() -> int:
         "sim", tmp / "data" / "plugins", tmp / "data" / "backup")
     check("无数据目录时不备份", backup is None)
 
+    real = backend.list_plugins()
+    real_items = {x["id"]: x for x in real["plugins"]}
+    check("三源合并 23 卡", len(real_items) == 23, str(len(real_items)))
+    check("22 个已安装且 sim 可安装",
+          sum(1 for x in real_items.values() if x["installed"]) == 22
+          and real_items["sim"]["installed"] is False
+          and real_items["sim"]["package"] is True)
+    check("INFO 来源正确", real_items["russian"]["info_source"] == "plugins"
+          and real_items["sim"]["info_source"] == "source"
+          and real_items["market"]["preset"] is True)
+
     # ---- backend 路由（隔离目录，不碰真实 plugins/） ----
     backend.plugins_dir = lambda: plugins
     backend.market_dir = lambda: market
@@ -129,6 +140,30 @@ def main() -> int:
           == "preset_protected")
 
     shutil.rmtree(plugins / "sim")
+    src = market / "sources" / "ghost"
+    src.mkdir(parents=True)
+    (src / "INFO.md").write_text("""---
+id: ghost
+name: Ghost
+version: 1.0
+kind: functional
+has_ui: true
+has_backend: false
+db_module_key: null
+routes_prefix: null
+summary: 无包源信息卡
+---
+""", encoding="utf-8")
+    bad = plugins / "testbad"
+    bad.mkdir()
+    (bad / "INFO.md").write_text("---\nid: testbad\n---\n", encoding="utf-8")
+    merged = backend.list_plugins()
+    by_id = {x["id"]: x for x in merged["plugins"]}
+    check("缺包信息不隐藏卡片", by_id.get("ghost", {}).get("package_error") == "缺包信息"
+          and by_id["ghost"]["installed"] is False)
+    check("坏 INFO 条目级错误", merged.get("ok") is True
+          and "testbad" in by_id and by_id["testbad"].get("info_error"))
+
     r = backend.handle("POST", "/install", {}, {"id": "sim"})
     check("路由安装成功", r.get("ok") is True and (plugins / "sim").is_dir())
 

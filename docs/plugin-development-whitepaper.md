@@ -88,11 +88,11 @@ live_json TEXT NOT NULL DEFAULT '' -- 当前编辑状态
 ## 七、项目状态与交接（2026-10-30）
 
 ### 7.1 插件清单
-- **22 个插件目录**：19 个有前端卡片的插件（ai、aidebug、bg_library、book_reader、expdata、filejudge、finance、market、model_usage、netexp、pdf、pixel_art、project_manager、promptgen、rivet、russian、schedule、screeps、urlarch）；3 个 backend-only 插件（webchat、cobuild、tts，`entries: []`，`/api/plugin/<id>/*` 正常分发）。`sim` 试点包源码在 `market/sources/sim/`，市场安装后进入 `plugins/sim/`。
+- **22 个插件目录**：19 个有前端卡片的插件（ai、aidebug、bg_library、book_reader、expdata、filejudge、finance、market、model_usage、netexp、pdf、pixel_art、project_manager、promptgen、rivet、russian、schedule、screeps、urlarch）；3 个 backend-only 插件（webchat、cobuild、tts，`entries: []`，`/api/plugin/<id>/*` 正常分发）。`sim` 试点包源码在 `market/sources/sim/`，市场安装后进入 `plugins/sim/`。22 个插件目录 + `sim` 源共 **23 份 `INFO.md`** 市场信息卡；规则见 [plugin-info-card-template.md](appendix/plugin-info-card-template.md)。
 - **russian 定位**：`russian` 是普通功能插件（非预置、可卸载），不是宿主主体或默认必装核心。
 - **宿主剩余**：`modules/__init__.py`、`modules/settings_store.py`、`ui/web/server.py`、`ui/web/static/app.js`。原 `core/` 与 `db/schema/` 业务 DDL 已清除。
 
-### 7.2 14 个 smoke 基线（round 82 更新）
+### 7.2 15 个 smoke 基线（round 85 更新）
 | 测试 | 覆盖 | 基线 |
 |---|---|---|
 | smoke_books.py | 书籍导入/列表 | 11/11 |
@@ -108,9 +108,10 @@ live_json TEXT NOT NULL DEFAULT '' -- 当前编辑状态
 | smoke_plugin_module_off.py | 模块关闭 503/不建表 | 10/10 |
 | smoke_plugins.py | manifest/清单/静态资源/后端 | 183/183 |
 | smoke_startup_once.py | 首次启动建表/API | 34/34 |
-| smoke_market.py | 市场安全/安装卸载/预置保护 | 23/23 |
+| smoke_market.py | 市场安全/安装卸载/预置保护 | 28/28 |
+| smoke_info_cards.py | 22+1 份 INFO.md 字段/一致性 | 8/8 |
 
-合计 **967/968**（13 项全 PASS；`smoke_web` 74/75，TTS 502 为唯一允许 FAIL）。
+合计 **980/981**（14 项全 PASS；`smoke_web` 74/75，TTS 502 为唯一允许 FAIL）。
 
 已知 FAIL：`smoke_web` 的 TTS 502 来自 edge-tts 外部网络不可用，不阻塞其他断言；出现非 TTS 的 FAIL 按回滚规则处理。
 
@@ -199,7 +200,9 @@ round 65 删除 `plugin-development-whitepaper-v2.1-draft.md` 与 `project-closu
 - 推荐多入口插件使用 `feature_<entry>.js`（如 `feature_pdf.js`）；manifest 的 `entries[].feature` 是唯一事实来源，文件名不强制。
 - 采用自定义命名时，在 README「入口与路由」列出 entry 与文件对应关系。
 
-## 十一、开发者文档索引（round 70）
+## 十一、开发者文档索引
+
+- 插件信息卡模板：[plugin-info-card-template.md](appendix/plugin-info-card-template.md)（INFO.md 必需结构）（round 70）
 
 - 插件开发守则（7 节开发者动线）：[docs/plugin-development-guide.md](plugin-development-guide.md)
 - 提示词模板（含占位符）：[docs/appendix/prompts/plugin-dev-prompt.md](appendix/prompts/plugin-dev-prompt.md)

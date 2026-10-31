@@ -1,9 +1,73 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-31T19:17:39+03:00",
-  "round": 84,
+  "generated_at": "2026-10-31T20:23:16+03:00",
+  "round": 85,
   "pending": [],
   "decided": [
+    {
+      "path": "docs/appendix/plugin-info-card-template.md",
+      "decision": "新增插件信息卡模板（round 85）",
+      "reason": "front matter 必需 9 项/可选 10 项、格式约定、正文固定结构、示例、校验口径；README 与 INFO.md 分工明确。",
+      "status": "done",
+      "round": 85,
+      "at": "2026-10-31T20:23:16+03:00"
+    },
+    {
+      "path": "plugins/*/INFO.md",
+      "decision": "22 个插件目录 + sim 源共 23 份 INFO.md（round 85）",
+      "reason": "每个插件 INFO.md 的 id/name/version/kind/has_ui/has_backend/db_module_key/routes_prefix/summary 与 manifest 一致，tables 与 schema 一致；sim 位于 market/sources/sim/INFO.md；敏感字段仅写路径类别。",
+      "status": "done",
+      "round": 85,
+      "at": "2026-10-31T20:23:16+03:00"
+    },
+    {
+      "path": "tools/gen_plugin_info_cards.py",
+      "decision": "新增 INFO.md 生成/校验工具（round 85）",
+      "reason": "--check 校验必需字段、id、manifest/schema/backend 一致性与可选字段；生成模式不覆盖已有文件（--force 才覆盖）；无第三方依赖。",
+      "status": "done",
+      "round": 85,
+      "at": "2026-10-31T20:23:16+03:00"
+    },
+    {
+      "path": "tests/smoke_info_cards.py",
+      "decision": "新增 INFO.md smoke（round 85）",
+      "reason": "23 份齐全、解析、字段一致、summary、坏 front matter、sensitive 路径类别；8/8 PASS。",
+      "status": "done",
+      "round": 85,
+      "at": "2026-10-31T20:23:16+03:00"
+    },
+    {
+      "path": "plugins/market/backend.py",
+      "decision": "market 三源合并（INFO/源/index）（round 85）",
+      "reason": "/list 扫描 plugins/*/INFO.md、market/sources/*/INFO.md、index.json，以 id 去重；预置/已安装/可安装/缺包信息状态；坏 INFO 条目级错误不整体失败；包字段仍来自 index。feature.js 增信息源展示。",
+      "status": "done",
+      "round": 85,
+      "at": "2026-10-31T20:23:16+03:00"
+    },
+    {
+      "path": "docs/plugin-development-guide.md",
+      "decision": "守则 §4.1 升级为 README 五节 + INFO.md 必需（round 85）",
+      "reason": "增加 INFO.md 要求与模板链接；§4 检查清单新增 INFO.md 校验项。",
+      "status": "done",
+      "round": 85,
+      "at": "2026-10-31T20:23:16+03:00"
+    },
+    {
+      "path": "README.md",
+      "decision": "README/白皮书/矩阵同步 15 项基线与信息卡（round 85）",
+      "reason": "smoke_market 28/28、smoke_info_cards 8/8，合计 980/981；§4 目录说明与 §12 基线、白皮书 §7.1/7.2/十一、合规矩阵补 INFO 说明。",
+      "status": "done",
+      "round": 85,
+      "at": "2026-10-31T20:23:16+03:00"
+    },
+    {
+      "path": "data/bg_import/::round85-none",
+      "decision": "本次无背景库数据（round 85）",
+      "reason": "用户未提供「项目优化与当前综述」导出 json；背景库不可用，本轮未执行 update 导入、未写背景库数据。",
+      "status": "done",
+      "round": 85,
+      "at": "2026-10-31T20:23:16+03:00"
+    },
     {
       "path": "plugins/market/backend.py",
       "decision": "testprobe 硬编码改为通用 test* 删表规则（round 84）",

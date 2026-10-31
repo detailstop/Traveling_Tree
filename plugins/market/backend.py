@@ -13,6 +13,7 @@ from pathlib import Path
 import config
 from db.connection import get_conn
 from plugins.market import packaging
+from plugins.market.info import InfoError, read_info
 
 PRESETS = ("market", "cobuild", "webchat", "tts", "pixel_art")
 _ID_RE = re.compile(r"^[a-z][a-z0-9_]{1,31}$")
@@ -65,6 +66,8 @@ def _lib_kinds() -> dict[str, str]:
 
 def _manifest(pid: str) -> dict | None:
     path = plugins_dir() / pid / "manifest.json"
+    if not path.is_file():
+        path = market_dir() / "sources" / pid / "manifest.json"
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
         return data if isinstance(data, dict) else None
@@ -128,76 +131,71 @@ def _records() -> dict[str, dict]:
 
 
 # ---------- 列表 ----------
+def _info_index() -> dict[str, dict]:
+    """三源 INFO：plugins/*/INFO.md 优先，其次 market/sources/*/INFO.md。"""
+    result: dict[str, dict] = {}
+    errors: dict[str, str] = {}
+    for base, source in ((plugins_dir(), "plugins"), (market_dir() / "sources", "source")):
+        if not base.is_dir():
+            continue
+        for d in sorted(base.iterdir(), key=lambda p: p.name):
+            info_path = d / "INFO.md"
+            if not d.is_dir() or not info_path.is_file() or d.name in result:
+                continue
+            try:
+                data = read_info(info_path)
+                if str(data.get("id")) != d.name:
+                    raise InfoError("INFO.id 与目录名不一致")
+                data["_info_source"] = source
+                result[d.name] = data
+            except InfoError as exc:
+                errors[d.name] = str(exc)
+    return {"items": result, "errors": errors}
+
+
 def list_plugins() -> dict:
     idx = _index()
     kinds = _lib_kinds()
     records = _records()
-    entries: dict[str, dict] = {}
-    for pkg in idx.get("packages") or []:
-        if not isinstance(pkg, dict):
-            continue
-        pid = str(pkg.get("id") or "")
-        if not _ID_RE.fullmatch(pid):
-            continue
-        entries[pid] = {
-            "id": pid,
-            "name": str(pkg.get("name") or pid),
-            "icon": str(pkg.get("icon") or "🧩"),
-            "kind": str(pkg.get("kind") or kinds.get(pid) or "functional"),
-            "desc": str(pkg.get("desc") or ""),
-            "version": str(pkg.get("version") or ""),
-            "installed": _installed(pid),
-            "preset": pid in PRESETS,
-            "package": True,
-            "size": int(pkg.get("size") or 0),
-            "sha256": str(pkg.get("sha256") or ""),
-            "source": str(pkg.get("source") or "local"),
-            "installed_at": (records.get(pid) or {}).get("installed_at", ""),
-        }
-    for pid in PRESETS:
-        if pid in entries:
-            continue
-        icon, name = _PRESET_META.get(pid, ("🧩", pid))
-        m = _manifest(pid) or {}
-        entries[pid] = {
-            "id": pid,
-            "name": str(m.get("name") or name),
-            "icon": str(m.get("icon") or icon),
-            "kind": kinds.get(pid) or "functional",
-            "desc": str(m.get("desc") or "预置插件"),
-            "version": str(m.get("version") or ""),
-            "installed": _installed(pid),
-            "preset": True,
-            "package": False,
-            "size": 0,
-            "sha256": "",
-            "source": "local",
-            "installed_at": (records.get(pid) or {}).get("installed_at", ""),
-        }
+    infos = _info_index()
+    packages = {str(p.get("id")): p for p in idx.get("packages") or []
+                if isinstance(p, dict) and p.get("id")}
+    ids = set(infos["items"]) | set(packages) | set(PRESETS)
     if plugins_dir().is_dir():
-        for d in sorted(plugins_dir().iterdir(), key=lambda p: p.name):
-            if not d.is_dir() or d.name in entries or d.name.startswith("."):
-                continue
-            m = _manifest(d.name)
-            if m is None:
-                continue
-            entries[d.name] = {
-                "id": d.name,
-                "name": str(m.get("name") or d.name),
-                "icon": str(m.get("icon") or "🧩"),
-                "kind": kinds.get(d.name) or "functional",
-                "desc": str(m.get("desc") or ""),
-                "version": str(m.get("version") or ""),
-                "installed": True,
-                "preset": d.name in PRESETS,
-                "package": False,
-                "size": 0,
-                "sha256": "",
-                "source": "local",
-                "installed_at": (records.get(d.name) or {}).get("installed_at", ""),
-            }
+        ids |= {d.name for d in plugins_dir().iterdir() if d.is_dir() and not d.name.startswith(".")}
+    entries: dict[str, dict] = {}
+    for pid in sorted(ids):
+        info = infos["items"].get(pid)
+        pkg = packages.get(pid)
+        manifest = _manifest(pid) or {}
+        installed = _installed(pid)
+        name = str((info or {}).get("name") or manifest.get("name") or pid)
+        version = str((info or {}).get("version") or manifest.get("version") or (pkg or {}).get("version") or "")
+        desc = str((info or {}).get("summary") or manifest.get("desc") or "")
+        kind = str((info or {}).get("kind") or kinds.get(pid) or "functional")
+        entries[pid] = {
+            "id": pid,
+            "name": name,
+            "icon": str(manifest.get("icon") or "🧩"),
+            "kind": kind,
+            "desc": desc,
+            "version": version,
+            "installed": installed,
+            "preset": pid in PRESETS,
+            "package": bool(pkg),
+            "has_package": bool(pkg),
+            "size": int((pkg or {}).get("size") or 0),
+            "sha256": str((pkg or {}).get("sha256") or ""),
+            "source": str((pkg or {}).get("source") or "local"),
+            "info_source": (info or {}).get("_info_source", "none"),
+            "info_error": infos["errors"].get(pid, ""),
+            "installed_at": (records.get(pid) or {}).get("installed_at", ""),
+        }
+        if not installed and not pkg:
+            entries[pid]["package_error"] = "缺包信息"
     items = sorted(entries.values(), key=lambda x: (0 if x["preset"] else 1, x["name"]))
-    return {"ok": True, "plugins": items, "presets": list(PRESETS)}
+    return {"ok": True, "plugins": items, "presets": list(PRESETS),
+            "info_errors": infos["errors"]}
 
 
 # ---------- 安装/卸载 ----------

@@ -59,10 +59,11 @@ plugins/<id>/
 - [ ] 对外提供能力时已声明 `provides`（§十.4）；`consumes` 可选
 - [ ] 派生/缓存/快照表按 G2 口径豁免时，已在 README「数据表」列出，且保留 `raw_json` 或来源说明（白皮书 §五）
 - [ ] 跨插件直接 import 已在该插件 README 与 `plugins/lib.json` notes 标注（§十.5）
+- [ ] `plugins/<id>/INFO.md` 存在且通过 `smoke_info_cards`（front matter 必需 9 项）
 - [ ] 打卡：`cobuild.checkin` 成功
 - [ ] 导航：`file_navigation.json` 已登记并重生成 md
 
-### 4.1 插件 README 格式
+### 4.1 插件 README 五节 + INFO.md（必需）
 
 每个 `plugins/<id>/README.md` 固定五节，只写事实、不复制代码：
 
@@ -73,6 +74,8 @@ plugins/<id>/
 5. **注意事项**：敏感数据、破坏性操作、已知环境失败（如 TTS 502）、未核实事项。
 
 README 不写实现细节，不复制代码；事实以 manifest/schema/backend 为准。
+
+自 round 85 起，每个插件还必须有 `INFO.md`（front matter + 精简正文），作为市场信息卡：字段清单、填写规则与示例见 [plugin-info-card-template.md](appendix/plugin-info-card-template.md)；校验用 `python tests/smoke_info_cards.py` 或 `python tools/gen_plugin_info_cards.py --check`。README 仍为详细事实源，INFO.md 的 `id/name/version/kind/has_ui/has_backend/db_module_key/routes_prefix/summary` 必须与 manifest 一致。
 
 ### 4.2 触发器维护约定（round 80）
 

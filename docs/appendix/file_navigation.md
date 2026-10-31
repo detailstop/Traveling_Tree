@@ -2,9 +2,9 @@
 
 > 只读摘要，勿手改。本文件由 docs/appendix/file_navigation.json 生成；结构与去留决定以 JSON 为准。
 
-- 生成时间：2026-10-31T19:17:39+03:00
-- 轮次：84
-- 待办：0 条；已决定：542 条
+- 生成时间：2026-10-31T20:23:16+03:00
+- 轮次：85
+- 待办：0 条；已决定：550 条
 
 ## 待办
 
@@ -15,6 +15,14 @@
 
 | 路径 | 决定 | 原因 | 状态 | 轮次 | 时间 | 备份路径 |
 | --- | --- | --- | --- | --- | --- | --- |
+| docs/appendix/plugin-info-card-template.md | 新增插件信息卡模板（round 85） | front matter 必需 9 项/可选 10 项、格式约定、正文固定结构、示例、校验口径；README 与 INFO.md 分工明确。 | done | 85 | 2026-10-31T20:23:16+03:00 |  |
+| plugins/*/INFO.md | 22 个插件目录 + sim 源共 23 份 INFO.md（round 85） | 每个插件 INFO.md 的 id/name/version/kind/has_ui/has_backend/db_module_key/routes_prefix/summary 与 manifest 一致，tables 与 schema 一致；sim 位于 market/sources/sim/INFO.md；敏感字段仅写路径类别。 | done | 85 | 2026-10-31T20:23:16+03:00 |  |
+| tools/gen_plugin_info_cards.py | 新增 INFO.md 生成/校验工具（round 85） | --check 校验必需字段、id、manifest/schema/backend 一致性与可选字段；生成模式不覆盖已有文件（--force 才覆盖）；无第三方依赖。 | done | 85 | 2026-10-31T20:23:16+03:00 |  |
+| tests/smoke_info_cards.py | 新增 INFO.md smoke（round 85） | 23 份齐全、解析、字段一致、summary、坏 front matter、sensitive 路径类别；8/8 PASS。 | done | 85 | 2026-10-31T20:23:16+03:00 |  |
+| plugins/market/backend.py | market 三源合并（INFO/源/index）（round 85） | /list 扫描 plugins/*/INFO.md、market/sources/*/INFO.md、index.json，以 id 去重；预置/已安装/可安装/缺包信息状态；坏 INFO 条目级错误不整体失败；包字段仍来自 index。feature.js 增信息源展示。 | done | 85 | 2026-10-31T20:23:16+03:00 |  |
+| docs/plugin-development-guide.md | 守则 §4.1 升级为 README 五节 + INFO.md 必需（round 85） | 增加 INFO.md 要求与模板链接；§4 检查清单新增 INFO.md 校验项。 | done | 85 | 2026-10-31T20:23:16+03:00 |  |
+| README.md | README/白皮书/矩阵同步 15 项基线与信息卡（round 85） | smoke_market 28/28、smoke_info_cards 8/8，合计 980/981；§4 目录说明与 §12 基线、白皮书 §7.1/7.2/十一、合规矩阵补 INFO 说明。 | done | 85 | 2026-10-31T20:23:16+03:00 |  |
+| data/bg_import/::round85-none | 本次无背景库数据（round 85） | 用户未提供「项目优化与当前综述」导出 json；背景库不可用，本轮未执行 update 导入、未写背景库数据。 | done | 85 | 2026-10-31T20:23:16+03:00 |  |
 | plugins/market/backend.py | testprobe 硬编码改为通用 test* 删表规则（round 84） | _test_tables(pid) 仅对 id 以 test 开头的插件读取其 schema 并收集 test_ 前缀表；uninstall(delete_tables) 仅在该条件下允许，先整库备份再删除；非 test* 或无 test_ 表一律拒绝，错误可读；去掉字符串 testprobe 硬编码。 | done | 84 | 2026-10-31T19:17:39+03:00 |  |
 | plugins/market/packaging.py | 删表函数注释明确正式/测试规则（round 84） | drop_test_tables 只接受 test_ 前缀表；注释写明正式卸载不删主库表、测试规则为唯一例外；未改函数行为。 | done | 84 | 2026-10-31T19:17:39+03:00 |  |
 | plugins/market/README.md | 市场 README 写明正式卸载规则（round 84） | 正式规则=卸载不 DROP 主库表；唯一例外 test* 插件 + test_ 表；删前整库备份；与代码一致。 | done | 84 | 2026-10-31T19:17:39+03:00 |  |

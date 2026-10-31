@@ -48,7 +48,7 @@
     } else if (preset) {
       actions = `<span class="mk-hint">内置，不可卸载</span>`;
     } else if (!installed && !it.package) {
-      actions = `<span class="mk-hint">无本地包</span>`;
+      actions = `<span class="mk-hint">${esc(it.package_error || '缺包信息')}</span>`;
     }
     return `<div class="mk-card${expanded ? ' open' : ''}" data-id="${esc(it.id)}">
       <div class="mk-head" data-toggle="${esc(it.id)}">
@@ -64,6 +64,7 @@
           <span>包大小</span><b>${fmtSize(it.size)}</b>
           <span>SHA256</span><b class="mono">${esc((it.sha256 || '').slice(0, 8) || '—')}</b>
           <span>来源</span><b>${esc(it.source || 'local')}</b>
+          <span>信息源</span><b>${esc(it.info_source || 'none')}${it.info_error ? '（' + esc(it.info_error) + '）' : ''}</b>
         </div>
         ${(!preset && installed) ? `<label class="mk-danger"><input type="checkbox" data-deldata="${esc(it.id)}"> 同时删除私有数据目录（默认保留）</label>` : ''}
       </div>` : ''}
