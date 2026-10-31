@@ -50,7 +50,7 @@ TARGETS = [
     {"id": "russian", "api": "/api/plugin/russian/items", "api_ok": 200},
     {"id": "schedule", "api": "/api/plugin/schedule/state", "api_ok": 200},
     {"id": "screeps", "api": "/api/plugin/screeps/state", "api_ok": 200},
-    {"id": "sim", "api": None},
+    {"id": "market", "api": "/api/plugin/market/list", "api_ok": 200},
     {"id": "urlarch", "api": "/api/plugin/urlarch/state", "api_ok": 200},
 ]
 TOTAL = len(TARGETS)

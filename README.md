@@ -1,6 +1,6 @@
 # 旅行之木
 
-本机运行的旅行之木：学习核心与可插件化工具均以插件形式加载，宿主只负责 Web 服务、插件发现/分发与共享设置。业务内容数据保存在本机 SQLite，只有 UI 偏好保留在浏览器 localStorage，不需要账号，也不做云同步。
+本机运行的旅行之木：俄语单词背诵与可插件化工具均以插件形式加载，宿主只负责 Web 服务、插件发现/分发与共享设置。业务内容数据保存在本机 SQLite，只有 UI 偏好保留在浏览器 localStorage，不需要账号，也不做云同步。
 
 > 根目录的早期整理稿与一次性调试/变更残留已于 2026-10-27 清理，去留与审查记录见 `docs/appendix/file_navigation.json`（`docs/appendix/file_navigation.md` 为只读摘要）；本 README 为当前主说明。
 
@@ -57,7 +57,7 @@ python -m playwright install chromium
 | --- | --- | --- |
 | `python main.py` | 日常使用 | 本地 Web UI；默认监听 `127.0.0.1:8765` |
 
-经典 Tkinter GUI 与 CLI 已随学习核心插件化退役：两者原先直接依赖 `core.models` / `core.repository` / `core.planner`，在业务表与学习逻辑下沉到 `plugins/russian/` 后不再维护。背景库导入、共建打卡等操作保留在 Web UI；宿主只保留 Web 入口。
+经典 Tkinter GUI 与 CLI 已随俄语学习功能插件化退役：两者原先直接依赖 `core.models` / `core.repository` / `core.planner`，在业务表与学习逻辑下沉到 `plugins/russian/` 后不再维护。`russian` 不是宿主主体/默认必装，仅为可卸载（非预置）功能插件。背景库导入、共建打卡等操作保留在 Web UI；宿主只保留 Web 入口。
 
 ## 4. 目录与职责
 
@@ -72,7 +72,7 @@ Traveling_Tree/
 ├── ui/
 │   ├── web/server.py        本地 HTTP 静态资源 + 插件分发 + 宿主 API
 │   └── web/static/          原生前端；features/*.js 按需加载
-├── plugins/                 22 个插件目录：19 个有卡片插件（russian/、book_reader/、project_manager/、bg_library/、promptgen/、ai/、aidebug/、sim/、expdata/、schedule/、screeps/、urlarch/、netexp/、rivet/、filejudge/、pdf/、model_usage/、pixel_art/、finance/）+ 3 个 backend-only（webchat/、cobuild/、tts/）；manifest + backend.py，有卡片的另有 feature.js + plugin.css，有表的另有 schema.sql
+├── plugins/                 22 个插件目录：19 个有卡片插件（russian/、book_reader/、project_manager/、bg_library/、promptgen/、ai/、aidebug/、market/、expdata/、schedule/、screeps/、urlarch/、netexp/、rivet/、filejudge/、pdf/、model_usage/、pixel_art/、finance/）+ 3 个 backend-only（webchat/、cobuild/、tts/）；manifest + backend.py，有卡片的另有 feature.js + plugin.css，有表的另有 schema.sql
 ├── data/                    运行时数据：SQLite、settings、缓存、会话、备份
 ├── docs/
 │   ├── plugin-development-whitepaper.md   开发白皮书（最高准则）
@@ -84,7 +84,7 @@ Traveling_Tree/
 
 分层约定：`ui/` 通过 `/api/plugin/<id>/*` 动态分发到各插件 backend；宿主不再有 `core/`，全部 SQL 在插件内（model_usage/pixel_art/finance/bg_library/book_reader/russian/project_manager）；`db/schema/` 为空，新增表只写 `plugins/<id>/schema.sql` 并由 manifest 的 `db` 声明，`db/connection.py` 启动时扫描执行；`data/settings.json` 的 `modules.enabled` 控制按模块建表，默认全启用。
 
-插件可有/无业务表：无表插件不声明 `db` 或声明 `"db": null`。当前 22 个插件中 **13 个有 `schema.sql`、9 个无表**（cobuild、expdata、filejudge、netexp、pdf、rivet、sim、tts、webchat）。
+插件可有/无业务表：无表插件不声明 `db` 或声明 `"db": null`。当前 22 个插件目录中 **14 个有 `schema.sql`、8 个无表**（cobuild、expdata、filejudge、netexp、pdf、rivet、tts、webchat）；`sim` 试点包源码在 `market/sources/sim/`，由市场安装后出现在 `plugins/`。
 
 ### 说明性文件分工
 
@@ -230,9 +230,10 @@ python tests/smoke_pm.py
 
 ## 12. 项目状态与交接（2026-10-30）
 
-- **插件**：22 个插件目录——19 个有前端卡片（ai、aidebug、bg_library、book_reader、expdata、filejudge、finance、model_usage、netexp、pdf、pixel_art、project_manager、promptgen、rivet、russian、schedule、screeps、sim、urlarch）+ 3 个 backend-only（webchat、cobuild、tts）。
-- **13 smoke 基线**：smoke_plugins 181/181、smoke_startup_once 33/33、smoke_web 74/75（TTS 502 已知）、smoke_plugin_decoupling 452/452、smoke_finance 34/34、smoke_model_usage 49/49、smoke_reader_range 25/25、smoke_pm 23/23、smoke_books 11/11、smoke_file_preview 17/17、smoke_pdf 17/17、smoke_plugin_data_dirs 13/13、smoke_plugin_module_off 10/10。
-- **剩余 pending**：`tests/smoke_plugin_decoupling.py::Server.start` 的 `stop()` 异常保护（低概率进程竞态，三次 452/452 通过，留观察）。
+- **插件**：22 个插件目录——19 个有前端卡片（ai、aidebug、bg_library、book_reader、expdata、filejudge、finance、market、model_usage、netexp、pdf、pixel_art、project_manager、promptgen、rivet、russian、schedule、screeps、urlarch）+ 3 个 backend-only（webchat、cobuild、tts）；`sim` 试点包不常驻 `plugins/`。
+- **插件市场（round 82）**：左侧栏「插件市场」；预置 5 个（market/cobuild/webchat/tts/pixel_art）不可卸载；本地包由 `tools/build_market_packages.py` 生成到 `market/packages/*.zip`（不进 Git），`market/index.json` 进 Git；安装/卸载重启生效；卸载默认保留 `data/plugins/<id>/`，勾选删除会先备份到 `data/backup/uninstall_<id>_<ts>/`。
+- **14 项 smoke 基线**：smoke_plugins 183/183、smoke_startup_once 34/34、smoke_web 74/75（TTS 502 已知）、smoke_plugin_decoupling 454/454、smoke_finance 34/34、smoke_model_usage 49/49、smoke_reader_range 25/25、smoke_pm 23/23、smoke_books 11/11、smoke_file_preview 17/17、smoke_pdf 17/17、smoke_plugin_data_dirs 13/13、smoke_plugin_module_off 10/10、smoke_market 18/18。
+- **剩余 pending**：无（`Server.start` 已在 round 80 修复并连续 20 次通过）。
 - **交接建议**：新功能进 `plugins/<id>/`，不碰宿主；改现有功能直接改对应插件；每轮下沉、改 settings 或改 API 后跑全量 13 个 smoke；`/api/plugin/<id>/*` 必须用语义子路径；二进制响应按附录 C。
 - 完整状态、数据资产与 docs 闭环规则见白皮书 [§7 项目状态与交接](docs/plugin-development-whitepaper.md) 与 [§8 docs 目录与临时文件闭环](docs/plugin-development-whitepaper.md)。
 - **schema 合规（round 79）**：round 75–78 完成 22 插件表结构收口——67 张表全部合规（9 张豁免 live 且有注释），61 个触发器；矩阵见 [plugin-schema-compliance-matrix.md](docs/appendix/plugin-schema-compliance-matrix.md)。

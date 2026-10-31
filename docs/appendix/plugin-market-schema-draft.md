@@ -1,6 +1,8 @@
 # 插件市场数据库设计草案（round 70）
 
-> **状态：草案，未建表。** 后续实现落到 `plugins/market/schema.sql`（新建插件 `plugins/market/`）；届时每张内容表必须含 `raw_json TEXT NOT NULL` 与 `live_json TEXT NOT NULL DEFAULT ''`（白皮书 §五）。本轮不建插件、不写 SQL、不改宿主。
+> **状态（round 82 更新）：A 阶段本地市场已落地。** 新建 `plugins/market/`（`backend.py` + `feature.js` + `schema.sql` + `packaging.py`），实际建表为 `market_installed`（id/version/source/installed_at/status/raw_json/live_json）；`market/index.json` 为只读包清单，`market/packages/*.zip` 不进 Git。B 阶段预留 `market_source` 与 `fetch_package` 的 HTTP 分支（当前只读本地包）。本文件其余字段仍为 B 阶段参考，未全部建表。
+>
+> 原说明：后续实现落到 `plugins/market/schema.sql`（新建插件 `plugins/market/`）；届时每张内容表必须含 `raw_json TEXT NOT NULL` 与 `live_json TEXT NOT NULL DEFAULT ''`（白皮书 §五）。
 
 ## 1. 目标与数据来源
 

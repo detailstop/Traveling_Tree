@@ -1,0 +1,20 @@
+{
+  "packages": [
+    {
+      "id": "sim",
+      "name": "随机模拟器",
+      "icon": "🎲",
+      "version": "1.0",
+      "kind": "functional",
+      "desc": "蒙特卡洛 · 醉汉 / 粒子沉积 / 自由运动",
+      "sha256": "c60268b5d2cbda6a2102f4b140094adfec0690b646d9608e9bb2d780d406e8e7",
+      "size": 12062,
+      "file": "sim.zip",
+      "source": "local",
+      "download_url": "",
+      "signature": "",
+      "signed_by": ""
+    }
+  ],
+  "version": 1
+}

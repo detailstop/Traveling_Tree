@@ -88,10 +88,11 @@ live_json TEXT NOT NULL DEFAULT '' -- 当前编辑状态
 ## 七、项目状态与交接（2026-10-30）
 
 ### 7.1 插件清单
-- **22 个插件目录**：19 个有前端卡片的插件（ai、aidebug、bg_library、book_reader、expdata、filejudge、finance、model_usage、netexp、pdf、pixel_art、project_manager、promptgen、rivet、russian、schedule、screeps、sim、urlarch）；3 个 backend-only 插件（webchat、cobuild、tts，`entries: []`，`/api/plugin/<id>/*` 正常分发）。
+- **22 个插件目录**：19 个有前端卡片的插件（ai、aidebug、bg_library、book_reader、expdata、filejudge、finance、market、model_usage、netexp、pdf、pixel_art、project_manager、promptgen、rivet、russian、schedule、screeps、urlarch）；3 个 backend-only 插件（webchat、cobuild、tts，`entries: []`，`/api/plugin/<id>/*` 正常分发）。`sim` 试点包源码在 `market/sources/sim/`，市场安装后进入 `plugins/sim/`。
+- **russian 定位**：`russian` 是普通功能插件（非预置、可卸载），不是宿主主体或默认必装核心。
 - **宿主剩余**：`modules/__init__.py`、`modules/settings_store.py`、`ui/web/server.py`、`ui/web/static/app.js`。原 `core/` 与 `db/schema/` 业务 DDL 已清除。
 
-### 7.2 13 个 smoke 基线（结项时点）
+### 7.2 14 个 smoke 基线（round 82 更新）
 | 测试 | 覆盖 | 基线 |
 |---|---|---|
 | smoke_books.py | 书籍导入/列表 | 11/11 |
@@ -103,15 +104,16 @@ live_json TEXT NOT NULL DEFAULT '' -- 当前编辑状态
 | smoke_file_preview.py | 文件预览 | 17/17 |
 | smoke_pdf.py | PDF 与二进制响应 | 17/17 |
 | smoke_plugin_data_dirs.py | 插件 data_dirs | 13/13 |
-| smoke_plugin_decoupling.py | 19 卡片插件改名/重启解耦 | 452/452 |
+| smoke_plugin_decoupling.py | 19 卡片插件改名/重启解耦 | 454/454 |
 | smoke_plugin_module_off.py | 模块关闭 503/不建表 | 10/10 |
-| smoke_plugins.py | manifest/清单/静态资源/后端 | 181/181 |
-| smoke_startup_once.py | 首次启动建表/API | 33/33 |
+| smoke_plugins.py | manifest/清单/静态资源/后端 | 183/183 |
+| smoke_startup_once.py | 首次启动建表/API | 34/34 |
+| smoke_market.py | 市场安全/安装卸载/预置保护 | 18/18 |
 
 已知 FAIL：`smoke_web` 的 TTS 502 来自 edge-tts 外部网络不可用，不阻塞其他断言；出现非 TTS 的 FAIL 按回滚规则处理。
 
 ### 7.3 剩余 pending
-- `tests/smoke_plugin_decoupling.py::Server.start` 的 `stop()` 异常保护：低概率进程竞态边界，三次 452/452 通过，暂不修，留观察。
+- 无（`Server.start` 已在 round 80 修复并连续 20 次 452/452 通过；本轮市场无新增 pending）。
 
 ### 7.4 交接建议
 - 新功能：在 `plugins/` 下新建插件，写 `manifest.json` + `backend.py`；有业务表加 `schema.sql`，参照附录 A–D。
@@ -125,6 +127,7 @@ live_json TEXT NOT NULL DEFAULT '' -- 当前编辑状态
 - 主库 `data/russian_tutor.db`（唯一业务主库；文件名与项目目录名解耦，不改）。
 - `data/settings.json`：`download_groups` + `modules.enabled`；插件 settings 在 `data/plugins/<id>/settings.json`。
 - 敏感文件：`data/ai_keys.json`、`data/webchat_sessions.json`、`data/plugins/webchat/webchat_profile/`、`data/plugins/finance/fixtures/rt_fin.json`；只按路径处理，不读正文、不进 Git。
+- 市场资产：`market/index.json`（进 Git，包清单/SHA256）、`market/packages/*.zip`（不进 Git）、`market/sources/<id>/`（试点源码，进 Git）、`market/.trash/`（卸载备份，不进 Git）；安装记录在 `market_installed` 表。
 
 ### 7.6 round 65 删除前核对结论（round 66 补记）
 round 65 删除 `plugin-development-whitepaper-v2.1-draft.md` 与 `project-closure-2026-10-29.md` 前，逐项核对结论如下；两份源文档未恢复。

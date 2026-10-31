@@ -26,3 +26,8 @@ Thumbs.db
 # 临时
 *.tmp
 *.log
+
+# 插件市场：zip 不进 Git（index.json 进 Git）
+market/packages/*.zip
+market/.tmp/
+market/.trash/

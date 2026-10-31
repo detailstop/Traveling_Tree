@@ -445,6 +445,7 @@ const TOOLS = [
 /* ---------- 插件工具（P1）：/api/plugins/list + /plugins/<id>/<feature> ---------- */
 const PLUGIN_DISABLED_KEY = 'rt_plugins_disabled';
 let PLUGIN_TOOLS = [];
+let PLUGIN_NAV = [];
 const PLUGIN_FEATURE_LOADS = new Map();
 const PLUGIN_STYLE_LOADS = new Map();
 
@@ -466,12 +467,13 @@ async function loadPlugins() {
   try {
     const d = await api('/api/plugins/list');
     const entries = [];
+    const navEntries = [];
     for (const plugin of (d.plugins || [])) {
       if (!plugin || !plugin.id) continue;
       for (const entry of (plugin.entries || [])) {
         if (!entry || !entry.id || !entry.feature_url) continue;
         if (TOOLS.some(t => t.id === entry.id)) continue;
-        entries.push({
+        const item = {
           ...entry,
           plugin_id: entry.plugin_id || plugin.id,
           style_url: plugin.style_url || '',
@@ -479,14 +481,31 @@ async function loadPlugins() {
           fromPlugin: true,
           desc: entry.desc || '',
           shelf: entry.shelf || 'gen',
-        });
+        };
+        if (entry.nav) navEntries.push(item);
+        else entries.push(item);
       }
     }
     PLUGIN_TOOLS = entries;
+    PLUGIN_NAV = navEntries;
   } catch (e) {
     PLUGIN_TOOLS = [];
+    PLUGIN_NAV = [];
     console.warn('插件清单加载失败：' + e.message);
   }
+}
+function renderNav() {
+  const nav = $('#nav');
+  if (!nav) return;
+  $$('.nav-item[data-plugin-nav]').forEach(b => b.remove());
+  PLUGIN_NAV.forEach(entry => {
+    const b = document.createElement('button');
+    b.className = 'nav-item';
+    b.dataset.nav = 'plugin:' + entry.plugin_id;
+    b.dataset.pluginNav = '1';
+    b.innerHTML = `<span class="ni">${esc(entry.icon)}</span><span class="nav-label">${esc(entry.name)}</span>`;
+    nav.appendChild(b);
+  });
 }
 function loadPluginStyle(plugin) {
   const url = plugin && plugin.style_url;
@@ -1303,6 +1322,37 @@ function emptyHTML(icon, title, sub) {
 function switchPage(name) {
   $$('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.nav === name));
   $$('.page').forEach(p => p.classList.add('hidden'));
+  if (name.startsWith('plugin:')) {
+    const pid = name.slice('plugin:'.length);
+    const entry = PLUGIN_NAV.find(e => e.plugin_id === pid) || null;
+    const page = $('#page-plugin');
+    page.classList.remove('hidden');
+    page.classList.remove('page-in');
+    void page.offsetWidth;
+    page.classList.add('page-in');
+    $('#page-title').textContent = entry ? entry.name : '插件';
+    $('#top-sub').textContent = entry ? (entry.desc || '') : '';
+    S.page = 'plugin';
+    page.innerHTML = '<div id="nav-view"></div>';
+    if (!entry) {
+      page.innerHTML = emptyHTML('🧩', '插件不可用', '该导航入口已不在插件清单中');
+      return;
+    }
+    (async () => {
+      try {
+        await loadPluginStyle(entry);
+        await loadPluginFeature(entry);
+        const render = window.__toolRenderers[entry.id];
+        if (typeof render !== 'function') throw new Error('功能入口未注册：' + entry.id);
+        if (S.page !== 'plugin') return;
+        const host = $('#nav-view');
+        if (host) render(host);
+      } catch (e) {
+        if (S.page === 'plugin') page.innerHTML = emptyHTML('⚠️', '插件加载失败', esc(e.message));
+      }
+    })();
+    return;
+  }
   const page = $('#page-' + name);
   page.classList.remove('hidden');
   page.classList.remove('page-in');
@@ -1459,6 +1509,7 @@ function wireNav() {
   try {
     S.settings = await api('/api/settings');   // 宿主设置（下载分组）；学习设置由插件加载
     await loadPlugins();
+    renderNav();
     switchPage('tools');   // 主界面 = 通用工具
     prefSyncFromServer();  // 本地先渲染，后端配置异步对齐
     // 页面数据由对应页面首次打开时按需请求，避免首屏后的请求突发和数据库排队。

@@ -232,6 +232,7 @@ def _plugin_entry(pid: str, raw: dict, base: Path) -> dict | None:
         "shelf": shelf,
         "feature": feature,
         "feature_url": f"/plugins/{quote(pid, safe='')}/{quote(feature, safe='/')}",
+        "nav": bool(raw.get("nav")),
     }
 
 

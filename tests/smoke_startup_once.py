@@ -79,9 +79,9 @@ def main() -> int:
                      "schedule_tasks", "urlarch_assets", "urlarch_links",
                      "screeps_assets", "screeps_units", "ai_sessions", "ai_tx_logs",
                      "aidebug_history", "reader_bookmarks", "finance_quant_assets",
-                     "finance_fund_cache")
+                     "finance_fund_cache", "market_installed")
     check("schema 单一源（核心 + 插件）",
-          len(schema_files) == 0 and len(plugin_schema_files) == 13
+          len(schema_files) == 0 and len(plugin_schema_files) == 14
           and all(f"CREATE TABLE IF NOT EXISTS {table}" in schema_text
                   for table in schema_tables),
           f"core={len(schema_files)} plugin={len(plugin_schema_files)}")
@@ -220,6 +220,7 @@ def main() -> int:
     conn = dbconn.get_conn()
     names = {r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")}
     check("关闭 pm 不建 pm_*", "pm_projects" not in names and "pm_stages" not in names)
+    check("market 安装记录表已建", "market_installed" in names)
     check("关闭 model_usage 不建表", "model_usage_logs" not in names)
     check("关闭 finance 不建表", "finance_accounts" not in names)
     check("其他模块仍建表", "items" in names and "reader_books" in names)

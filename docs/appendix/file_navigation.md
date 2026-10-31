@@ -2,9 +2,9 @@
 
 > 只读摘要，勿手改。本文件由 docs/appendix/file_navigation.json 生成；结构与去留决定以 JSON 为准。
 
-- 生成时间：2026-10-31T17:57:52+03:00
-- 轮次：81
-- 待办：0 条；已决定：522 条
+- 生成时间：2026-10-31T18:43:21+03:00
+- 轮次：82
+- 待办：0 条；已决定：529 条
 
 ## 待办
 
@@ -15,6 +15,13 @@
 
 | 路径 | 决定 | 原因 | 状态 | 轮次 | 时间 | 备份路径 |
 | --- | --- | --- | --- | --- | --- | --- |
+| plugins/market/ | 新增插件市场（A 阶段本地包机制）（round 82） | manifest（导航型 entry nav:true）+ schema（market_installed，双列）+ backend（/list /index /status /install /uninstall）+ packaging（SHA256、路径穿越/绝对路径/符号链接/大小/文件数校验、临时目录、manifest.id 一致、原子安装）+ feature.js/plugin.css（卡片、搜索、kind 过滤、详情、预置不可卸载、删数据二次确认）。 | done | 82 | 2026-10-31T18:43:21+03:00 |  |
+| market/index.json | 本地市场包清单与构建脚本（round 82） | tools/build_market_packages.py 从 market/sources/<id>/ 生成固定时间戳 zip 并写 index（id/name/version/kind/desc/sha256/size/file/source/签名预留）；sim.zip 生成成功（12062 B，sha256 c60268b5…）；zip 已加入 .gitignore，index.json 进 Git。 | done | 82 | 2026-10-31T18:43:21+03:00 |  |
+| market/sources/sim/ | sim 试点迁移（方案 a，round 82） | plugins/sim 移至 market/sources/sim（源码进 Git，zip 不进 Git）；市场可安装/卸载/重装；真实库试点安装→卸载→重装→卸载通过，最终 sim 未安装（plugins 目录 22 个）。 | done | 82 | 2026-10-31T18:43:21+03:00 |  |
+| ui/web/static/app.js | 通用导航壳支持插件导航型 entry（round 82） | loadPlugins 将 entry.nav 分流为 PLUGIN_NAV；renderNav 动态插入 #nav；switchPage 增加 plugin: 通用页（#page-plugin + #nav-view）并加载 feature/style；不硬编码 market id，market 删除后入口消失且零 Traceback。server.py 的 _plugin_entry 透传 nav 字段。 | done | 82 | 2026-10-31T18:43:21+03:00 |  |
+| tests/smoke_market.py | 新增市场 smoke 与既有断言适配（round 82） | smoke_market 18/18：SHA256 一致、路径穿越/绝对路径/符号链接/id 不一致/重复安装拒绝、安装/卸载/重装、预置保护、删数据备份；smoke_plugins 183/183、smoke_startup_once 34/34、smoke_plugin_decoupling 454/454（TARGETS sim→market）；全量 14 通过（smoke_web 74/75 TTS 502 已知）。 | done | 82 | 2026-10-31T18:43:21+03:00 |  |
+| README.md | README 增市场说明、预置名单、基线更新与 russian 定位修正（round 82） | 补市场使用/打包/zip 不进 Git/重启/卸载删数据规则；13 项基线→14 项（183/34/454/18 等）；russian 明确非主体/非必装；白皮书 §7.1/§7.2/§7.3/§7.5、守则 §4.3、市场草案同步；合规矩阵补 market_installed（68 表）。 | done | 82 | 2026-10-31T18:43:21+03:00 |  |
+| data/bg_import/::round82-none | 本次无背景库数据（round 82） | 用户未提供「项目优化与当前综述」导出 json；背景库不可用，本轮未执行 update 导入、未写背景库数据。 | done | 82 | 2026-10-31T18:43:21+03:00 |  |
 | docs/appendix/project-acceptance-round80.md | 新增项目验收与结项文档（round 81） | 汇总验收结论、定位、架构、schema 合规（67/67、9 豁免、61 触发器）、13 项测试基线、round 65–80 提交链、round 75–81 备份、已知限制、未来方向与验收清单；数据来自已有文档与 round 80 实测，不读插件实现。 | done | 81 | 2026-10-31T17:57:52+03:00 |  |
 | README.md | README 项目状态标记验收完成（round 81） | §12 增加验收完成条目，链接验收报告与合规矩阵；保留 round 79/80 历史条目。 | done | 81 | 2026-10-31T17:57:52+03:00 |  |
 | tests/ | 验收轮全量 13 结果（round 81） | 12 项全 PASS；smoke_web 74/75（TTS 502 已知）；smoke_plugin_decoupling 452/452；合计 939/940。未改测试。 | done | 81 | 2026-10-31T17:57:52+03:00 |  |

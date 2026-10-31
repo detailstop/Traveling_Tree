@@ -82,6 +82,8 @@ README 不写实现细节，不复制代码；事实以 manifest/schema/backend 
 - 触发器依赖 SQLite JSON1（≥3.38，本机 3.45）；新插件如采用该方案，须在 README「数据表」与 `migrate.py` 中说明。
 - 合规状态与触发器覆盖见 [plugin-schema-compliance-matrix.md](appendix/plugin-schema-compliance-matrix.md)。
 
+插件打包与本地市场安装：`tools/build_market_packages.py` 从 `market/sources/<id>/` 生成 `market/packages/<id>.zip` 与 `market/index.json`；安装/卸载/安全校验在 `plugins/market/`，使用说明见 README §12。
+
 > `provides` 示例（round 73 核实）：`webchat` → `["webchat"]`；`ai` → `["ai"]`；`pixel_art` → `["pixel_assets"]`。`cobuild` 不声明 `provides`：它面向用户打卡入口，没有被其他插件调用。`consumes` 可选。
 
 ## 5. 接口索引（只列路由与调用方，不抄签名）

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-30T14:48:46+03:00",
+  "generated_at": "2026-10-31T18:40:00+03:00",
   "classification_rule": "有前端卡片（manifest.entries 非空）= functional（功能性）；无卡片（entries 为空）= library（底层下沉）；cobuild 例外归 functional（backend-only，但用户直接使用打卡入口）。本文件仅作文档索引，宿主、测试与插件运行时不读取。",
   "plugins": [
     {
@@ -167,6 +167,13 @@
         "ui/web/static/features/webchat.js"
       ],
       "notes": "网页会话（底层下沉）；无卡片；被 ai/aidebug/finance/promptgen 与宿主共享脚本调用；依赖 Playwright 浏览器与登录态 data/plugins/webchat/webchat_profile/（敏感，不读正文）。详见 docs/appendix/lib/webchat.md。 对外提供能力：provides=[webchat]（ai/aidebug/finance/promptgen 与宿主调用）。"
+    },
+    {
+      "id": "market",
+      "kind": "functional",
+      "has_ui": true,
+      "called_by": [],
+      "notes": "插件市场；有导航型卡片入口（nav entry）；读取 market/index.json，安装/卸载本地包；预置 5 个不可卸载；不修改其它插件。"
     }
   ]
 }

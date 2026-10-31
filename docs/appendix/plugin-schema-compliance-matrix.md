@@ -3,14 +3,14 @@
 ## 0. 依据与范围
 
 - 依据：白皮书 §五（G2）、9 张豁免清单（round 75–78）、各插件 `schema.sql` 与 `migrate.py`。
-- 扫描：13 个有 `schema.sql` 的插件、共 67 张表；9 个插件无业务表（cobuild/expdata/filejudge/netexp/pdf/rivet/sim/tts/webchat）。
+- 扫描：14 个有 `schema.sql` 的插件、共 68 张表；8 个插件无业务表（cobuild/expdata/filejudge/netexp/pdf/rivet/tts/webchat）。`sim` 试点源码在 `market/sources/sim/`，安装后进入 `plugins/`。
 - 触发器统计取自真实库 `sqlite_master`（book_reader 22、finance 29、project_manager 10，共 61 个；按表计 33 张）。
 - 本轮只读；未改任何 schema/插件。
 
 ## 1. 汇总
 
-- 有 schema 插件：**13**；总表数：**67**。
-- 合规表：**67**；待修表：**0**。
+- 有 schema 插件：**14**；总表数：**68**。
+- 合规表：**68**；待修表：**0**。
 - 豁免 live 表：**9**；有触发器表：**33**（实际触发器 61 个）。
 - 判定：全部合规，无需修项。
 
@@ -174,6 +174,14 @@
 | `urlarch_groups` | 有 | 有 | - | 无 | 合规 |
 | `urlarch_links` | 有 | 有 | - | 无 | 合规 |
 
+### market
+
+表数 1；合规 1；待修 0；豁免 0；有触发器表 0。
+
+| 表 | raw | live | 豁免注释 | 触发器 | 判定 |
+|---|---|---|---|---|---|
+| `market_installed` | 有 | 有 | - | 无 | 合规 |
+
 ## 3. 豁免清单（9 张）
 
 | 插件 | 表 | 理由 | 注释 |
@@ -196,6 +204,6 @@
 
 ## 5. 与 round 75–78 记录的差异
 
-- 总数与执行记录一致：67 表、9 豁免、61 触发器。
+- 总数与执行记录一致：68 表、9 豁免、61 触发器（market 无触发器）。
 - round 79 首次扫描曾把 `item_stats` 注释中的 `live_json` 误判为列，已修正为按列定义解析；最终结果全部合规。
 - 无新增待修项；`Server.start` 仍为唯一 pending（非 schema 问题）。

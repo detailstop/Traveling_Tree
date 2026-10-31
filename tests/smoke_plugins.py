@@ -161,7 +161,7 @@ SHARED_CSS_SELECTORS = (".pi-check", ".pi-badge", ".fin-note", ".rv-card",
 PLUGIN_CSS_ANCHORS = {
     "ai": [],
     "aidebug": [".adb-pre"],
-    "sim": [".sim-wrap", ".sim-canvas-box"],
+    "market": [".mk-wrap", ".mk-grid"],
     "expdata": [".exp-imgbox"],
     "schedule": [".hm-cell", ".wp-strip", ".pi-card", ".plan-tip"],
     "screeps": [],
