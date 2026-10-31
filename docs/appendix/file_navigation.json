@@ -1,9 +1,65 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-31T18:55:45+03:00",
-  "round": 83,
+  "generated_at": "2026-10-31T19:17:39+03:00",
+  "round": 84,
   "pending": [],
   "decided": [
+    {
+      "path": "plugins/market/backend.py",
+      "decision": "testprobe 硬编码改为通用 test* 删表规则（round 84）",
+      "reason": "_test_tables(pid) 仅对 id 以 test 开头的插件读取其 schema 并收集 test_ 前缀表；uninstall(delete_tables) 仅在该条件下允许，先整库备份再删除；非 test* 或无 test_ 表一律拒绝，错误可读；去掉字符串 testprobe 硬编码。",
+      "status": "done",
+      "round": 84,
+      "at": "2026-10-31T19:17:39+03:00"
+    },
+    {
+      "path": "plugins/market/packaging.py",
+      "decision": "删表函数注释明确正式/测试规则（round 84）",
+      "reason": "drop_test_tables 只接受 test_ 前缀表；注释写明正式卸载不删主库表、测试规则为唯一例外；未改函数行为。",
+      "status": "done",
+      "round": 84,
+      "at": "2026-10-31T19:17:39+03:00"
+    },
+    {
+      "path": "plugins/market/README.md",
+      "decision": "市场 README 写明正式卸载规则（round 84）",
+      "reason": "正式规则=卸载不 DROP 主库表；唯一例外 test* 插件 + test_ 表；删前整库备份；与代码一致。",
+      "status": "done",
+      "round": 84,
+      "at": "2026-10-31T19:17:39+03:00"
+    },
+    {
+      "path": "README.md",
+      "decision": "README 落 B3 源码公开决定与市场 UI 点测清单（round 84）",
+      "reason": "B3 改为“已决定接受公开：market/sources/ 与未来市场仓库源码可见，无敏感内容”；新增 9 条市场 UI 手动点测清单（入口、搜索、过滤、详情、预置、安装、卸载二次确认、删数据备份、重启）。",
+      "status": "done",
+      "round": 84,
+      "at": "2026-10-31T19:17:39+03:00"
+    },
+    {
+      "path": "docs/plugin-development-whitepaper.md",
+      "decision": "白皮书基线同步与 B3 决定（round 84）",
+      "reason": "smoke_market 23/23、合计 967/968（TTS 502 唯一 FAIL）；§7.5 B3 改为已决定接受公开。",
+      "status": "done",
+      "round": 84,
+      "at": "2026-10-31T19:17:39+03:00"
+    },
+    {
+      "path": "docs/appendix/plugin-market-schema-draft.md",
+      "decision": "市场草案补正式卸载规则与 B3 决定（round 84）",
+      "reason": "删除不 DROP 主库表；test* + test_ 为唯一例外且先备份；B3 已接受源码公开。",
+      "status": "done",
+      "round": 84,
+      "at": "2026-10-31T19:17:39+03:00"
+    },
+    {
+      "path": "data/bg_import/::round84-none",
+      "decision": "本次无背景库数据（round 84）",
+      "reason": "用户未提供「项目优化与当前综述」导出 json；背景库不可用，本轮未执行 update 导入、未写背景库数据。",
+      "status": "done",
+      "round": 84,
+      "at": "2026-10-31T19:17:39+03:00"
+    },
     {
       "path": "plugins/market/backend.py",
       "decision": "市场源只读预留与测试表删除守卫（round 83）",

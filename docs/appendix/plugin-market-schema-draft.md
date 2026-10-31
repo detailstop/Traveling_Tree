@@ -2,7 +2,7 @@
 
 > **状态（round 82 更新）：A 阶段本地市场已落地。** 新建 `plugins/market/`（`backend.py` + `feature.js` + `schema.sql` + `packaging.py`），实际建表为 `market_installed`（id/version/source/installed_at/status/raw_json/live_json）；`market/index.json` 为只读包清单，`market/packages/*.zip` 不进 Git。B 阶段预留 `market_source` 与 `fetch_package` 的 HTTP 分支（当前只读本地包）。本文件其余字段仍为 B 阶段参考，未全部建表。
 >
-> A 阶段配置：市场源默认 `market/packages/`（`data/plugins/market/settings.json` 的 `market_source`，只读）；B3 独立市场仓库时源码可能公开，需用户确认后再切换。
+> A 阶段配置：市场源默认 `market/packages/`（`data/plugins/market/settings.json` 的 `market_source`，只读）；B3 已决定接受源码公开：`market/sources/` 与未来市场仓库源码可见，无敏感内容。
 >
 > 原说明：后续实现落到 `plugins/market/schema.sql`（新建插件 `plugins/market/`）；届时每张内容表必须含 `raw_json TEXT NOT NULL` 与 `live_json TEXT NOT NULL DEFAULT ''`（白皮书 §五）。
 
@@ -92,3 +92,8 @@
 - 远端同步协议（拉取方式、鉴权、签名/哈希校验、离线回退）。
 - 分类体系与现有插件卡片的 `shelf` 字段如何对齐。
 - 是否需要“安装/卸载”动作；若需要，必须先解决插件目录写入与宿主重启的安全边界（本轮不设计）。
+
+## 正式卸载规则（round 84）
+
+- 卸载不 DROP 主库表。
+- 唯一例外：插件 id 以 `test` 开头且表名 `test_` 前缀时，可删除测试表；删前整库备份到 `data/backup/uninstall_<id>_<ts>/`。

@@ -160,7 +160,7 @@ def backup_database(db_path: Path, backup_root: Path) -> Path:
 
 
 def drop_test_tables(db_path: Path, tables: list[str]) -> list[str]:
-    """仅删除 test_ 前缀的测试表（调用方须先做插件限定）。"""
+    """仅删除 test_ 前缀的测试表（正式卸载不删主库表；调用方须限定 test* 插件）。"""
     import sqlite3
     if any(not t.startswith("test_") for t in tables):
         raise MarketError("forbidden", "只允许删除 test_ 前缀测试表")

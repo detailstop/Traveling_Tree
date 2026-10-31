@@ -231,8 +231,8 @@ python tests/smoke_pm.py
 ## 12. 项目状态与交接（2026-10-30）
 
 - **插件**：22 个插件目录——19 个有前端卡片（ai、aidebug、bg_library、book_reader、expdata、filejudge、finance、market、model_usage、netexp、pdf、pixel_art、project_manager、promptgen、rivet、russian、schedule、screeps、urlarch）+ 3 个 backend-only（webchat、cobuild、tts）；`sim` 试点包不常驻 `plugins/`。
-- **插件市场（round 82）**：左侧栏「插件市场」；预置 5 个（market/cobuild/webchat/tts/pixel_art）不可卸载；本地包由 `tools/build_market_packages.py` 生成到 `market/packages/*.zip`（不进 Git），`market/index.json` 进 Git；安装/卸载重启生效；卸载默认保留 `data/plugins/<id>/`，勾选删除会先备份到 `data/backup/uninstall_<id>_<ts>/`。克隆后先运行 `python tools/build_market_packages.py` 生成 `market/packages/sim.zip`，否则 sim 不可安装。`market/sources/` 进 Git 意味着试点插件源码可见；B3 独立市场仓库时源码可能公开，是否接受由用户后续决定。
-- **14 项 smoke 基线**：smoke_plugins 183/183、smoke_startup_once 34/34、smoke_web 74/75（TTS 502 已知）、smoke_plugin_decoupling 454/454、smoke_finance 34/34、smoke_model_usage 49/49、smoke_reader_range 25/25、smoke_pm 23/23、smoke_books 11/11、smoke_file_preview 17/17、smoke_pdf 17/17、smoke_plugin_data_dirs 13/13、smoke_plugin_module_off 10/10、smoke_market 18/18。
+- **插件市场（round 82）**：左侧栏「插件市场」；预置 5 个（market/cobuild/webchat/tts/pixel_art）不可卸载；本地包由 `tools/build_market_packages.py` 生成到 `market/packages/*.zip`（不进 Git），`market/index.json` 进 Git；安装/卸载重启生效；卸载默认保留 `data/plugins/<id>/`，勾选删除会先备份到 `data/backup/uninstall_<id>_<ts>/`。克隆后先运行 `python tools/build_market_packages.py` 生成 `market/packages/sim.zip`，否则 sim 不可安装。`market/sources/` 进 Git 意味着试点插件源码可见；B3 已决定接受源码公开：`market/sources/` 与未来市场仓库源码可见，无敏感内容。
+- **14 项 smoke 基线**：smoke_plugins 183/183、smoke_startup_once 34/34、smoke_web 74/75（TTS 502 已知）、smoke_plugin_decoupling 454/454、smoke_finance 34/34、smoke_model_usage 49/49、smoke_reader_range 25/25、smoke_pm 23/23、smoke_books 11/11、smoke_file_preview 17/17、smoke_pdf 17/17、smoke_plugin_data_dirs 13/13、smoke_plugin_module_off 10/10、smoke_market 23/23。
 - **剩余 pending**：无（`Server.start` 已在 round 80 修复并连续 20 次通过）。
 - **交接建议**：新功能进 `plugins/<id>/`，不碰宿主；改现有功能直接改对应插件；每轮下沉、改 settings 或改 API 后跑全量 13 个 smoke；`/api/plugin/<id>/*` 必须用语义子路径；二进制响应按附录 C。
 - 完整状态、数据资产与 docs 闭环规则见白皮书 [§7 项目状态与交接](docs/plugin-development-whitepaper.md) 与 [§8 docs 目录与临时文件闭环](docs/plugin-development-whitepaper.md)。
@@ -240,3 +240,15 @@ python tests/smoke_pm.py
 - **round 80 收口**：`Server.start` 已修复（健康检查捕获 `BadStatusLine`/`HTTPException`，`stop()` 包裹进程退出竞态），连续 20 次 452/452 通过；**pending 清零**。触发器维护约定见守则 §4.2，无表插件说明见 §4。
 - **验收完成（round 81）**：项目验收通过——schema 合规 67/67、测试稳定、pending 清零、备份齐全；验收报告见 [project-acceptance-round80.md](docs/appendix/project-acceptance-round80.md)，合规矩阵见 [plugin-schema-compliance-matrix.md](docs/appendix/plugin-schema-compliance-matrix.md)。
 - **round 65 删除核对**：v2.1 草案四项（backend-only / 根路由 / `__binary__` / import 约定）已分别落在 `docs/appendix/A–D`；结项报告的 22 插件清单、13 smoke 基线、剩余 pending、交接建议已落在白皮书 §7.1–7.4。核对表见白皮书 §7.6；两份源文档未恢复。
+
+### 市场 UI 手动点测清单
+
+1. **左侧栏入口**：打开首页，确认「插件市场」与「旅行之木」首页标识同级显示；移除 `plugins/market/` 后入口消失且服务无 Traceback（名称/图标来自 manifest，非宿主硬编码）。
+2. **搜索**：输入 `sim`、`随机`、`market`，卡片列表按名称/简介/id 过滤；清空恢复全部。
+3. **按 kind 过滤**：切换下拉（functional/library），列表仅保留对应分类；计数 `x / y` 同步。
+4. **展开详情**：点击卡片标题，显示简介全文、版本、包大小、SHA256 前 8 位、来源；再次点击收起。
+5. **预置不可卸载**：market/cobuild/webchat/tts/pixel_art 显示「预置 / 内置，不可卸载」，无卸载按钮。
+6. **安装**：未安装的 `sim` 点击安装 → 提示「安装完成，重启服务后生效」；`plugins/sim/` 出现，列表状态变「已安装」。
+7. **卸载二次确认**：已安装的 `sim` 点击卸载 → 浏览器确认框；取消不生效，确认后移出 `plugins/sim/` 并提示重启。
+8. **删私有目录备份提示**：卸载详情勾选「同时删除私有数据目录」→ 出现二次确认；确认后 `data/plugins/<id>/` 备份到 `data/backup/uninstall_<id>_<ts>/` 再删除；默认不勾选。
+9. **重启生效**：安装/卸载后重启服务，插件清单/卡片与市场状态一致；`sim` 可重装。

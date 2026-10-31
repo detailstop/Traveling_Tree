@@ -2,9 +2,9 @@
 
 > 只读摘要，勿手改。本文件由 docs/appendix/file_navigation.json 生成；结构与去留决定以 JSON 为准。
 
-- 生成时间：2026-10-31T18:55:45+03:00
-- 轮次：83
-- 待办：0 条；已决定：535 条
+- 生成时间：2026-10-31T19:17:39+03:00
+- 轮次：84
+- 待办：0 条；已决定：542 条
 
 ## 待办
 
@@ -15,6 +15,13 @@
 
 | 路径 | 决定 | 原因 | 状态 | 轮次 | 时间 | 备份路径 |
 | --- | --- | --- | --- | --- | --- | --- |
+| plugins/market/backend.py | testprobe 硬编码改为通用 test* 删表规则（round 84） | _test_tables(pid) 仅对 id 以 test 开头的插件读取其 schema 并收集 test_ 前缀表；uninstall(delete_tables) 仅在该条件下允许，先整库备份再删除；非 test* 或无 test_ 表一律拒绝，错误可读；去掉字符串 testprobe 硬编码。 | done | 84 | 2026-10-31T19:17:39+03:00 |  |
+| plugins/market/packaging.py | 删表函数注释明确正式/测试规则（round 84） | drop_test_tables 只接受 test_ 前缀表；注释写明正式卸载不删主库表、测试规则为唯一例外；未改函数行为。 | done | 84 | 2026-10-31T19:17:39+03:00 |  |
+| plugins/market/README.md | 市场 README 写明正式卸载规则（round 84） | 正式规则=卸载不 DROP 主库表；唯一例外 test* 插件 + test_ 表；删前整库备份；与代码一致。 | done | 84 | 2026-10-31T19:17:39+03:00 |  |
+| README.md | README 落 B3 源码公开决定与市场 UI 点测清单（round 84） | B3 改为“已决定接受公开：market/sources/ 与未来市场仓库源码可见，无敏感内容”；新增 9 条市场 UI 手动点测清单（入口、搜索、过滤、详情、预置、安装、卸载二次确认、删数据备份、重启）。 | done | 84 | 2026-10-31T19:17:39+03:00 |  |
+| docs/plugin-development-whitepaper.md | 白皮书基线同步与 B3 决定（round 84） | smoke_market 23/23、合计 967/968（TTS 502 唯一 FAIL）；§7.5 B3 改为已决定接受公开。 | done | 84 | 2026-10-31T19:17:39+03:00 |  |
+| docs/appendix/plugin-market-schema-draft.md | 市场草案补正式卸载规则与 B3 决定（round 84） | 删除不 DROP 主库表；test* + test_ 为唯一例外且先备份；B3 已接受源码公开。 | done | 84 | 2026-10-31T19:17:39+03:00 |  |
+| data/bg_import/::round84-none | 本次无背景库数据（round 84） | 用户未提供「项目优化与当前综述」导出 json；背景库不可用，本轮未执行 update 导入、未写背景库数据。 | done | 84 | 2026-10-31T19:17:39+03:00 |  |
 | plugins/market/backend.py | 市场源只读预留与测试表删除守卫（round 83） | settings() 只读 data/plugins/market/settings.json 的 market_source（默认 market/packages/）；uninstall 增加 delete_tables，仅 testprobe 验证钩子开放，其他插件拒绝且永不 DROP 主库表；backup_database 先整库备份再 drop_test_tables（仅 test_ 前缀）。 | done | 83 | 2026-10-31T18:55:45+03:00 |  |
 | tests/smoke_market.py | smoke_market 增补有表卸载用例（round 83） | 新增：非测试插件禁删表、整库备份含删除前表、仅删除 test_ 表、禁删非 test_ 表；smoke_market 22/22。临时有表插件链路验证后已删除，未提交。 | done | 83 | 2026-10-31T18:55:45+03:00 |  |
 | README.md | README 补克隆后打包说明与 B3 源码公开边界（round 83） | 市场章节：克隆后先跑 tools/build_market_packages.py 生成 zip，否则 sim 不可安装；market/sources/ 进 Git 表示源码可见，B3 独立市场仓库时源码可能公开，由用户后续决定。 | done | 83 | 2026-10-31T18:55:45+03:00 |  |

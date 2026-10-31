@@ -113,6 +113,13 @@ def main() -> int:
     backend._records = lambda: {}
     (market / "index.json").write_text(json.dumps({"packages": [entry]}), encoding="utf-8")
 
+    demo = plugins / "testdemo"
+    demo.mkdir()
+    (demo / "schema.sql").write_text(
+        "CREATE TABLE IF NOT EXISTS test_demo_items (id TEXT PRIMARY KEY);\n", encoding="utf-8")
+    check("通用 test* 规则识别 test_ 表", backend._test_tables("testdemo") == ["test_demo_items"]
+          and backend._test_tables("sim") == [])
+
     listed = backend.handle("GET", "/list", {}, {})
     item = next(p for p in listed["plugins"] if p["id"] == "sim")
     check("/list 结构完整", {"id", "name", "kind", "desc", "version", "installed",

@@ -21,5 +21,6 @@
 
 ## 注意事项
 - 安装前强制 SHA256 + zip 路径穿越/符号链接校验；安装=解压到 `plugins/<id>/`，重启生效。
-- 卸载=移出 `plugins/<id>/`（保留 `data/plugins/<id>/`）；勾选删除私有数据时先备份到 `data/backup/uninstall_<id>_<ts>/`，不 DROP 主库表。
+- 卸载=移出 `plugins/<id>/`（保留 `data/plugins/<id>/`）；勾选删除私有数据时先备份到 `data/backup/uninstall_<id>_<ts>/`。
+- **正式规则：卸载不 DROP 主库表。** 唯一例外是测试规则：插件 id 以 `test` 开头且表名以 `test_` 前缀时，可勾选删除测试表，删前先整库备份到 `data/backup/uninstall_<id>_<ts>/`；其他插件一律拒绝。
 - `market` 自身为预置，不提供卸载；B 阶段远程市场预留 `fetch_package` / `market_source`。

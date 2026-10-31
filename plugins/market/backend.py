@@ -225,15 +225,29 @@ def install(pid: str) -> dict:
             "message": "安装完成，重启服务后生效"}
 
 
+def _test_tables(pid: str) -> list[str]:
+    """通用测试规则：id 以 test 开头时，只收集其 schema 中 test_ 前缀的表。"""
+    if not pid.startswith("test"):
+        return []
+    path = plugins_dir() / pid / "schema.sql"
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError:
+        return []
+    names = re.findall(r"CREATE TABLE(?: IF NOT EXISTS)?\s+([A-Za-z0-9_]+)", text, re.I)
+    return [n for n in names if n.startswith("test_")]
+
+
 def uninstall(pid: str, delete_data: bool = False, delete_tables: bool = False) -> dict:
     pid = str(pid or "").strip()
     if not _ID_RE.fullmatch(pid):
         return {"ok": False, "error": "bad_id", "message": "非法插件 id"}
     if pid in PRESETS:
         return {"ok": False, "error": "preset_protected", "message": "预置插件不可卸载"}
-    if delete_tables and pid != "testprobe":
+    test_tables = _test_tables(pid) if delete_tables else []
+    if delete_tables and not test_tables:
         return {"ok": False, "error": "delete_tables_forbidden",
-                "message": "仅测试插件 testprobe 允许删除测试表"}
+                "message": "仅 id 以 test 开头且声明 test_ 表的插件允许删除测试表"}
     if not _installed(pid):
         return {"ok": False, "error": "not_installed", "message": "插件未安装"}
     try:
@@ -247,11 +261,11 @@ def uninstall(pid: str, delete_data: bool = False, delete_tables: bool = False) 
     table_backup = ""
     dropped: list[str] = []
     if delete_tables:
-        # 仅 testprobe 验证钩子开放；其他插件卸载永不 DROP 主库表。
+        # 正式规则：卸载不 DROP 主库表；唯一例外是 test* 插件的 test_ 前缀测试表。
         stamp = time.strftime("%Y%m%d_%H%M%S")
         table_backup = str(packaging.backup_database(
             Path(config.DB_PATH), Path(config.DATA_DIR) / "backup" / f"uninstall_{pid}_{stamp}"))
-        dropped = packaging.drop_test_tables(Path(config.DB_PATH), ["test_probe_items"])
+        dropped = packaging.drop_test_tables(Path(config.DB_PATH), test_tables)
     _record(pid, "", "local", "removed")
     return {"ok": True, "id": pid, "restart_required": True,
             "plugin_backup": str(backup),
