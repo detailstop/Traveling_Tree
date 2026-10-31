@@ -8,6 +8,7 @@ has_backend: true
 db_module_key: promptgen
 routes_prefix: /api/plugin/promptgen
 summary: 结构化组装提示词 · 简化生成工作流
+icon: 📝
 entries: [promptgen]
 tables: [pg_assets, pg_flows, pg_modules, pg_tasks, pg_flow_groups]
 data_dirs: []

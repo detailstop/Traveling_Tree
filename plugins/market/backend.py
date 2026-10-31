@@ -14,7 +14,7 @@ import config
 from db.connection import get_conn
 from plugins.market import packaging
 from plugins.market.info import InfoError, read_info
-from plugins.market import scaffold
+from plugins.market import index_store, scaffold
 
 PRESETS = ("market", "cobuild", "webchat", "tts", "pixel_art")
 _ID_RE = re.compile(r"^[a-z][a-z0-9_]{1,31}$")
@@ -44,16 +44,7 @@ def plugins_dir() -> Path:
 
 
 def _index() -> dict:
-    path = index_path()
-    if not path.is_file():
-        return {"packages": []}
-    try:
-        data = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, ValueError) as exc:
-        raise packaging.MarketError("bad_index", f"market/index.json 不可读：{exc}") from exc
-    if not isinstance(data, dict) or not isinstance(data.get("packages"), list):
-        raise packaging.MarketError("bad_index", "market/index.json 结构不合法")
-    return data
+    return index_store.read_runtime()
 
 
 def _lib_kinds() -> dict[str, str]:
@@ -83,11 +74,12 @@ def _installed(pid: str) -> bool:
 def settings() -> dict:
     """只读市场私有配置：默认 A 阶段本地包目录；B 阶段可切市场仓库。"""
     path = Path(config.DATA_DIR) / "plugins" / "market" / "settings.json"
-    default = {"market_source": "market/packages/"}
+    default = {"market_source": "market/packages/", "market_source_url": ""}
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
         if isinstance(data, dict):
-            default.update({k: v for k, v in data.items() if k == "market_source"})
+            default.update({k: v for k, v in data.items()
+                            if k in ("market_source", "market_source_url")})
     except (OSError, ValueError):
         pass
     return default
@@ -195,7 +187,10 @@ def list_plugins() -> dict:
         if not installed and not pkg:
             entries[pid]["package_error"] = "缺包信息"
     items = sorted(entries.values(), key=lambda x: (0 if x["preset"] else 1, x["name"]))
+    idx = _index()
     return {"ok": True, "plugins": items, "presets": list(PRESETS),
+            "index_version": int(idx.get("version", 0) or 0),
+            "market_source_url": settings().get("market_source_url", ""),
             "info_errors": infos["errors"]}
 
 
@@ -297,11 +292,18 @@ def handle(method: str, subpath: str, query: dict, body: dict):
                     "download_dir": str(out or ""), "configured": out is not None}
         if method == "POST" and route == "scaffold/generate":
             return {"ok": True, **scaffold.generate(body.get("id"), body.get("values") or {})}
+        if method == "GET" and route == "refresh-index":
+            return {"ok": True, "configured": bool(settings().get("market_source_url")),
+                    "version": int(_index().get("version", 0) or 0)}
+        if method == "POST" and route == "refresh-index":
+            return index_store.refresh(settings().get("market_source_url", ""))
     except packaging.MarketError as exc:
         return {"ok": False, "error": exc.code, "message": exc.message}
     except scaffold.ScaffoldError as exc:
         return {"ok": False, "error": exc.code, "message": exc.message}
+    except index_store.IndexError_ as exc:
+        return {"ok": False, "error": exc.code, "message": exc.message}
     if route in {"list", "index", "status", "install", "uninstall",
-                 "scaffold/fields", "scaffold/generate"}:
+                 "scaffold/fields", "scaffold/generate", "refresh-index"}:
         return {"ok": False, "error": "method_not_allowed", "__status__": 405}
     return {"ok": False, "error": "not_found", "__status__": 404}

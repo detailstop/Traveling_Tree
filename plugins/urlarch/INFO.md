@@ -8,6 +8,7 @@ has_backend: true
 db_module_key: urlarch
 routes_prefix: /api/plugin/urlarch
 summary: 归档网址信息 · 后续接入网址爬虫
+icon: 🔖
 entries: [urlarch]
 tables: [urlarch_assets, urlarch_groups, urlarch_links]
 data_dirs: []

@@ -8,6 +8,7 @@ has_backend: true
 db_module_key: null
 routes_prefix: /api/plugin/webchat
 summary: Playwright 网页会话后端（无前端卡片）
+icon: 💬
 entries: []
 tables: []
 data_dirs: [webchat]

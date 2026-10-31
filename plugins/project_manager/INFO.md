@@ -8,6 +8,7 @@ has_backend: true
 db_module_key: pm
 routes_prefix: /api/plugin/project_manager
 summary: 六阶段项目推进 · 手填提示词 · 结果留档与上下文声明
+icon: 🗂️
 entries: [project-manager]
 tables: [pm_stage_templates, pm_projects, pm_stages, pm_prompt_drafts, pm_results]
 data_dirs: []

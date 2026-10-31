@@ -8,6 +8,7 @@ has_backend: false
 db_module_key: null
 routes_prefix: null
 summary: A 键开始 · 三次点击 · 输出三线段长度
+icon: 🧪
 entries: [expdata]
 tables: []
 data_dirs: []

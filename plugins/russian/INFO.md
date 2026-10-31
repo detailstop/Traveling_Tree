@@ -8,6 +8,7 @@ has_backend: true
 db_module_key: russian
 routes_prefix: /api/plugin/russian
 summary: 卡片学习 · 复习 · 知识库 · 统计
+icon: 🇷🇺
 entries: [russian]
 tables: [items, item_stats, review_logs, daily_logs, themes]
 data_dirs: []

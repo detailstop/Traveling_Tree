@@ -8,6 +8,7 @@ has_backend: true
 db_module_key: schedule
 routes_prefix: /api/plugin/schedule
 summary: 周计划 · 打卡热力图
+icon: 📅
 entries: [schedule]
 tables: [schedule_assets, schedule_week_plans, schedule_tasks]
 data_dirs: []

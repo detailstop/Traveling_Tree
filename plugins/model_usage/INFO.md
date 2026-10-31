@@ -8,6 +8,7 @@ has_backend: true
 db_module_key: model_usage
 routes_prefix: /api/plugin/model_usage
 summary: 单次调用记录 · 对话/功能/模型分组 · 趋势与消费
+icon: 📈
 entries: [model-usage]
 tables: [model_usage_logs]
 data_dirs: []

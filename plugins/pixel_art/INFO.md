@@ -8,6 +8,7 @@ has_backend: true
 db_module_key: pixel_art
 routes_prefix: /api/plugin/pixel_art
 summary: 像素画布 · 作品库 · 书签/图标资产 · JSON/PNG/Piskel 导入导出
+icon: 🎨
 entries: [pixel-art]
 tables: [pixel_artworks, pixel_asset_refs, visual_settings]
 data_dirs: []

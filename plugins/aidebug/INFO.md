@@ -8,6 +8,7 @@ has_backend: true
 db_module_key: aidebug
 routes_prefix: /api/plugin/aidebug
 summary: 网页 DS 对接：发送 · 抓取原文 · JSON 解码
+icon: 🛠️
 entries: [aidebug]
 tables: [aidebug_history]
 data_dirs: []

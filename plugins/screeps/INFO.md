@@ -8,6 +8,7 @@ has_backend: true
 db_module_key: screeps
 routes_prefix: /api/plugin/screeps
 summary: 编程竞技游戏 · 后续接入游玩代码生成
+icon: 🤖
 entries: [screeps]
 tables: [screeps_assets, screeps_units, screeps_modules]
 data_dirs: []

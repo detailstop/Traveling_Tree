@@ -61,6 +61,7 @@ plugins/<id>/
 - [ ] 跨插件直接 import 已在该插件 README 与 `plugins/lib.json` notes 标注（§十.5）
 - [ ] `plugins/<id>/INFO.md` 存在且通过 `smoke_info_cards`（front matter 必需 9 项）
 - [ ] 市场「开发插件」可用：模板存在、`download_dir` 已设置；未设置/缺值/路径穿越均明确报错
+- [ ] 市场运行态 index 可初始化（5 条）、远程拉取可覆盖且失败不动本地；`market_source_url` 空时按钮置灰
 - [ ] 打卡：`cobuild.checkin` 成功
 - [ ] 导航：`file_navigation.json` 已登记并重生成 md
 

@@ -8,6 +8,7 @@ has_backend: false
 db_module_key: null
 routes_prefix: null
 summary: 信息互联 · 远程信息交换探索
+icon: 🌐
 entries: [netexp]
 tables: []
 data_dirs: []

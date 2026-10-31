@@ -17,7 +17,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 import config
-from plugins.market import backend, packaging
+from plugins.market import backend, index_store, packaging
 
 results: list[bool] = []
 
@@ -58,8 +58,17 @@ def main() -> int:
         print("FAIL 缺少 market/packages/sim.zip，请先运行 tools/build_market_packages.py")
         return 1
     good_zip = real_zip.read_bytes()
-    index = json.loads((ROOT / "market" / "index.json").read_text(encoding="utf-8"))
-    entry = next(p for p in index["packages"] if p["id"] == "sim")
+    sim_manifest = json.loads((ROOT / "market" / "sources" / "sim" / "manifest.json").read_text(encoding="utf-8"))
+    entry = {
+        "id": "sim", "name": sim_manifest.get("name") or "随机模拟器",
+        "version": str(sim_manifest.get("version") or "1.0"),
+        "kind": "functional", "desc": sim_manifest.get("desc") or "",
+        "summary": sim_manifest.get("desc") or "", "has_ui": True,
+        "icon": sim_manifest.get("icon") or "🎲",
+        "sha256": packaging.sha256_bytes(good_zip), "size": len(good_zip),
+        "file": "sim.zip", "download_url": "", "source": "local",
+        "signature": "", "signed_by": "", "package_ready": True,
+    }
     check("index SHA256 与包一致", entry["sha256"] == packaging.sha256_bytes(good_zip))
 
     tmp = Path(tempfile.mkdtemp(prefix="rt_market_test_"))
@@ -119,10 +128,11 @@ def main() -> int:
     backend.plugins_dir = lambda: plugins
     backend.market_dir = lambda: market
     backend.packages_dir = lambda: packages
-    backend.index_path = lambda: market / "index.json"
+    backend.index_store.runtime_path = lambda: market / "index.json"
+    backend.index_store.template_path = lambda: market / "index.json"
     backend._record = lambda *a, **k: None
     backend._records = lambda: {}
-    (market / "index.json").write_text(json.dumps({"packages": [entry]}), encoding="utf-8")
+    (market / "index.json").write_text(json.dumps({"version": 1, "packages": [entry]}), encoding="utf-8")
 
     demo = plugins / "testdemo"
     demo.mkdir()
@@ -236,6 +246,87 @@ summary: 无包源信息卡
         sc.TEMPLATE = old_tpl
     check("模板缺失时市场其余接口正常", miss.get("error") == "template_missing"
           and still.get("ok") is True)
+
+    # ---- B 阶段：初始化复制 / 拉取 / 校验 ----
+    def pkg(pid):
+        return {"id": pid, "name": pid, "version": "1.0", "kind": "functional",
+                "desc": "d", "summary": "s", "has_ui": True, "icon": "📦",
+                "sha256": "", "size": 0, "file": "", "download_url": "",
+                "source": "local", "signature": "", "signed_by": "", "package_ready": False}
+
+    orig_fetch = index_store._fetch_url
+    btmp = tmp / "b"; btmp.mkdir()
+    tpl = btmp / "template.json"; run = btmp / "runtime.json"
+    tpl.write_text(json.dumps({"version": 1, "packages": [pkg(f"p{i}") for i in range(5)]}), encoding="utf-8")
+    old_rt, old_tpl = index_store.runtime_path, index_store.template_path
+    index_store.runtime_path = lambda: run
+    index_store.template_path = lambda: tpl
+    try:
+        index_store.ensure_runtime()
+        first = json.loads(run.read_text(encoding="utf-8"))
+        run.write_text(json.dumps({"version": 9, "packages": [pkg("kept")]}), encoding="utf-8")
+        index_store.ensure_runtime()
+        kept = json.loads(run.read_text(encoding="utf-8"))
+        check("首次初始化复制 5 条且不覆盖", len(first["packages"]) == 5
+              and kept["version"] == 9 and kept["packages"][0]["id"] == "kept")
+        remote = {"version": 10, "packages": [pkg(f"r{i}") for i in range(23)]}
+        index_store._fetch_url = lambda url: json.dumps(remote).encode()
+        out = index_store.refresh("https://example.com/index.json")
+        now = json.loads(run.read_text(encoding="utf-8"))
+        check("拉取成功覆盖并升版", out["version"] == 10 and len(now["packages"]) == 23)
+        before = run.read_bytes()
+        def bad_remote(data):
+            run.write_bytes(before)
+            index_store._fetch_url = lambda url: data
+            try:
+                index_store.refresh("https://example.com/index.json")
+            except index_store.IndexError_ as exc:
+                return exc.code
+            return "no_error"
+        checks = {
+            "非法 JSON": (b"not json", "invalid_structure"),
+            "缺字段": (json.dumps({"version": 3, "packages": [{"id": "x"}]}).encode(), "invalid_structure"),
+            "路径穿越 file": (json.dumps({"version": 3, "packages": [dict(pkg("x"), file="../a.zip", package_ready=True,
+                sha256="0"*64)]}).encode(), "invalid_structure"),
+            "sha256 非法": (json.dumps({"version": 3, "packages": [dict(pkg("x"), package_ready=True,
+                file="a.zip", sha256="zz")]}).encode(), "invalid_structure"),
+            "版本回滚": (json.dumps({"version": 1, "packages": [pkg("x")]}).encode(), "version_regression"),
+        }
+        failed = []
+        for name, (data, expect) in checks.items():
+            got = bad_remote(data)
+            if got != expect or run.read_bytes() != before:
+                failed.append(f"{name}:{got}")
+        check("拉取失败不动本地且错误码正确", not failed, " | ".join(failed))
+        try:
+            index_store.refresh("")
+        except index_store.IndexError_ as exc:
+            nc = exc.code
+        else:
+            nc = "no_error"
+        check("未配置返回 not_configured", nc == "not_configured")
+        index_store._fetch_url = orig_fetch
+        try:
+            index_store._fetch_url("http://127.0.0.1/x")
+        except index_store.IndexError_ as exc:
+            sec = exc.code
+        else:
+            sec = "no_error"
+        check("生产路径拒绝 http", sec == "insecure_url")
+        bad_tpl = btmp / "bad.json"; bad_tpl.write_text(json.dumps({"packages": []}), encoding="utf-8")
+        bad_run = btmp / "bad_runtime.json"
+        index_store.template_path = lambda: bad_tpl
+        index_store.runtime_path = lambda: bad_run
+        try:
+            index_store.ensure_runtime()
+        except index_store.IndexError_ as exc:
+            bad_code = exc.code
+        else:
+            bad_code = "no_error"
+        check("非法模板拒绝初始化", bad_code == "invalid_structure" and not bad_run.exists())
+    finally:
+        index_store.runtime_path, index_store.template_path = old_rt, old_tpl
+        index_store._fetch_url = orig_fetch
 
     shutil.rmtree(tmp, ignore_errors=True)
     print(f"\nRESULT: {results.count(True)}/{len(results)} PASS")

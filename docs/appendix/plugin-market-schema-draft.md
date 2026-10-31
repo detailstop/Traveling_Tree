@@ -97,3 +97,10 @@
 
 - 卸载不 DROP 主库表。
 - 唯一例外：插件 id 以 `test` 开头且表名 `test_` 前缀时，可删除测试表；删前整库备份到 `data/backup/uninstall_<id>_<ts>/`。
+
+## B 阶段（round 88）
+
+- 初始化模板：`market/index.json`（5 预置，进 Git）；运行态：`data/plugins/market/index.json`（首次请求复制，之后由拉取覆盖，不进 Git）。
+- 拉取：`data/plugins/market/settings.json` 的 `market_source_url`（https raw）；POST `/api/plugin/market/refresh-index`，校验结构/id/sha256/size/file/download_url/版本递增后原子覆盖；失败不动本地。
+- 运行态本轮 23 条（5 预置 + 17 非预置 + sim），包级字段留空、`package_ready:false`；待用户上传 GitHub raw。
+- 生产只接受 https；`http://`/`file://` 仅测试注入，不进生产路径。

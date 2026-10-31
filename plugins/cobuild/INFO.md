@@ -8,6 +8,7 @@ has_backend: true
 db_module_key: null
 routes_prefix: /api/plugin/cobuild
 summary: 多 AI 共建打卡与日志镜像（无前端卡片）
+icon: 🤝
 entries: []
 tables: []
 data_dirs: []

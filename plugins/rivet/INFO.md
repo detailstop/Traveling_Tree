@@ -8,6 +8,7 @@ has_backend: true
 db_module_key: null
 routes_prefix: /api/plugin/rivet
 summary: 长期任务打卡 · 统计 · 循序 · 激励
+icon: 🔩
 entries: [rivet]
 tables: []
 data_dirs: [rivet]

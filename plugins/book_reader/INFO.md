@@ -8,6 +8,7 @@ has_backend: true
 db_module_key: reader
 routes_prefix: /api/plugin/book_reader
 summary: 书籍阅读 · 标注清洗 · 全局词库
+icon: 📚
 entries: [book-reader]
 tables: [reader_books, reader_sections, reader_sentences, reader_placeholders, reader_words, reader_phrases, reader_translation_pairs, reader_marks, reader_import_batches, reader_cleaning_tasks, reader_cleaning_records, reader_return_errors, reader_bookmarks]
 data_dirs: []

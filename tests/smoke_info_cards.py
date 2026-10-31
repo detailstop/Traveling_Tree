@@ -52,6 +52,10 @@ def main() -> int:
                                for x in parsed.get(pid, {}).get("sensitive_data", []))
                        for pid, _ in targets)
     check("sensitive_data 仅路径类别", sensitive_ok)
+    icon_ok = all(isinstance(parsed.get(pid, {}).get("icon", "📦"), str)
+                  and str(parsed.get(pid, {}).get("icon", "📦")).strip()
+                  for pid, _ in targets)
+    check("icon 可选字段合法", icon_ok)
     print(f"\nRESULT: {results.count(True)}/{len(results)} PASS")
     return 0 if all(results) else 1
 

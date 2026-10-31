@@ -8,6 +8,7 @@ has_backend: false
 db_module_key: null
 routes_prefix: null
 summary: 蒙特卡洛 · 醉汉 / 粒子沉积 / 自由运动
+icon: 🎲
 entries: [sim]
 tables: []
 data_dirs: []

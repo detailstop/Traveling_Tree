@@ -8,6 +8,7 @@ has_backend: true
 db_module_key: bg
 routes_prefix: /api/plugin/bg_library
 summary: 功能背景信息库 · 树形浏览 · 勾选导出 · 优化导入 · 历史归档
+icon: 🗺️
 entries: [bg-library]
 tables: [bg_nodes, bg_versions, file_notes, db_rules]
 data_dirs: []

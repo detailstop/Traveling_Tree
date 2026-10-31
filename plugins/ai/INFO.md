@@ -8,6 +8,7 @@ has_backend: true
 db_module_key: ai
 routes_prefix: /api/plugin/ai
 summary: 多平台对话：DeepSeek · Kimi · 豆包待接入
+icon: 🤖
 entries: [ai]
 tables: [ai_sessions, ai_tx_logs]
 data_dirs: []

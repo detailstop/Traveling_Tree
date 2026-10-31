@@ -8,6 +8,7 @@ has_backend: true
 db_module_key: null
 routes_prefix: /api/plugin/pdf
 summary: PDF 合并/分割/压缩 · 批量压缩
+icon: 📄
 entries: [pdf, batch]
 tables: []
 data_dirs: []

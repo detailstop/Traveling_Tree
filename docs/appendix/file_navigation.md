@@ -2,9 +2,9 @@
 
 > 只读摘要，勿手改。本文件由 docs/appendix/file_navigation.json 生成；结构与去留决定以 JSON 为准。
 
-- 生成时间：2026-11-01T00:06:25+03:00
-- 轮次：87
-- 待办：0 条；已决定：563 条
+- 生成时间：2026-11-01T00:43:56+03:00
+- 轮次：88
+- 待办：0 条；已决定：572 条
 
 ## 待办
 
@@ -15,6 +15,15 @@
 
 | 路径 | 决定 | 原因 | 状态 | 轮次 | 时间 | 备份路径 |
 | --- | --- | --- | --- | --- | --- | --- |
+| market/index.json | market/index.json 改为 5 预置初始化模板（round 88） | 仅 5 预置；展示字段齐全，包级字段留空 + package_ready:false；作为克隆后运行态初值。 | done | 88 | 2026-11-01T00:43:56+03:00 |  |
+| data/plugins/market/index.json | 运行态 index 补为 23 条（round 88） | 5 预置 + 17 非预置 + sim；展示字段来自 INFO/manifest；包级字段空、package_ready:false；不进 Git，供用户上传 GitHub raw（绝对路径 C:\Users\WJL\Desktop\Traveling_Tree\data\plugins\market\index.json）。 | done | 88 | 2026-11-01T00:43:56+03:00 |  |
+| plugins/market/index_store.py | 新增 index 运行态/拉取/校验模块（round 88） | 首次请求从模板复制（不覆盖已有）；validate 校验结构/id/sha256/size/file/download_url/版本递增；仅 https；原子写入；失败不动本地。 | done | 88 | 2026-11-01T00:43:56+03:00 |  |
+| plugins/market/backend.py | 新增 /refresh-index 路由并接入运行态（round 88） | GET 状态/POST 拉取；/list 读运行态并返回 index_version/market_source_url；错误码 not_configured/network_error/http_error/invalid_structure/version_regression/insecure_url。 | done | 88 | 2026-11-01T00:43:56+03:00 |  |
+| plugins/market/feature.js | 市场“拉取最新插件”按钮（round 88） | 未配置 market_source_url 置灰；成功提示版本/条数并刷新列表；失败展示后端错误；不改卡片/开发插件逻辑。 | done | 88 | 2026-11-01T00:43:56+03:00 |  |
+| plugins/*/INFO.md | INFO.md 可选 icon 字段（round 88） | 23 份补 icon；模板可选 11 项；smoke_info_cards 校验 icon 存在时非空字符串；生成器 --check 全 PASS。 | done | 88 | 2026-11-01T00:43:56+03:00 |  |
+| tests/smoke_market.py | smoke_market 增补 B 阶段用例（round 88） | 初始化复制不覆盖、拉取成功升版、非法 JSON/缺字段/路径穿越/sha/回滚失败不动本地、not_configured、https 强制、非法模板拒绝；40/40。 | done | 88 | 2026-11-01T00:43:56+03:00 |  |
+| README.md | 文档补市场运行态/远程源与基线（round 88） | §6 market_source_url 与运行态；§9/守则检查清单；白皮书 §7.2/7.5、市场草案、market README/INFO 同步；smoke_market 40/40、smoke_info_cards 9/9，合计 993/994。 | done | 88 | 2026-11-01T00:43:56+03:00 |  |
+| data/bg_import/::round88-none | 本次无背景库数据（round 88） | 用户未提供「项目优化与当前综述」导出 json；背景库不可用，本轮未执行 update 导入、未写背景库数据。 | done | 88 | 2026-11-01T00:43:56+03:00 |  |
 | plugins/market/feature.js | 模板缺失时前端不再误报未设置下载地址（round 87） | 新增 devErrorCode；template_missing 时按钮保持可点、title 指向模板路径，展开面板展示后端真实错误；not_configured 仍置灰并提示先设置 download_dir。未改后端错误码与生成逻辑。 | done | 87 | 2026-11-01T00:06:25+03:00 |  |
 | ui/web/static/app.js | 设置页 help 补浏览器下载独立性说明（round 87） | 通用下载地址（本地路径）帮助文案补：该路径仅用于插件服务端写盘；浏览器下载仍走浏览器/统一下载句柄，与该项相互独立。 | done | 87 | 2026-11-01T00:06:25+03:00 |  |
 | docs/plugin-development-whitepaper.md | 白皮书 §7.5 补浏览器下载独立性（round 87） | download_dir 条目补同句，与设置页/README 口径一致。 | done | 87 | 2026-11-01T00:06:25+03:00 |  |

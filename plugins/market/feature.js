@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   let STATE = { items: [], search: '', kind: '', expanded: null, busy: false,
-    devOpen: false, devFields: [], devConfigured: false, devError: '', devErrorCode: '', devValues: {}, devResult: null };
+    devOpen: false, devFields: [], devConfigured: false, devError: '', devErrorCode: '', devValues: {}, devResult: null, marketSourceUrl: '', indexVersion: 0 };
 
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
@@ -32,6 +32,8 @@
   async function loadList() {
     const r = await api('/api/plugin/market/list');
     STATE.items = r.plugins || [];
+    STATE.marketSourceUrl = r.market_source_url || '';
+    STATE.indexVersion = r.index_version || 0;
   }
 
   function cardHTML(it) {
@@ -136,6 +138,7 @@
         <select id="mk-kind" class="mk-kind-sel"><option value="">全部类型</option></select>
         <span id="mk-count" class="mk-count"></span>
         <button id="mk-dev" class="btn sm" title="${STATE.devConfigured ? '填写参数并生成开发提示词' : '请先在设置页填写通用下载地址'}">🛠 开发插件</button>
+        <button id="mk-refresh" class="btn soft sm" title="${STATE.marketSourceUrl ? '从 market_source_url 拉取并覆盖运行态 index' : '未配置 market_source_url，请先在 data/plugins/market/settings.json 填写'}">🔄 拉取最新插件</button>
       </div>
       <div id="mk-dev-panel" class="mk-dev-panel"${STATE.devOpen ? '' : ' hidden'}></div>
       <div id="mk-grid" class="mk-grid"></div>
@@ -207,6 +210,18 @@
         };
       });
     }
+    host.querySelector('#mk-refresh').onclick = async () => {
+      if (!STATE.marketSourceUrl) { toast('未配置 market_source_url', 'warn'); return; }
+      const btn = host.querySelector('#mk-refresh');
+      btn.disabled = true;
+      try {
+        const r = await api('/api/plugin/market/refresh-index', { body: {} });
+        if (!r.ok) throw new Error(r.message || r.error);
+        toast(`已更新到版本 ${r.version}（${r.count} 条）`, 'success');
+        await refresh();
+      } catch (e) { toast('拉取失败：' + e.message, 'error'); }
+      btn.disabled = false;
+    };
     host.querySelector('#mk-dev').onclick = () => {
       if (!STATE.devConfigured && STATE.devErrorCode !== 'template_missing') {
         toast('请先在设置页填写通用下载地址', 'warn'); return;
@@ -214,6 +229,8 @@
       STATE.devOpen = !STATE.devOpen;
       drawDev(host);
     };
+    const refreshBtn = host.querySelector('#mk-refresh');
+    if (refreshBtn) refreshBtn.disabled = !STATE.marketSourceUrl;
     host.querySelector('#mk-search').oninput = e => { STATE.search = e.target.value; draw(); };
     host.querySelector('#mk-kind').onchange = e => { STATE.kind = e.target.value; draw(); };
     refresh();

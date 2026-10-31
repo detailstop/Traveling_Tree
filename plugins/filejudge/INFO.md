@@ -8,6 +8,7 @@ has_backend: true
 db_module_key: null
 routes_prefix: /api/plugin/filejudge
 summary: 扫描筛选 · 逐张审判 · 确认删除
+icon: ⚖️
 entries: [filejudge]
 tables: []
 data_dirs: [filejudge]

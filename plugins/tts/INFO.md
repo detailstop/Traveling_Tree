@@ -8,6 +8,7 @@ has_backend: true
 db_module_key: null
 routes_prefix: /api/plugin/tts
 summary: edge-tts 语音合成与缓存（无前端卡片，供各插件共用）
+icon: 🔊
 entries: []
 tables: []
 data_dirs: []

@@ -10,7 +10,7 @@ REQUIRED = (
 )
 OPTIONAL = (
     "entries", "tables", "data_dirs", "shared_features", "provides",
-    "consumes", "market_package", "source", "known_limits", "sensitive_data",
+    "consumes", "market_package", "source", "known_limits", "sensitive_data", "icon",
 )
 
 

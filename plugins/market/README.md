@@ -24,6 +24,12 @@
 - 预置插件：`market`、`cobuild`、`webchat`、`tts`、`pixel_art`
 - 插件源码试点：`market/sources/sim/`（进 Git，zip 由脚本生成）
 
+## 拉取最新插件
+- 运行态：`data/plugins/market/index.json`；首次请求若缺失，从 `market/index.json`（5 条预置模板）复制，已有不覆盖。
+- 配置：`data/plugins/market/settings.json` 的 `market_source_url`（https raw index）；为空时按钮置灰。
+- 手动点击「拉取最新插件」→ POST `/api/plugin/market/refresh-index`：校验 JSON 结构、id/sha256/size/file/download_url、版本单调递增；通过后原子覆盖运行态；失败不动本地并返回错误码（not_configured/network_error/http_error/invalid_structure/version_regression/insecure_url）。
+- 生产只接受 https；测试通过注入本地假源，不依赖外网。
+
 ## 注意事项
 - 安装前强制 SHA256 + zip 路径穿越/符号链接校验；安装=解压到 `plugins/<id>/`，重启生效。
 - 卸载=移出 `plugins/<id>/`（保留 `data/plugins/<id>/`）；勾选删除私有数据时先备份到 `data/backup/uninstall_<id>_<ts>/`。

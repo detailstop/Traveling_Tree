@@ -1,9 +1,82 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-01T00:06:25+03:00",
-  "round": 87,
+  "generated_at": "2026-11-01T00:43:56+03:00",
+  "round": 88,
   "pending": [],
   "decided": [
+    {
+      "path": "market/index.json",
+      "decision": "market/index.json 改为 5 预置初始化模板（round 88）",
+      "reason": "仅 5 预置；展示字段齐全，包级字段留空 + package_ready:false；作为克隆后运行态初值。",
+      "status": "done",
+      "round": 88,
+      "at": "2026-11-01T00:43:56+03:00"
+    },
+    {
+      "path": "data/plugins/market/index.json",
+      "decision": "运行态 index 补为 23 条（round 88）",
+      "new_path": "data/plugins/market/index.json",
+      "reason": "5 预置 + 17 非预置 + sim；展示字段来自 INFO/manifest；包级字段空、package_ready:false；不进 Git，供用户上传 GitHub raw（绝对路径 C:\\Users\\WJL\\Desktop\\Traveling_Tree\\data\\plugins\\market\\index.json）。",
+      "status": "done",
+      "round": 88,
+      "at": "2026-11-01T00:43:56+03:00"
+    },
+    {
+      "path": "plugins/market/index_store.py",
+      "decision": "新增 index 运行态/拉取/校验模块（round 88）",
+      "reason": "首次请求从模板复制（不覆盖已有）；validate 校验结构/id/sha256/size/file/download_url/版本递增；仅 https；原子写入；失败不动本地。",
+      "status": "done",
+      "round": 88,
+      "at": "2026-11-01T00:43:56+03:00"
+    },
+    {
+      "path": "plugins/market/backend.py",
+      "decision": "新增 /refresh-index 路由并接入运行态（round 88）",
+      "reason": "GET 状态/POST 拉取；/list 读运行态并返回 index_version/market_source_url；错误码 not_configured/network_error/http_error/invalid_structure/version_regression/insecure_url。",
+      "status": "done",
+      "round": 88,
+      "at": "2026-11-01T00:43:56+03:00"
+    },
+    {
+      "path": "plugins/market/feature.js",
+      "decision": "市场“拉取最新插件”按钮（round 88）",
+      "reason": "未配置 market_source_url 置灰；成功提示版本/条数并刷新列表；失败展示后端错误；不改卡片/开发插件逻辑。",
+      "status": "done",
+      "round": 88,
+      "at": "2026-11-01T00:43:56+03:00"
+    },
+    {
+      "path": "plugins/*/INFO.md",
+      "decision": "INFO.md 可选 icon 字段（round 88）",
+      "reason": "23 份补 icon；模板可选 11 项；smoke_info_cards 校验 icon 存在时非空字符串；生成器 --check 全 PASS。",
+      "status": "done",
+      "round": 88,
+      "at": "2026-11-01T00:43:56+03:00"
+    },
+    {
+      "path": "tests/smoke_market.py",
+      "decision": "smoke_market 增补 B 阶段用例（round 88）",
+      "reason": "初始化复制不覆盖、拉取成功升版、非法 JSON/缺字段/路径穿越/sha/回滚失败不动本地、not_configured、https 强制、非法模板拒绝；40/40。",
+      "status": "done",
+      "round": 88,
+      "at": "2026-11-01T00:43:56+03:00"
+    },
+    {
+      "path": "README.md",
+      "decision": "文档补市场运行态/远程源与基线（round 88）",
+      "reason": "§6 market_source_url 与运行态；§9/守则检查清单；白皮书 §7.2/7.5、市场草案、market README/INFO 同步；smoke_market 40/40、smoke_info_cards 9/9，合计 993/994。",
+      "status": "done",
+      "round": 88,
+      "at": "2026-11-01T00:43:56+03:00"
+    },
+    {
+      "path": "data/bg_import/::round88-none",
+      "decision": "本次无背景库数据（round 88）",
+      "reason": "用户未提供「项目优化与当前综述」导出 json；背景库不可用，本轮未执行 update 导入、未写背景库数据。",
+      "status": "done",
+      "round": 88,
+      "at": "2026-11-01T00:43:56+03:00"
+    },
     {
       "path": "plugins/market/feature.js",
       "decision": "模板缺失时前端不再误报未设置下载地址（round 87）",

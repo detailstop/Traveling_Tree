@@ -24,13 +24,13 @@
 | `routes_prefix` | string/null | 有 backend 为 `/api/plugin/<id>`；否则 `null` |
 | `summary` | string | 一句话简介，与 manifest.desc 一致 |
 
-### 可选 10 项
+### 可选 11 项
 
-`entries`、`tables`、`data_dirs`、`shared_features`、`provides`、`consumes`、`market_package`、`source`、`known_limits`、`sensitive_data`。
+`entries`、`tables`、`data_dirs`、`shared_features`、`provides`、`consumes`、`market_package`、`source`、`known_limits`、`sensitive_data`、`icon`。
 
 - `tables` 必须与 `schema.sql` 的 `CREATE TABLE` 表名完全一致；无表省略或 `[]`。
 - `sensitive_data` 只写路径类别（如 `[data/ai_keys.json]`），**不写敏感正文**；市场 UI 不展示其内容。
-- `known_limits` 单行短句；`market_package` 仅试点包为 `true`。
+- `known_limits` 单行短句；`market_package` 仅试点包为 `true`；`icon` 为表情/短字符串，缺省 `📦`。
 
 ## 3. 格式约定
 
@@ -73,6 +73,7 @@ has_backend: true
 db_module_key: market
 routes_prefix: /api/plugin/market
 summary: 本地插件包浏览、安装、卸载与预置状态
+icon: 🛍️
 entries: [market]
 tables: [market_installed]
 data_dirs: []
