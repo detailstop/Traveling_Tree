@@ -2,16 +2,15 @@
 
 > 只读摘要，勿手改。本文件由 docs/appendix/file_navigation.json 生成；结构与去留决定以 JSON 为准。
 
-- 生成时间：2026-10-31T15:32:35+03:00
-- 轮次：76
-- 待办：4 条；已决定：496 条
+- 生成时间：2026-10-31T16:27:39+03:00
+- 轮次：77
+- 待办：3 条；已决定：501 条
 
 ## 待办
 
 | 路径 | 移动计划 | 指南计划 | 摘要 | 轮次 | 创建时间 |
 | --- | --- | --- | --- | --- | --- |
 | tests/smoke_plugin_decoupling.py::Server.start |  |  |  | 54 | 2026-10-29T19:48:41+03:00 |
-| plugins/finance |  |  |  | 71 | 2026-10-31T14:42:02+03:00 |
 | plugins/pixel_art |  |  |  | 71 | 2026-10-31T14:42:02+03:00 |
 | plugins/project_manager |  |  |  | 71 | 2026-10-31T14:42:02+03:00 |
 
@@ -19,6 +18,11 @@
 
 | 路径 | 决定 | 原因 | 状态 | 轮次 | 时间 | 备份路径 |
 | --- | --- | --- | --- | --- | --- | --- |
+| plugins/book_reader/README.md | 补 book_reader 触发器三点说明（round 77） | 说明 JSON1 依赖（≥3.38，本机 3.45）、加列需重建触发器（migrate 按 PRAGMA 生成）、raw/live 由触发器维护业务 SQL 不显式写；盘点文档同步。 | done | 77 | 2026-10-31T16:27:39+03:00 |  |
+| data/backup/round77_db/ | 迁移前备份真实库（round 77） | 19103744 B，SHA256 80F869CB3E2C20038341F9C81E6522606C041BF94784578CAC2025A2F8E4827B，integrity_check=ok。 | done | 77 | 2026-10-31T16:27:39+03:00 |  |
+| plugins/finance/schema.sql | finance 17 表补 raw/live 与豁免注释（round 77） | 12 张内容/日志表补 raw+live；finance_settings 与 4 张 *snapshot* 表仅 raw（豁免 live，schema 注释说明可重建来源）；quant_assets/fund_cache 已合规；新增 finance/migrate.py 并在 manifest 声明；触发器同步写入（先删后建，INSERT 填 raw/live、UPDATE/upsert 刷 live 保留 raw）；旧库幂等、真实库 17 表 0 空 raw、29 触发器。 | done | 77 | 2026-10-31T16:27:39+03:00 |  |
+| docs/appendix/file_navigation.json | round 77 pending 闭环：finance resolved，2 条留 round 78（round 77） | 关闭 finance；保留 pixel_art、project_manager 与 Server.start。全量 13：12 项全 PASS；decoupling 首次 Server.start 健康检查超时，重跑 452/452 通过（已知偶发）。 | done | 77 | 2026-10-31T16:27:39+03:00 |  |
+| data/bg_import/::round77-none | 本次无背景库数据（round 77） | 用户未提供「项目优化与当前综述」导出 json；背景库不可用，本轮未执行 update 导入、未写背景库数据。 | done | 77 | 2026-10-31T16:27:39+03:00 |  |
 | data/backup/round76_db/ | 迁移前备份真实库（round 76） | SQLite 在线备份 16285696 B，SHA256 1C5C4E247279BACCF23CB6F1BED1B073FB87D4B9F1812028D5C069231E355C1A，integrity_check=ok。 | done | 76 | 2026-10-31T15:32:35+03:00 |  |
 | plugins/book_reader/book_reader.py | 14 处位置式 INSERT 改显式列名（round 76 阶段 A） | 实际 14 处（非约 20）：books 2、sections 4、placeholders 2、sentences 3、marks 1、import_batches 1、cleaning_records 1；列名与参数顺序逐一对应，未改参数/语义；smoke_books 11/11、smoke_reader_range 25/25、smoke_web 74/75 通过。 | done | 76 | 2026-10-31T15:32:35+03:00 |  |
 | plugins/book_reader/schema.sql | book_reader 11 表补 raw/live 与写入同步（round 76 阶段 B） | 11 表补 raw+live（迁移快照）；reader_placeholders 仅 raw（豁免 live）、reader_bookmarks 已合规；写入同步用 AFTER INSERT/UPDATE 触发器（迁移按 PRAGMA 列生成、先删后建；INSERT 填 raw/live，UPDATE 刷 live 保留 raw），未改 47 处业务 SQL；旧库迁移两次幂等、真实库 11 表 0 空 raw、22 触发器。 | done | 76 | 2026-10-31T15:32:35+03:00 |  |

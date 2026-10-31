@@ -29,7 +29,7 @@
 - `finance_quant_assets`
 - `finance_fund_cache`
 
-- raw/live 状态：`finance_quant_assets`/`finance_fund_cache` 双列；其余 17 表缺双列（round 71 blocker，按 G2 待 round 73 处理）
+- raw/live 状态：round 77 已补：12 张内容/日志表 raw+live（触发器同步）；finance_settings 与 4 张 *snapshot* 表仅 raw（豁免 live，可重建来源见 schema 注释）；quant_assets/fund_cache 原已合规
 
 ## 依赖
 - `data_dirs: ["finance"]`

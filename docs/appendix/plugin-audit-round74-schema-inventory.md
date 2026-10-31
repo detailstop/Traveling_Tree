@@ -158,3 +158,17 @@
 - **russian 主题级联**：rename/delete/set_type 后刷新该主题下 `items.live_json`，`items.raw_json` 不变；临时库验证通过。
 - **验证**：旧库迁移两次幂等；真实库迁移后 11 表 0 空 raw、22 个触发器；全量 13 通过（TTS 502 已知）。
 - **剩余**：finance、pixel_art、project_manager 留 round 77。
+
+## 10. round 76 触发器说明补齐（round 77）
+
+- 依赖 SQLite JSON1（≥3.38 默认内置；本机 3.45 可用），目标环境需具备。
+- 给 `reader_*` 加列后必须重建触发器；`migrate.py` 按 PRAGMA 列重新生成，新增列需同步 JSON 字段。
+- raw/live 由触发器维护，业务 SQL 不显式写入；`repo.py` 中看不到 raw/live 属正常。
+
+## 11. 执行状态（round 77）
+
+- **备份**：data/backup/round77_db/russian_tutor.db.bak，19103744 B，SHA256 80F869CB3E2C20038341F9C81E6522606C041BF94784578CAC2025A2F8E4827B，integrity_check=ok。
+- **finance**：19 表中 17 表补列。12 张内容/日志表补 raw+live；finance_settings 与 4 张 *snapshot* 表仅补 raw（豁免 live，schema 注释说明可重建来源）；quant_assets/fund_cache 原已合规。
+- **写入同步**：用户确认采用触发器（与 book_reader 同方案）；迁移时先删后建，INSERT 填 raw/live，UPDATE（含 upsert DO UPDATE）刷 live 保留 raw；已验证 upsert 触发 UPDATE 触发器。
+- **验证**：旧库迁移两次幂等；真实库 17 表 0 空 raw；全量 13 通过（TTS 502 已知）。
+- **剩余**：pixel_art、project_manager 留 round 78。

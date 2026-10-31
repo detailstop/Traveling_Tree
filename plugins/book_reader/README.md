@@ -24,6 +24,10 @@
 - `reader_bookmarks`
 
 - raw/live 状态：round 76 已补 11 表 `raw_json`+`live_json`（迁移快照，live=raw，触发器维护写入）；`reader_placeholders` 仅 `raw_json`（豁免 live）；`reader_bookmarks` 已合规
+- 触发器说明（round 77）：
+  1. 依赖 SQLite JSON1（SQLite ≥3.38 默认内置；本机 3.45 可用），目标环境需具备。
+  2. 未来给 `reader_*` 表加列后必须重建触发器；`migrate.py` 会在迁移时按 PRAGMA 列重新生成，新增列需同步 JSON 字段。
+  3. raw/live 由 AFTER INSERT/UPDATE 触发器维护，业务 SQL 不显式写入；在 `repo.py`/`book_reader.py` 看不到 raw/live 写入属正常。
 
 ## 依赖
 - 直接 import：`plugins.pixel_art.service`（G4 已标注；计划改走 HTTP）

@@ -4,7 +4,9 @@
 CREATE TABLE IF NOT EXISTS finance_account_groups (
   id         TEXT PRIMARY KEY,
   name       TEXT NOT NULL,
-  sort_order INTEGER NOT NULL DEFAULT 0
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  raw_json TEXT NOT NULL DEFAULT '',
+  live_json TEXT NOT NULL DEFAULT ''
 );
 
 CREATE TABLE IF NOT EXISTS finance_accounts (
@@ -17,14 +19,18 @@ CREATE TABLE IF NOT EXISTS finance_accounts (
   date       TEXT,
   include    INTEGER NOT NULL DEFAULT 1,
   sort_order INTEGER NOT NULL DEFAULT 0,
-  FOREIGN KEY(group_id) REFERENCES finance_account_groups(id) ON DELETE SET NULL
+  raw_json TEXT NOT NULL DEFAULT '',
+  live_json TEXT NOT NULL DEFAULT '',
+    FOREIGN KEY(group_id) REFERENCES finance_account_groups(id) ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS finance_fx_history (
   currency TEXT NOT NULL,
   date     TEXT NOT NULL,
   rate     REAL NOT NULL,
-  PRIMARY KEY(currency, date)
+  raw_json TEXT NOT NULL DEFAULT '',
+  live_json TEXT NOT NULL DEFAULT '',
+    PRIMARY KEY(currency, date)
 );
 
 CREATE TABLE IF NOT EXISTS finance_inv_accounts (
@@ -32,7 +38,9 @@ CREATE TABLE IF NOT EXISTS finance_inv_accounts (
   name       TEXT NOT NULL,
   cur        TEXT NOT NULL DEFAULT 'CNY',
   note       TEXT NOT NULL DEFAULT '',
-  sort_order INTEGER NOT NULL DEFAULT 0
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  raw_json TEXT NOT NULL DEFAULT '',
+  live_json TEXT NOT NULL DEFAULT ''
 );
 
 CREATE TABLE IF NOT EXISTS finance_inv_holdings (
@@ -48,7 +56,9 @@ CREATE TABLE IF NOT EXISTS finance_inv_holdings (
   cost       REAL NOT NULL DEFAULT 0,
   value      REAL NOT NULL DEFAULT 0,
   sort_order INTEGER NOT NULL DEFAULT 0,
-  FOREIGN KEY(acct_id) REFERENCES finance_accounts(id) ON DELETE SET NULL
+  raw_json TEXT NOT NULL DEFAULT '',
+  live_json TEXT NOT NULL DEFAULT '',
+    FOREIGN KEY(acct_id) REFERENCES finance_accounts(id) ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS finance_inv_lots (
@@ -59,13 +69,17 @@ CREATE TABLE IF NOT EXISTS finance_inv_lots (
   cost       REAL NOT NULL DEFAULT 0,
   px         REAL NOT NULL DEFAULT 0,
   sort_order INTEGER NOT NULL DEFAULT 0,
-  FOREIGN KEY(holding_id) REFERENCES finance_inv_holdings(id) ON DELETE CASCADE
+  raw_json TEXT NOT NULL DEFAULT '',
+  live_json TEXT NOT NULL DEFAULT '',
+    FOREIGN KEY(holding_id) REFERENCES finance_inv_holdings(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS finance_inv_note_groups (
   id         TEXT PRIMARY KEY,
   name       TEXT NOT NULL,
-  sort_order INTEGER NOT NULL DEFAULT 0
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  raw_json TEXT NOT NULL DEFAULT '',
+  live_json TEXT NOT NULL DEFAULT ''
 );
 
 CREATE TABLE IF NOT EXISTS finance_inv_notes (
@@ -75,7 +89,9 @@ CREATE TABLE IF NOT EXISTS finance_inv_notes (
   date       TEXT,
   gid        TEXT,
   sort_order INTEGER NOT NULL DEFAULT 0,
-  FOREIGN KEY(gid) REFERENCES finance_inv_note_groups(id) ON DELETE SET NULL
+  raw_json TEXT NOT NULL DEFAULT '',
+  live_json TEXT NOT NULL DEFAULT '',
+    FOREIGN KEY(gid) REFERENCES finance_inv_note_groups(id) ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS finance_inv_vals (
@@ -84,7 +100,9 @@ CREATE TABLE IF NOT EXISTS finance_inv_vals (
   seq        INTEGER NOT NULL DEFAULT 0,
   price      REAL,
   value      REAL NOT NULL DEFAULT 0,
-  PRIMARY KEY(holding_id, date, seq),
+  raw_json TEXT NOT NULL DEFAULT '',
+  live_json TEXT NOT NULL DEFAULT '',
+    PRIMARY KEY(holding_id, date, seq),
   FOREIGN KEY(holding_id) REFERENCES finance_inv_holdings(id) ON DELETE CASCADE
 );
 
@@ -98,7 +116,9 @@ CREATE TABLE IF NOT EXISTS finance_liabs (
   rate       REAL NOT NULL DEFAULT 0,
   due        TEXT,
   note       TEXT NOT NULL DEFAULT '',
-  sort_order INTEGER NOT NULL DEFAULT 0
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  raw_json TEXT NOT NULL DEFAULT '',
+  live_json TEXT NOT NULL DEFAULT ''
 );
 
 CREATE TABLE IF NOT EXISTS finance_reals (
@@ -110,15 +130,20 @@ CREATE TABLE IF NOT EXISTS finance_reals (
   value      REAL NOT NULL DEFAULT 0,
   date       TEXT,
   note       TEXT NOT NULL DEFAULT '',
-  sort_order INTEGER NOT NULL DEFAULT 0
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  raw_json TEXT NOT NULL DEFAULT '',
+  live_json TEXT NOT NULL DEFAULT ''
 );
 
 CREATE TABLE IF NOT EXISTS finance_reasons (
   id         INTEGER PRIMARY KEY AUTOINCREMENT,
   name       TEXT NOT NULL UNIQUE,
-  sort_order INTEGER NOT NULL DEFAULT 0
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  raw_json TEXT NOT NULL DEFAULT '',
+  live_json TEXT NOT NULL DEFAULT ''
 );
 
+-- raw_json 为迁移时快照；live_json 豁免：配置类，可按默认值重建
 CREATE TABLE IF NOT EXISTS finance_settings (
   id               INTEGER PRIMARY KEY CHECK(id = 1),
   base             TEXT    NOT NULL DEFAULT 'CNY',
@@ -129,20 +154,24 @@ CREATE TABLE IF NOT EXISTS finance_settings (
   fx_date          TEXT,
   migrated_at      TEXT,
   migration_source TEXT,
-  updated_at       TEXT    NOT NULL
+  updated_at       TEXT    NOT NULL,
+  raw_json TEXT NOT NULL DEFAULT ''
 );
 
+-- raw_json 为迁移时快照；live_json 豁免：可由 finance_snapshot_accounts/accounts 重建
 CREATE TABLE IF NOT EXISTS finance_snapshot_account_subs (
   snapshot_id INTEGER NOT NULL,
   account_id  TEXT NOT NULL,
   seq         INTEGER NOT NULL DEFAULT 0,
   why         TEXT NOT NULL DEFAULT '',
   val         REAL NOT NULL DEFAULT 0,
-  PRIMARY KEY(snapshot_id, account_id, seq),
+  raw_json TEXT NOT NULL DEFAULT '',
+    PRIMARY KEY(snapshot_id, account_id, seq),
   FOREIGN KEY(snapshot_id, account_id)
     REFERENCES finance_snapshot_accounts(snapshot_id, account_id) ON DELETE CASCADE
 );
 
+-- raw_json 为迁移时快照；live_json 豁免：可由 accounts/估值重建
 CREATE TABLE IF NOT EXISTS finance_snapshot_accounts (
   snapshot_id INTEGER NOT NULL,
   account_id  TEXT NOT NULL,
@@ -152,18 +181,22 @@ CREATE TABLE IF NOT EXISTS finance_snapshot_accounts (
   base        REAL NOT NULL DEFAULT 0,
   why         TEXT,
   seq         INTEGER NOT NULL DEFAULT 0,
-  PRIMARY KEY(snapshot_id, account_id),
+  raw_json TEXT NOT NULL DEFAULT '',
+    PRIMARY KEY(snapshot_id, account_id),
   FOREIGN KEY(snapshot_id) REFERENCES finance_snapshots(id) ON DELETE CASCADE
 );
 
+-- raw_json 为迁移时快照；live_json 豁免：可由 finance_fx_history 重建
 CREATE TABLE IF NOT EXISTS finance_snapshot_fx (
   snapshot_id INTEGER NOT NULL,
   currency    TEXT NOT NULL,
   rate        REAL NOT NULL,
-  PRIMARY KEY(snapshot_id, currency),
+  raw_json TEXT NOT NULL DEFAULT '',
+    PRIMARY KEY(snapshot_id, currency),
   FOREIGN KEY(snapshot_id) REFERENCES finance_snapshots(id) ON DELETE CASCADE
 );
 
+-- raw_json 为迁移时快照；live_json 豁免：可由账户/估值/汇率重建
 CREATE TABLE IF NOT EXISTS finance_snapshots (
   id           INTEGER PRIMARY KEY AUTOINCREMENT,
   date         TEXT NOT NULL UNIQUE,
@@ -176,7 +209,8 @@ CREATE TABLE IF NOT EXISTS finance_snapshots (
   inv          REAL NOT NULL DEFAULT 0,
   liab         REAL NOT NULL DEFAULT 0,
   note         TEXT NOT NULL DEFAULT '',
-  created_at   TEXT NOT NULL
+  created_at   TEXT NOT NULL,
+  raw_json TEXT NOT NULL DEFAULT ''
 );
 
 CREATE INDEX IF NOT EXISTS idx_finance_accounts_group ON finance_accounts(group_id);
