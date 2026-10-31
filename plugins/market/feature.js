@@ -155,6 +155,15 @@
         : '<div class="mk-empty">没有匹配的插件</div>';
       bind();
     };
+    function syncRefreshButton() {
+      const btn = host.querySelector('#mk-refresh');
+      if (!btn) return;
+      btn.disabled = !STATE.marketSourceUrl;
+      btn.title = STATE.marketSourceUrl
+        ? '从远程拉取最新 index（market_source_url）'
+        : '未配置 market_source_url，请先在 data/plugins/market/settings.json 填写';
+    }
+
     const refresh = async () => {
       try {
         try {
@@ -173,6 +182,7 @@
         draw();
         drawDev(host);
       } catch (e) { toast('市场加载失败：' + e.message, 'error'); }
+      finally { syncRefreshButton(); }
     };
     function bind() {
       host.querySelectorAll('[data-toggle]').forEach(el => {
@@ -220,7 +230,7 @@
         toast(`已更新到版本 ${r.version}（${r.count} 条）`, 'success');
         await refresh();
       } catch (e) { toast('拉取失败：' + e.message, 'error'); }
-      btn.disabled = false;
+      finally { syncRefreshButton(); }
     };
     host.querySelector('#mk-dev').onclick = () => {
       if (!STATE.devConfigured && STATE.devErrorCode !== 'template_missing') {
@@ -229,8 +239,7 @@
       STATE.devOpen = !STATE.devOpen;
       drawDev(host);
     };
-    const refreshBtn = host.querySelector('#mk-refresh');
-    if (refreshBtn) refreshBtn.disabled = !STATE.marketSourceUrl;
+    syncRefreshButton();
     host.querySelector('#mk-search').oninput = e => { STATE.search = e.target.value; draw(); };
     host.querySelector('#mk-kind').onchange = e => { STATE.kind = e.target.value; draw(); };
     refresh();

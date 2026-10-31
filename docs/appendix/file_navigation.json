@@ -1,9 +1,25 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-01T00:43:56+03:00",
-  "round": 88,
+  "generated_at": "2026-11-01T01:04:03+03:00",
+  "round": 89,
   "pending": [],
   "decided": [
+    {
+      "path": "plugins/market/feature.js",
+      "decision": "修复拉取按钮初始置灰不再更新的时序缺陷（round 89）",
+      "reason": "新增 syncRefreshButton() 统一设置 #mk-refresh 的 disabled/title；在 render 初始化、refresh（loadList 完成/失败）finally、拉取成功/失败 finally 调用；不改变拉取/校验/列表/开发插件逻辑。配置存在时按钮可点、为空置灰，拉取后状态同步。",
+      "status": "done",
+      "round": 89,
+      "at": "2026-11-01T01:04:03+03:00"
+    },
+    {
+      "path": "data/bg_import/::round89-none",
+      "decision": "本次无背景库数据（round 89）",
+      "reason": "用户未提供「项目优化与当前综述」导出 json；背景库不可用，本轮未执行 update 导入、未写背景库数据。",
+      "status": "done",
+      "round": 89,
+      "at": "2026-11-01T01:04:03+03:00"
+    },
     {
       "path": "market/index.json",
       "decision": "market/index.json 改为 5 预置初始化模板（round 88）",

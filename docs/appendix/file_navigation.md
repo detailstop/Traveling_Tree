@@ -2,9 +2,9 @@
 
 > 只读摘要，勿手改。本文件由 docs/appendix/file_navigation.json 生成；结构与去留决定以 JSON 为准。
 
-- 生成时间：2026-11-01T00:43:56+03:00
-- 轮次：88
-- 待办：0 条；已决定：572 条
+- 生成时间：2026-11-01T01:04:03+03:00
+- 轮次：89
+- 待办：0 条；已决定：574 条
 
 ## 待办
 
@@ -15,6 +15,8 @@
 
 | 路径 | 决定 | 原因 | 状态 | 轮次 | 时间 | 备份路径 |
 | --- | --- | --- | --- | --- | --- | --- |
+| plugins/market/feature.js | 修复拉取按钮初始置灰不再更新的时序缺陷（round 89） | 新增 syncRefreshButton() 统一设置 #mk-refresh 的 disabled/title；在 render 初始化、refresh（loadList 完成/失败）finally、拉取成功/失败 finally 调用；不改变拉取/校验/列表/开发插件逻辑。配置存在时按钮可点、为空置灰，拉取后状态同步。 | done | 89 | 2026-11-01T01:04:03+03:00 |  |
+| data/bg_import/::round89-none | 本次无背景库数据（round 89） | 用户未提供「项目优化与当前综述」导出 json；背景库不可用，本轮未执行 update 导入、未写背景库数据。 | done | 89 | 2026-11-01T01:04:03+03:00 |  |
 | market/index.json | market/index.json 改为 5 预置初始化模板（round 88） | 仅 5 预置；展示字段齐全，包级字段留空 + package_ready:false；作为克隆后运行态初值。 | done | 88 | 2026-11-01T00:43:56+03:00 |  |
 | data/plugins/market/index.json | 运行态 index 补为 23 条（round 88） | 5 预置 + 17 非预置 + sim；展示字段来自 INFO/manifest；包级字段空、package_ready:false；不进 Git，供用户上传 GitHub raw（绝对路径 C:\Users\WJL\Desktop\Traveling_Tree\data\plugins\market\index.json）。 | done | 88 | 2026-11-01T00:43:56+03:00 |  |
 | plugins/market/index_store.py | 新增 index 运行态/拉取/校验模块（round 88） | 首次请求从模板复制（不覆盖已有）；validate 校验结构/id/sha256/size/file/download_url/版本递增；仅 https；原子写入；失败不动本地。 | done | 88 | 2026-11-01T00:43:56+03:00 |  |
