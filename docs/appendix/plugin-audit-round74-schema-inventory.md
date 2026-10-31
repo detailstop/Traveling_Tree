@@ -172,3 +172,12 @@
 - **写入同步**：用户确认采用触发器（与 book_reader 同方案）；迁移时先删后建，INSERT 填 raw/live，UPDATE（含 upsert DO UPDATE）刷 live 保留 raw；已验证 upsert 触发 UPDATE 触发器。
 - **验证**：旧库迁移两次幂等；真实库 17 表 0 空 raw；全量 13 通过（TTS 502 已知）。
 - **剩余**：pixel_art、project_manager 留 round 78。
+
+## 12. 执行状态（round 78）
+
+- **备份**：data/backup/round78_db/russian_tutor.db.bak，19255296 B，SHA256 F8DC093538660029ADD8F0A32DF4AA4028660C11D0A9573D66BC294BC49EBBFD，integrity_check=ok。
+- **finance README**：补触发器三点说明（JSON1、加列重建、隐式写入），与 book_reader 对齐。
+- **pixel_art**：pixel_artworks 补 raw+live；pixel_asset_refs、visual_settings 仅 raw（豁免 live，注释可重建）；写入 4 处显式同步；新增 migrate 并声明。
+- **project_manager**：5 表补 raw+live；用户确认触发器方案（4 INSERT + 15 UPDATE，含批量状态更新）；新增 migrate 并声明；INSERT 填 raw/live、UPDATE 刷 live 保留 raw。
+- **验证**：旧库两次 migrate 幂等；真实库 pixel 3 表 + pm 5 表 0 空 raw、pm 10 触发器；全量 13 通过（TTS 502 已知）；`Server.start` 连续 10 次运行 `smoke_plugin_decoupling` 全部 452/452 PASS（106–133s/次），未触发超时。
+- **剩余**：无 blocker；仅 Server.start 观察项。

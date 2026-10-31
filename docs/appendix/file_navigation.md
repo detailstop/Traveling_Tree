@@ -2,22 +2,27 @@
 
 > 只读摘要，勿手改。本文件由 docs/appendix/file_navigation.json 生成；结构与去留决定以 JSON 为准。
 
-- 生成时间：2026-10-31T16:27:39+03:00
-- 轮次：77
-- 待办：3 条；已决定：501 条
+- 生成时间：2026-10-31T16:57:49+03:00
+- 轮次：78
+- 待办：1 条；已决定：508 条
 
 ## 待办
 
 | 路径 | 移动计划 | 指南计划 | 摘要 | 轮次 | 创建时间 |
 | --- | --- | --- | --- | --- | --- |
 | tests/smoke_plugin_decoupling.py::Server.start |  |  |  | 54 | 2026-10-29T19:48:41+03:00 |
-| plugins/pixel_art |  |  |  | 71 | 2026-10-31T14:42:02+03:00 |
-| plugins/project_manager |  |  |  | 71 | 2026-10-31T14:42:02+03:00 |
 
 ## 已决定去留
 
 | 路径 | 决定 | 原因 | 状态 | 轮次 | 时间 | 备份路径 |
 | --- | --- | --- | --- | --- | --- | --- |
+| plugins/finance/README.md | finance README 补触发器三点说明（round 78 确认） | 与 book_reader 对齐：JSON1 依赖（≥3.38）、加列需重建触发器、raw/live 由触发器维护业务 SQL 不显式写；原 README 缺此三点。 | done | 78 | 2026-10-31T16:57:49+03:00 |  |
+| data/backup/round78_db/ | 迁移前备份真实库（round 78） | 19255296 B，SHA256 F8DC093538660029ADD8F0A32DF4AA4028660C11D0A9573D66BC294BC49EBBFD，integrity_check=ok。 | done | 78 | 2026-10-31T16:57:49+03:00 |  |
+| plugins/pixel_art/schema.sql | pixel_art 3 表补 raw/live（round 78） | pixel_artworks raw+live；pixel_asset_refs/visual_settings 仅 raw（豁免 live，注释可重建）；写入 4 处显式同步（artworks insert/update、asset_refs upsert、visual_settings upsert）；新增 migrate 并声明；真实库 0 空 raw。 | done | 78 | 2026-10-31T16:57:49+03:00 |  |
+| plugins/project_manager/schema.sql | project_manager 5 表补 raw/live 与触发器同步（round 78） | 5 表 raw+live；用户确认触发器方案（4 INSERT + 15 UPDATE 含批量状态更新）；新增 migrate 并声明（保留 seed）；真实库 0 空 raw、10 触发器；旧库两次幂等。 | done | 78 | 2026-10-31T16:57:49+03:00 |  |
+| tests/smoke_plugin_decoupling.py::Server.start | Server.start 连续 10 次稳定性测试（round 78） | 10/10 次 452/452 PASS，单次 106–133s，未出现健康检查超时；不修代码，pending 保留并更新描述为“15+ 次未触发，留观察；本轮 10 次连续通过”。 | done | 78 | 2026-10-31T16:57:49+03:00 |  |
+| docs/appendix/file_navigation.json | round 78 pending 闭环：pixel_art/project_manager resolved，仅 Server.start 保留（round 78） | 关闭 pixel_art、project_manager；Server.start 保留并更新描述。全量 13 通过（smoke_web 74/75 TTS 502 已知）。 | done | 78 | 2026-10-31T16:57:49+03:00 |  |
+| data/bg_import/::round78-none | 本次无背景库数据（round 78） | 用户未提供「项目优化与当前综述」导出 json；背景库不可用，本轮未执行 update 导入、未写背景库数据。 | done | 78 | 2026-10-31T16:57:49+03:00 |  |
 | plugins/book_reader/README.md | 补 book_reader 触发器三点说明（round 77） | 说明 JSON1 依赖（≥3.38，本机 3.45）、加列需重建触发器（migrate 按 PRAGMA 生成）、raw/live 由触发器维护业务 SQL 不显式写；盘点文档同步。 | done | 77 | 2026-10-31T16:27:39+03:00 |  |
 | data/backup/round77_db/ | 迁移前备份真实库（round 77） | 19103744 B，SHA256 80F869CB3E2C20038341F9C81E6522606C041BF94784578CAC2025A2F8E4827B，integrity_check=ok。 | done | 77 | 2026-10-31T16:27:39+03:00 |  |
 | plugins/finance/schema.sql | finance 17 表补 raw/live 与豁免注释（round 77） | 12 张内容/日志表补 raw+live；finance_settings 与 4 张 *snapshot* 表仅 raw（豁免 live，schema 注释说明可重建来源）；quant_assets/fund_cache 已合规；新增 finance/migrate.py 并在 manifest 声明；触发器同步写入（先删后建，INSERT 填 raw/live、UPDATE/upsert 刷 live 保留 raw）；旧库幂等、真实库 17 表 0 空 raw、29 触发器。 | done | 77 | 2026-10-31T16:27:39+03:00 |  |

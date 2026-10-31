@@ -13,7 +13,7 @@
 - `pixel_asset_refs`
 - `visual_settings`
 
-- raw/live 状态：3 表缺 `raw_json`/`live_json`（round 71 blocker，按 G2 待 round 73）
+- raw/live 状态：round 78 已补：pixel_artworks raw+live；pixel_asset_refs、visual_settings 仅 raw（豁免 live，可重建来源见 schema 注释）；写入显式同步
 
 ## 依赖
 - 被 `book_reader` 直接 import `service`（G4 已标注）

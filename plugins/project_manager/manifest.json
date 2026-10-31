@@ -20,7 +20,8 @@
   "db": {
     "module_key": "pm",
     "schema": "schema.sql",
-    "seed": "seed.py"
+    "seed": "seed.py",
+    "migrate": "migrate.py"
   },
   "style": "plugin.css",
   "provides": [],

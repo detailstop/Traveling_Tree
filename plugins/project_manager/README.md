@@ -15,7 +15,7 @@
 - `pm_prompt_drafts`
 - `pm_results`
 
-- raw/live 状态：5 表缺 `raw_json`/`live_json`（round 71 blocker，按 G2 待 round 73）
+- raw/live 状态：round 78 已补 5 表 raw+live（迁移快照；触发器同步写入）
 
 ## 依赖
 - `seed.py` 初始化阶段模板

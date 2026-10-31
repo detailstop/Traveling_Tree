@@ -1,5 +1,7 @@
 """pixel_art 插件 SQL 层：pixel_artworks / pixel_asset_refs。"""
 
+import json
+
 from db.connection import get_conn
 
 
@@ -16,17 +18,23 @@ def list_pixel_artworks() -> list:
 
 
 def add_pixel_artwork(values: tuple) -> None:
+    payload = json.dumps(dict(zip(
+        ("artwork_id", "name", "width", "height", "palette", "pixels", "created_at", "updated_at"),
+        values)), ensure_ascii=False, default=str)
     get_conn().execute(
-        "INSERT INTO pixel_artworks(artwork_id,name,width,height,palette,pixels,created_at,updated_at) "
-        "VALUES(?,?,?,?,?,?,?,?)", values,
+        "INSERT INTO pixel_artworks(artwork_id,name,width,height,palette,pixels,created_at,updated_at,raw_json,live_json) "
+        "VALUES(?,?,?,?,?,?,?,?,?,?)", (*values, payload, payload),
     )
     get_conn().commit()
 
 
 def update_pixel_artwork(values: tuple) -> None:
+    payload = json.dumps(dict(zip(
+        ("name", "width", "height", "palette", "pixels", "updated_at", "artwork_id"),
+        values)), ensure_ascii=False, default=str)
     get_conn().execute(
-        "UPDATE pixel_artworks SET name=?,width=?,height=?,palette=?,pixels=?,updated_at=? "
-        "WHERE artwork_id=?", values,
+        "UPDATE pixel_artworks SET name=?,width=?,height=?,palette=?,pixels=?,updated_at=?,live_json=? "
+        "WHERE artwork_id=?", (*values[:6], payload, values[6]),
     )
     get_conn().commit()
 
@@ -49,9 +57,12 @@ def set_pixel_asset_ref(ref_key: str, artwork_id: str | None, updated_at: str) -
         conn.execute("DELETE FROM pixel_asset_refs WHERE ref_key=?", (ref_key,))
     else:
         conn.execute(
-            "INSERT INTO pixel_asset_refs(ref_key,artwork_id,updated_at) VALUES(?,?,?) "
+            "INSERT INTO pixel_asset_refs(ref_key,artwork_id,updated_at,raw_json) VALUES(?,?,?,?) "
             "ON CONFLICT(ref_key) DO UPDATE SET artwork_id=excluded.artwork_id, "
-            "updated_at=excluded.updated_at", (ref_key, artwork_id, updated_at),
+            "updated_at=excluded.updated_at, raw_json=excluded.raw_json",
+            (ref_key, artwork_id, updated_at,
+             json.dumps({"ref_key": ref_key, "artwork_id": artwork_id, "updated_at": updated_at},
+                        ensure_ascii=False)),
         )
     conn.commit()
 

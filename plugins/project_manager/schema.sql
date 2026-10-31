@@ -13,7 +13,9 @@ CREATE TABLE IF NOT EXISTS pm_stage_templates (
   variable_spec TEXT NOT NULL,
   summary_schema TEXT NOT NULL,
   created_at TEXT NOT NULL,
-  updated_at TEXT NOT NULL
+  updated_at TEXT NOT NULL,
+  raw_json TEXT NOT NULL DEFAULT '',
+  live_json TEXT NOT NULL DEFAULT ''
 );
 CREATE TABLE IF NOT EXISTS pm_projects (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -21,7 +23,9 @@ CREATE TABLE IF NOT EXISTS pm_projects (
   description TEXT,
   status TEXT NOT NULL DEFAULT 'active',
   created_at TEXT NOT NULL,
-  updated_at TEXT NOT NULL
+  updated_at TEXT NOT NULL,
+  raw_json TEXT NOT NULL DEFAULT '',
+  live_json TEXT NOT NULL DEFAULT ''
 );
 CREATE TABLE IF NOT EXISTS pm_stages (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -37,6 +41,8 @@ CREATE TABLE IF NOT EXISTS pm_stages (
   status TEXT NOT NULL DEFAULT 'empty',
   created_at TEXT NOT NULL,
   updated_at TEXT NOT NULL,
+  raw_json TEXT NOT NULL DEFAULT '',
+  live_json TEXT NOT NULL DEFAULT '',
   UNIQUE(project_id, order_index)
 );
 CREATE TABLE IF NOT EXISTS pm_prompt_drafts (
@@ -48,6 +54,8 @@ CREATE TABLE IF NOT EXISTS pm_prompt_drafts (
   variables TEXT NOT NULL,
   is_active INTEGER NOT NULL DEFAULT 0,
   created_at TEXT NOT NULL,
+  raw_json TEXT NOT NULL DEFAULT '',
+  live_json TEXT NOT NULL DEFAULT '',
   UNIQUE(stage_id, version)
 );
 CREATE TABLE IF NOT EXISTS pm_results (
@@ -58,5 +66,7 @@ CREATE TABLE IF NOT EXISTS pm_results (
   body TEXT NOT NULL,
   summary_json TEXT,
   created_at TEXT NOT NULL,
-  updated_at TEXT NOT NULL
+  updated_at TEXT NOT NULL,
+  raw_json TEXT NOT NULL DEFAULT '',
+  live_json TEXT NOT NULL DEFAULT ''
 );
