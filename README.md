@@ -185,6 +185,7 @@ result = cobuild.checkin(
 
 ## 9. 开发约定
 
+- 开发新插件先读[插件开发守则](docs/plugin-development-guide.md)（7 节动线，规则引用白皮书）；AI 提示词模板见 [plugin-dev-prompt.md](docs/appendix/prompts/plugin-dev-prompt.md)，可用 `python tools/scaffold_plugin.py` 填充占位符；市场数据库草案见 [plugin-market-schema-draft.md](docs/appendix/plugin-market-schema-draft.md)（未建表）。
 - 不引入 Web 框架；接口保持本地 JSON；前端不引入框架/构建步骤。
 - SQL 分层：全部 SQL 在插件内（`plugins/russian/repo.py`、`plugins/project_manager/pm_repository.py`、`plugins/book_reader/book_reader.py`、`plugins/bg_library/`、`plugins/model_usage/repo.py`、`plugins/pixel_art/repo.py`、`plugins/finance/repo.py`）；宿主 `db/schema/` 为空，新增表只写 `plugins/<id>/schema.sql`，由 manifest 的 `db` 声明，`db/connection.py` 启动时扫描执行；`data/settings.json` 的 `modules.enabled.<module_key>` 可关闭对应建表（默认全启用）。
 - 新增工具：在 `ui/web/static/features/` 放按需模块，通过 `window.__toolRenderers` 注册；入口/架子在 `app.js`。
@@ -221,6 +222,7 @@ python tests/smoke_pm.py
 ## 11. 文档
 
 - [旅行之木 · 微内核架构与插件开发白皮书 (v2.0)](docs/plugin-development-whitepaper.md)
+- [插件开发守则](docs/plugin-development-guide.md) · [AI 提示词模板](docs/appendix/prompts/plugin-dev-prompt.md) · [插件市场草案](docs/appendix/plugin-market-schema-draft.md)
 - 白皮书附录：[A backend-only](docs/appendix/A-backend-only.md) · [B 根路由](docs/appendix/B-root-routing.md) · [C 二进制格式](docs/appendix/C-binary-format.md) · [D 其他约定](docs/appendix/D-conventions.md)
 - 说明性文件：[file_navigation.json](docs/appendix/file_navigation.json) · [file_navigation.md](docs/appendix/file_navigation.md) · [files_manifest.json](docs/appendix/files_manifest.json)
 
