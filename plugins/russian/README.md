@@ -15,7 +15,7 @@
 - `daily_logs`
 - `themes`
 
-- raw/live 状态：round 75 已补：items/themes/review_logs/daily_logs 双列；item_stats 仅 `raw_json`（豁免 live，可由 items+review_logs 重建）
+- raw/live 状态：round 75/76 已补：items/themes/review_logs/daily_logs 双列；item_stats 仅 `raw_json`（豁免 live）；主题级联更新会刷新 items.live_json
 
 ## 依赖
 - 朗读经宿主 `speakBtn()` 间接使用 `tts`

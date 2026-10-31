@@ -149,3 +149,12 @@
   - russian 5 表补 `raw_json`；items/themes/review_logs/daily_logs 同时补 `live_json`；item_stats 豁免 live；migrate 幂等；写入路径同步。
 - **验证**：旧库迁移连跑两次 OK；写路径实测 raw 非空且 live==raw；全量 13 见 round 75 报告。
 - **剩余**：book_reader、finance、pixel_art、project_manager 留 round 76。
+
+## 9. 执行状态（round 76）
+
+- **数据库备份**：`data/backup/round76_db/russian_tutor.db.bak`，16285696 B，SHA256 `1C5C4E247279BACCF23CB6F1BED1B073FB87D4B9F1812028D5C069231E355C1A`，integrity_check=ok。
+- **book_reader 位置式 INSERT**：实际 **14 处**（round 75 汇报“约 20 处”偏多），已全部改为显式列名；`smoke_books` 11/11、`smoke_reader_range` 25/25、`smoke_web` 74/75 通过。
+- **book_reader 补列**：11 表补 `raw_json`+`live_json`（迁移快照）；`reader_placeholders` 仅 raw（豁免 live）；`reader_bookmarks` 已合规。写入同步采用 schema 无关的 **AFTER INSERT/UPDATE 触发器**（迁移时按 PRAGMA 列生成，先删后建），避免改写 47 处业务 SQL；INSERT 自动填 raw/live，UPDATE 只刷新 live、保留 raw。
+- **russian 主题级联**：rename/delete/set_type 后刷新该主题下 `items.live_json`，`items.raw_json` 不变；临时库验证通过。
+- **验证**：旧库迁移两次幂等；真实库迁移后 11 表 0 空 raw、22 个触发器；全量 13 通过（TTS 502 已知）。
+- **剩余**：finance、pixel_art、project_manager 留 round 77。

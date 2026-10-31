@@ -23,7 +23,7 @@
 - `reader_return_errors`
 - `reader_bookmarks`
 
-- raw/live 状态：`reader_bookmarks` 双列；`reader_placeholders` 仅 `raw_json`；其余缺双列（round 71 blocker，按 G2 待 round 73 处理）
+- raw/live 状态：round 76 已补 11 表 `raw_json`+`live_json`（迁移快照，live=raw，触发器维护写入）；`reader_placeholders` 仅 `raw_json`（豁免 live）；`reader_bookmarks` 已合规
 
 ## 依赖
 - 直接 import：`plugins.pixel_art.service`（G4 已标注；计划改走 HTTP）

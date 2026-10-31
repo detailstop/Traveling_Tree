@@ -27,6 +27,12 @@ def _refresh_live(conn, table: str, key_col: str, key_val) -> None:
                  (_json_text(data), key_val))
 
 
+def _refresh_items_by_theme(conn, theme: str) -> None:
+    """主题级联后刷新该主题下 items.live_json（raw 保留插入快照）。"""
+    for row in conn.execute("SELECT id FROM items WHERE theme=?", (theme,)).fetchall():
+        _refresh_live(conn, "items", "id", row["id"])
+
+
 # ============================================================
 # items
 # ============================================================
@@ -436,6 +442,7 @@ def rename_theme(old: str, new: str) -> None:
     conn.execute("UPDATE themes SET name=? WHERE name=?", (new, old))
     conn.execute("UPDATE items SET theme=? WHERE theme=?", (new, old))
     _refresh_live(conn, "themes", "name", new)
+    _refresh_items_by_theme(conn, new)
     conn.commit()
 
 
@@ -446,6 +453,7 @@ def delete_theme(name: str) -> None:
     conn = get_conn()
     conn.execute("UPDATE items SET theme=? WHERE theme=?", (config.DEFAULT_THEME, name))
     conn.execute("DELETE FROM themes WHERE name=?", (name,))
+    _refresh_items_by_theme(conn, config.DEFAULT_THEME)
     conn.commit()
 
 
@@ -464,6 +472,7 @@ def set_theme_type(name: str, item_type: str) -> int:
     conn.execute("UPDATE themes SET default_type=? WHERE name=?", (item_type, name))
     _refresh_live(conn, "themes", "name", name)
     cur = conn.execute("UPDATE items SET item_type=? WHERE theme=?", (item_type, name))
+    _refresh_items_by_theme(conn, name)
     conn.commit()
     return cur.rowcount
 

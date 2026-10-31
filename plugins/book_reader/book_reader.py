@@ -165,8 +165,8 @@ def create_book(data):
     if not name: raise ValueError("书名不能为空")
     conn = _conn(); now = _now(); book_id = _id(); root = _id()
     order = conn.execute("SELECT COALESCE(MAX(order_index),-1)+1 FROM reader_books").fetchone()[0]
-    conn.execute("INSERT INTO reader_books VALUES(?,?,?,?,?)", (book_id,name,order,now,now))
-    conn.execute("INSERT INTO reader_sections VALUES(?,?,?,?,?,?)", (root,book_id,None,"根目录",0,now))
+    conn.execute("INSERT INTO reader_books (book_id,name,order_index,created_at,updated_at) VALUES(?,?,?,?,?)", (book_id,name,order,now,now))
+    conn.execute("INSERT INTO reader_sections (section_id,book_id,parent_id,name,order_index,created_at) VALUES(?,?,?,?,?,?)", (root,book_id,None,"根目录",0,now))
     conn.commit()
     return {"book": next(b for b in list_books() if b["book_id"] == book_id)}
 
@@ -208,19 +208,19 @@ def copy_book(book_id, data):
         n=1
         while _one("SELECT 1 FROM reader_books WHERE book_id=?",(f"{book_id}_copy{n}",)): n+=1
         new_id=f"{book_id}_copy{n}"; now=_now(); root=_id()
-        conn.execute("INSERT INTO reader_books VALUES(?,?,?,?,?)",(new_id,source["name"]+f" 副本{n}",conn.execute("SELECT COALESCE(MAX(order_index),-1)+1 FROM reader_books").fetchone()[0],now,now))
-        conn.execute("INSERT INTO reader_sections VALUES(?,?,?,?,?,?)",(root,new_id,None,"根目录",0,now))
+        conn.execute("INSERT INTO reader_books (book_id,name,order_index,created_at,updated_at) VALUES(?,?,?,?,?)",(new_id,source["name"]+f" 副本{n}",conn.execute("SELECT COALESCE(MAX(order_index),-1)+1 FROM reader_books").fetchone()[0],now,now))
+        conn.execute("INSERT INTO reader_sections (section_id,book_id,parent_id,name,order_index,created_at) VALUES(?,?,?,?,?,?)",(root,new_id,None,"根目录",0,now))
         section_map={}
         def clone_section(old_id,parent_new):
             old=_section(old_id); sid=_id(); section_map[old_id]=sid
-            conn.execute("INSERT INTO reader_sections VALUES(?,?,?,?,?,?)",(sid,new_id,parent_new,old["name"],old["order_index"],now))
+            conn.execute("INSERT INTO reader_sections (section_id,book_id,parent_id,name,order_index,created_at) VALUES(?,?,?,?,?,?)",(sid,new_id,parent_new,old["name"],old["order_index"],now))
             for invalid in _all("SELECT * FROM reader_placeholders WHERE section_id=? ORDER BY order_index",(old_id,)):
-                conn.execute("INSERT INTO reader_placeholders VALUES(?,?,?,?,?,?,?,?)",(_id(),new_id,sid,invalid["order_index"],invalid["raw_json"],invalid["error"],invalid["import_index"],now))
+                conn.execute("INSERT INTO reader_placeholders (placeholder_id,book_id,section_id,order_index,raw_json,error,import_index,created_at) VALUES(?,?,?,?,?,?,?,?)",(_id(),new_id,sid,invalid["order_index"],invalid["raw_json"],invalid["error"],invalid["import_index"],now))
             for sent in _all("SELECT * FROM reader_sentences WHERE section_id=? ORDER BY order_index",(old_id,)):
-                new_sent=_id(); conn.execute("INSERT INTO reader_sentences VALUES(?,?,?,?,?,?,?,?)",(new_sent,new_id,sid,sent["order_index"],sent["sentence_ru"],sent["translation_zh"],sent["tokens_json"],now))
+                new_sent=_id(); conn.execute("INSERT INTO reader_sentences (sentence_id,book_id,section_id,order_index,sentence_ru,translation_zh,tokens_json,created_at) VALUES(?,?,?,?,?,?,?,?)",(new_sent,new_id,sid,sent["order_index"],sent["sentence_ru"],sent["translation_zh"],sent["tokens_json"],now))
                 if data.get("copy_marks",True):
                     for mark in _all("SELECT * FROM reader_marks WHERE sentence_id=?",(sent["sentence_id"],)):
-                        conn.execute("INSERT INTO reader_marks VALUES(?,?,?,?,?,?,?,?,?,?,?)",(_id(),new_id,new_sent,mark["mark_type"],mark["surface"],mark["token_indexes"],mark["word_id"],mark["phrase_id"],mark["status"],mark["source"],now))
+                        conn.execute("INSERT INTO reader_marks (mark_id,book_id,sentence_id,mark_type,surface,token_indexes,word_id,phrase_id,status,source,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?)",(_id(),new_id,new_sent,mark["mark_type"],mark["surface"],mark["token_indexes"],mark["word_id"],mark["phrase_id"],mark["status"],mark["source"],now))
             for child in _all("SELECT section_id FROM reader_sections WHERE parent_id=? ORDER BY order_index",(old_id,)):clone_section(child["section_id"],sid)
         for sid in selected: clone_section(sid,root)
         # Root is always preserved; selected sections are nested below it.
@@ -246,7 +246,7 @@ def add_section(book_id, data):
         if p["book_id"] != book_id: raise ValueError("父层级不属于当前书籍")
     conn = _conn(); sid = _id(); now = _now()
     order = conn.execute("SELECT COALESCE(MAX(order_index),-1)+1 FROM reader_sections WHERE book_id=? AND parent_id IS ?",(book_id,parent)).fetchone()[0]
-    conn.execute("INSERT INTO reader_sections VALUES(?,?,?,?,?,?)", (sid,book_id,parent,name,order,now)); conn.commit()
+    conn.execute("INSERT INTO reader_sections (section_id,book_id,parent_id,name,order_index,created_at) VALUES(?,?,?,?,?,?)", (sid,book_id,parent,name,order,now)); conn.commit()
     return {"section":_section(sid)}
 
 
@@ -337,7 +337,7 @@ def import_json(section_id, data):
     if duplicate and not data.get("allow_duplicate"):
         return {"duplicate_suspected":True,"message":"疑似重复导入，请确认是否继续。","previous_batch_id":duplicate[0]}
     now=_now(); batch_id=_id()
-    conn.execute("INSERT INTO reader_import_batches VALUES(?,?,?,?,?)",(batch_id,section["book_id"],section_id,digest,now))
+    conn.execute("INSERT INTO reader_import_batches (batch_id,book_id,section_id,content_hash,created_at) VALUES(?,?,?,?,?)",(batch_id,section["book_id"],section_id,digest,now))
     order=data.get("order_index")
     if order is None:
         order=conn.execute("SELECT COALESCE(MAX(order_index),-1)+1 FROM (SELECT order_index FROM reader_sentences WHERE section_id=? UNION ALL SELECT order_index FROM reader_placeholders WHERE section_id=?)",(section_id,section_id)).fetchone()[0]
@@ -349,11 +349,11 @@ def import_json(section_id, data):
         elif not isinstance(record["sentence_ru"],str) or not isinstance(record["translation_zh"],str): reason="sentence_ru 与 translation_zh 必须为字符串"
         elif not record["sentence_ru"].strip() or not record["translation_zh"].strip(): reason="sentence_ru 与 translation_zh 去除空白后不能为空"
         if reason:
-            conn.execute("INSERT INTO reader_placeholders VALUES(?,?,?,?,?,?,?,?)",(_id(),section["book_id"],section_id,order,fragments[ix-1],reason,ix,now)); order+=1; bad+=1; continue
+            conn.execute("INSERT INTO reader_placeholders (placeholder_id,book_id,section_id,order_index,raw_json,error,import_index,created_at) VALUES(?,?,?,?,?,?,?,?)",(_id(),section["book_id"],section_id,order,fragments[ix-1],reason,ix,now)); order+=1; bad+=1; continue
         if "key_words" in record and not isinstance(record["key_words"],list): warnings.append(f"第 {ix} 条 key_words 不是数组，已忽略")
         if "key_phrases" in record and not isinstance(record["key_phrases"],list): warnings.append(f"第 {ix} 条 key_phrases 不是数组，已忽略")
         sentence_id=_id(); ru=record["sentence_ru"].strip(); tokens=_tokens(ru)
-        conn.execute("INSERT INTO reader_sentences VALUES(?,?,?,?,?,?,?,?)",(sentence_id,section["book_id"],section_id,order,ru,record["translation_zh"].strip(),_json(tokens),now)); order+=1
+        conn.execute("INSERT INTO reader_sentences (sentence_id,book_id,section_id,order_index,sentence_ru,translation_zh,tokens_json,created_at) VALUES(?,?,?,?,?,?,?,?)",(sentence_id,section["book_id"],section_id,order,ru,record["translation_zh"].strip(),_json(tokens),now)); order+=1
         sentence_ids.append(sentence_id)
         for word in record.get("key_words",[]) if isinstance(record.get("key_words",[]),list) else []:
             if isinstance(word,str):
@@ -441,7 +441,7 @@ def append_sentences(section_id, data):
         zh = record["translation_zh"].strip()
         tokens = _tokens(ru)
         sid = _id()
-        conn.execute("INSERT INTO reader_sentences VALUES(?,?,?,?,?,?,?,?)",
+        conn.execute("INSERT INTO reader_sentences (sentence_id,book_id,section_id,order_index,sentence_ru,translation_zh,tokens_json,created_at) VALUES(?,?,?,?,?,?,?,?)",
                      (sid, section["book_id"], section_id, order + offset, ru, zh, _json(tokens), now))
         sentence_ids.append(sid)
         for word in record.get("key_words") or []:
@@ -841,7 +841,7 @@ def export_cleaning(data):
         if mark["mark_type"]=="word": address["token_index"]=indexes[0]
         else: address["token_indexes"]=indexes
         item={"record_id":record_id,"mark_id":mark["mark_id"],"mark_type":mark["mark_type"],"surface":mark["surface"],"address":address,"sentence_ru":mark["sentence_ru"],"translation_zh":mark["translation_zh"]}
-        conn.execute("INSERT INTO reader_cleaning_records VALUES(?,?,?,?,?,NULL)",(record_id,task_id,mark["mark_id"],_json(address),_json(item)))
+        conn.execute("INSERT INTO reader_cleaning_records (record_id,task_id,mark_id,address_json,item_json,returned_at) VALUES(?,?,?,?,?,NULL)",(record_id,task_id,mark["mark_id"],_json(address),_json(item)))
         out.append(item)
     conn.commit(); return {"task_id":task_id,"exported_at":now,"items":out,
         "range":{"start":info["start"],"end":info["end"],"total":info["total"]},

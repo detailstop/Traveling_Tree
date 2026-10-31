@@ -6,18 +6,25 @@
 CREATE TABLE IF NOT EXISTS reader_books (
   book_id TEXT PRIMARY KEY, name TEXT NOT NULL, order_index INTEGER NOT NULL,
   created_at TEXT NOT NULL, updated_at TEXT NOT NULL
+  , raw_json TEXT NOT NULL DEFAULT ''
+  , live_json TEXT NOT NULL DEFAULT ''
 );
 CREATE TABLE IF NOT EXISTS reader_sections (
   section_id TEXT PRIMARY KEY, book_id TEXT NOT NULL REFERENCES reader_books(book_id) ON DELETE CASCADE,
   parent_id TEXT REFERENCES reader_sections(section_id) ON DELETE CASCADE,
   name TEXT NOT NULL, order_index INTEGER NOT NULL, created_at TEXT NOT NULL
+  , raw_json TEXT NOT NULL DEFAULT ''
+  , live_json TEXT NOT NULL DEFAULT ''
 );
 CREATE TABLE IF NOT EXISTS reader_sentences (
   sentence_id TEXT PRIMARY KEY, book_id TEXT NOT NULL REFERENCES reader_books(book_id) ON DELETE CASCADE,
   section_id TEXT NOT NULL REFERENCES reader_sections(section_id) ON DELETE CASCADE,
   order_index INTEGER NOT NULL, sentence_ru TEXT NOT NULL, translation_zh TEXT NOT NULL,
   tokens_json TEXT NOT NULL, created_at TEXT NOT NULL
+  , raw_json TEXT NOT NULL DEFAULT ''
+  , live_json TEXT NOT NULL DEFAULT ''
 );
+ -- raw_json 为导入时原文；live_json 豁免：可由导入源重建
 CREATE TABLE IF NOT EXISTS reader_placeholders (
   placeholder_id TEXT PRIMARY KEY, book_id TEXT NOT NULL REFERENCES reader_books(book_id) ON DELETE CASCADE,
   section_id TEXT NOT NULL REFERENCES reader_sections(section_id) ON DELETE CASCADE,
@@ -31,7 +38,10 @@ CREATE TABLE IF NOT EXISTS reader_words (
   stress INTEGER, examples TEXT,
   export_selected INTEGER NOT NULL DEFAULT 0,
   memorize_round INTEGER NOT NULL DEFAULT 1,
-  created_at TEXT NOT NULL, updated_at TEXT NOT NULL, UNIQUE(lemma, pos)
+  created_at TEXT NOT NULL, updated_at TEXT NOT NULL,
+  raw_json TEXT NOT NULL DEFAULT '',
+  live_json TEXT NOT NULL DEFAULT '',
+  UNIQUE(lemma, pos)
 );
 CREATE TABLE IF NOT EXISTS reader_phrases (
   phrase_id TEXT PRIMARY KEY, phrase_lemma TEXT NOT NULL, phrase_type TEXT NOT NULL DEFAULT '',
@@ -41,10 +51,14 @@ CREATE TABLE IF NOT EXISTS reader_phrases (
   export_selected INTEGER NOT NULL DEFAULT 0,
   memorize_round INTEGER NOT NULL DEFAULT 1,
   created_at TEXT NOT NULL, updated_at TEXT NOT NULL,
+  raw_json TEXT NOT NULL DEFAULT '',
+  live_json TEXT NOT NULL DEFAULT '',
   UNIQUE(phrase_lemma, phrase_type)
 );
 CREATE TABLE IF NOT EXISTS reader_translation_pairs (
   id TEXT PRIMARY KEY, ru TEXT NOT NULL, zh TEXT NOT NULL, created_at TEXT NOT NULL
+  , raw_json TEXT NOT NULL DEFAULT ''
+  , live_json TEXT NOT NULL DEFAULT ''
 );
 CREATE TABLE IF NOT EXISTS reader_marks (
   mark_id TEXT PRIMARY KEY, book_id TEXT NOT NULL REFERENCES reader_books(book_id) ON DELETE CASCADE,
@@ -53,23 +67,33 @@ CREATE TABLE IF NOT EXISTS reader_marks (
   token_indexes TEXT NOT NULL, word_id TEXT REFERENCES reader_words(word_id) ON DELETE SET NULL,
   phrase_id TEXT REFERENCES reader_phrases(phrase_id) ON DELETE SET NULL,
   status TEXT NOT NULL DEFAULT 'uncleaned', source TEXT NOT NULL DEFAULT 'manual', created_at TEXT NOT NULL
+  , raw_json TEXT NOT NULL DEFAULT ''
+  , live_json TEXT NOT NULL DEFAULT ''
 );
 CREATE TABLE IF NOT EXISTS reader_import_batches (
   batch_id TEXT PRIMARY KEY, book_id TEXT NOT NULL REFERENCES reader_books(book_id) ON DELETE CASCADE,
   section_id TEXT NOT NULL REFERENCES reader_sections(section_id) ON DELETE CASCADE,
   content_hash TEXT NOT NULL, created_at TEXT NOT NULL
+  , raw_json TEXT NOT NULL DEFAULT ''
+  , live_json TEXT NOT NULL DEFAULT ''
 );
 CREATE TABLE IF NOT EXISTS reader_cleaning_tasks (
   task_id TEXT PRIMARY KEY, scope TEXT NOT NULL, exported_at TEXT NOT NULL,
   range_start INTEGER, range_end INTEGER, range_total INTEGER
+  , raw_json TEXT NOT NULL DEFAULT ''
+  , live_json TEXT NOT NULL DEFAULT ''
 );
 CREATE TABLE IF NOT EXISTS reader_cleaning_records (
   record_id TEXT PRIMARY KEY, task_id TEXT NOT NULL REFERENCES reader_cleaning_tasks(task_id) ON DELETE CASCADE,
   mark_id TEXT NOT NULL, address_json TEXT NOT NULL, item_json TEXT NOT NULL, returned_at TEXT
+  , raw_json TEXT NOT NULL DEFAULT ''
+  , live_json TEXT NOT NULL DEFAULT ''
 );
 CREATE TABLE IF NOT EXISTS reader_return_errors (
   id INTEGER PRIMARY KEY AUTOINCREMENT, task_id TEXT, record_id TEXT, error TEXT NOT NULL,
   payload TEXT NOT NULL, created_at TEXT NOT NULL
+  , raw_json TEXT NOT NULL DEFAULT ''
+  , live_json TEXT NOT NULL DEFAULT ''
 );
 CREATE INDEX IF NOT EXISTS idx_reader_sections_parent ON reader_sections(book_id, parent_id, order_index);
 CREATE INDEX IF NOT EXISTS idx_reader_sentences_section ON reader_sentences(section_id, order_index);

@@ -4,7 +4,64 @@
 """
 from __future__ import annotations
 
+import json
 import sqlite3
+from pathlib import Path
+
+_SCHEMA_PATH = Path(__file__).with_name("schema.sql")
+
+_JSON_TABLES = (
+    "reader_books", "reader_sections", "reader_sentences", "reader_words",
+    "reader_phrases", "reader_translation_pairs", "reader_marks",
+    "reader_import_batches", "reader_cleaning_tasks", "reader_cleaning_records",
+    "reader_return_errors",
+)
+
+
+def _add_raw_live(conn) -> None:
+    """补 raw_json/live_json 并按当前行回填（raw 为迁移时快照，live=raw）。"""
+    for table in _JSON_TABLES:
+        cols = {r["name"] for r in conn.execute(f"PRAGMA table_info({table})")}
+        if not cols:
+            continue
+        for column in ("raw_json", "live_json"):
+            if column not in cols:
+                conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} TEXT NOT NULL DEFAULT ''")
+        business = [c["name"] for c in conn.execute(f"PRAGMA table_info({table})")
+                    if c["name"] not in ("raw_json", "live_json")]
+        rows = conn.execute(
+            f"SELECT rowid AS _rid, {', '.join(business)} FROM {table} "
+            "WHERE raw_json='' OR live_json=''"
+        ).fetchall()
+        for row in rows:
+            payload = json.dumps({c: row[c] for c in business}, ensure_ascii=False, default=str)
+            conn.execute(f"UPDATE {table} SET raw_json=?, live_json=? WHERE rowid=?",
+                         (payload, payload, row["_rid"]))
+
+
+def _drop_json_triggers(conn) -> None:
+    for row in conn.execute(
+        "SELECT name FROM sqlite_master WHERE type='trigger' AND name LIKE 'trg_reader%'"
+    ).fetchall():
+        conn.execute(f"DROP TRIGGER IF EXISTS {row['name']}")
+
+
+def _install_triggers(conn) -> None:
+    """按当前列安装 JSON 同步触发器（raw=插入快照，live=当前状态）。"""
+    for table in _JSON_TABLES:
+        cols = [c["name"] for c in conn.execute(f"PRAGMA table_info({table})")
+                if c["name"] not in ("raw_json", "live_json")]
+        if not cols:
+            continue
+        j = "json_object(" + ", ".join(f"'{c}', NEW.{c}" for c in cols) + ")"
+        conn.execute(
+            f"CREATE TRIGGER IF NOT EXISTS trg_{table}_json_ins AFTER INSERT ON {table} BEGIN "
+            f"UPDATE {table} SET raw_json={j}, live_json={j} WHERE rowid=NEW.rowid; END"
+        )
+        conn.execute(
+            f"CREATE TRIGGER IF NOT EXISTS trg_{table}_json_upd AFTER UPDATE ON {table} BEGIN "
+            f"UPDATE {table} SET live_json={j} WHERE rowid=NEW.rowid; END"
+        )
 
 
 def _supports_drop_column() -> bool:
@@ -12,6 +69,7 @@ def _supports_drop_column() -> bool:
 
 
 def migrate(conn) -> None:
+    _drop_json_triggers(conn)
     reader_mark_cols = {r["name"] for r in conn.execute("PRAGMA table_info(reader_marks)")}
     if reader_mark_cols and "source" not in reader_mark_cols:
         conn.execute("ALTER TABLE reader_marks ADD COLUMN source TEXT NOT NULL DEFAULT 'manual'")
@@ -47,4 +105,6 @@ def migrate(conn) -> None:
             conn.execute(
                 f"UPDATE {table} SET export_selected=0 "
                 "WHERE export_selected IS NULL OR export_selected NOT IN (0,1)")
+    _add_raw_live(conn)
+    _install_triggers(conn)
     conn.commit()
