@@ -2,9 +2,9 @@
 
 > 只读摘要，勿手改。本文件由 docs/appendix/file_navigation.json 生成；结构与去留决定以 JSON 为准。
 
-- 生成时间：2026-10-31T18:43:21+03:00
-- 轮次：82
-- 待办：0 条；已决定：529 条
+- 生成时间：2026-10-31T18:55:45+03:00
+- 轮次：83
+- 待办：0 条；已决定：535 条
 
 ## 待办
 
@@ -15,6 +15,12 @@
 
 | 路径 | 决定 | 原因 | 状态 | 轮次 | 时间 | 备份路径 |
 | --- | --- | --- | --- | --- | --- | --- |
+| plugins/market/backend.py | 市场源只读预留与测试表删除守卫（round 83） | settings() 只读 data/plugins/market/settings.json 的 market_source（默认 market/packages/）；uninstall 增加 delete_tables，仅 testprobe 验证钩子开放，其他插件拒绝且永不 DROP 主库表；backup_database 先整库备份再 drop_test_tables（仅 test_ 前缀）。 | done | 83 | 2026-10-31T18:55:45+03:00 |  |
+| tests/smoke_market.py | smoke_market 增补有表卸载用例（round 83） | 新增：非测试插件禁删表、整库备份含删除前表、仅删除 test_ 表、禁删非 test_ 表；smoke_market 22/22。临时有表插件链路验证后已删除，未提交。 | done | 83 | 2026-10-31T18:55:45+03:00 |  |
+| README.md | README 补克隆后打包说明与 B3 源码公开边界（round 83） | 市场章节：克隆后先跑 tools/build_market_packages.py 生成 zip，否则 sim 不可安装；market/sources/ 进 Git 表示源码可见，B3 独立市场仓库时源码可能公开，由用户后续决定。 | done | 83 | 2026-10-31T18:55:45+03:00 |  |
+| docs/plugin-development-whitepaper.md | 白皮书基线按实际 14 项修正并补 B3 边界（round 83） | §7.2 合计 966/967（13 项全 PASS，smoke_web 74/75 TTS 502 唯一 FAIL）；§7.5 补 market_source 默认本地与 B3 源码公开待确认。 | done | 83 | 2026-10-31T18:55:45+03:00 |  |
+| docs/appendix/plugin-market-schema-draft.md | 市场草案补 A 阶段配置与 B3 边界（round 83） | market_source 只读默认 market/packages/；B3 独立市场仓库源码公开需用户确认。 | done | 83 | 2026-10-31T18:55:45+03:00 |  |
+| data/bg_import/::round83-none | 本次无背景库数据（round 83） | 用户未提供「项目优化与当前综述」导出 json；背景库不可用，本轮未执行 update 导入、未写背景库数据。 | done | 83 | 2026-10-31T18:55:45+03:00 |  |
 | plugins/market/ | 新增插件市场（A 阶段本地包机制）（round 82） | manifest（导航型 entry nav:true）+ schema（market_installed，双列）+ backend（/list /index /status /install /uninstall）+ packaging（SHA256、路径穿越/绝对路径/符号链接/大小/文件数校验、临时目录、manifest.id 一致、原子安装）+ feature.js/plugin.css（卡片、搜索、kind 过滤、详情、预置不可卸载、删数据二次确认）。 | done | 82 | 2026-10-31T18:43:21+03:00 |  |
 | market/index.json | 本地市场包清单与构建脚本（round 82） | tools/build_market_packages.py 从 market/sources/<id>/ 生成固定时间戳 zip 并写 index（id/name/version/kind/desc/sha256/size/file/source/签名预留）；sim.zip 生成成功（12062 B，sha256 c60268b5…）；zip 已加入 .gitignore，index.json 进 Git。 | done | 82 | 2026-10-31T18:43:21+03:00 |  |
 | market/sources/sim/ | sim 试点迁移（方案 a，round 82） | plugins/sim 移至 market/sources/sim（源码进 Git，zip 不进 Git）；市场可安装/卸载/重装；真实库试点安装→卸载→重装→卸载通过，最终 sim 未安装（plugins 目录 22 个）。 | done | 82 | 2026-10-31T18:43:21+03:00 |  |

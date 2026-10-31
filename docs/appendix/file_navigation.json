@@ -1,9 +1,57 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-31T18:43:21+03:00",
-  "round": 82,
+  "generated_at": "2026-10-31T18:55:45+03:00",
+  "round": 83,
   "pending": [],
   "decided": [
+    {
+      "path": "plugins/market/backend.py",
+      "decision": "市场源只读预留与测试表删除守卫（round 83）",
+      "reason": "settings() 只读 data/plugins/market/settings.json 的 market_source（默认 market/packages/）；uninstall 增加 delete_tables，仅 testprobe 验证钩子开放，其他插件拒绝且永不 DROP 主库表；backup_database 先整库备份再 drop_test_tables（仅 test_ 前缀）。",
+      "status": "done",
+      "round": 83,
+      "at": "2026-10-31T18:55:45+03:00"
+    },
+    {
+      "path": "tests/smoke_market.py",
+      "decision": "smoke_market 增补有表卸载用例（round 83）",
+      "reason": "新增：非测试插件禁删表、整库备份含删除前表、仅删除 test_ 表、禁删非 test_ 表；smoke_market 22/22。临时有表插件链路验证后已删除，未提交。",
+      "status": "done",
+      "round": 83,
+      "at": "2026-10-31T18:55:45+03:00"
+    },
+    {
+      "path": "README.md",
+      "decision": "README 补克隆后打包说明与 B3 源码公开边界（round 83）",
+      "reason": "市场章节：克隆后先跑 tools/build_market_packages.py 生成 zip，否则 sim 不可安装；market/sources/ 进 Git 表示源码可见，B3 独立市场仓库时源码可能公开，由用户后续决定。",
+      "status": "done",
+      "round": 83,
+      "at": "2026-10-31T18:55:45+03:00"
+    },
+    {
+      "path": "docs/plugin-development-whitepaper.md",
+      "decision": "白皮书基线按实际 14 项修正并补 B3 边界（round 83）",
+      "reason": "§7.2 合计 966/967（13 项全 PASS，smoke_web 74/75 TTS 502 唯一 FAIL）；§7.5 补 market_source 默认本地与 B3 源码公开待确认。",
+      "status": "done",
+      "round": 83,
+      "at": "2026-10-31T18:55:45+03:00"
+    },
+    {
+      "path": "docs/appendix/plugin-market-schema-draft.md",
+      "decision": "市场草案补 A 阶段配置与 B3 边界（round 83）",
+      "reason": "market_source 只读默认 market/packages/；B3 独立市场仓库源码公开需用户确认。",
+      "status": "done",
+      "round": 83,
+      "at": "2026-10-31T18:55:45+03:00"
+    },
+    {
+      "path": "data/bg_import/::round83-none",
+      "decision": "本次无背景库数据（round 83）",
+      "reason": "用户未提供「项目优化与当前综述」导出 json；背景库不可用，本轮未执行 update 导入、未写背景库数据。",
+      "status": "done",
+      "round": 83,
+      "at": "2026-10-31T18:55:45+03:00"
+    },
     {
       "path": "plugins/market/",
       "decision": "新增插件市场（A 阶段本地包机制）（round 82）",

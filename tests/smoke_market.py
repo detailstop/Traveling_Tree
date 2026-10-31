@@ -7,6 +7,7 @@ from __future__ import annotations
 import io
 import json
 import shutil
+import sqlite3
 import sys
 import tempfile
 import zipfile
@@ -137,6 +138,27 @@ def main() -> int:
     check("勾选后私有目录已删除", not (tmp / "data" / "plugins" / "sim").exists())
     r = backend.handle("POST", "/install", {}, {"id": "sim"})
     check("卸载后可重装", r.get("ok") is True and (plugins / "sim").is_dir())
+
+    # ---- 测试表卸载：仅 testprobe + 整库备份 + 只 DROP test_ 表 ----
+    check("非测试插件禁删表", backend.handle(
+        "POST", "/uninstall", {}, {"id": "sim", "delete_tables": True}).get("error")
+        == "delete_tables_forbidden")
+    dbp = tmp / "probe.db"
+    dbc = sqlite3.connect(dbp)
+    dbc.execute("CREATE TABLE test_probe_items (id TEXT PRIMARY KEY)")
+    dbc.execute("CREATE TABLE keep_me (id TEXT PRIMARY KEY)")
+    dbc.execute("INSERT INTO keep_me VALUES('k')")
+    dbc.commit(); dbc.close()
+    bak = packaging.backup_database(dbp, tmp / "dbbak")
+    packaging.drop_test_tables(dbp, ["test_probe_items"])
+    names = {r[0] for r in sqlite3.connect(dbp).execute(
+        "SELECT name FROM sqlite_master WHERE type='table'")}
+    bak_names = {r[0] for r in sqlite3.connect(bak).execute(
+        "SELECT name FROM sqlite_master WHERE type='table'")}
+    check("备份存在且含删除前表", bak.is_file() and {"test_probe_items", "keep_me"} <= bak_names)
+    check("仅删除 test_ 表", "test_probe_items" not in names and "keep_me" in names)
+    expect_error("禁删非 test_ 表", lambda: packaging.drop_test_tables(
+        dbp, ["keep_me"]), "forbidden")
 
     shutil.rmtree(tmp, ignore_errors=True)
     print(f"\nRESULT: {results.count(True)}/{len(results)} PASS")

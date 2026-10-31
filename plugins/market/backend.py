@@ -76,6 +76,19 @@ def _installed(pid: str) -> bool:
     return (plugins_dir() / pid / "manifest.json").is_file()
 
 
+def settings() -> dict:
+    """只读市场私有配置：默认 A 阶段本地包目录；B 阶段可切市场仓库。"""
+    path = Path(config.DATA_DIR) / "plugins" / "market" / "settings.json"
+    default = {"market_source": "market/packages/"}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        if isinstance(data, dict):
+            default.update({k: v for k, v in data.items() if k == "market_source"})
+    except (OSError, ValueError):
+        pass
+    return default
+
+
 def _fetch_package(entry: dict) -> bytes:
     """A 阶段：读本地 market/packages/<file>；B 阶段在此加 HTTP 分支。"""
     source = str(entry.get("source") or "local")
@@ -212,12 +225,15 @@ def install(pid: str) -> dict:
             "message": "安装完成，重启服务后生效"}
 
 
-def uninstall(pid: str, delete_data: bool = False) -> dict:
+def uninstall(pid: str, delete_data: bool = False, delete_tables: bool = False) -> dict:
     pid = str(pid or "").strip()
     if not _ID_RE.fullmatch(pid):
         return {"ok": False, "error": "bad_id", "message": "非法插件 id"}
     if pid in PRESETS:
         return {"ok": False, "error": "preset_protected", "message": "预置插件不可卸载"}
+    if delete_tables and pid != "testprobe":
+        return {"ok": False, "error": "delete_tables_forbidden",
+                "message": "仅测试插件 testprobe 允许删除测试表"}
     if not _installed(pid):
         return {"ok": False, "error": "not_installed", "message": "插件未安装"}
     try:
@@ -228,10 +244,19 @@ def uninstall(pid: str, delete_data: bool = False) -> dict:
     if delete_data:
         data_backup = packaging.backup_private_data(
             pid, Path(config.DATA_DIR) / "plugins", Path(config.DATA_DIR) / "backup")
+    table_backup = ""
+    dropped: list[str] = []
+    if delete_tables:
+        # 仅 testprobe 验证钩子开放；其他插件卸载永不 DROP 主库表。
+        stamp = time.strftime("%Y%m%d_%H%M%S")
+        table_backup = str(packaging.backup_database(
+            Path(config.DB_PATH), Path(config.DATA_DIR) / "backup" / f"uninstall_{pid}_{stamp}"))
+        dropped = packaging.drop_test_tables(Path(config.DB_PATH), ["test_probe_items"])
     _record(pid, "", "local", "removed")
     return {"ok": True, "id": pid, "restart_required": True,
             "plugin_backup": str(backup),
             "data_backup": str(data_backup) if data_backup else "",
+            "table_backup": table_backup, "dropped_tables": dropped,
             "message": "卸载完成，重启服务后生效"}
 
 
@@ -251,7 +276,8 @@ def handle(method: str, subpath: str, query: dict, body: dict):
         if method == "POST" and route == "install":
             return install(body.get("id"))
         if method == "POST" and route == "uninstall":
-            return uninstall(body.get("id"), bool(body.get("delete_data")))
+            return uninstall(body.get("id"), bool(body.get("delete_data")),
+                             bool(body.get("delete_tables")))
     except packaging.MarketError as exc:
         return {"ok": False, "error": exc.code, "message": exc.message}
     if route in {"list", "index", "status", "install", "uninstall"}:

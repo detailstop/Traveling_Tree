@@ -142,3 +142,33 @@ def backup_private_data(pid: str, data_plugins_dir: Path, backup_root: Path) -> 
     shutil.copytree(src, target, dirs_exist_ok=True)
     shutil.rmtree(src, ignore_errors=True)
     return dst
+
+
+def backup_database(db_path: Path, backup_root: Path) -> Path:
+    """整库副本（SQLite 在线备份）到 backup_root/russian_tutor.db.bak；不改原库。"""
+    import sqlite3
+    backup_root.mkdir(parents=True, exist_ok=True)
+    dst = backup_root / "russian_tutor.db.bak"
+    src = sqlite3.connect(str(db_path))
+    out = sqlite3.connect(str(dst))
+    try:
+        src.backup(out)
+    finally:
+        out.close()
+        src.close()
+    return dst
+
+
+def drop_test_tables(db_path: Path, tables: list[str]) -> list[str]:
+    """仅删除 test_ 前缀的测试表（调用方须先做插件限定）。"""
+    import sqlite3
+    if any(not t.startswith("test_") for t in tables):
+        raise MarketError("forbidden", "只允许删除 test_ 前缀测试表")
+    conn = sqlite3.connect(str(db_path))
+    try:
+        for table in tables:
+            conn.execute(f"DROP TABLE IF EXISTS {table}")
+        conn.commit()
+    finally:
+        conn.close()
+    return tables

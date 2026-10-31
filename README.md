@@ -231,7 +231,7 @@ python tests/smoke_pm.py
 ## 12. 项目状态与交接（2026-10-30）
 
 - **插件**：22 个插件目录——19 个有前端卡片（ai、aidebug、bg_library、book_reader、expdata、filejudge、finance、market、model_usage、netexp、pdf、pixel_art、project_manager、promptgen、rivet、russian、schedule、screeps、urlarch）+ 3 个 backend-only（webchat、cobuild、tts）；`sim` 试点包不常驻 `plugins/`。
-- **插件市场（round 82）**：左侧栏「插件市场」；预置 5 个（market/cobuild/webchat/tts/pixel_art）不可卸载；本地包由 `tools/build_market_packages.py` 生成到 `market/packages/*.zip`（不进 Git），`market/index.json` 进 Git；安装/卸载重启生效；卸载默认保留 `data/plugins/<id>/`，勾选删除会先备份到 `data/backup/uninstall_<id>_<ts>/`。
+- **插件市场（round 82）**：左侧栏「插件市场」；预置 5 个（market/cobuild/webchat/tts/pixel_art）不可卸载；本地包由 `tools/build_market_packages.py` 生成到 `market/packages/*.zip`（不进 Git），`market/index.json` 进 Git；安装/卸载重启生效；卸载默认保留 `data/plugins/<id>/`，勾选删除会先备份到 `data/backup/uninstall_<id>_<ts>/`。克隆后先运行 `python tools/build_market_packages.py` 生成 `market/packages/sim.zip`，否则 sim 不可安装。`market/sources/` 进 Git 意味着试点插件源码可见；B3 独立市场仓库时源码可能公开，是否接受由用户后续决定。
 - **14 项 smoke 基线**：smoke_plugins 183/183、smoke_startup_once 34/34、smoke_web 74/75（TTS 502 已知）、smoke_plugin_decoupling 454/454、smoke_finance 34/34、smoke_model_usage 49/49、smoke_reader_range 25/25、smoke_pm 23/23、smoke_books 11/11、smoke_file_preview 17/17、smoke_pdf 17/17、smoke_plugin_data_dirs 13/13、smoke_plugin_module_off 10/10、smoke_market 18/18。
 - **剩余 pending**：无（`Server.start` 已在 round 80 修复并连续 20 次通过）。
 - **交接建议**：新功能进 `plugins/<id>/`，不碰宿主；改现有功能直接改对应插件；每轮下沉、改 settings 或改 API 后跑全量 13 个 smoke；`/api/plugin/<id>/*` 必须用语义子路径；二进制响应按附录 C。

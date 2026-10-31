@@ -110,6 +110,8 @@ live_json TEXT NOT NULL DEFAULT '' -- 当前编辑状态
 | smoke_startup_once.py | 首次启动建表/API | 34/34 |
 | smoke_market.py | 市场安全/安装卸载/预置保护 | 18/18 |
 
+合计 **966/967**（13 项全 PASS；`smoke_web` 74/75，TTS 502 为唯一允许 FAIL）。
+
 已知 FAIL：`smoke_web` 的 TTS 502 来自 edge-tts 外部网络不可用，不阻塞其他断言；出现非 TTS 的 FAIL 按回滚规则处理。
 
 ### 7.3 剩余 pending
@@ -128,6 +130,7 @@ live_json TEXT NOT NULL DEFAULT '' -- 当前编辑状态
 - `data/settings.json`：`download_groups` + `modules.enabled`；插件 settings 在 `data/plugins/<id>/settings.json`。
 - 敏感文件：`data/ai_keys.json`、`data/webchat_sessions.json`、`data/plugins/webchat/webchat_profile/`、`data/plugins/finance/fixtures/rt_fin.json`；只按路径处理，不读正文、不进 Git。
 - 市场资产：`market/index.json`（进 Git，包清单/SHA256）、`market/packages/*.zip`（不进 Git）、`market/sources/<id>/`（试点源码，进 Git）、`market/.trash/`（卸载备份，不进 Git）；安装记录在 `market_installed` 表。
+- 市场源：`data/plugins/market/settings.json` 的 `market_source` 只读默认 `market/packages/`（A 阶段）；B3 切换独立市场仓库前需用户确认源码公开范围。
 
 ### 7.6 round 65 删除前核对结论（round 66 补记）
 round 65 删除 `plugin-development-whitepaper-v2.1-draft.md` 与 `project-closure-2026-10-29.md` 前，逐项核对结论如下；两份源文档未恢复。

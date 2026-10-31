@@ -2,6 +2,8 @@
 
 > **状态（round 82 更新）：A 阶段本地市场已落地。** 新建 `plugins/market/`（`backend.py` + `feature.js` + `schema.sql` + `packaging.py`），实际建表为 `market_installed`（id/version/source/installed_at/status/raw_json/live_json）；`market/index.json` 为只读包清单，`market/packages/*.zip` 不进 Git。B 阶段预留 `market_source` 与 `fetch_package` 的 HTTP 分支（当前只读本地包）。本文件其余字段仍为 B 阶段参考，未全部建表。
 >
+> A 阶段配置：市场源默认 `market/packages/`（`data/plugins/market/settings.json` 的 `market_source`，只读）；B3 独立市场仓库时源码可能公开，需用户确认后再切换。
+>
 > 原说明：后续实现落到 `plugins/market/schema.sql`（新建插件 `plugins/market/`）；届时每张内容表必须含 `raw_json TEXT NOT NULL` 与 `live_json TEXT NOT NULL DEFAULT ''`（白皮书 §五）。
 
 ## 1. 目标与数据来源
