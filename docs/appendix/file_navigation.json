@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-01T18:38:15+03:00",
-  "round": 101,
+  "generated_at": "2026-11-01T19:25:02+03:00",
+  "round": 102,
   "pending": [
     {
       "path": "docs/appendix/file_navigation.json",
@@ -16,6 +16,70 @@
     }
   ],
   "decided": [
+    {
+      "path": "plugins/urlarch/repo.py",
+      "decision": "组名唯一 + 组/条目 PATCH 的 SQL 层（round 102）",
+      "reason": "create_shortcut_group 与新增 update_shortcut_group 在 BEGIN IMMEDIATE 内查同名（排除自身），冲突抛 GroupNameConflict → 409；update_shortcut_group 只更新 name/sort_order 并同步 live_json/updated_at（raw 保留建组快照）；set_shortcut_group 只改 group_id 并刷新 live_json/updated_at，不动 path/args/name/hotkey。",
+      "status": "done",
+      "round": 102,
+      "at": "2026-11-01T19:25:02+03:00"
+    },
+    {
+      "path": "plugins/urlarch/backend.py",
+      "decision": "新增两个 PATCH 路由与错误码（round 102）",
+      "reason": "PATCH /shortcut-groups/<id> 仅接受 name/sort_order（至少一项，否则 INVALID_REQUEST）；PATCH /shortcuts/<id> 只接受 group_id 并忽略 path/args/name/hotkey/cmd，不触发启动；错误码新增 GROUP_NAME_CONFLICT(409)/SORT_ORDER_INVALID(400)/INVALID_REQUEST(400)；POST 建组同名同样 409。",
+      "status": "done",
+      "round": 102,
+      "at": "2026-11-01T19:25:02+03:00"
+    },
+    {
+      "path": "plugins/urlarch/security.py",
+      "decision": "新增严格 sort_order 校验（round 102）",
+      "reason": "validate_sort_order_strict：仅接受 -10000~10000 的整数（布尔/浮点/字符串/越界 → SORT_ORDER_INVALID 400）；既有 validate_group_name（GROUP_NAME_INVALID）复用于新建与改名；路径/参数校验未变。",
+      "status": "done",
+      "round": 102,
+      "at": "2026-11-01T19:25:02+03:00"
+    },
+    {
+      "path": "plugins/urlarch/feature.js",
+      "decision": "组改名/上下移/条目拖拽改组（round 102）",
+      "reason": "组标题栏加 ✏️/↑/↓/🗑️（首组 ↑、末组 ↓ 置灰）；改名走 prompt + PATCH，冲突 toast「组名已存在」并以服务端名恢复；调序按相邻交换并把 sort_order 规范化为 index*10 后逐个 PATCH（刷新保持）；条目行 draggable，拖到组容器（含未分组）后 PATCH 只改 group_id，拖后 400ms 抑制点击避免误启动，失败重新拉取无乐观残留；新增 uaPatch 直连 fetch（宿主 api() 在有 body 时强制 POST）并给 GET 加时间戳绕开缓存。",
+      "status": "done",
+      "round": 102,
+      "at": "2026-11-01T19:25:02+03:00"
+    },
+    {
+      "path": "plugins/urlarch/plugin.css",
+      "decision": "拖拽与禁用按钮样式（round 102）",
+      "reason": ".ua-sc-row.dragging 半透明、.ua-sg.dragover 高亮描边、.ua-group-ops .mini-btn[disabled] 置灰不可点；仍限 .ua-* 命名空间。",
+      "status": "done",
+      "round": 102,
+      "at": "2026-11-01T19:25:02+03:00"
+    },
+    {
+      "path": "plugins/urlarch/README.md",
+      "decision": "五节同步组名唯一/PATCH/拖拽（round 102）",
+      "reason": "入口与路由补两个 PATCH 与建组 409；注意事项新增组名唯一（历史同名保留）、组排序按钮与规范化、条目拖拽只改 group_id 且不触发启动、失败无乐观残留；错误码表补 GROUP_NAME_CONFLICT/SORT_ORDER_INVALID/INVALID_REQUEST。",
+      "status": "done",
+      "round": 102,
+      "at": "2026-11-01T19:25:02+03:00"
+    },
+    {
+      "path": "plugins/urlarch/INFO.md",
+      "decision": "注意事项补组名唯一与拖拽（round 102）",
+      "reason": "新增一条：组名唯一（同名 409）、组用按钮上下移调序（持久化）、条目可拖拽到其他组（只改 group_id、不触发启动）；front matter 9 项与 source=local / market_package=false / tables 5 表不变。",
+      "status": "done",
+      "round": 102,
+      "at": "2026-11-01T19:25:02+03:00"
+    },
+    {
+      "path": "docs/appendix/file_navigation.json",
+      "decision": "登记 round 102（组名去重 + PATCH + 拖拽改组）",
+      "reason": "追加 8 条 decided 并 round→102、generated_at 更新；pending 保留既有 1 条（round 67–94 的 28 条非文件占位待清理）；resolved 45 条不动；file_navigation.md 由生成器重生成。安全用例 4.1–4.5 全 PASS（API 23/23 + 浏览器 10/10）；真实库核实：1 个组（无同名）、2 条白名单均未分组，本轮未改真实库、未跑 migrate。本轮无背景库数据。",
+      "status": "done",
+      "round": 102,
+      "at": "2026-11-01T19:25:02+03:00"
+    },
     {
       "path": "plugins/urlarch/schema.sql",
       "decision": "新增 urlarch_shortcut_groups 表 + urlarch_shortcuts.group_id 列（round 101）",

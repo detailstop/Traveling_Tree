@@ -2,9 +2,9 @@
 
 > 只读摘要，勿手改。本文件由 docs/appendix/file_navigation.json 生成；结构与去留决定以 JSON 为准。
 
-- 生成时间：2026-11-01T18:38:15+03:00
-- 轮次：101
-- 待办：1 条；已决定：653 条
+- 生成时间：2026-11-01T19:25:02+03:00
+- 轮次：102
+- 待办：1 条；已决定：661 条
 
 ## 待办
 
@@ -16,6 +16,14 @@
 
 | 路径 | 决定 | 原因 | 状态 | 轮次 | 时间 | 备份路径 |
 | --- | --- | --- | --- | --- | --- | --- |
+| plugins/urlarch/repo.py | 组名唯一 + 组/条目 PATCH 的 SQL 层（round 102） | create_shortcut_group 与新增 update_shortcut_group 在 BEGIN IMMEDIATE 内查同名（排除自身），冲突抛 GroupNameConflict → 409；update_shortcut_group 只更新 name/sort_order 并同步 live_json/updated_at（raw 保留建组快照）；set_shortcut_group 只改 group_id 并刷新 live_json/updated_at，不动 path/args/name/hotkey。 | done | 102 | 2026-11-01T19:25:02+03:00 |  |
+| plugins/urlarch/backend.py | 新增两个 PATCH 路由与错误码（round 102） | PATCH /shortcut-groups/<id> 仅接受 name/sort_order（至少一项，否则 INVALID_REQUEST）；PATCH /shortcuts/<id> 只接受 group_id 并忽略 path/args/name/hotkey/cmd，不触发启动；错误码新增 GROUP_NAME_CONFLICT(409)/SORT_ORDER_INVALID(400)/INVALID_REQUEST(400)；POST 建组同名同样 409。 | done | 102 | 2026-11-01T19:25:02+03:00 |  |
+| plugins/urlarch/security.py | 新增严格 sort_order 校验（round 102） | validate_sort_order_strict：仅接受 -10000~10000 的整数（布尔/浮点/字符串/越界 → SORT_ORDER_INVALID 400）；既有 validate_group_name（GROUP_NAME_INVALID）复用于新建与改名；路径/参数校验未变。 | done | 102 | 2026-11-01T19:25:02+03:00 |  |
+| plugins/urlarch/feature.js | 组改名/上下移/条目拖拽改组（round 102） | 组标题栏加 ✏️/↑/↓/🗑️（首组 ↑、末组 ↓ 置灰）；改名走 prompt + PATCH，冲突 toast「组名已存在」并以服务端名恢复；调序按相邻交换并把 sort_order 规范化为 index*10 后逐个 PATCH（刷新保持）；条目行 draggable，拖到组容器（含未分组）后 PATCH 只改 group_id，拖后 400ms 抑制点击避免误启动，失败重新拉取无乐观残留；新增 uaPatch 直连 fetch（宿主 api() 在有 body 时强制 POST）并给 GET 加时间戳绕开缓存。 | done | 102 | 2026-11-01T19:25:02+03:00 |  |
+| plugins/urlarch/plugin.css | 拖拽与禁用按钮样式（round 102） | .ua-sc-row.dragging 半透明、.ua-sg.dragover 高亮描边、.ua-group-ops .mini-btn[disabled] 置灰不可点；仍限 .ua-* 命名空间。 | done | 102 | 2026-11-01T19:25:02+03:00 |  |
+| plugins/urlarch/README.md | 五节同步组名唯一/PATCH/拖拽（round 102） | 入口与路由补两个 PATCH 与建组 409；注意事项新增组名唯一（历史同名保留）、组排序按钮与规范化、条目拖拽只改 group_id 且不触发启动、失败无乐观残留；错误码表补 GROUP_NAME_CONFLICT/SORT_ORDER_INVALID/INVALID_REQUEST。 | done | 102 | 2026-11-01T19:25:02+03:00 |  |
+| plugins/urlarch/INFO.md | 注意事项补组名唯一与拖拽（round 102） | 新增一条：组名唯一（同名 409）、组用按钮上下移调序（持久化）、条目可拖拽到其他组（只改 group_id、不触发启动）；front matter 9 项与 source=local / market_package=false / tables 5 表不变。 | done | 102 | 2026-11-01T19:25:02+03:00 |  |
+| docs/appendix/file_navigation.json | 登记 round 102（组名去重 + PATCH + 拖拽改组） | 追加 8 条 decided 并 round→102、generated_at 更新；pending 保留既有 1 条（round 67–94 的 28 条非文件占位待清理）；resolved 45 条不动；file_navigation.md 由生成器重生成。安全用例 4.1–4.5 全 PASS（API 23/23 + 浏览器 10/10）；真实库核实：1 个组（无同名）、2 条白名单均未分组，本轮未改真实库、未跑 migrate。本轮无背景库数据。 | done | 102 | 2026-11-01T19:25:02+03:00 |  |
 | plugins/urlarch/schema.sql | 新增 urlarch_shortcut_groups 表 + urlarch_shortcuts.group_id 列（round 101） | 组别表：id/name/sort_order/raw_json/live_json/created_at/updated_at + 索引 idx_urlarch_shortcut_groups_sort(sort_order)；白名单加 group_id TEXT NOT NULL DEFAULT ''（空串=未分组）；未删除既有列（args/hotkey 保留），未改动旧三表。 | done | 101 | 2026-11-01T18:38:15+03:00 |  |
 | plugins/urlarch/migrate.py | 迁移补组别表与 group_id 列（round 101） | 新增 _ensure_shortcut_groups（缺表建表/缺列补列/索引/raw-live 回填）与 _ensure_shortcuts 的 group_id 补列（PRAGMA 检查 + ALTER，旧数据默认空串）；全部加性语句、末尾 commit、失败由 init_db 回滚。验证：真实库副本两次 migrate 幂等，旧三表（1/6/15 行）与 2 条旧白名单内容哈希不变、group_id 均为空串；schema.sql→migrate 启动路径同样通过。 | done | 101 | 2026-11-01T18:38:15+03:00 |  |
 | plugins/urlarch/repo.py | 组别 CRUD + 白名单 group_id 读写（round 101） | list/get/create 组别（id=ug_+16hex、raw/live 双写、显式列名）；白名单 SELECT/INSERT 增加 group_id；delete_shortcut_group 事务内删组并把组内条目 group_id 置空串、按当前列刷新 live_json（raw 保留登记快照），条目不删。 | done | 101 | 2026-11-01T18:38:15+03:00 |  |

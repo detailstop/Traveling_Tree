@@ -141,7 +141,30 @@ def delete_shortcut(shortcut_id: str) -> bool:
     return cur.rowcount > 0
 
 
+def set_shortcut_group(shortcut_id: str, group_id: str) -> dict | None:
+    """只改 group_id（拖拽改组）：刷新 live_json 与 updated_at，raw_json 保留登记快照。
+
+    不动 path/args/name/hotkey，也不触发任何启动逻辑。
+    """
+    row = get_shortcut(shortcut_id)
+    if row is None:
+        return None
+    payload = _shortcut_json(row["name"], row["path"], json.loads(row["args"] or "[]"),
+                             row["hotkey"], group_id)
+    conn = get_conn()
+    conn.execute(
+        "UPDATE urlarch_shortcuts SET group_id=?, live_json=?, updated_at=? WHERE id=?",
+        (group_id, payload, _now(), shortcut_id),
+    )
+    conn.commit()
+    return get_shortcut(shortcut_id)
+
+
 # ---------------- 软件快捷入口组别 ----------------
+
+class GroupNameConflict(Exception):
+    """同名组（由 backend 映射为 GROUP_NAME_CONFLICT 409）。"""
+
 
 def list_shortcut_groups() -> list[dict]:
     rows = get_conn().execute(
@@ -158,19 +181,77 @@ def get_shortcut_group(group_id: str) -> dict | None:
     return dict(row) if row else None
 
 
+def find_shortcut_group_by_name(name: str, exclude_id: str = "") -> dict | None:
+    row = get_conn().execute(
+        f"SELECT {_GROUP_COLS} FROM urlarch_shortcut_groups "
+        "WHERE name=? AND id<>? ORDER BY created_at, id LIMIT 1",
+        (name, exclude_id),
+    ).fetchone()
+    return dict(row) if row else None
+
+
 def create_shortcut_group(name: str, sort_order: int = 0) -> dict:
+    """新建组别：事务内查同名（历史同名数据保留，但不再新增重复）。"""
     conn = get_conn()
     now = _now()
     payload = _group_json(name, sort_order)
     group_id = "ug_" + secrets.token_hex(8)
-    conn.execute(
-        "INSERT INTO urlarch_shortcut_groups"
-        "(id,name,sort_order,raw_json,live_json,created_at,updated_at) "
-        "VALUES(?,?,?,?,?,?,?)",
-        (group_id, name, sort_order, payload, payload, now, now),
-    )
-    conn.commit()
+    conn.execute("BEGIN IMMEDIATE")
+    try:
+        if conn.execute("SELECT 1 FROM urlarch_shortcut_groups WHERE name=?",
+                        (name,)).fetchone():
+            conn.rollback()
+            raise GroupNameConflict(name)
+        conn.execute(
+            "INSERT INTO urlarch_shortcut_groups"
+            "(id,name,sort_order,raw_json,live_json,created_at,updated_at) "
+            "VALUES(?,?,?,?,?,?,?)",
+            (group_id, name, sort_order, payload, payload, now, now),
+        )
+        conn.commit()
+    except GroupNameConflict:
+        raise
+    except Exception:
+        conn.rollback()
+        raise
     return get_shortcut_group(group_id) or {}
+
+
+def update_shortcut_group(group_id: str, name: str | None = None,
+                          sort_order: int | None = None) -> dict | None:
+    """改名 / 改排序：只更新指定列，同步 live_json 与 updated_at；raw_json 保留建组快照。"""
+    conn = get_conn()
+    conn.execute("BEGIN IMMEDIATE")
+    try:
+        row = conn.execute(
+            f"SELECT {_GROUP_COLS} FROM urlarch_shortcut_groups WHERE id=?", (group_id,)
+        ).fetchone()
+        if row is None:
+            conn.rollback()
+            return None
+        new_name = row["name"] if name is None else name
+        new_sort = row["sort_order"] if sort_order is None else sort_order
+        if name is not None:
+            clash = conn.execute(
+                "SELECT 1 FROM urlarch_shortcut_groups WHERE name=? AND id<>?",
+                (new_name, group_id),
+            ).fetchone()
+            if clash:
+                conn.rollback()
+                raise GroupNameConflict(new_name)
+        payload = _group_json(new_name, new_sort)
+        conn.execute(
+            "UPDATE urlarch_shortcut_groups "
+            "SET name=?, sort_order=?, live_json=?, updated_at=? WHERE id=?",
+            (new_name, new_sort, payload, _now(), group_id),
+        )
+        conn.commit()
+    except GroupNameConflict:
+        raise
+    except Exception:
+        conn.rollback()
+        raise
+    return get_shortcut_group(group_id)
 
 
 def delete_shortcut_group(group_id: str) -> bool:

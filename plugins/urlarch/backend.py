@@ -87,8 +87,55 @@ def _create_group(body: dict) -> dict:
         sort_order = security.validate_sort_order(body.get("sort_order"))
     except security.ShortcutError as exc:
         return _err(exc.code, exc.message, 400)
-    row = repo.create_shortcut_group(name, sort_order)
+    try:
+        row = repo.create_shortcut_group(name, sort_order)
+    except repo.GroupNameConflict:
+        return _err("GROUP_NAME_CONFLICT", "组名已存在，请换一个", 409)
     return {"ok": True, "item": _public_group(row)}
+
+
+def _patch_group(group_id: str, body: dict) -> dict:
+    """改名 / 调序：只接受 name 与 sort_order，其余字段忽略；组名唯一（排除自身）。"""
+    if not security.valid_group_id(group_id):
+        return _err("GROUP_NOT_FOUND", "组别不存在", 404)
+    has_name = "name" in body
+    has_sort = "sort_order" in body
+    if not has_name and not has_sort:
+        return _err("INVALID_REQUEST", "至少提供 name 或 sort_order", 400)
+    name = None
+    sort_order = None
+    try:
+        if has_name:
+            name = security.validate_group_name(body.get("name"))
+        if has_sort:
+            sort_order = security.validate_sort_order_strict(body.get("sort_order"))
+    except security.ShortcutError as exc:
+        return _err(exc.code, exc.message, 400)
+    try:
+        row = repo.update_shortcut_group(group_id, name=name, sort_order=sort_order)
+    except repo.GroupNameConflict:
+        return _err("GROUP_NAME_CONFLICT", "组名已存在，请换一个", 409)
+    if row is None:
+        return _err("GROUP_NOT_FOUND", "组别不存在", 404)
+    return {"ok": True, "item": _public_group(row)}
+
+
+def _patch_shortcut(shortcut_id: str, body: dict) -> dict:
+    """只改 group_id（拖拽改组）：忽略 path/args/name/hotkey/cmd 等任何其他字段。"""
+    if not security.valid_id(shortcut_id):
+        return _err("SHORTCUT_NOT_FOUND", "白名单中找不到该条目", 404)
+    if "group_id" not in body:
+        return _err("INVALID_REQUEST", "只接受 group_id", 400)
+    group_id = body.get("group_id") or ""
+    if not isinstance(group_id, str):
+        return _err("GROUP_NOT_FOUND", "group_id 必须是字符串", 404)
+    group_id = group_id.strip()
+    if group_id and repo.get_shortcut_group(group_id) is None:
+        return _err("GROUP_NOT_FOUND", "组别不存在", 404)
+    row = repo.set_shortcut_group(shortcut_id, group_id)
+    if row is None:
+        return _err("SHORTCUT_NOT_FOUND", "白名单中找不到该条目", 404)
+    return {"ok": True, "item": _public(row)}
 
 
 def _delete_group(group_id: str) -> dict:
@@ -135,6 +182,8 @@ def _dispatch(method: str, subpath: str, query: dict, body: dict) -> dict:
     if len(parts) == 2 and parts[0] == "shortcuts":
         if method == "DELETE":
             return _delete_shortcut(parts[1])
+        if method == "PATCH":
+            return _patch_shortcut(parts[1], body)
         return _err("method_not_allowed", "", 405)
     if parts == ["shortcut-groups"]:
         if method == "GET":
@@ -145,6 +194,8 @@ def _dispatch(method: str, subpath: str, query: dict, body: dict) -> dict:
     if len(parts) == 2 and parts[0] == "shortcut-groups":
         if method == "DELETE":
             return _delete_group(parts[1])
+        if method == "PATCH":
+            return _patch_group(parts[1], body)
         return _err("method_not_allowed", "", 405)
     if parts == ["launch"]:
         if method == "POST":

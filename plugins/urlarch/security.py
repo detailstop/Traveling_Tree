@@ -150,7 +150,7 @@ def validate_group_name(raw) -> str:
 
 
 def validate_sort_order(raw) -> int:
-    """排序值可选：非整数按 0 处理，范围 0–9999。"""
+    """排序值可选：非整数按 0 处理，范围 0–9999（新建组用）。"""
     if raw is None or raw == "":
         return 0
     try:
@@ -158,6 +158,15 @@ def validate_sort_order(raw) -> int:
     except (TypeError, ValueError):
         return 0
     return max(0, min(9999, value))
+
+
+def validate_sort_order_strict(raw) -> int:
+    """PATCH 调序用：必须是 -10000~10000 的整数，否则 SORT_ORDER_INVALID(400)。"""
+    if isinstance(raw, bool) or not isinstance(raw, int):
+        raise ShortcutError("SORT_ORDER_INVALID", "sort_order 必须是整数")
+    if raw < -10000 or raw > 10000:
+        raise ShortcutError("SORT_ORDER_INVALID", "sort_order 需在 -10000~10000 之间")
+    return raw
 
 
 def valid_id(raw) -> bool:

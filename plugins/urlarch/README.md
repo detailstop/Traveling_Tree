@@ -10,9 +10,9 @@
 - 子路径：
   - `state`（GET 读 / PUT、POST 写网址库）
   - `shortcuts`（GET 列表 / POST 登记，入口自 `urlarch_shortcuts`；POST 可选 `group_id`）
-  - `shortcuts/<id>`（DELETE 只删登记，不卸载软件）
-  - `shortcut-groups`（GET 列表 / POST 新建，按 `sort_order` 排序）
-  - `shortcut-groups/<id>`（DELETE 删组，组内条目 `group_id` 置空串、条目不删）
+  - `shortcuts/<id>`（DELETE 只删登记，不卸载软件；PATCH **只接受** `group_id`，用于拖动改组）
+  - `shortcut-groups`（GET 列表 / POST 新建，按 `sort_order` 排序；同名新建 409）
+  - `shortcut-groups/<id>`（DELETE 删组，组内条目 `group_id` 置空串、条目不删；PATCH 接受 `name`/`sort_order`）
   - `launch`（POST，请求体只接受 `{"id": "<白名单id>"}`）
 
 ## 数据表
@@ -37,11 +37,14 @@
 - 数据落在本机 SQLite（`data/` 下），不进 Git、不写成 `data/` 下的 JSON 配置、不放在 `plugins/` 目录；白名单属用户登记数据，不可重建，故保留 `raw_json`+`live_json` 双列。
 - 迁移：`manifest.db.migrate` → `migrate.py`；缺表时建表、缺列时补列、缺 `raw`/`live` 时按行回填，全部加性语句，连跑两次无变更（旧库三表数据不变）。
 - round 99/100/101 R4 启动能力（**白名单注册制 + 组别列表 + 点击启动**）：只启动 `urlarch_shortcuts` 内已登记的软件。页面内「🚀 软件快捷入口」按组列出条目（名称 + 完整绝对路径），点击行 → `POST /launch`，入参只有 `{"id": ...}`；行右侧 ✕ 只删登记、不卸载软件。这是页面内入口，**不是键盘热键、不是系统桌面快捷方式**，不注册任何 keydown 监听、不创建 `.lnk`、不写桌面/开始菜单。
-- 软件入口组别（round 101）：组标题栏可点击收起 / 展开（▾ 旋转为 ▸），复用网址组的折叠样式与交互；折叠状态只存页面会话内存（`feature.js` 内的 Set，按组 id，含「未分组」虚拟组），刷新恢复默认展开、不落库、不用 localStorage；多组互不影响。删除组时组内条目 `group_id` 置空串移到「未分组」，条目不删。
+- 软件入口组别（round 101/102）：组标题栏可点击收起 / 展开（▾ 旋转为 ▸），复用网址组的折叠样式与交互；折叠状态只存页面会话内存（`feature.js` 内的 Set，按组 id，含「未分组」虚拟组），刷新恢复默认展开、不落库、不用 localStorage；多组互不影响。删除组时组内条目 `group_id` 置空串移到「未分组」，条目不删。
+- 组名唯一（round 102）：新建 / 改名时事务内查同名（排除自身），冲突返回 `GROUP_NAME_CONFLICT`(409)，前端提示“组名已存在”并恢复服务端名称；**历史已存在的同名组保留不改**（本轮不做数据清理）。
+- 组排序（round 102）：用 ✏️ / ↑ / ↓ / 🗑️ 按钮管理，不做组拖拽；↑/↓ 按相邻交换并把全部组的 `sort_order` 规范化为 `index*10` 后逐个 `PATCH`，首组 ↑、末组 ↓ 置灰禁用；排序持久化，刷新保持。
+- 条目拖拽改组（round 102）：条目行 `draggable`，拖到任意组容器（含「未分组」）后 `PATCH /shortcuts/<id>` **只改 `group_id`**；不重新校验 path/args、不触发启动；拖动结束会短暂抑制点击，避免误启动；失败 toast 并重新拉取服务端状态（无乐观残留）。目标组若处于折叠态保持折叠，拖动不改折叠状态。
 - 参数输入已移除（round 101）：前端不再有「参数 JSON 数组」输入框，新增条目请求体不含 `args`，后端默认写 `'[]'`；`args` 列保留（历史数据不删），API 对显式传入的 `args` 仍走同一套校验（`ARGS_INVALID`）。
 - 启动请求只接受白名单 `id`：`path`/`args` 一律由后端按 id 查表得到；请求体里出现的 `path`、`args`、`cmd` 等字段一律忽略。启动用 `subprocess.Popen([path] + args, shell=False)`，不拼命令字符串、不经 shell、不等待进程结束。
 - 路径校验：必须绝对路径 + 真实存在的普通文件，拒绝 `..`、UNC 网络路径与控制字符；扩展名黑名单显式拦截脚本/快捷方式/安装包类（`.bat`、`.cmd`、`.lnk`、`.ps1`、`.vbs`、`.js`、`.wsf`、`.msi`、`.scr`、`.com`、`.reg`、`.py`、`.sh` 等，返回 `PATH_EXT_BLOCKED`）。**不使用“任意路径 + 扩展名白名单”**。
 - 参数校验：显式传入的 `args` 必须是 JSON 字符串数组，≤20 项、单项 ≤200 字符、总长 ≤1000；含 `;`、`&&`、`||`、`|`、`>`、`<`、反引号、`$(`、换行等 shell 元字符一律拒绝（`ARGS_INVALID`）。
 - `hotkey` 列（R3 建表遗留）：**可选且不参与任何逻辑**——不校验组合格式、不检查冲突、可为空；仅为兼容旧数据保留，快捷入口一律靠点击触发。同一 `path` **允许重复登记**（同一程序可挂不同参数或不同入口名），不设 `PATH_DUPLICATE`。
-- 稳定错误码：`SHORTCUT_NOT_FOUND`(404)、`GROUP_NOT_FOUND`(404)、`PATH_INVALID`、`PATH_EXT_BLOCKED`、`ARGS_INVALID`、`NAME_INVALID`、`GROUP_NAME_INVALID`、`HOTKEY_INVALID`(400，仅 hotkey 类型/长度/控制字符的基础清洗)、`LAUNCH_FAILED`(500)、`METHOD_NOT_ALLOWED`(405)、`INTERNAL_ERROR`(500)；失败不启动、不静默、不向宿主抛 Traceback。
+- 稳定错误码：`SHORTCUT_NOT_FOUND`(404)、`GROUP_NOT_FOUND`(404)、`GROUP_NAME_CONFLICT`(409)、`PATH_INVALID`、`PATH_EXT_BLOCKED`、`ARGS_INVALID`、`NAME_INVALID`、`GROUP_NAME_INVALID`、`SORT_ORDER_INVALID`、`INVALID_REQUEST`、`HOTKEY_INVALID`(400，仅 hotkey 类型/长度/控制字符的基础清洗)、`LAUNCH_FAILED`(500)、`METHOD_NOT_ALLOWED`(405)、`INTERNAL_ERROR`(500)；失败不启动、不静默、不向宿主抛 Traceback。
 - 安全边界：宿主只监听 `127.0.0.1`，但**不要**把服务暴露到 `0.0.0.0`；本接口不做“请求来自 localhost”的可信假设，安全完全依赖白名单注册制 + 参数校验 + `shell=False`。白名单只在本机 `data/` 库内，不进 Git。

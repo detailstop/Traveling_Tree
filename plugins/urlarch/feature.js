@@ -16,6 +16,9 @@ const UA_ERR_TEXT = {
   NAME_INVALID: '名称不合法（1–64 字符）',
   GROUP_NOT_FOUND: '组别不存在（可能已被删除）',
   GROUP_NAME_INVALID: '组名不合法（1–64 字符）',
+  GROUP_NAME_CONFLICT: '组名已存在，请换一个',
+  SORT_ORDER_INVALID: '排序值不合法（需 -10000~10000 的整数）',
+  INVALID_REQUEST: '请求缺少必要字段',
   LAUNCH_FAILED: '启动失败：进程创建被拒绝或系统报错',
   INTERNAL_ERROR: '后端内部错误，未启动',
   METHOD_NOT_ALLOWED: '请求方式不被支持',
@@ -25,12 +28,16 @@ let uaShortcuts = [];
 let uaShortcutGroups = [];
 // 软件入口组别的折叠状态：仅页面会话内存（刷新恢复默认展开），多组互不影响。
 const uaCollapsedShortcutGroups = new Set();
+// 拖拽状态：仅内存；拖动结束后短暂抑制点击，避免“拖动结束误触发启动”。
+let uaDraggingShortcutId = '';
+let uaSuppressRowClickUntil = 0;
 function uaShortcutHint(code) {
   return UA_ERR_TEXT[code] || ('操作失败：' + (code || '未知错误'));
 }
 async function uaFetchShortcuts() {
   try {
-    const d = await api('/api/plugin/urlarch/shortcuts');
+    // 加时间戳绕过宿主 api() 的 GET 缓存，保证 PATCH 后拿到服务端真实状态。
+    const d = await api('/api/plugin/urlarch/shortcuts?t=' + Date.now());
     return Array.isArray(d && d.items) ? d.items : [];
   } catch (e) {
     return [];
@@ -38,11 +45,25 @@ async function uaFetchShortcuts() {
 }
 async function uaFetchShortcutGroups() {
   try {
-    const d = await api('/api/plugin/urlarch/shortcut-groups');
+    const d = await api('/api/plugin/urlarch/shortcut-groups?t=' + Date.now());
     return Array.isArray(d && d.items) ? d.items : [];
   } catch (e) {
     return [];
   }
+}
+// 宿主的 api() 在有 body 时会强制 POST，PATCH 只能直连 fetch；错误码仍按同一约定抛出。
+async function uaPatch(path, body) {
+  const res = await fetch(path, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  let data = null;
+  try { data = await res.json(); } catch (e) { /* 非 JSON */ }
+  if (!res.ok || (data && data.ok === false)) {
+    throw new Error((data && data.error) || ('请求失败 ' + res.status));
+  }
+  return data;
 }
 
 const UA_DEFAULT_GROUP = 'ungrouped';
@@ -390,7 +411,7 @@ async function renderUrlArchTool() {
     }
   };
   const shortcutRowHTML = item => `
-    <div class="ua-sc-row" data-sc-launch="${esc(item.id)}" role="button" tabindex="0" title="点击启动 ${esc(item.name)}">
+    <div class="ua-sc-row" data-sc-launch="${esc(item.id)}" draggable="true" role="button" tabindex="0" title="点击启动 ${esc(item.name)}；可拖到其他组">
       <span class="ua-sc-name">${esc(item.name)}</span>
       <span class="ua-sc-path">${esc(item.path)}</span>
       <button class="mini-btn danger ua-sc-del" data-sc-del="${esc(item.id)}" title="从白名单删除（不卸载软件）">✕</button>
@@ -424,18 +445,23 @@ async function renderUrlArchTool() {
       sel.innerHTML = groups.map(g => `<option value="${esc(g.id)}">${esc(g.name)}</option>`).join('');
       if (groups.some(g => g.id === cur)) sel.value = cur;
     }
-    box.innerHTML = groups.map(g => {
+    box.innerHTML = groups.map((g, idx) => {
       const rows = uaShortcuts.filter(x => (x.group_id || '') === g.id);
       const folded = uaCollapsedShortcutGroups.has(g.id);
-      const del = g.id
-        ? `<span class="ua-group-ops"><button class="mini-btn danger" data-sg-del="${esc(g.id)}" title="删除组（组内软件移到未分组）">🗑️</button></span>`
+      const ops = g.id
+        ? `<span class="ua-group-ops">
+             <button class="mini-btn" data-sg-rename="${esc(g.id)}" title="重命名组">✏️</button>
+             <button class="mini-btn" data-sg-up="${esc(g.id)}" title="上移" ${idx <= 1 ? 'disabled' : ''}>↑</button>
+             <button class="mini-btn" data-sg-down="${esc(g.id)}" title="下移" ${idx >= groups.length - 1 ? 'disabled' : ''}>↓</button>
+             <button class="mini-btn danger" data-sg-del="${esc(g.id)}" title="删除组（组内软件移到未分组）">🗑️</button>
+           </span>`
         : '';
       return `<section class="ua-group ua-sg${folded ? ' collapsed' : ''}" data-sgid="${esc(g.id)}">
         <div class="ua-group-head" data-sghead="${esc(g.id)}">
           <button type="button" class="ua-caret" data-sg-toggle="${esc(g.id)}" aria-expanded="${folded ? 'false' : 'true'}" aria-label="${folded ? '展开组别' : '收起组别'}" title="${folded ? '展开' : '收起'}">▾</button>
           <b>${esc(g.name)}</b>
           <span class="ua-count">${rows.length} 项</span>
-          ${del}
+          ${ops}
         </div>
         <div class="ua-items ua-sg-items">${rows.map(shortcutRowHTML).join('') || '<div class="ua-empty">该组暂无软件</div>'}</div>
       </section>`;
@@ -449,10 +475,14 @@ async function renderUrlArchTool() {
       if (e.target.closest('button,a,input,select,textarea,label')) return;
       toggleShortcutGroup(head.dataset.sghead);
     });
+    box.querySelectorAll('[data-sg-rename]').forEach(btn => btn.onclick = () => renameShortcutGroup(btn.dataset.sgRename));
+    box.querySelectorAll('[data-sg-up]').forEach(btn => btn.onclick = () => moveShortcutGroup(btn.dataset.sgUp, -1));
+    box.querySelectorAll('[data-sg-down]').forEach(btn => btn.onclick = () => moveShortcutGroup(btn.dataset.sgDown, 1));
     box.querySelectorAll('[data-sg-del]').forEach(btn => btn.onclick = () => removeShortcutGroup(btn.dataset.sgDel));
     box.querySelectorAll('[data-sc-launch]').forEach(row => {
       row.onclick = e => {
         if (e.target.closest('[data-sc-del]')) return;
+        if (Date.now() < uaSuppressRowClickUntil) return; // 拖动结束不触发启动
         launchShortcut(row.dataset.scLaunch);
       };
       // 回车/空格等同点击（可访问性），不是全局键盘快捷键。
@@ -462,8 +492,106 @@ async function renderUrlArchTool() {
           launchShortcut(row.dataset.scLaunch);
         }
       };
+      row.ondragstart = e => {
+        uaDraggingShortcutId = row.dataset.scLaunch;
+        row.classList.add('dragging');
+        try {
+          e.dataTransfer.effectAllowed = 'move';
+          e.dataTransfer.setData('text/plain', row.dataset.scLaunch);
+        } catch (err) { /* 某些环境无 dataTransfer */ }
+      };
+      row.ondragend = () => {
+        uaDraggingShortcutId = '';
+        uaSuppressRowClickUntil = Date.now() + 400;
+        row.classList.remove('dragging');
+        box.querySelectorAll('.ua-sg.dragover').forEach(s => s.classList.remove('dragover'));
+      };
+    });
+    // 组容器作为放置目标（「未分组」同样合法）
+    box.querySelectorAll('.ua-sg').forEach(sec => {
+      sec.ondragover = e => {
+        if (!uaDraggingShortcutId) return;
+        e.preventDefault();
+        try { e.dataTransfer.dropEffect = 'move'; } catch (err) { /* 忽略 */ }
+        sec.classList.add('dragover');
+      };
+      sec.ondragleave = e => {
+        if (e.relatedTarget && sec.contains(e.relatedTarget)) return;
+        sec.classList.remove('dragover');
+      };
+      sec.ondrop = e => {
+        e.preventDefault();
+        sec.classList.remove('dragover');
+        const sid = uaDraggingShortcutId || (e.dataTransfer && e.dataTransfer.getData('text/plain')) || '';
+        uaDraggingShortcutId = '';
+        uaSuppressRowClickUntil = Date.now() + 400;
+        const target = sec.dataset.sgid || '';
+        const item = uaShortcuts.find(x => x.id === sid);
+        if (!item || (item.group_id || '') === target) return;
+        moveShortcutToGroup(sid, target);
+      };
     });
     box.querySelectorAll('[data-sc-del]').forEach(btn => btn.onclick = () => removeShortcut(btn.dataset.scDel));
+  };
+  const moveShortcutToGroup = async (id, groupId) => {
+    try {
+      await uaPatch('/api/plugin/urlarch/shortcuts/' + encodeURIComponent(id),
+        { group_id: groupId });
+      uaShortcuts = await uaFetchShortcuts();
+      renderShortcuts();
+      toast(groupId ? '已移到目标组 ✓' : '已移到未分组 ✓', 'success', 2200);
+    } catch (err) {
+      toast(uaShortcutHint(err && err.message), 'warn', 4600);
+      // 失败不做乐观残留：重新拉取服务端真实状态
+      uaShortcuts = await uaFetchShortcuts();
+      renderShortcuts();
+    }
+  };
+  const renameShortcutGroup = async gid => {
+    const g = uaShortcutGroups.find(x => x.id === gid);
+    if (!g) return;
+    const input = prompt('重命名组别', g.name);
+    if (input === null) return;
+    const text = String(input).trim();
+    if (!text) { toast('组名不能为空', 'warn'); return; }
+    if (text === g.name) return;
+    try {
+      await uaPatch('/api/plugin/urlarch/shortcut-groups/' + encodeURIComponent(gid),
+        { name: text });
+      uaShortcutGroups = await uaFetchShortcutGroups();
+      renderShortcuts();
+      toast('组名已更新 ✓', 'success');
+    } catch (err) {
+      toast(uaShortcutHint(err && err.message), 'warn', 4600);
+      uaShortcutGroups = await uaFetchShortcutGroups();
+      renderShortcuts();
+    }
+  };
+  const moveShortcutGroup = async (gid, dir) => {
+    const ordered = uaShortcutGroups.slice();
+    const i = ordered.findIndex(g => g.id === gid);
+    const j = i + dir;
+    if (i < 0 || j < 0 || j >= ordered.length) return;
+    const [moved] = ordered.splice(i, 1);
+    ordered.splice(j, 0, moved);
+    // 规范化 sort_order = index*10，保证顺序稳定（只提交有变化的组）
+    const updates = ordered.map((g, idx) => ({ id: g.id, sort_order: idx * 10 }))
+      .filter(u => {
+        const cur = uaShortcutGroups.find(g => g.id === u.id);
+        return !cur || cur.sort_order !== u.sort_order;
+      });
+    try {
+      for (const u of updates) {
+        await uaPatch('/api/plugin/urlarch/shortcut-groups/' + encodeURIComponent(u.id),
+          { sort_order: u.sort_order });
+      }
+      uaShortcutGroups = await uaFetchShortcutGroups();
+      renderShortcuts();
+    } catch (err) {
+      toast(uaShortcutHint(err && err.message), 'warn', 4600);
+      uaShortcutGroups = await uaFetchShortcutGroups();
+      renderShortcuts();
+    }
   };
   const removeShortcut = async id => {
     if (!confirm('从白名单删除该软件？（只删登记，不卸载软件）')) return;
