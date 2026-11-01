@@ -53,11 +53,10 @@ def expect_error(name: str, fn, code: str) -> None:
 
 
 def main() -> int:
-    real_zip = ROOT / "market" / "packages" / "sim.zip"
-    if not real_zip.is_file():
-        print("FAIL 缺少 market/packages/sim.zip，请先运行 tools/build_market_packages.py")
-        return 1
-    good_zip = real_zip.read_bytes()
+    good_manifest = json.dumps(
+        {"id": "sim", "name": "随机模拟器", "version": "1.0", "desc": "临时包"}).encode()
+    good_zip = make_zip({"manifest.json": good_manifest, "feature.js": b"",
+                         "plugin.css": b"", "README.md": b""})
     sim_manifest = json.loads((ROOT / "market" / "sources" / "sim" / "manifest.json").read_text(encoding="utf-8"))
     entry = {
         "id": "sim", "name": sim_manifest.get("name") or "随机模拟器",
@@ -79,7 +78,6 @@ def main() -> int:
     packages.mkdir(parents=True)
     (packages / "sim.zip").write_bytes(good_zip)
 
-    good_manifest = (ROOT / "market" / "sources" / "sim" / "manifest.json").read_bytes()
     malicious = {
         "traversal": make_zip({"manifest.json": good_manifest, "../evil.txt": b"x"}),
         "absolute": make_zip({"manifest.json": good_manifest, "/abs.txt": b"x"}),
@@ -132,7 +130,17 @@ def main() -> int:
     backend.index_store.template_path = lambda: market / "index.json"
     backend._record = lambda *a, **k: None
     backend._records = lambda: {}
-    (market / "index.json").write_text(json.dumps({"version": 1, "packages": [entry]}), encoding="utf-8")
+    guard_entries = [entry,
+                     dict(entry, id="needpkg", file="missing.zip", download_url="", package_ready=True),
+                     dict(entry, id="notready", file="sim.zip", package_ready=False)]
+    (market / "index.json").write_text(
+        json.dumps({"version": 1, "packages": guard_entries}), encoding="utf-8")
+    check("download_url 为空报包地址未配置",
+          backend.handle("POST", "/install", {}, {"id": "needpkg"}).get("error")
+          == "package_url_missing")
+    check("package_ready=false 拒绝安装",
+          backend.handle("POST", "/install", {}, {"id": "notready"}).get("error")
+          == "package_not_ready")
 
     demo = plugins / "testdemo"
     demo.mkdir()

@@ -17,7 +17,7 @@ provides: [market]
 consumes: []
 market_package: false
 source: local
-known_limits: 
+known_limits: zip 不进 Git，需 Release 上传后 download_url 才可用 
 sensitive_data: []
 ---
 # 插件市场 信息卡

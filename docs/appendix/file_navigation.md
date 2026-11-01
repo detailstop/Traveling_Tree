@@ -2,9 +2,9 @@
 
 > 只读摘要，勿手改。本文件由 docs/appendix/file_navigation.json 生成；结构与去留决定以 JSON 为准。
 
-- 生成时间：2026-11-01T01:04:03+03:00
-- 轮次：89
-- 待办：0 条；已决定：574 条
+- 生成时间：2026-11-01T14:00:52+03:00
+- 轮次：90
+- 待办：0 条；已决定：583 条
 
 ## 待办
 
@@ -15,6 +15,15 @@
 
 | 路径 | 决定 | 原因 | 状态 | 轮次 | 时间 | 备份路径 |
 | --- | --- | --- | --- | --- | --- | --- |
+| tools/build_market_packages.py | 打包脚本支持 18 插件/排除/校验/回填运行态（round 90） | 17 个 plugins + sim 源；排除 __pycache__/*.pyc/.git/data/*.zip/*.tmp/.trash；现算 sha256/size/file；校验 zip 无路径穿越/排除目录；回填 data/plugins/market/index.json，不写 market/index.json；补包不升版。 | done | 90 | 2026-11-01T14:00:52+03:00 |  |
+| market/packages/ | 18 个非预置插件 zip 已生成（round 90） | 18 个 zip 生成并通过内容校验；zip 不进 Git，待用户上传 GitHub Release；`market/index.json` 保持 5 条模板。 | done | 90 | 2026-11-01T14:00:52+03:00 |  |
+| data/plugins/market/index.json | 运行态 index 回填 18 条包级字段（round 90） | sha256/size/file/package_ready:true 18 条；download_url 保持空；文件绝对路径 C:\Users\WJL\Desktop\Traveling_Tree\data\plugins\market\index.json。 | done | 90 | 2026-11-01T14:00:52+03:00 |  |
+| plugins/*/INFO.md | 18 份 INFO market_package=true 与 known_limits（round 90） | 17 plugins + sim 源设 true；预置 5 份保持 false；known_limits 注明待上传 Release 与 download_url 为空报错；gen --check 通过。 | done | 90 | 2026-11-01T14:00:52+03:00 |  |
+| plugins/market/backend.py | 安装包未就绪/空地址明确报错（round 90） | package_ready=false → package_not_ready；本地包缺失且 download_url 为空 → package_url_missing（包地址未配置）；不静默、不改其他安装逻辑。 | done | 90 | 2026-11-01T14:00:52+03:00 |  |
+| tests/smoke_market.py | 市场测试改用临时包并补空地址/未就绪用例（round 90） | 不依赖真实 market/packages；42/42；克隆模拟移走 packages 后仍全过。 | done | 90 | 2026-11-01T14:00:52+03:00 |  |
+| tests/smoke_info_cards.py | INFO market_package 与运行态一致校验（round 90） | true 的 id 必须出现在运行态 package_ready=true 集合；运行态缺失时跳过；10/10。 | done | 90 | 2026-11-01T14:00:52+03:00 |  |
+| README.md | 文档补 18 包/Release/download_url 口径（round 90） | README §5/§6、白皮书 §7.5、守则 §3/§4、市场草案、INFO 模板、market README/INFO 同步；基线 996/997（market 42/42、info 10/10）。 | done | 90 | 2026-11-01T14:00:52+03:00 |  |
+| data/bg_import/::round90-none | 本次无背景库数据（round 90） | 用户未提供「项目优化与当前综述」导出 json；背景库不可用，本轮未执行 update 导入、未写背景库数据。 | done | 90 | 2026-11-01T14:00:52+03:00 |  |
 | plugins/market/feature.js | 修复拉取按钮初始置灰不再更新的时序缺陷（round 89） | 新增 syncRefreshButton() 统一设置 #mk-refresh 的 disabled/title；在 render 初始化、refresh（loadList 完成/失败）finally、拉取成功/失败 finally 调用；不改变拉取/校验/列表/开发插件逻辑。配置存在时按钮可点、为空置灰，拉取后状态同步。 | done | 89 | 2026-11-01T01:04:03+03:00 |  |
 | data/bg_import/::round89-none | 本次无背景库数据（round 89） | 用户未提供「项目优化与当前综述」导出 json；背景库不可用，本轮未执行 update 导入、未写背景库数据。 | done | 89 | 2026-11-01T01:04:03+03:00 |  |
 | market/index.json | market/index.json 改为 5 预置初始化模板（round 88） | 仅 5 预置；展示字段齐全，包级字段留空 + package_ready:false；作为克隆后运行态初值。 | done | 88 | 2026-11-01T00:43:56+03:00 |  |

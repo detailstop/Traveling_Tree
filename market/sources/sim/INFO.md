@@ -17,7 +17,7 @@ provides: []
 consumes: []
 market_package: true
 source: local
-known_limits: 
+known_limits: 包已生成，待上传 Release；download_url 为空时安装报“包地址未配置”
 sensitive_data: []
 ---
 # 随机模拟器 信息卡

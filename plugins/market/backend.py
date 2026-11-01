@@ -95,6 +95,8 @@ def _fetch_package(entry: dict) -> bytes:
         raise packaging.MarketError("bad_index", f"包文件名不合法：{file_name}")
     path = packages_dir() / file_name
     if not path.is_file():
+        if not str(entry.get("download_url") or "").strip():
+            raise packaging.MarketError("package_url_missing", "包地址未配置（download_url 为空且本地包缺失）")
         raise packaging.MarketError("package_missing", f"本地包不存在：{file_name}")
     return path.read_bytes()
 
@@ -208,6 +210,8 @@ def install(pid: str) -> dict:
                   if isinstance(p, dict) and str(p.get("id")) == pid), None)
     if entry is None:
         return {"ok": False, "error": "no_package", "message": "index.json 中没有该插件包"}
+    if not entry.get("package_ready"):
+        return {"ok": False, "error": "package_not_ready", "message": "包未就绪（package_ready=false）"}
     try:
         data = _fetch_package(entry)
         manifest = packaging.install_package(

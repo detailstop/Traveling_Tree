@@ -23,6 +23,7 @@
 - `market/index.json`（只读）、`market/packages/*.zip`（A 阶段本地包，不进 Git）
 - 预置插件：`market`、`cobuild`、`webchat`、`tts`、`pixel_art`
 - 插件源码试点：`market/sources/sim/`（进 Git，zip 由脚本生成）
+- 本地包：`market/packages/<id>.zip`（18 个非预置已生成；不进 Git；补包不升版；上传 Release 后回填 `download_url`；为空时安装报“包地址未配置”）
 
 ## 拉取最新插件
 - 运行态：`data/plugins/market/index.json`；首次请求若缺失，从 `market/index.json`（5 条预置模板）复制，已有不覆盖。

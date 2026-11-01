@@ -108,10 +108,10 @@ live_json TEXT NOT NULL DEFAULT '' -- 当前编辑状态
 | smoke_plugin_module_off.py | 模块关闭 503/不建表 | 10/10 |
 | smoke_plugins.py | manifest/清单/静态资源/后端 | 183/183 |
 | smoke_startup_once.py | 首次启动建表/API | 34/34 |
-| smoke_market.py | 市场安全/安装/拉取/开发插件 | 40/40 |
-| smoke_info_cards.py | 22+1 份 INFO.md 字段/一致性 | 9/9 |
+| smoke_market.py | 市场安全/安装/拉取/开发插件 | 42/42 |
+| smoke_info_cards.py | 22+1 份 INFO.md 字段/一致性 | 10/10 |
 
-合计 **993/994**（14 项全 PASS；`smoke_web` 74/75，TTS 502 为唯一允许 FAIL）。
+合计 **996/997**（14 项全 PASS；`smoke_web` 74/75，TTS 502 为唯一允许 FAIL）。
 
 已知 FAIL：`smoke_web` 的 TTS 502 来自 edge-tts 外部网络不可用，不阻塞其他断言；出现非 TTS 的 FAIL 按回滚规则处理。
 
@@ -132,6 +132,7 @@ live_json TEXT NOT NULL DEFAULT '' -- 当前编辑状态
 - 敏感文件：`data/ai_keys.json`、`data/webchat_sessions.json`、`data/plugins/webchat/webchat_profile/`、`data/plugins/finance/fixtures/rt_fin.json`；只按路径处理，不读正文、不进 Git。
 - 市场运行态：`data/plugins/market/index.json`（不进 Git；首次请求从 `market/index.json` 复制 5 条预置；远程拉取覆盖）。
 - 市场源：`data/plugins/market/settings.json` 的 `market_source_url`（https raw；空则拉取按钮置灰）。
+- 市场包：`market/packages/<id>.zip`（18 个非预置已生成；不进 Git，补包不升版；需上传 Release 后回填 `download_url`；为空时安装报“包地址未配置”）。
 - 市场资产：`market/index.json`（进 Git，包清单/SHA256）、`market/packages/*.zip`（不进 Git）、`market/sources/<id>/`（试点源码，进 Git）、`market/.trash/`（卸载备份，不进 Git）；安装记录在 `market_installed` 表。
 - 通用下载地址：`data/settings.json` 的 `download_dir`（绝对路径）；市场「开发插件」写盘使用，未设置/目录不存在/无权限时明确报错。该路径仅用于插件服务端写盘；浏览器下载仍走浏览器/统一下载句柄，与该项相互独立。
 - 市场源：`data/plugins/market/settings.json` 的 `market_source` 只读默认 `market/packages/`（A 阶段）；B3 已决定接受源码公开：`market/sources/` 与未来市场仓库源码可见，无敏感内容。

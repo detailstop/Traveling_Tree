@@ -30,7 +30,7 @@
 
 - `tables` 必须与 `schema.sql` 的 `CREATE TABLE` 表名完全一致；无表省略或 `[]`。
 - `sensitive_data` 只写路径类别（如 `[data/ai_keys.json]`），**不写敏感正文**；市场 UI 不展示其内容。
-- `known_limits` 单行短句；`market_package` 仅试点包为 `true`；`icon` 为表情/短字符串，缺省 `📦`。
+- `known_limits` 单行短句；`market_package` 必须与实际包状态一致（有 zip/Release 为 `true`，预置为 `false`）；`source` 与包来源一致；`icon` 为表情/短字符串，缺省 `📦`。
 
 ## 3. 格式约定
 

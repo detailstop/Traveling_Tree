@@ -1,9 +1,82 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-01T01:04:03+03:00",
-  "round": 89,
+  "generated_at": "2026-11-01T14:00:52+03:00",
+  "round": 90,
   "pending": [],
   "decided": [
+    {
+      "path": "tools/build_market_packages.py",
+      "decision": "打包脚本支持 18 插件/排除/校验/回填运行态（round 90）",
+      "reason": "17 个 plugins + sim 源；排除 __pycache__/*.pyc/.git/data/*.zip/*.tmp/.trash；现算 sha256/size/file；校验 zip 无路径穿越/排除目录；回填 data/plugins/market/index.json，不写 market/index.json；补包不升版。",
+      "status": "done",
+      "round": 90,
+      "at": "2026-11-01T14:00:52+03:00"
+    },
+    {
+      "path": "market/packages/",
+      "decision": "18 个非预置插件 zip 已生成（round 90）",
+      "new_path": "market/packages/<id>.zip",
+      "reason": "18 个 zip 生成并通过内容校验；zip 不进 Git，待用户上传 GitHub Release；`market/index.json` 保持 5 条模板。",
+      "status": "done",
+      "round": 90,
+      "at": "2026-11-01T14:00:52+03:00"
+    },
+    {
+      "path": "data/plugins/market/index.json",
+      "decision": "运行态 index 回填 18 条包级字段（round 90）",
+      "reason": "sha256/size/file/package_ready:true 18 条；download_url 保持空；文件绝对路径 C:\\Users\\WJL\\Desktop\\Traveling_Tree\\data\\plugins\\market\\index.json。",
+      "status": "done",
+      "round": 90,
+      "at": "2026-11-01T14:00:52+03:00"
+    },
+    {
+      "path": "plugins/*/INFO.md",
+      "decision": "18 份 INFO market_package=true 与 known_limits（round 90）",
+      "reason": "17 plugins + sim 源设 true；预置 5 份保持 false；known_limits 注明待上传 Release 与 download_url 为空报错；gen --check 通过。",
+      "status": "done",
+      "round": 90,
+      "at": "2026-11-01T14:00:52+03:00"
+    },
+    {
+      "path": "plugins/market/backend.py",
+      "decision": "安装包未就绪/空地址明确报错（round 90）",
+      "reason": "package_ready=false → package_not_ready；本地包缺失且 download_url 为空 → package_url_missing（包地址未配置）；不静默、不改其他安装逻辑。",
+      "status": "done",
+      "round": 90,
+      "at": "2026-11-01T14:00:52+03:00"
+    },
+    {
+      "path": "tests/smoke_market.py",
+      "decision": "市场测试改用临时包并补空地址/未就绪用例（round 90）",
+      "reason": "不依赖真实 market/packages；42/42；克隆模拟移走 packages 后仍全过。",
+      "status": "done",
+      "round": 90,
+      "at": "2026-11-01T14:00:52+03:00"
+    },
+    {
+      "path": "tests/smoke_info_cards.py",
+      "decision": "INFO market_package 与运行态一致校验（round 90）",
+      "reason": "true 的 id 必须出现在运行态 package_ready=true 集合；运行态缺失时跳过；10/10。",
+      "status": "done",
+      "round": 90,
+      "at": "2026-11-01T14:00:52+03:00"
+    },
+    {
+      "path": "README.md",
+      "decision": "文档补 18 包/Release/download_url 口径（round 90）",
+      "reason": "README §5/§6、白皮书 §7.5、守则 §3/§4、市场草案、INFO 模板、market README/INFO 同步；基线 996/997（market 42/42、info 10/10）。",
+      "status": "done",
+      "round": 90,
+      "at": "2026-11-01T14:00:52+03:00"
+    },
+    {
+      "path": "data/bg_import/::round90-none",
+      "decision": "本次无背景库数据（round 90）",
+      "reason": "用户未提供「项目优化与当前综述」导出 json；背景库不可用，本轮未执行 update 导入、未写背景库数据。",
+      "status": "done",
+      "round": 90,
+      "at": "2026-11-01T14:00:52+03:00"
+    },
     {
       "path": "plugins/market/feature.js",
       "decision": "修复拉取按钮初始置灰不再更新的时序缺陷（round 89）",

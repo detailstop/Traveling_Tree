@@ -104,3 +104,10 @@
 - 拉取：`data/plugins/market/settings.json` 的 `market_source_url`（https raw）；POST `/api/plugin/market/refresh-index`，校验结构/id/sha256/size/file/download_url/版本递增后原子覆盖；失败不动本地。
 - 运行态本轮 23 条（5 预置 + 17 非预置 + sim），包级字段留空、`package_ready:false`；待用户上传 GitHub raw。
 - 生产只接受 https；`http://`/`file://` 仅测试注入，不进生产路径。
+
+## 打包与 Release 分发（round 90）
+
+- 18 个非预置插件（17 plugins + sim）已生成 `market/packages/<id>.zip`；zip 不进 Git；预置 5 个不打包。
+- `tools/build_market_packages.py` 现算 sha256/size/file 并回填 `data/plugins/market/index.json`；`market/index.json` 模板保持 5 条。
+- `download_url` 留空；上传 GitHub Release 后回填。为空时安装报“包地址未配置”，不静默。
+- 补包不升版（version 保持 1.0）。
