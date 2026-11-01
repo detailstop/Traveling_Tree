@@ -51,13 +51,10 @@ def _create_shortcut(body: dict) -> dict:
         name = security.validate_name(body.get("name"))
         path = security.validate_path(body.get("path"))
         args = security.validate_args(body.get("args"))
-        hotkey = security.normalize_hotkey(body.get("hotkey"))
+        hotkey = security.sanitize_hotkey(body.get("hotkey"))
     except security.ShortcutError as exc:
         return _err(exc.code, exc.message, 400)
-    try:
-        row = repo.create_shortcut(name, path, args, hotkey)
-    except repo.ShortcutConflict:
-        return _err("HOTKEY_CONFLICT", "该快捷键已被其他软件占用，请换一个组合", 409)
+    row = repo.create_shortcut(name, path, args, hotkey)
     return {"ok": True, "item": _public(row)}
 
 

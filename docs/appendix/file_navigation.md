@@ -2,9 +2,9 @@
 
 > 只读摘要，勿手改。本文件由 docs/appendix/file_navigation.json 生成；结构与去留决定以 JSON 为准。
 
-- 生成时间：2026-11-01T17:53:43+03:00
-- 轮次：99
-- 待办：1 条；已决定：635 条
+- 生成时间：2026-11-01T18:09:42+03:00
+- 轮次：100
+- 待办：1 条；已决定：643 条
 
 ## 待办
 
@@ -16,6 +16,14 @@
 
 | 路径 | 决定 | 原因 | 状态 | 轮次 | 时间 | 备份路径 |
 | --- | --- | --- | --- | --- | --- | --- |
+| plugins/urlarch/feature.js | R4 方向修正：删除键盘热键层，改为点击式软件快捷入口（round 100） | 移除 keydown 监听、快捷键采集输入框、MutationObserver 注销、组合键解析与 hotkey 提示；新增「🚀 软件快捷入口」卡片网格（首字图标+名称+路径+参数摘要），点击卡片 → POST /launch（只传 id），带删除按钮与添加表单（名称/路径/参数，不再要求 hotkey）；未改既有组别折叠逻辑、未用 localStorage。 | done | 100 | 2026-11-01T18:09:42+03:00 |  |
+| plugins/urlarch/plugin.css | 快捷入口卡片样式替换热键行样式（round 100） | 新增 .ua-sc-grid/.ua-sc-card/.ua-sc-icon 等卡片样式（hover/active/focus-visible 过渡），删除仅在键盘热键层使用的 .ua-sc-kbd/.ua-sc-row/.ua-sc-list；仍限 .ua-sc-* 命名空间。 | done | 100 | 2026-11-01T18:09:42+03:00 |  |
+| plugins/urlarch/backend.py | 移除 hotkey 冲突错误分支，hotkey 改为可选（round 100） | POST /shortcuts 用 security.sanitize_hotkey（可空、仅基础清洗），删除 HOTKEY_CONFLICT 409 分支；launch/CRUD 接口与安全边界不变（仅按 id 启动、路径参数取自库、Popen 列表 + shell=False、忽略请求体 path/args/cmd、异常转 INTERNAL_ERROR）。 | done | 100 | 2026-11-01T18:09:42+03:00 |  |
+| plugins/urlarch/repo.py | 去掉 hotkey 去重与 BEGIN IMMEDIATE，允许同 path 重复登记（round 100） | create_shortcut 删除 ShortcutConflict 与事务内 hotkey 查询，改为单条 INSERT（显式列名 + raw/live 双写、id/时间戳后端生成）；同一 path 允许重复登记（同程序不同参数/入口名），不引入新 schema 约束。另修复编辑过程中误删的 _shortcut_json/list_shortcuts（已核对文件完整）。 | done | 100 | 2026-11-01T18:09:42+03:00 |  |
+| plugins/urlarch/security.py | normalize_hotkey 降级为 sanitize_hotkey（round 100） | hotkey 不再参与逻辑：仅保留长度/类型/控制字符基础清洗（HOTKEY_INVALID 只用于异常输入），删除修饰键/键位格式强校验与规范化；路径、参数、名称、id 校验原样保留。 | done | 100 | 2026-11-01T18:09:42+03:00 |  |
+| plugins/urlarch/README.md | 五节同步「点击快捷入口」语义（round 100） | 职责与注意事项改写：快捷入口为页面内可点击卡片，明确不是键盘热键、不是系统桌面快捷方式（不建 .lnk、不写桌面/开始菜单）；补 hotkey 为历史可选字段、同 path 允许重复、错误码表删除 HOTKEY_CONFLICT；路由与安全边界段落保持。 | done | 100 | 2026-11-01T18:09:42+03:00 |  |
+| plugins/urlarch/INFO.md | 注意事项改写为快捷入口/白名单/仅本机（round 100） | front matter 9 项与 source=local / market_package=false / tables 4 表不变；正文删除「页面内快捷键」表述，改为点击卡片启动、非系统全局快捷方式、hotkey 历史字段可选。 | done | 100 | 2026-11-01T18:09:42+03:00 |  |
+| docs/appendix/file_navigation.json | 登记 round 100（R4 方向修正） | 追加 8 条 decided 并 round→100、generated_at 更新；pending 保留既有 1 条（round 67–94 的 28 条非文件占位待清理）；resolved 45 条不动；file_navigation.md 由生成器重生成。安全用例 4.1–4.7 全 PASS（API 31/31 + 浏览器 7/7：卡片渲染、点击启动、path 篡改拒绝、删除后不可启动、Ctrl+Alt+J 不再触发）。本轮无背景库数据、未改 schema/migrate/manifest。 | done | 100 | 2026-11-01T18:09:42+03:00 |  |
 | plugins/urlarch/security.py | 新增 R4 安全校验模块（round 99） | 纯函数校验：路径（绝对、存在、拒绝 ..、UNC、控制字符、脚本/快捷方式扩展名黑名单 PATH_EXT_BLOCKED）、参数（JSON 字符串数组、≤20 项/单项≤200/总长≤1000、拒绝 ; && \|\| \| > < 反引号 $( 与换行）、快捷键（修饰键+A–Z/0–9/F1–F12，需含 Ctrl/Alt/Meta 或 F 键，规范化固定顺序）、名称与 id 形态（us_[0-9a-f]{16}）；稳定错误码由 ShortcutError 携带。 | done | 99 | 2026-11-01T17:53:43+03:00 |  |
 | plugins/urlarch/repo.py | 白名单 SQL CRUD（显式列名 + raw/live 双写，round 99） | list/get/create/delete：INSERT 显式列名并同时写 raw_json/live_json（同值快照）；id 由后端 secrets 生成（us_+16hex）、created_at/updated_at 后端生成；create 用 BEGIN IMMEDIATE 内查 hotkey 冲突（ShortcutConflict → HOTKEY_CONFLICT），失败 rollback；DELETE 只删登记行。 | done | 99 | 2026-11-01T17:53:43+03:00 |  |
 | plugins/urlarch/backend.py | 新增白名单 CRUD 与启动接口（round 99） | 语义子路径 state / shortcuts(GET,POST) / shortcuts/<id>(DELETE) / launch(POST)；launch 只接受 id，路径与参数从库读取并在启动前重新校验，subprocess.Popen([path]+args, shell=False, close_fds=True) 不等待；异常统一转 INTERNAL_ERROR，不向宿主抛 Traceback；原有 state 行为不变。 | done | 99 | 2026-11-01T17:53:43+03:00 |  |

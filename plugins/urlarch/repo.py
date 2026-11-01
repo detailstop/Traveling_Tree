@@ -82,12 +82,8 @@ def save_state(data: dict) -> dict:
 
 
 # ------------------------------------------------------------
-# 快捷键白名单（R4）：只做存储；启动在 backend.py，路径/参数一律取自本表
+# 软件快捷入口白名单（R4）：只做存储；启动在 backend.py，路径/参数一律取自本表
 # ------------------------------------------------------------
-
-class ShortcutConflict(Exception):
-    """同一快捷键重复登记（由 backend 映射为 HOTKEY_CONFLICT）。"""
-
 
 def _shortcut_json(name: str, path: str, args: list, hotkey: str) -> str:
     payload = {"name": name, "path": path, "args": args, "hotkey": hotkey}
@@ -110,31 +106,23 @@ def get_shortcut(shortcut_id: str) -> dict | None:
     return dict(row) if row else None
 
 
-def create_shortcut(name: str, path: str, args_text: str, hotkey: str) -> dict:
-    """新增白名单条目；id/时间戳由后端生成，raw_json 与 live_json 同值双写。"""
+def create_shortcut(name: str, path: str, args_text: str, hotkey: str = "") -> dict:
+    """新增白名单条目；id/时间戳由后端生成，raw_json 与 live_json 同值双写。
+
+    hotkey 为 R3 建表时的历史列（可选、可为空），不参与任何逻辑与去重；
+    同一 path 允许重复登记（常见用途：同一程序挂不同参数或不同入口名）。
+    """
     conn = get_conn()
     now = _now()
-    args = json.loads(args_text)
-    payload = _shortcut_json(name, path, args, hotkey)
+    payload = _shortcut_json(name, path, json.loads(args_text), hotkey)
     shortcut_id = "us_" + secrets.token_hex(8)
-    conn.execute("BEGIN IMMEDIATE")
-    try:
-        if conn.execute("SELECT 1 FROM urlarch_shortcuts WHERE hotkey=?",
-                        (hotkey,)).fetchone():
-            conn.rollback()
-            raise ShortcutConflict(hotkey)
-        conn.execute(
-            "INSERT INTO urlarch_shortcuts"
-            "(id,name,path,args,hotkey,raw_json,live_json,created_at,updated_at) "
-            "VALUES(?,?,?,?,?,?,?,?,?)",
-            (shortcut_id, name, path, args_text, hotkey, payload, payload, now, now),
-        )
-        conn.commit()
-    except ShortcutConflict:
-        raise
-    except Exception:
-        conn.rollback()
-        raise
+    conn.execute(
+        "INSERT INTO urlarch_shortcuts"
+        "(id,name,path,args,hotkey,raw_json,live_json,created_at,updated_at) "
+        "VALUES(?,?,?,?,?,?,?,?,?)",
+        (shortcut_id, name, path, args_text, hotkey, payload, payload, now, now),
+    )
+    conn.commit()
     return get_shortcut(shortcut_id) or {}
 
 

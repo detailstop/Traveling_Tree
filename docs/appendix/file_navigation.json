@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-01T17:53:43+03:00",
-  "round": 99,
+  "generated_at": "2026-11-01T18:09:42+03:00",
+  "round": 100,
   "pending": [
     {
       "path": "docs/appendix/file_navigation.json",
@@ -16,6 +16,70 @@
     }
   ],
   "decided": [
+    {
+      "path": "plugins/urlarch/feature.js",
+      "decision": "R4 方向修正：删除键盘热键层，改为点击式软件快捷入口（round 100）",
+      "reason": "移除 keydown 监听、快捷键采集输入框、MutationObserver 注销、组合键解析与 hotkey 提示；新增「🚀 软件快捷入口」卡片网格（首字图标+名称+路径+参数摘要），点击卡片 → POST /launch（只传 id），带删除按钮与添加表单（名称/路径/参数，不再要求 hotkey）；未改既有组别折叠逻辑、未用 localStorage。",
+      "status": "done",
+      "round": 100,
+      "at": "2026-11-01T18:09:42+03:00"
+    },
+    {
+      "path": "plugins/urlarch/plugin.css",
+      "decision": "快捷入口卡片样式替换热键行样式（round 100）",
+      "reason": "新增 .ua-sc-grid/.ua-sc-card/.ua-sc-icon 等卡片样式（hover/active/focus-visible 过渡），删除仅在键盘热键层使用的 .ua-sc-kbd/.ua-sc-row/.ua-sc-list；仍限 .ua-sc-* 命名空间。",
+      "status": "done",
+      "round": 100,
+      "at": "2026-11-01T18:09:42+03:00"
+    },
+    {
+      "path": "plugins/urlarch/backend.py",
+      "decision": "移除 hotkey 冲突错误分支，hotkey 改为可选（round 100）",
+      "reason": "POST /shortcuts 用 security.sanitize_hotkey（可空、仅基础清洗），删除 HOTKEY_CONFLICT 409 分支；launch/CRUD 接口与安全边界不变（仅按 id 启动、路径参数取自库、Popen 列表 + shell=False、忽略请求体 path/args/cmd、异常转 INTERNAL_ERROR）。",
+      "status": "done",
+      "round": 100,
+      "at": "2026-11-01T18:09:42+03:00"
+    },
+    {
+      "path": "plugins/urlarch/repo.py",
+      "decision": "去掉 hotkey 去重与 BEGIN IMMEDIATE，允许同 path 重复登记（round 100）",
+      "reason": "create_shortcut 删除 ShortcutConflict 与事务内 hotkey 查询，改为单条 INSERT（显式列名 + raw/live 双写、id/时间戳后端生成）；同一 path 允许重复登记（同程序不同参数/入口名），不引入新 schema 约束。另修复编辑过程中误删的 _shortcut_json/list_shortcuts（已核对文件完整）。",
+      "status": "done",
+      "round": 100,
+      "at": "2026-11-01T18:09:42+03:00"
+    },
+    {
+      "path": "plugins/urlarch/security.py",
+      "decision": "normalize_hotkey 降级为 sanitize_hotkey（round 100）",
+      "reason": "hotkey 不再参与逻辑：仅保留长度/类型/控制字符基础清洗（HOTKEY_INVALID 只用于异常输入），删除修饰键/键位格式强校验与规范化；路径、参数、名称、id 校验原样保留。",
+      "status": "done",
+      "round": 100,
+      "at": "2026-11-01T18:09:42+03:00"
+    },
+    {
+      "path": "plugins/urlarch/README.md",
+      "decision": "五节同步「点击快捷入口」语义（round 100）",
+      "reason": "职责与注意事项改写：快捷入口为页面内可点击卡片，明确不是键盘热键、不是系统桌面快捷方式（不建 .lnk、不写桌面/开始菜单）；补 hotkey 为历史可选字段、同 path 允许重复、错误码表删除 HOTKEY_CONFLICT；路由与安全边界段落保持。",
+      "status": "done",
+      "round": 100,
+      "at": "2026-11-01T18:09:42+03:00"
+    },
+    {
+      "path": "plugins/urlarch/INFO.md",
+      "decision": "注意事项改写为快捷入口/白名单/仅本机（round 100）",
+      "reason": "front matter 9 项与 source=local / market_package=false / tables 4 表不变；正文删除「页面内快捷键」表述，改为点击卡片启动、非系统全局快捷方式、hotkey 历史字段可选。",
+      "status": "done",
+      "round": 100,
+      "at": "2026-11-01T18:09:42+03:00"
+    },
+    {
+      "path": "docs/appendix/file_navigation.json",
+      "decision": "登记 round 100（R4 方向修正）",
+      "reason": "追加 8 条 decided 并 round→100、generated_at 更新；pending 保留既有 1 条（round 67–94 的 28 条非文件占位待清理）；resolved 45 条不动；file_navigation.md 由生成器重生成。安全用例 4.1–4.7 全 PASS（API 31/31 + 浏览器 7/7：卡片渲染、点击启动、path 篡改拒绝、删除后不可启动、Ctrl+Alt+J 不再触发）。本轮无背景库数据、未改 schema/migrate/manifest。",
+      "status": "done",
+      "round": 100,
+      "at": "2026-11-01T18:09:42+03:00"
+    },
     {
       "path": "plugins/urlarch/security.py",
       "decision": "新增 R4 安全校验模块（round 99）",

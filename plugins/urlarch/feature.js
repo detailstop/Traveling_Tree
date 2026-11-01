@@ -5,85 +5,27 @@ let uaState = null;
 // 单组折叠状态：只存在页面会话内存（刷新后恢复默认展开），不写 localStorage。
 const uaCollapsedGroups = new Set();
 
-/* ---------------- R4：页面内快捷键白名单 ----------------
-   作用域仅限「urlarch 视图可见 + 页面聚焦」；输入框聚焦不触发；离开视图注销监听。
-   快捷键不是操作系统级全局热键，也没有后台常驻监听。 */
+/* ---------------- R4：软件快捷入口（点击启动，非键盘热键） ----------------
+   白名单存 urlarch_shortcuts；页面内点击卡片 → POST /launch（只传 id）。
+   这是页面内入口，不是操作系统桌面快捷方式，也不注册任何键盘监听。 */
 const UA_ERR_TEXT = {
   SHORTCUT_NOT_FOUND: '白名单中找不到该软件（可能已被删除）',
   PATH_INVALID: '可执行路径无效或文件不存在',
   PATH_EXT_BLOCKED: '该扩展名（.bat/.lnk/.ps1 等）被禁止，请登记可执行程序本体',
   ARGS_INVALID: '参数不合法：需 JSON 字符串数组，且不含 ; && || | > < 等字符',
-  HOTKEY_INVALID: '快捷键不合法：需含 Ctrl / Alt / Meta 之一，或使用 F1–F12',
-  HOTKEY_CONFLICT: '该快捷键已被其他软件占用，请换一个组合',
   NAME_INVALID: '名称不合法（1–64 字符）',
   LAUNCH_FAILED: '启动失败：进程创建被拒绝或系统报错',
   INTERNAL_ERROR: '后端内部错误，未启动',
   METHOD_NOT_ALLOWED: '请求方式不被支持',
   not_found: '接口不存在',
 };
-const uaShortcut = { items: [], root: null, handler: null, observer: null };
+let uaShortcuts = [];
 function uaShortcutHint(code) {
   return UA_ERR_TEXT[code] || ('操作失败：' + (code || '未知错误'));
 }
-function uaComboFromEvent(e) {
-  const key = String(e.key || '');
-  if (!key || key === 'Control' || key === 'Alt' || key === 'Shift' || key === 'Meta') return null;
-  let name = '';
-  if (/^[a-zA-Z]$/.test(key)) name = key.toUpperCase();
-  else if (/^[0-9]$/.test(key)) name = key;
-  else if (/^F([1-9]|1[0-2])$/.test(key)) name = key.toUpperCase();
-  else return null;
-  const mods = [];
-  if (e.ctrlKey) mods.push('Ctrl');
-  if (e.altKey) mods.push('Alt');
-  if (e.shiftKey) mods.push('Shift');
-  if (e.metaKey) mods.push('Meta');
-  const hasMod = mods.some(m => m === 'Ctrl' || m === 'Alt' || m === 'Meta');
-  if (!hasMod && !name.startsWith('F')) return null;
-  return (mods.length ? mods.join('+') + '+' : '') + name;
-}
-function uaUnbindShortcutKeys() {
-  if (uaShortcut.handler) {
-    document.removeEventListener('keydown', uaShortcut.handler, false);
-    uaShortcut.handler = null;
-  }
-  if (uaShortcut.observer) {
-    uaShortcut.observer.disconnect();
-    uaShortcut.observer = null;
-  }
-  uaShortcut.root = null;
-}
-function uaBindShortcutKeys(root) {
-  uaUnbindShortcutKeys();
-  if (!root) return;
-  uaShortcut.root = root;
-  uaShortcut.handler = e => uaHandleShortcutKey(e);
-  document.addEventListener('keydown', uaShortcut.handler, false);
-  // 视图被替换/切走时自动注销（宿主不提供卸载钩子，用 DOM 存活判断代替）。
-  const obs = new MutationObserver(() => {
-    if (uaShortcut.root && !document.body.contains(uaShortcut.root)) uaUnbindShortcutKeys();
-  });
-  obs.observe(document.body, { childList: true, subtree: true });
-  uaShortcut.observer = obs;
-}
-async function uaHandleShortcutKey(e) {
-  if (e.defaultPrevented || e.repeat) return;
-  if (document.visibilityState !== 'visible' || !document.hasFocus()) return;
-  if (!uaShortcut.root || !document.body.contains(uaShortcut.root)) return;
-  const t = e.target;
-  if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA'
-    || t.tagName === 'SELECT' || t.isContentEditable)) return;
-  const combo = uaComboFromEvent(e);
-  if (!combo) return;
-  const hit = uaShortcut.items.find(x => x.hotkey === combo);
-  if (!hit) return;
-  // 不调用 preventDefault：不与浏览器默认快捷键竞争，浏览器若同时响应属于预期。
-  try {
-    const d = await api('/api/plugin/urlarch/launch', { method: 'POST', body: { id: hit.id } });
-    toast(`已启动「${hit.name}」（页面内快捷键 · pid ${d && d.pid}）`, 'success', 2400);
-  } catch (err) {
-    toast(uaShortcutHint(err && err.message), 'warn', 4600);
-  }
+function uaShortcutIcon(name) {
+  const text = String(name || '').trim();
+  return text ? text.slice(0, 1).toUpperCase() : '🧩';
 }
 async function uaFetchShortcuts() {
   try {
@@ -185,18 +127,17 @@ async function renderUrlArchTool() {
       <div id="ua-list" style="min-height:40px;"></div>
     </div>
     <div class="gcard" id="ua-shortcut-card" style="margin-top:14px;">
-      <div class="section-title"><span class="st-emoji">⌨️</span>快捷键白名单
-        <span style="font-size:12px;color:var(--text-dim);font-weight:400;">页面内快捷键 · 非系统全局热键 · 仅本机</span>
+      <div class="section-title"><span class="st-emoji">🚀</span>软件快捷入口
+        <span style="font-size:12px;color:var(--text-dim);font-weight:400;">点击卡片启动 · 白名单注册制 · 仅本机</span>
       </div>
+      <div id="ua-sc-grid" class="ua-sc-grid"></div>
       <div class="ua-sc-form">
         <input class="input" id="ua-sc-name" placeholder="名称，如：记事本" style="flex:2;min-width:120px;">
         <input class="input" id="ua-sc-path" placeholder="可执行文件绝对路径，如 C:/Program Files/App/app.exe" style="flex:3;min-width:220px;">
         <input class="input" id="ua-sc-args" placeholder='参数 JSON 数组（可选），如 ["--new"]' style="flex:2;min-width:150px;">
-        <input class="input" id="ua-sc-hotkey" placeholder="点此按下快捷键" readonly style="flex:1;min-width:150px;">
-        <button class="btn" id="ua-sc-add">＋ 登记</button>
+        <button class="btn" id="ua-sc-add">＋ 添加软件</button>
       </div>
-      <div class="ua-sc-hint">只启动白名单内已登记的软件：后端按 id 取路径，前端不能传路径或命令。快捷键需含 Ctrl / Alt / Meta 之一或使用 F1–F12；同一组合不可重复登记；输入框聚焦、离开本页、页面未聚焦时都不触发；不拦截浏览器默认快捷键。</div>
-      <div id="ua-sc-list" class="ua-sc-list"></div>
+      <div class="ua-sc-hint">只启动白名单内已登记的软件：点击卡片后请求 <code>POST /api/plugin/urlarch/launch</code>，入参只有 id；路径与参数由后端从白名单读取并再次校验，前端不能传路径或命令。这是页面内入口，不是系统桌面快捷方式，也不注册键盘快捷键。</div>
     </div>`;
   const listBox = $('#ua-list');
   let blocked = {};
@@ -434,28 +375,52 @@ async function renderUrlArchTool() {
     const blob = new Blob([JSON.stringify(rows, null, 2)], { type: 'application/json' });
     window.rtDownloadBlob(blob, 'url_archive.json');
   };
+  const launchShortcut = async id => {
+    const item = uaShortcuts.find(x => x.id === id);
+    try {
+      const d = await api('/api/plugin/urlarch/launch', { method: 'POST', body: { id } });
+      toast(`已启动「${(item && item.name) || (d && d.name) || '软件'}」`, 'success', 2400);
+    } catch (err) {
+      toast(uaShortcutHint(err && err.message), 'warn', 4600);
+    }
+  };
   const renderShortcuts = () => {
-    const box = $('#ua-sc-list');
+    const box = $('#ua-sc-grid');
     if (!box) return;
-    if (!uaShortcut.items.length) {
-      box.innerHTML = '<div class="ua-sc-empty">尚未登记软件。填写名称、可执行文件绝对路径与快捷键后点「＋ 登记」。</div>';
+    if (!uaShortcuts.length) {
+      box.innerHTML = '<div class="ua-sc-empty">还没有软件快捷入口。填写名称、可执行文件绝对路径（参数可选）后点「＋ 添加软件」。</div>';
       return;
     }
-    box.innerHTML = uaShortcut.items.map(item => `
-      <div class="ua-sc-row">
-        <span class="ua-sc-kbd">${esc(item.hotkey)}</span>
-        <span class="ua-sc-name">${esc(item.name)}</span>
-        <span class="ua-sc-path" title="${esc(item.path)}">${esc(item.path)}</span>
-        <span class="ua-sc-args">${esc(uaArgsSummary(item.args))}</span>
-        <button class="mini-btn danger" data-sc-del="${esc(item.id)}" title="从白名单删除（不卸载软件）">🗑️</button>
+    box.innerHTML = uaShortcuts.map(item => `
+      <div class="ua-sc-card" data-sc-launch="${esc(item.id)}" role="button" tabindex="0" title="点击启动 ${esc(item.name)}">
+        <span class="ua-sc-icon">${esc(uaShortcutIcon(item.name))}</span>
+        <span class="ua-sc-card-main">
+          <span class="ua-sc-name">${esc(item.name)}</span>
+          <span class="ua-sc-path" title="${esc(item.path)}">${esc(item.path)}</span>
+          <span class="ua-sc-args">${esc(uaArgsSummary(item.args))}</span>
+        </span>
+        <button class="mini-btn danger ua-sc-del" data-sc-del="${esc(item.id)}" title="从白名单删除（不卸载软件）">🗑️</button>
       </div>`).join('');
+    box.querySelectorAll('[data-sc-launch]').forEach(card => {
+      card.onclick = e => {
+        if (e.target.closest('[data-sc-del]')) return;
+        launchShortcut(card.dataset.scLaunch);
+      };
+      // 回车/空格等同点击（可访问性），不是全局键盘快捷键。
+      card.onkeydown = e => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          launchShortcut(card.dataset.scLaunch);
+        }
+      };
+    });
     box.querySelectorAll('[data-sc-del]').forEach(btn => btn.onclick = () => removeShortcut(btn.dataset.scDel));
   };
   const removeShortcut = async id => {
     if (!confirm('从白名单删除该软件？（只删登记，不卸载软件）')) return;
     try {
       await api('/api/plugin/urlarch/shortcuts/' + encodeURIComponent(id), { method: 'DELETE' });
-      uaShortcut.items = uaShortcut.items.filter(x => x.id !== id);
+      uaShortcuts = uaShortcuts.filter(x => x.id !== id);
       renderShortcuts();
       toast('已从白名单删除 ✓', 'success');
     } catch (err) {
@@ -466,43 +431,23 @@ async function renderUrlArchTool() {
     const name = $('#ua-sc-name').value.trim();
     const path = $('#ua-sc-path').value.trim();
     const args = $('#ua-sc-args').value.trim();
-    const hotkey = $('#ua-sc-hotkey').value.trim();
     if (!name) { toast('请填写名称', 'warn'); return; }
     if (!path) { toast('请填写可执行文件绝对路径', 'warn'); return; }
-    if (!hotkey) { toast('请在快捷键框内按下组合键', 'warn'); return; }
-    const payload = { name, path, hotkey };
+    const payload = { name, path };
     if (args) payload.args = args;
     try {
       await api('/api/plugin/urlarch/shortcuts', { method: 'POST', body: payload });
-      uaShortcut.items = await uaFetchShortcuts();
+      uaShortcuts = await uaFetchShortcuts();
       renderShortcuts();
-      $('#ua-sc-name').value = ''; $('#ua-sc-path').value = '';
-      $('#ua-sc-args').value = ''; $('#ua-sc-hotkey').value = '';
-      toast('已登记白名单 ✓', 'success');
+      $('#ua-sc-name').value = ''; $('#ua-sc-path').value = ''; $('#ua-sc-args').value = '';
+      toast('已添加快捷入口 ✓', 'success');
     } catch (err) {
       toast(uaShortcutHint(err && err.message), 'warn', 4600);
     }
   };
   $('#ua-sc-add').onclick = addShortcut;
-  const hotkeyInput = $('#ua-sc-hotkey');
-  if (hotkeyInput) {
-    // 采集框内拦截按键（含浏览器动作）；全局快捷键处理从不 preventDefault。
-    hotkeyInput.onkeydown = e => {
-      e.preventDefault();
-      e.stopPropagation();
-      if (e.key === 'Escape') { hotkeyInput.value = ''; return; }
-      const combo = uaComboFromEvent(e);
-      if (!combo) {
-        hotkeyInput.value = '';
-        toast('不支持的组合：键位需 A–Z / 0–9 / F1–F12，且含 Ctrl / Alt / Meta 或为 F 键', 'warn', 3600);
-        return;
-      }
-      hotkeyInput.value = combo;
-    };
-  }
-  uaShortcut.items = await uaFetchShortcuts();
+  uaShortcuts = await uaFetchShortcuts();
   renderShortcuts();
-  uaBindShortcutKeys($('#ua-shortcut-card'));
   draw();
 }
 

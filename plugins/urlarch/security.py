@@ -1,4 +1,4 @@
-"""urlarch R4 安全校验：白名单条目的名称/路径/参数/快捷键校验（纯函数，无副作用）。
+"""urlarch R4 安全校验：白名单条目的名称/路径/参数校验（纯函数，无副作用）。
 
 安全底线（对应守则第 21 条 / 硬约束 5）：
 - 只接受「白名单 id」，path/args 一律取自数据库，不接受前端传入的路径或命令；
@@ -18,7 +18,6 @@ MAX_HOTKEY = 64
 MAX_ARGS = 20
 MAX_ARG_LEN = 200
 MAX_ARGS_TOTAL = 1000
-
 # 明确拒绝：可执行任意内容的脚本 / 快捷方式 / 安装包 / 链接类文件。
 # 采用「黑名单显式拦截」，而非「扩展名白名单」——白名单注册制才是放行依据。
 BLOCKED_EXTS = frozenset({
@@ -29,14 +28,6 @@ BLOCKED_EXTS = frozenset({
 # shell 元字符：args 里出现即拒绝（即使 shell=False 不会解释，也不放宽）。
 _SHELL_META = (";", "&&", "||", "|", ">", "<", "`", "$(", "\n", "\r", "\0")
 
-_MODS = {
-    "ctrl": "Ctrl", "control": "Ctrl",
-    "alt": "Alt",
-    "shift": "Shift",
-    "meta": "Meta", "win": "Meta", "cmd": "Meta", "super": "Meta",
-}
-_MOD_ORDER = ("Ctrl", "Alt", "Shift", "Meta")
-_KEY_RE = re.compile(r"^(?:[A-Z]|[0-9]|F(?:[1-9]|1[0-2]))$")
 _ID_RE = re.compile(r"^us_[0-9a-f]{16}$")
 
 
@@ -128,29 +119,21 @@ def parse_stored_args(raw) -> list[str]:
         raise ShortcutError("ARGS_INVALID", "库中 args 无法解析") from None
 
 
-def normalize_hotkey(raw) -> str:
-    """把 "ctrl+alt+k" 规范成 "Ctrl+Alt+K"；不合法抛 HOTKEY_INVALID。"""
+def sanitize_hotkey(raw) -> str:
+    """hotkey 字段可选：只做基础清洗（长度/控制字符），不校验组合格式、不检查冲突。
+
+    该列是 R3 建表时的历史字段，schema 本轮不改；快捷入口为点击启动，hotkey 不参与逻辑。
+    """
+    if raw is None:
+        return ""
     if not isinstance(raw, str):
-        raise ShortcutError("HOTKEY_INVALID", "快捷键必须是字符串")
+        raise ShortcutError("HOTKEY_INVALID", "hotkey 必须是字符串")
     text = raw.strip()
-    if not text or len(text) > MAX_HOTKEY:
-        raise ShortcutError("HOTKEY_INVALID", f"快捷键需为 1–{MAX_HOTKEY} 个字符")
-    parts = [p.strip() for p in text.split("+") if p.strip()]
-    if len(parts) < 1:
-        raise ShortcutError("HOTKEY_INVALID", "快捷键为空")
-    key = parts[-1].upper()
-    if not _KEY_RE.match(key):
-        raise ShortcutError("HOTKEY_INVALID", "键位仅支持 A–Z、0–9、F1–F12")
-    mods = []
-    for token in parts[:-1]:
-        mod = _MODS.get(token.lower())
-        if mod is None or mod in mods:
-            raise ShortcutError("HOTKEY_INVALID", "修饰键仅支持 Ctrl / Alt / Shift / Meta，且不可重复")
-        mods.append(mod)
-    if not any(m in mods for m in ("Ctrl", "Alt", "Meta")) and not key.startswith("F"):
-        raise ShortcutError("HOTKEY_INVALID", "快捷键需含 Ctrl / Alt / Meta 之一，或使用 F1–F12")
-    ordered = [m for m in _MOD_ORDER if m in mods]
-    return "+".join(ordered + [key])
+    if len(text) > MAX_HOTKEY:
+        raise ShortcutError("HOTKEY_INVALID", f"hotkey 不能超过 {MAX_HOTKEY} 字符")
+    if any(ch in text for ch in "\r\n\t\0"):
+        raise ShortcutError("HOTKEY_INVALID", "hotkey 不能包含控制字符")
+    return text
 
 
 def valid_id(raw) -> bool:
