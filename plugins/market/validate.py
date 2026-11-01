@@ -16,6 +16,18 @@ from pathlib import Path
 from plugins.market.info import OPTIONAL, REQUIRED, InfoError, parse_front_matter
 
 TOOL_VERSION = "1.0"
+ERROR_CODES = (
+    "path_empty", "path_not_found", "path_not_dir", "manifest_missing",
+    "manifest_invalid", "manifest_id_invalid", "manifest_id_mismatch",
+    "schema_version_invalid", "feature_missing", "backend_missing",
+    "info_missing", "info_invalid", "info_field_missing", "info_id_mismatch",
+    "source_package_mismatch", "source_invalid", "tables_mismatch",
+    "has_ui_mismatch", "has_backend_mismatch", "pack_empty",
+)
+WARNING_CODES = (
+    "readme_missing", "readme_section_missing", "info_optional_missing",
+    "known_limits_empty",
+)
 REQUIRED_README = ("职责", "入口与路由", "数据表", "依赖", "注意事项")
 EXCLUDE_DIRS = {"__pycache__", ".git", "data", ".trash"}
 FIXED_TIME = (2026, 1, 1, 0, 0, 0)

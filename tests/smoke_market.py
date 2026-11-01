@@ -14,6 +14,7 @@ sys.path.insert(0, str(ROOT))
 
 import config
 from plugins.market import backend, index_store, packaging, validate as vp
+from plugins.market.validate import ERROR_CODES, WARNING_CODES
 
 results: list[bool] = []
 
@@ -262,6 +263,21 @@ market_package: false
                                {"path": str(ROOT / "plugins" / "market"), "out_dir": str(out / "http")})
     check("HTTP/Python 双出口一致", http_res["ok"] is True and http_pack.get("ok") is True
           and Path(http_pack["zip_path"]).is_file())
+
+    # ---- 文档错误码与常量一致 ----
+    import re as _re
+    readme_text = (ROOT / "plugins" / "market" / "README.md").read_text(encoding="utf-8")
+    def _doc_codes(label):
+        m = _re.search(r"^- " + label + r"：(.+)$", readme_text, _re.M)
+        return set(_re.findall(r"`([a-z_]+)`", m.group(1))) if m else set()
+    doc_err = _doc_codes("错误码")
+    doc_warn = _doc_codes("警告码")
+    check("错误码文档与常量一致", doc_err == set(ERROR_CODES),
+          "文档多：" + ",".join(sorted(doc_err - set(ERROR_CODES)))
+          + " 文档缺：" + ",".join(sorted(set(ERROR_CODES) - doc_err)))
+    check("警告码文档与常量一致", doc_warn == set(WARNING_CODES),
+          "文档多：" + ",".join(sorted(doc_warn - set(WARNING_CODES)))
+          + " 文档缺：" + ",".join(sorted(set(WARNING_CODES) - doc_warn)))
 
     shutil.rmtree(tmp, ignore_errors=True)
     print(f"\nRESULT: {results.count(True)}/{len(results)} PASS")

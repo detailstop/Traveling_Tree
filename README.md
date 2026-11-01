@@ -240,7 +240,7 @@ python tests/smoke_pm.py
 
 - **插件**：23 个插件目录——20 个有前端卡片（ai、aidebug、bg_library、book_reader、expdata、filejudge、finance、market、model_usage、netexp、pdf、pixel_art、project_manager、promptgen、rivet、russian、schedule、screeps、sim、urlarch）+ 3 个 backend-only（webchat、cobuild、tts）。
 - **插件市场（round 91）**：左侧栏「插件市场」；双索引 remote（覆盖）+ local（INFO 组装），展示四源合并 INFO > remote > local；三类：预置 5、公共库 2（finance/promptgen，Release 安装）、本地开发 16（无按钮）。**Release 为唯一分发源**，`market/packages/` 为空目录；安装下载到 `downloads/`，卸载默认保留 `data/plugins/<id>/`。
-- **15 项 smoke 基线**：smoke_plugins 185/185、smoke_startup_once 34/34、smoke_web 74/75（TTS 502 已知）、smoke_plugin_decoupling 476/476、smoke_finance 34/34、smoke_model_usage 49/49、smoke_reader_range 25/25、smoke_pm 23/23、smoke_books 11/11、smoke_file_preview 17/17、smoke_pdf 17/17、smoke_plugin_data_dirs 13/13、smoke_plugin_module_off 10/10、smoke_market 29/29、smoke_info_cards 11/11（合计 1008/1009）。
+- **15 项 smoke 基线**：smoke_plugins 185/185、smoke_startup_once 34/34、smoke_web 74/75（TTS 502 已知）、smoke_plugin_decoupling 476/476、smoke_finance 34/34、smoke_model_usage 49/49、smoke_reader_range 25/25、smoke_pm 23/23、smoke_books 11/11、smoke_file_preview 17/17、smoke_pdf 17/17、smoke_plugin_data_dirs 13/13、smoke_plugin_module_off 10/10、smoke_market 31/31、smoke_info_cards 11/11（合计 1010/1011）。
 - **剩余 pending**：无（`Server.start` 已在 round 80 修复并连续 20 次通过）。
 - **交接建议**：新功能进 `plugins/<id>/`，不碰宿主；改现有功能直接改对应插件；每轮下沉、改 settings 或改 API 后跑全量 15 个 smoke；`/api/plugin/<id>/*` 必须用语义子路径；二进制响应按附录 C。
 - 完整状态、数据资产与 docs 闭环规则见白皮书 [§7 项目状态与交接](docs/plugin-development-whitepaper.md) 与 [§8 docs 目录与临时文件闭环](docs/plugin-development-whitepaper.md)。

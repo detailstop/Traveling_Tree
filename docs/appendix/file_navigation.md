@@ -2,9 +2,9 @@
 
 > 只读摘要，勿手改。本文件由 docs/appendix/file_navigation.json 生成；结构与去留决定以 JSON 为准。
 
-- 生成时间：2026-11-01T16:24:31+03:00
-- 轮次：93
-- 待办：0 条；已决定：607 条
+- 生成时间：2026-11-01T16:31:30+03:00
+- 轮次：94
+- 待办：0 条；已决定：612 条
 
 ## 待办
 
@@ -15,6 +15,11 @@
 
 | 路径 | 决定 | 原因 | 状态 | 轮次 | 时间 | 备份路径 |
 | --- | --- | --- | --- | --- | --- | --- |
+| plugins/market/validate.py | 导出 ERROR_CODES/WARNING_CODES 常量（round 94） | 在原有校验逻辑不变的前提下集中错误码/警告码清单，供文档一致性测试 import。 | done | 94 | 2026-11-01T16:31:30+03:00 |  |
+| tests/smoke_market.py | 文档错误码与常量一致性测试（round 94） | 解析 README 错误码/警告码列表，与 validate.py 常量集合比较；不一致输出差集；故意删 pack_empty 验证失败后恢复；31/31。 | done | 94 | 2026-11-01T16:31:30+03:00 |  |
+| plugins/market/README.md | 校验打包补脱敏提醒（round 94） | INFO.md 原样入包，sensitive_data 字段会公开；只写路径类别、不写敏感内容。 | done | 94 | 2026-11-01T16:31:30+03:00 |  |
+| README.md | 基线同步（round 94） | smoke_market 31/31，合计 1010/1011；白皮书 §7.2 同步。 | done | 94 | 2026-11-01T16:31:30+03:00 |  |
+| data/bg_import/::round94-none | 本次无背景库数据（round 94） | 用户未提供「项目优化与当前综述」导出 json；背景库不可用，本轮未执行 update 导入、未写背景库数据。 | done | 94 | 2026-11-01T16:31:30+03:00 |  |
 | plugins/market/validate.py | 新增插件校验打包核心（round 93） | validate(path) 固定 JSON（path/id/errors/warnings/checked_at/tool_version）；覆盖 manifest/README/INFO/schema/backend/feature 校验；错误码枚举稳定；pack 仅 ok 时打包到 data/backup/market_build/<id>.zip，排除 __pycache__/data 等并校验 zip；源目录只读。 | done | 93 | 2026-11-01T16:24:31+03:00 |  |
 | plugins/market/backend.py | 新增 validate-pack 路由（round 93） | POST /validate-pack/check 与 /pack；路径空/不存在/非目录返回错误码不 Traceback；与 scaffold/refresh 并列，不改既有路由。 | done | 93 | 2026-11-01T16:24:31+03:00 |  |
 | plugins/market/feature.js | 市场顶部“校验打包”面板（round 93） | 路径输入+datalist、校验/打包按钮、错误/警告分级、输出 zip 路径；不改卡片/开发插件/拉取逻辑；node --check 通过。 | done | 93 | 2026-11-01T16:24:31+03:00 |  |

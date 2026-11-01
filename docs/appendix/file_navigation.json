@@ -1,9 +1,49 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-01T16:24:31+03:00",
-  "round": 93,
+  "generated_at": "2026-11-01T16:31:30+03:00",
+  "round": 94,
   "pending": [],
   "decided": [
+    {
+      "path": "plugins/market/validate.py",
+      "decision": "导出 ERROR_CODES/WARNING_CODES 常量（round 94）",
+      "reason": "在原有校验逻辑不变的前提下集中错误码/警告码清单，供文档一致性测试 import。",
+      "status": "done",
+      "round": 94,
+      "at": "2026-11-01T16:31:30+03:00"
+    },
+    {
+      "path": "tests/smoke_market.py",
+      "decision": "文档错误码与常量一致性测试（round 94）",
+      "reason": "解析 README 错误码/警告码列表，与 validate.py 常量集合比较；不一致输出差集；故意删 pack_empty 验证失败后恢复；31/31。",
+      "status": "done",
+      "round": 94,
+      "at": "2026-11-01T16:31:30+03:00"
+    },
+    {
+      "path": "plugins/market/README.md",
+      "decision": "校验打包补脱敏提醒（round 94）",
+      "reason": "INFO.md 原样入包，sensitive_data 字段会公开；只写路径类别、不写敏感内容。",
+      "status": "done",
+      "round": 94,
+      "at": "2026-11-01T16:31:30+03:00"
+    },
+    {
+      "path": "README.md",
+      "decision": "基线同步（round 94）",
+      "reason": "smoke_market 31/31，合计 1010/1011；白皮书 §7.2 同步。",
+      "status": "done",
+      "round": 94,
+      "at": "2026-11-01T16:31:30+03:00"
+    },
+    {
+      "path": "data/bg_import/::round94-none",
+      "decision": "本次无背景库数据（round 94）",
+      "reason": "用户未提供「项目优化与当前综述」导出 json；背景库不可用，本轮未执行 update 导入、未写背景库数据。",
+      "status": "done",
+      "round": 94,
+      "at": "2026-11-01T16:31:30+03:00"
+    },
     {
       "path": "plugins/market/validate.py",
       "decision": "新增插件校验打包核心（round 93）",

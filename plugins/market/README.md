@@ -40,6 +40,7 @@
 - 结果固定结构：`{ok, path, id, errors[], warnings[], checked_at, tool_version}`；错误阻止打包，警告仅提示。
 - 错误码：`path_empty`、`path_not_found`、`path_not_dir`、`manifest_missing`、`manifest_invalid`、`manifest_id_invalid`、`manifest_id_mismatch`、`schema_version_invalid`、`feature_missing`、`backend_missing`、`info_missing`、`info_invalid`、`info_field_missing`、`info_id_mismatch`、`source_package_mismatch`、`source_invalid`、`tables_mismatch`、`has_ui_mismatch`、`has_backend_mismatch`、`pack_empty`。
 - 警告码：`readme_missing`、`readme_section_missing`、`info_optional_missing`、`known_limits_empty`。
+- **打包脱敏提醒**：打包会将 `INFO.md` 原样入包，`sensitive_data` 字段会公开；请确认只写路径类别、不写敏感内容。
 - 源目录只读；打包输出 `data/backup/market_build/<id>.zip`，排除 `__pycache__/`、`*.pyc`、`.git/`、`data/`、`*.zip`、`*.tmp`、`.trash/`；不写 `market/packages/`。
 
 ## 注意事项

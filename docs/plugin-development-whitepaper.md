@@ -109,10 +109,10 @@ live_json TEXT NOT NULL DEFAULT '' -- 当前编辑状态
 | smoke_plugin_module_off.py | 模块关闭 503/不建表 | 10/10 |
 | smoke_plugins.py | manifest/清单/静态资源/后端 | 185/185 |
 | smoke_startup_once.py | 首次启动建表/API | 34/34 |
-| smoke_market.py | 市场双索引/安装/拉取/校验打包 | 29/29 |
+| smoke_market.py | 市场双索引/安装/拉取/校验打包 | 31/31 |
 | smoke_info_cards.py | 23 份 INFO.md 字段/一致性 | 11/11 |
 
-合计 **1008/1009**（14 项全 PASS；`smoke_web` 74/75，TTS 502 为唯一允许 FAIL）。
+合计 **1010/1011**（14 项全 PASS；`smoke_web` 74/75，TTS 502 为唯一允许 FAIL）。
 
 已知 FAIL：`smoke_web` 的 TTS 502 来自 edge-tts 外部网络不可用，不阻塞其他断言；出现非 TTS 的 FAIL 按回滚规则处理。
 
