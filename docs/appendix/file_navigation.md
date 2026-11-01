@@ -2,19 +2,30 @@
 
 > 只读摘要，勿手改。本文件由 docs/appendix/file_navigation.json 生成；结构与去留决定以 JSON 为准。
 
-- 生成时间：2026-11-01T16:31:30+03:00
-- 轮次：94
-- 待办：0 条；已决定：612 条
+- 生成时间：2026-11-01T17:23:10+03:00
+- 轮次：97
+- 待办：1 条；已决定：622 条
 
 ## 待办
 
 | 路径 | 移动计划 | 指南计划 | 摘要 | 轮次 | 创建时间 |
 | --- | --- | --- | --- | --- | --- |
+| docs/appendix/file_navigation.json | 不移动文件；清理对象是 decided[] 内 28 条非文件占位 path（round 67–94 的 data/bg_import/::roundNN-none），本轮只登记不改动。 | 建议单独一轮统一清理：逐条删除，或在删除时于当轮 decided 写明依据；不改 schema、不改其他历史条目、不编造替代 path。清理完成后再移入 resolved[] 并写 resolution。 | round 67–94 共 28 条 data/bg_import/::roundNN-none 非文件占位待统一清理（:: 前为空目录、无实际文件；round 95 同类占位已于 round 96 删除）。 | 97 | 2026-11-01T17:23:10+03:00 |
 
 ## 已决定去留
 
 | 路径 | 决定 | 原因 | 状态 | 轮次 | 时间 | 备份路径 |
 | --- | --- | --- | --- | --- | --- | --- |
+| docs/appendix/file_navigation.json | round 95 五条记录恢复原文、措辞修正在历史条目上回滚（round 97） | 依据 docs/plugin-development-whitepaper.md「docs/appendix/file_navigation.json：新增决定追加；历史语义保留；不改 schema」与 docs/plugin-development-guide.md「导航登记：在 decided[] 追加」：历史条目不得原地改写。已恢复 round 95 的 feature.js / plugin.css / README.md / INFO.md 及本条登记记录原文（原文措辞「组别级单卡」仅作历史语义保留）；round 96 的措辞修正条目保留为历史动作记录。现行措辞以「组别级收起 / 展开」为准：折叠单位是 .ua-group，非卡片。 | done | 97 | 2026-11-01T17:23:10+03:00 |  |
+| docs/appendix/file_navigation.json | 登记 28 条非文件占位待清理待办（round 97） | 在 pending[] 新增 1 条汇总待办（path 指向本文件的真实文件路径），记录 round 67–94 的 28 条 data/bg_import/::roundNN-none 非文件占位；本轮不删除历史条目（避免一次改动 28 条历史记录），留单独一轮统一清理。 | done | 97 | 2026-11-01T17:23:10+03:00 |  |
+| plugins/urlarch/README.md | 措辞统一为「组别级收起 / 展开」（round 96） | 职责与注意事项删去易被误读为卡片级的措辞：折叠单位是组别（`.ua-group`）；收起后 `.ua-items`/`.ua-blocked` 隐藏、不接收拖拽放置，展开后恢复；五节结构不变。 | done | 96 | 2026-11-01T17:18:19+03:00 |  |
+| plugins/urlarch/INFO.md | 注意事项措辞统一为组别级（round 96） | 正文注意事项改为组别级表述；front matter 9 项必需字段、source=local、market_package=false 均不变；gen_plugin_info_cards.py --check 通过。 | done | 96 | 2026-11-01T17:18:19+03:00 |  |
+| docs/appendix/file_navigation.json | round 95 记录措辞修正与占位清理（round 96） | 修正 round 95 四条记录措辞为组别级、删除非文件占位 path data/bg_import/::round95-none；本轮无背景库数据（未导入、未构造 mode:update 更新包）；round→96、generated_at 更新；file_navigation.md 由生成器重生成，未手改。 | done | 96 | 2026-11-01T17:18:19+03:00 |  |
+| plugins/urlarch/feature.js | 组别级单卡收起 / 展开（round 95） | 点组别标题栏 `.ua-group-head` 空白处或左侧 ▾ 按钮切换该组 `.ua-items`/`.ua-blocked` 显隐；折叠状态存模块内 Set（仅页面会话内存，刷新恢复默认展开），多组互不影响；只切 class 不重绘列表，不写 localStorage、不落库、不改路由与表结构。 | done | 95 | 2026-11-01T17:07:05+03:00 |  |
+| plugins/urlarch/plugin.css | 组别折叠样式与 ▾ 旋转过渡（round 95） | 标题栏 `cursor:pointer`+`user-select:none`，`.ua-caret` 加 transform/color 过渡；`.ua-group.collapsed` 时隐藏 `.ua-items`/`.ua-blocked` 并弱化组名；仍只用 .ua-* 命名空间，不污染 .gcard/.btn 等共享组件。 | done | 95 | 2026-11-01T17:07:05+03:00 |  |
+| plugins/urlarch/README.md | 五节同步组别折叠能力（round 95） | 职责与注意事项补折叠交互、状态仅存内存、刷新恢复展开、收起时不接收拖拽；五节（职责/入口与路由/数据表/依赖/注意事项）结构不变。 | done | 95 | 2026-11-01T17:07:05+03:00 |  |
+| plugins/urlarch/INFO.md | 注意事项补组别折叠说明（round 95） | front matter 9 项必需字段与 source=local / market_package=false 均不变，仅正文注意事项加一行；gen_plugin_info_cards.py --check 与 market validate 均通过。 | done | 95 | 2026-11-01T17:07:05+03:00 |  |
+| docs/appendix/file_navigation.json | 登记 round 95 决策（round 95） | 新增 6 条 decided 并更新 round/generated_at；pending 无新增（本轮无 docs 临时文件）；file_navigation.md 由 tools/gen_file_navigation_md.py 重新生成，未手改；docs/多AI共建日志.md 未手改。 | done | 95 | 2026-11-01T17:07:05+03:00 |  |
 | plugins/market/validate.py | 导出 ERROR_CODES/WARNING_CODES 常量（round 94） | 在原有校验逻辑不变的前提下集中错误码/警告码清单，供文档一致性测试 import。 | done | 94 | 2026-11-01T16:31:30+03:00 |  |
 | tests/smoke_market.py | 文档错误码与常量一致性测试（round 94） | 解析 README 错误码/警告码列表，与 validate.py 常量集合比较；不一致输出差集；故意删 pack_empty 验证失败后恢复；31/31。 | done | 94 | 2026-11-01T16:31:30+03:00 |  |
 | plugins/market/README.md | 校验打包补脱敏提醒（round 94） | INFO.md 原样入包，sensitive_data 字段会公开；只写路径类别、不写敏感内容。 | done | 94 | 2026-11-01T16:31:30+03:00 |  |

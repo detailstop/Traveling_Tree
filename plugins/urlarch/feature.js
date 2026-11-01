@@ -2,6 +2,8 @@
 /* 按需加载的功能模块：urlarch（网址归档） */
 (function () {
 let uaState = null;
+// 单组折叠状态：只存在页面会话内存（刷新后恢复默认展开），不写 localStorage。
+const uaCollapsedGroups = new Set();
 const UA_DEFAULT_GROUP = 'ungrouped';
 function uaDefaultGroup() {
   return { id: UA_DEFAULT_GROUP, name: '未分组', type: 'normal', order: 0 };
@@ -87,6 +89,24 @@ async function renderUrlArchTool() {
   const listBox = $('#ua-list');
   let blocked = {};
   const uaLaunching = {};
+  // 折叠只切换内存 Set + 现有 DOM 的 class，不整表重绘（避免丢输入焦点与拖拽态）。
+  const applyGroupCollapse = () => {
+    listBox.querySelectorAll('.ua-group').forEach(sec => {
+      const folded = uaCollapsedGroups.has(sec.dataset.gid);
+      sec.classList.toggle('collapsed', folded);
+      const caret = sec.querySelector('.ua-caret');
+      if (!caret) return;
+      caret.setAttribute('aria-expanded', folded ? 'false' : 'true');
+      caret.setAttribute('aria-label', folded ? '展开组别' : '收起组别');
+      caret.title = folded ? '展开' : '收起';
+    });
+  };
+  const toggleGroupCollapse = gid => {
+    if (!gid) return;
+    if (uaCollapsedGroups.has(gid)) uaCollapsedGroups.delete(gid);
+    else uaCollapsedGroups.add(gid);
+    applyGroupCollapse();
+  };
   const draw = () => {
     const state = uaLoad();
     $('#ua-count').textContent = state.items.length;
@@ -106,9 +126,11 @@ async function renderUrlArchTool() {
         return uaGroupHTML(state, g, rows, blocked);
       }).join('');
     }
+    applyGroupCollapse();
     bindList();
   };
   const uaGroupHTML = (state, g, rows, blockedMap) => {
+    const folded = uaCollapsedGroups.has(g.id);
     const items = rows.map(({ it, idx }) => `
       <div class="ua-item" draggable="true" data-idx="${idx}">
         <a href="${esc(it.url)}" target="_blank" rel="noopener noreferrer" draggable="false">${esc(it.title || it.url)}</a>
@@ -122,8 +144,9 @@ async function renderUrlArchTool() {
     const launchBtn = launching
       ? `<button class="btn sm soft" data-launch="${esc(g.id)}" disabled>启动中 ${launching.done}/${launching.total}…</button>`
       : `<button class="btn sm soft" data-launch="${esc(g.id)}">▶ 一键启动</button>`;
-    return `<section class="ua-group" data-gid="${esc(g.id)}">
-      <div class="ua-group-head">
+    return `<section class="ua-group${folded ? ' collapsed' : ''}" data-gid="${esc(g.id)}">
+      <div class="ua-group-head" data-grouphead="${esc(g.id)}">
+        <button type="button" class="ua-caret" data-group-toggle="${esc(g.id)}" aria-expanded="${folded ? 'false' : 'true'}" aria-label="${folded ? '展开组别' : '收起组别'}" title="${folded ? '展开' : '收起'}">▾</button>
         <b>${esc(g.name)}</b><span class="ua-type ${g.type}">${g.type === 'functional' ? '功能性' : '普通'}</span>
         <span class="ua-count">${rows.length} 条</span>
         ${g.type === 'functional' ? `${launchBtn}<span class="ua-whitelist">可把本站加入浏览器弹窗白名单；加入后通常不再拦截</span>` : ''}
@@ -137,6 +160,15 @@ async function renderUrlArchTool() {
     </section>`;
   };
   const bindList = () => {
+    listBox.querySelectorAll('[data-group-toggle]').forEach(btn => btn.onclick = e => {
+      e.stopPropagation();
+      toggleGroupCollapse(btn.dataset.groupToggle);
+    });
+    // 点标题栏任意空白处也可切换；组内按钮/链接保持原行为。
+    listBox.querySelectorAll('[data-grouphead]').forEach(head => head.onclick = e => {
+      if (e.target.closest('button,a,input,select,textarea,label')) return;
+      toggleGroupCollapse(head.dataset.grouphead);
+    });
     listBox.querySelectorAll('[data-delitem]').forEach(btn => btn.onclick = () => {
       const state = uaLoad();
       state.items.splice(Number(btn.dataset.delitem), 1);
