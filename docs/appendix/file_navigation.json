@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-01T17:23:10+03:00",
-  "round": 97,
+  "generated_at": "2026-11-01T17:39:05+03:00",
+  "round": 98,
   "pending": [
     {
       "path": "docs/appendix/file_navigation.json",
@@ -16,6 +16,46 @@
     }
   ],
   "decided": [
+    {
+      "path": "plugins/urlarch/schema.sql",
+      "decision": "新增 urlarch_shortcuts 白名单表（round 98）",
+      "reason": "CREATE TABLE IF NOT EXISTS：id/name/path/args/hotkey/raw_json/live_json/created_at/updated_at，索引 idx_urlarch_shortcuts_hotkey(hotkey)；属内容表不豁免 live_json（白名单为用户登记数据、不可重建），未加触发器（与本插件其余三表一致，由 SQL 层显式双写）；未改动 urlarch_assets/groups/links 三表与既有索引。",
+      "status": "done",
+      "round": 98,
+      "at": "2026-11-01T17:39:05+03:00"
+    },
+    {
+      "path": "plugins/urlarch/migrate.py",
+      "decision": "追加白名单表迁移（round 98）",
+      "reason": "manifest.json 原已声明 db.migrate（本轮未改 manifest，亦无 tables 字段需同步）；在既有 migrate 追加 _ensure_shortcuts：缺表建表、缺列 ALTER 补列、缺 raw/live 按行回填并建索引，全部加性语句，末尾沿用 conn.commit()、失败由 init_db 统一回滚。验证：真实库副本连跑两次无变更，旧三表行数/内容哈希不变（assets 1 / groups 6 / links 15），缺列形态副本可补列并回填。",
+      "status": "done",
+      "round": 98,
+      "at": "2026-11-01T17:39:05+03:00"
+    },
+    {
+      "path": "plugins/urlarch/INFO.md",
+      "decision": "tables 增 urlarch_shortcuts 并补白名单说明（round 98）",
+      "reason": "front matter tables 与 schema 对齐为 4 表；正文数据表与注意事项补“白名单存数据库表、库文件在 data/ 下不进 Git、本轮只建表、启动接口留 R4”；9 项必需字段与 source=local / market_package=false 不变。",
+      "status": "done",
+      "round": 98,
+      "at": "2026-11-01T17:39:05+03:00"
+    },
+    {
+      "path": "plugins/urlarch/README.md",
+      "decision": "五节同步白名单表与迁移口径（round 98）",
+      "reason": "数据表节补 urlarch_shortcuts 字段/索引/双列/无触发器说明；注意事项补用途（R4 白名单注册制）、存储位置（本机 SQLite，data/ 下不进 Git，不放 plugins/ 与 data/ JSON 配置）、迁移幂等与加性口径；五节结构不变。",
+      "status": "done",
+      "round": 98,
+      "at": "2026-11-01T17:39:05+03:00"
+    },
+    {
+      "path": "docs/appendix/file_navigation.json",
+      "decision": "登记 round 98（schema + migrate 白名单前置轮）",
+      "reason": "追加 5 条 decided 并 round→98、generated_at 更新；pending 保留既有 1 条（round 67–94 的 28 条非文件占位待清理），本轮无新增临时文件；resolved 45 条不动；file_navigation.md 由 tools/gen_file_navigation_md.py 重生成，未手改。本轮无背景库数据（未导入、未构造 mode:update 更新包）。",
+      "status": "done",
+      "round": 98,
+      "at": "2026-11-01T17:39:05+03:00"
+    },
     {
       "path": "docs/appendix/file_navigation.json",
       "decision": "round 95 五条记录恢复原文、措辞修正在历史条目上回滚（round 97）",

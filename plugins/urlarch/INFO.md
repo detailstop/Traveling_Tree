@@ -10,7 +10,7 @@ routes_prefix: /api/plugin/urlarch
 summary: 归档网址信息 · 后续接入网址爬虫
 icon: 🔖
 entries: [urlarch]
-tables: [urlarch_assets, urlarch_groups, urlarch_links]
+tables: [urlarch_assets, urlarch_groups, urlarch_links, urlarch_shortcuts]
 data_dirs: []
 shared_features: []
 provides: []
@@ -33,6 +33,7 @@ sensitive_data: []
 - `urlarch_assets`
 - `urlarch_groups`
 - `urlarch_links`
+- `urlarch_shortcuts`（白名单：本地软件条目，R4 轮使用；本轮只建表）
 
 ## 依赖
 - provides：无
@@ -40,4 +41,5 @@ sensitive_data: []
 
 ## 注意事项
 - 组别级收起 / 展开：点某组标题栏或 ▾ 按钮切换该组链接与拦截提示的显隐（▾→▸）；状态仅存页面会话内存，刷新恢复展开；不改后端与表结构。
+- 白名单存数据库表 `urlarch_shortcuts`，数据库文件在 `data/` 下不进 Git；本轮只建表，启动接口与快捷键留 R4 轮。
 - 详见 README.md；本卡为市场精简信息，关键字段由校验脚本与 manifest/schema 保持一致。

@@ -2,9 +2,9 @@
 
 > 只读摘要，勿手改。本文件由 docs/appendix/file_navigation.json 生成；结构与去留决定以 JSON 为准。
 
-- 生成时间：2026-11-01T17:23:10+03:00
-- 轮次：97
-- 待办：1 条；已决定：622 条
+- 生成时间：2026-11-01T17:39:05+03:00
+- 轮次：98
+- 待办：1 条；已决定：627 条
 
 ## 待办
 
@@ -16,6 +16,11 @@
 
 | 路径 | 决定 | 原因 | 状态 | 轮次 | 时间 | 备份路径 |
 | --- | --- | --- | --- | --- | --- | --- |
+| plugins/urlarch/schema.sql | 新增 urlarch_shortcuts 白名单表（round 98） | CREATE TABLE IF NOT EXISTS：id/name/path/args/hotkey/raw_json/live_json/created_at/updated_at，索引 idx_urlarch_shortcuts_hotkey(hotkey)；属内容表不豁免 live_json（白名单为用户登记数据、不可重建），未加触发器（与本插件其余三表一致，由 SQL 层显式双写）；未改动 urlarch_assets/groups/links 三表与既有索引。 | done | 98 | 2026-11-01T17:39:05+03:00 |  |
+| plugins/urlarch/migrate.py | 追加白名单表迁移（round 98） | manifest.json 原已声明 db.migrate（本轮未改 manifest，亦无 tables 字段需同步）；在既有 migrate 追加 _ensure_shortcuts：缺表建表、缺列 ALTER 补列、缺 raw/live 按行回填并建索引，全部加性语句，末尾沿用 conn.commit()、失败由 init_db 统一回滚。验证：真实库副本连跑两次无变更，旧三表行数/内容哈希不变（assets 1 / groups 6 / links 15），缺列形态副本可补列并回填。 | done | 98 | 2026-11-01T17:39:05+03:00 |  |
+| plugins/urlarch/INFO.md | tables 增 urlarch_shortcuts 并补白名单说明（round 98） | front matter tables 与 schema 对齐为 4 表；正文数据表与注意事项补“白名单存数据库表、库文件在 data/ 下不进 Git、本轮只建表、启动接口留 R4”；9 项必需字段与 source=local / market_package=false 不变。 | done | 98 | 2026-11-01T17:39:05+03:00 |  |
+| plugins/urlarch/README.md | 五节同步白名单表与迁移口径（round 98） | 数据表节补 urlarch_shortcuts 字段/索引/双列/无触发器说明；注意事项补用途（R4 白名单注册制）、存储位置（本机 SQLite，data/ 下不进 Git，不放 plugins/ 与 data/ JSON 配置）、迁移幂等与加性口径；五节结构不变。 | done | 98 | 2026-11-01T17:39:05+03:00 |  |
+| docs/appendix/file_navigation.json | 登记 round 98（schema + migrate 白名单前置轮） | 追加 5 条 decided 并 round→98、generated_at 更新；pending 保留既有 1 条（round 67–94 的 28 条非文件占位待清理），本轮无新增临时文件；resolved 45 条不动；file_navigation.md 由 tools/gen_file_navigation_md.py 重生成，未手改。本轮无背景库数据（未导入、未构造 mode:update 更新包）。 | done | 98 | 2026-11-01T17:39:05+03:00 |  |
 | docs/appendix/file_navigation.json | round 95 五条记录恢复原文、措辞修正在历史条目上回滚（round 97） | 依据 docs/plugin-development-whitepaper.md「docs/appendix/file_navigation.json：新增决定追加；历史语义保留；不改 schema」与 docs/plugin-development-guide.md「导航登记：在 decided[] 追加」：历史条目不得原地改写。已恢复 round 95 的 feature.js / plugin.css / README.md / INFO.md 及本条登记记录原文（原文措辞「组别级单卡」仅作历史语义保留）；round 96 的措辞修正条目保留为历史动作记录。现行措辞以「组别级收起 / 展开」为准：折叠单位是 .ua-group，非卡片。 | done | 97 | 2026-11-01T17:23:10+03:00 |  |
 | docs/appendix/file_navigation.json | 登记 28 条非文件占位待清理待办（round 97） | 在 pending[] 新增 1 条汇总待办（path 指向本文件的真实文件路径），记录 round 67–94 的 28 条 data/bg_import/::roundNN-none 非文件占位；本轮不删除历史条目（避免一次改动 28 条历史记录），留单独一轮统一清理。 | done | 97 | 2026-11-01T17:23:10+03:00 |  |
 | plugins/urlarch/README.md | 措辞统一为「组别级收起 / 展开」（round 96） | 职责与注意事项删去易被误读为卡片级的措辞：折叠单位是组别（`.ua-group`）；收起后 `.ua-items`/`.ua-blocked` 隐藏、不接收拖拽放置，展开后恢复；五节结构不变。 | done | 96 | 2026-11-01T17:18:19+03:00 |  |
