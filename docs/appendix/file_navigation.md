@@ -2,9 +2,9 @@
 
 > 只读摘要，勿手改。本文件由 docs/appendix/file_navigation.json 生成；结构与去留决定以 JSON 为准。
 
-- 生成时间：2026-11-01T14:00:52+03:00
-- 轮次：90
-- 待办：0 条；已决定：583 条
+- 生成时间：2026-11-01T14:46:28+03:00
+- 轮次：91
+- 待办：0 条；已决定：594 条
 
 ## 待办
 
@@ -15,6 +15,17 @@
 
 | 路径 | 决定 | 原因 | 状态 | 轮次 | 时间 | 备份路径 |
 | --- | --- | --- | --- | --- | --- | --- |
+| plugins/sim/ | sim 移回 plugins 并删除空 sources（round 91） | market/sources/sim → plugins/sim（含 INFO）；sources 空目录删除；INFO source=local、market_package=false；smoke_plugins 23 目录/185 断言、decoupling 476 断言同步。 | done | 91 | 2026-11-01T14:46:28+03:00 |  |
+| plugins/market/index_store.py | 双索引 remote/local 与旧文件迁移（round 91） | remote 覆盖式、local 组装式（扫描 INFO，21 条）；旧 index.json 迁移 finance/promptgen 到 remote、其余到 local 后删除；刷新只写 remote；下载目录 downloads/。 | done | 91 | 2026-11-01T14:46:28+03:00 |  |
+| plugins/market/backend.py | 四源合并/三类状态/下载安装（round 91） | 展示 INFO > remote > local；preset/market/local 分类；公共库从 download_url 下载到 downloads/，校验后解压并删 zip，失败保留；空地址 package_url_missing，未就绪 package_not_ready；本地开发不可安装。 | done | 91 | 2026-11-01T14:46:28+03:00 |  |
+| plugins/market/feature.js | 三类卡片与按钮（round 91） | 预置/公共库/本地开发徽标；本地开发无按钮；公共库安装/卸载；node --check 通过。 | done | 91 | 2026-11-01T14:46:28+03:00 |  |
+| plugins/*/INFO.md | 23 份 INFO source 三值（round 91） | preset 5、market 2（finance/promptgen）、local 16（含 sim）；market_package 与 source 语义一致；模板与 smoke_info_cards 同步；gen --check PASS。 | done | 91 | 2026-11-01T14:46:28+03:00 |  |
+| data/plugins/market/ | 运行态双文件迁移（round 91） | local_index.json 21 条、remote_index.json 2 条（finance/promptgen 包字段）；旧 index.json 已删除；运行态不进 Git。 | done | 91 | 2026-11-01T14:46:28+03:00 |  |
+| tests/smoke_market.py | 市场测试重写为双索引隔离用例（round 91） | 安全校验、双索引四源、三类状态、本地/下载安装、空地址、旧文件迁移、刷新只写 remote、失败保留 zip；21/21。 | done | 91 | 2026-11-01T14:46:28+03:00 |  |
+| tests/smoke_info_cards.py | INFO source 三值校验（round 91） | 允许 preset/market/local；market 必配 package true；remote package_ready 一致性；11/11。 | done | 91 | 2026-11-01T14:46:28+03:00 |  |
+| data/backup/market_upload/index.json | 待上传远程 index（2 条，round 91） | finance/promptgen 两条，version 2，含 sha256/size/file/download_url（GitHub Release v1）；不进 Git，供用户上传。 | done | 91 | 2026-11-01T14:46:28+03:00 |  |
+| README.md | 文档补双索引/三类/下载目录与基线（round 91） | README、白皮书 §7.2/7.5、守则、市场草案、market README/INFO 同步；全量 1000/1001（market 21、info 11、plugins 185、decoupling 476）。 | done | 91 | 2026-11-01T14:46:28+03:00 |  |
+| data/bg_import/::round91-none | 本次无背景库数据（round 91） | 用户未提供「项目优化与当前综述」导出 json；背景库不可用，本轮未执行 update 导入、未写背景库数据。 | done | 91 | 2026-11-01T14:46:28+03:00 |  |
 | tools/build_market_packages.py | 打包脚本支持 18 插件/排除/校验/回填运行态（round 90） | 17 个 plugins + sim 源；排除 __pycache__/*.pyc/.git/data/*.zip/*.tmp/.trash；现算 sha256/size/file；校验 zip 无路径穿越/排除目录；回填 data/plugins/market/index.json，不写 market/index.json；补包不升版。 | done | 90 | 2026-11-01T14:00:52+03:00 |  |
 | market/packages/ | 18 个非预置插件 zip 已生成（round 90） | 18 个 zip 生成并通过内容校验；zip 不进 Git，待用户上传 GitHub Release；`market/index.json` 保持 5 条模板。 | done | 90 | 2026-11-01T14:00:52+03:00 |  |
 | data/plugins/market/index.json | 运行态 index 回填 18 条包级字段（round 90） | sha256/size/file/package_ready:true 18 条；download_url 保持空；文件绝对路径 C:\Users\WJL\Desktop\Traveling_Tree\data\plugins\market\index.json。 | done | 90 | 2026-11-01T14:00:52+03:00 |  |

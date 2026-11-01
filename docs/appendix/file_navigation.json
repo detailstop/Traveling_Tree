@@ -1,9 +1,98 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-01T14:00:52+03:00",
-  "round": 90,
+  "generated_at": "2026-11-01T14:46:28+03:00",
+  "round": 91,
   "pending": [],
   "decided": [
+    {
+      "path": "plugins/sim/",
+      "decision": "sim 移回 plugins 并删除空 sources（round 91）",
+      "reason": "market/sources/sim → plugins/sim（含 INFO）；sources 空目录删除；INFO source=local、market_package=false；smoke_plugins 23 目录/185 断言、decoupling 476 断言同步。",
+      "status": "done",
+      "round": 91,
+      "at": "2026-11-01T14:46:28+03:00"
+    },
+    {
+      "path": "plugins/market/index_store.py",
+      "decision": "双索引 remote/local 与旧文件迁移（round 91）",
+      "reason": "remote 覆盖式、local 组装式（扫描 INFO，21 条）；旧 index.json 迁移 finance/promptgen 到 remote、其余到 local 后删除；刷新只写 remote；下载目录 downloads/。",
+      "status": "done",
+      "round": 91,
+      "at": "2026-11-01T14:46:28+03:00"
+    },
+    {
+      "path": "plugins/market/backend.py",
+      "decision": "四源合并/三类状态/下载安装（round 91）",
+      "reason": "展示 INFO > remote > local；preset/market/local 分类；公共库从 download_url 下载到 downloads/，校验后解压并删 zip，失败保留；空地址 package_url_missing，未就绪 package_not_ready；本地开发不可安装。",
+      "status": "done",
+      "round": 91,
+      "at": "2026-11-01T14:46:28+03:00"
+    },
+    {
+      "path": "plugins/market/feature.js",
+      "decision": "三类卡片与按钮（round 91）",
+      "reason": "预置/公共库/本地开发徽标；本地开发无按钮；公共库安装/卸载；node --check 通过。",
+      "status": "done",
+      "round": 91,
+      "at": "2026-11-01T14:46:28+03:00"
+    },
+    {
+      "path": "plugins/*/INFO.md",
+      "decision": "23 份 INFO source 三值（round 91）",
+      "reason": "preset 5、market 2（finance/promptgen）、local 16（含 sim）；market_package 与 source 语义一致；模板与 smoke_info_cards 同步；gen --check PASS。",
+      "status": "done",
+      "round": 91,
+      "at": "2026-11-01T14:46:28+03:00"
+    },
+    {
+      "path": "data/plugins/market/",
+      "decision": "运行态双文件迁移（round 91）",
+      "reason": "local_index.json 21 条、remote_index.json 2 条（finance/promptgen 包字段）；旧 index.json 已删除；运行态不进 Git。",
+      "status": "done",
+      "round": 91,
+      "at": "2026-11-01T14:46:28+03:00"
+    },
+    {
+      "path": "tests/smoke_market.py",
+      "decision": "市场测试重写为双索引隔离用例（round 91）",
+      "reason": "安全校验、双索引四源、三类状态、本地/下载安装、空地址、旧文件迁移、刷新只写 remote、失败保留 zip；21/21。",
+      "status": "done",
+      "round": 91,
+      "at": "2026-11-01T14:46:28+03:00"
+    },
+    {
+      "path": "tests/smoke_info_cards.py",
+      "decision": "INFO source 三值校验（round 91）",
+      "reason": "允许 preset/market/local；market 必配 package true；remote package_ready 一致性；11/11。",
+      "status": "done",
+      "round": 91,
+      "at": "2026-11-01T14:46:28+03:00"
+    },
+    {
+      "path": "data/backup/market_upload/index.json",
+      "decision": "待上传远程 index（2 条，round 91）",
+      "new_path": "data/backup/market_upload/index.json",
+      "reason": "finance/promptgen 两条，version 2，含 sha256/size/file/download_url（GitHub Release v1）；不进 Git，供用户上传。",
+      "status": "done",
+      "round": 91,
+      "at": "2026-11-01T14:46:28+03:00"
+    },
+    {
+      "path": "README.md",
+      "decision": "文档补双索引/三类/下载目录与基线（round 91）",
+      "reason": "README、白皮书 §7.2/7.5、守则、市场草案、market README/INFO 同步；全量 1000/1001（market 21、info 11、plugins 185、decoupling 476）。",
+      "status": "done",
+      "round": 91,
+      "at": "2026-11-01T14:46:28+03:00"
+    },
+    {
+      "path": "data/bg_import/::round91-none",
+      "decision": "本次无背景库数据（round 91）",
+      "reason": "用户未提供「项目优化与当前综述」导出 json；背景库不可用，本轮未执行 update 导入、未写背景库数据。",
+      "status": "done",
+      "round": 91,
+      "at": "2026-11-01T14:46:28+03:00"
+    },
     {
       "path": "tools/build_market_packages.py",
       "decision": "打包脚本支持 18 插件/排除/校验/回填运行态（round 90）",

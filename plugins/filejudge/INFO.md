@@ -15,9 +15,9 @@ data_dirs: [filejudge]
 shared_features: []
 provides: []
 consumes: []
-market_package: true
+market_package: false
 source: local
-known_limits: 包已生成，待上传 Release；download_url 为空时安装报“包地址未配置”
+known_limits: 本地开发，不通过市场分发
 sensitive_data: []
 ---
 # 文件判官 信息卡

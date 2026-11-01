@@ -52,22 +52,23 @@ def main() -> int:
                                for x in parsed.get(pid, {}).get("sensitive_data", []))
                        for pid, _ in targets)
     check("sensitive_data 仅路径类别", sensitive_ok)
+    src_ok = all(parsed.get(pid, {}).get("source") in ("preset", "market", "local")
+                 and ((parsed[pid]["source"] == "market") == (parsed[pid].get("market_package") is True))
+                 for pid, _ in targets)
+    check("source 三值与 market_package 语义", src_ok)
     icon_ok = all(isinstance(parsed.get(pid, {}).get("icon", "📦"), str)
                   and str(parsed.get(pid, {}).get("icon", "📦")).strip()
                   for pid, _ in targets)
     check("icon 可选字段合法", icon_ok)
     from plugins.market import index_store
-    rp = index_store.runtime_path()
-    if rp.is_file():
-        import json as _json
-        idx = _json.loads(rp.read_text(encoding="utf-8"))
-        ready = {str(x.get("id")) for x in idx.get("packages") or [] if x.get("package_ready")}
-        true_ids = {pid for pid, _ in targets
-                    if parsed.get(pid, {}).get("market_package") is True}
-        check("market_package 与运行态 package_ready 一致", true_ids <= ready,
+    remote = index_store.read_remote()
+    ready = {str(x.get("id")) for x in remote.get("packages") or [] if x.get("package_ready")}
+    true_ids = {pid for pid, _ in targets if parsed.get(pid, {}).get("market_package") is True}
+    if ready:
+        check("market_package 与 remote package_ready 一致", true_ids <= ready,
               "缺：" + ",".join(sorted(true_ids - ready)))
     else:
-        check("market_package 与运行态 package_ready 一致（运行态缺失，跳过）", True)
+        check("market_package 与 remote package_ready 一致（remote 空，跳过）", True)
     print(f"\nRESULT: {results.count(True)}/{len(results)} PASS")
     return 0 if all(results) else 1
 

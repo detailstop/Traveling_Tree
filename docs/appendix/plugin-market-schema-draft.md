@@ -111,3 +111,12 @@
 - `tools/build_market_packages.py` 现算 sha256/size/file 并回填 `data/plugins/market/index.json`；`market/index.json` 模板保持 5 条。
 - `download_url` 留空；上传 GitHub Release 后回填。为空时安装报“包地址未配置”，不静默。
 - 补包不升版（version 保持 1.0）。
+
+## 双文件分离与三类插件（round 91）
+
+- `remote_index.json`：覆盖式，仅拉取写入；公共库 finance/promptgen 的包字段。
+- `local_index.json`：组装式，扫描 `plugins/*/INFO.md` 生成（5 预置 + 16 本地开发）。
+- 展示合并：INFO > remote > local；旧 `index.json` 迁移后删除。
+- 三类：预置 5（preset，不可卸载）、公共库 2（market，Release 安装）、本地开发 16（local，无按钮）。
+- 下载目录 `data/plugins/market/downloads/`；成功删除 zip，失败保留。
+- `market/packages/` 18 个本地 zip 本轮保留，下一轮验证后删。

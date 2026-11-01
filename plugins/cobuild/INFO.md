@@ -16,8 +16,8 @@ shared_features: []
 provides: []
 consumes: []
 market_package: false
-source: local
-known_limits: 
+source: preset
+known_limits: 预置，不可卸载
 sensitive_data: []
 ---
 # 多 AI 共建 信息卡

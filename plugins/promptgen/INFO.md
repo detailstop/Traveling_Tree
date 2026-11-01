@@ -16,8 +16,8 @@ shared_features: [webchat]
 provides: []
 consumes: []
 market_package: true
-source: local
-known_limits: 包已生成，待上传 Release；download_url 为空时安装报“包地址未配置”
+source: market
+known_limits: Release v1，download_url 见远程 index
 sensitive_data: []
 ---
 # 提示词生成器 信息卡

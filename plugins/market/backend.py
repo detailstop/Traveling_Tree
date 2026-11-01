@@ -43,8 +43,23 @@ def plugins_dir() -> Path:
     return Path(config.BASE_DIR) / "plugins"
 
 
+def _remote_map() -> dict[str, dict]:
+    return {str(p.get("id")): p for p in index_store.read_remote().get("packages") or []
+            if isinstance(p, dict) and p.get("id")}
+
+
+def _local_map() -> dict[str, dict]:
+    return {str(p.get("id")): p for p in index_store.read_local().get("packages") or []
+            if isinstance(p, dict) and p.get("id")}
+
+
 def _index() -> dict:
-    return index_store.read_runtime()
+    remote = index_store.read_remote()
+    local = index_store.read_local()
+    merged = {str(p.get("id")): p for p in local.get("packages") or [] if isinstance(p, dict)}
+    merged.update({str(p.get("id")): p for p in remote.get("packages") or [] if isinstance(p, dict)})
+    return {"version": int(remote.get("version", 0) or 0),
+            "packages": list(merged.values())}
 
 
 def _lib_kinds() -> dict[str, str]:
@@ -85,20 +100,19 @@ def settings() -> dict:
     return default
 
 
-def _fetch_package(entry: dict) -> bytes:
-    """A 阶段：读本地 market/packages/<file>；B 阶段在此加 HTTP 分支。"""
-    source = str(entry.get("source") or "local")
-    if source != "local":
-        raise packaging.MarketError("remote_not_implemented", "B 阶段远程包尚未实现")
+def _fetch_package(entry: dict) -> tuple[bytes, Path | None]:
+    """优先 download_url 下载到 downloads/；否则读本地 packages/。返回 (bytes, 下载文件)。"""
+    url = str(entry.get("download_url") or "").strip()
+    if url:
+        path = index_store.download_zip(url, str(entry.get("id")))
+        return path.read_bytes(), path
     file_name = str(entry.get("file") or "")
     if not file_name or "/" in file_name or "\\" in file_name or ".." in file_name:
         raise packaging.MarketError("bad_index", f"包文件名不合法：{file_name}")
     path = packages_dir() / file_name
     if not path.is_file():
-        if not str(entry.get("download_url") or "").strip():
-            raise packaging.MarketError("package_url_missing", "包地址未配置（download_url 为空且本地包缺失）")
-        raise packaging.MarketError("package_missing", f"本地包不存在：{file_name}")
-    return path.read_bytes()
+        raise packaging.MarketError("package_url_missing", "包地址未配置（download_url 为空且本地包缺失）")
+    return path.read_bytes(), None
 
 
 # ---------- 安装记录（market_installed） ----------
@@ -149,49 +163,53 @@ def _info_index() -> dict[str, dict]:
 
 
 def list_plugins() -> dict:
-    idx = _index()
     kinds = _lib_kinds()
     records = _records()
     infos = _info_index()
-    packages = {str(p.get("id")): p for p in idx.get("packages") or []
-                if isinstance(p, dict) and p.get("id")}
-    ids = set(infos["items"]) | set(packages) | set(PRESETS)
+    remote = _remote_map()
+    local = _local_map()
+    ids = set(infos["items"]) | set(remote) | set(local) | set(PRESETS)
     if plugins_dir().is_dir():
         ids |= {d.name for d in plugins_dir().iterdir() if d.is_dir() and not d.name.startswith(".")}
     entries: dict[str, dict] = {}
     for pid in sorted(ids):
         info = infos["items"].get(pid)
-        pkg = packages.get(pid)
+        rp = remote.get(pid)
+        lp = local.get(pid)
+        pkg = rp or lp
         manifest = _manifest(pid) or {}
         installed = _installed(pid)
-        name = str((info or {}).get("name") or manifest.get("name") or pid)
-        version = str((info or {}).get("version") or manifest.get("version") or (pkg or {}).get("version") or "")
-        desc = str((info or {}).get("summary") or manifest.get("desc") or "")
+        name = str((info or {}).get("name") or (pkg or {}).get("name") or manifest.get("name") or pid)
+        version = str((info or {}).get("version") or (pkg or {}).get("version") or manifest.get("version") or "")
+        desc = str((info or {}).get("summary") or (pkg or {}).get("summary") or manifest.get("desc") or "")
         kind = str((info or {}).get("kind") or kinds.get(pid) or "functional")
+        icon = str((info or {}).get("icon") or manifest.get("icon") or "🧩")
+        if pid in PRESETS:
+            source = "preset"
+        elif pid in remote:
+            source = "market"
+        else:
+            source = "local"
+        ready = bool((pkg or {}).get("package_ready"))
         entries[pid] = {
-            "id": pid,
-            "name": name,
-            "icon": str(manifest.get("icon") or "🧩"),
-            "kind": kind,
-            "desc": desc,
-            "version": version,
-            "installed": installed,
-            "preset": pid in PRESETS,
-            "package": bool(pkg),
-            "has_package": bool(pkg),
+            "id": pid, "name": name, "icon": icon, "kind": kind, "desc": desc,
+            "version": version, "installed": installed, "preset": pid in PRESETS,
+            "plugin_source": source, "source": source,
+            "package": ready, "has_package": ready,
+            "package_ready": ready,
             "size": int((pkg or {}).get("size") or 0),
             "sha256": str((pkg or {}).get("sha256") or ""),
-            "source": str((pkg or {}).get("source") or "local"),
+            "download_url": str((pkg or {}).get("download_url") or ""),
             "info_source": (info or {}).get("_info_source", "none"),
             "info_error": infos["errors"].get(pid, ""),
             "installed_at": (records.get(pid) or {}).get("installed_at", ""),
         }
-        if not installed and not pkg:
+        if source == "market" and not ready:
             entries[pid]["package_error"] = "缺包信息"
     items = sorted(entries.values(), key=lambda x: (0 if x["preset"] else 1, x["name"]))
-    idx = _index()
     return {"ok": True, "plugins": items, "presets": list(PRESETS),
-            "index_version": int(idx.get("version", 0) or 0),
+            "index_version": int(index_store.read_remote().get("version", 0) or 0),
+            "local_version": int(index_store.read_local().get("version", 0) or 0),
             "market_source_url": settings().get("market_source_url", ""),
             "info_errors": infos["errors"]}
 
@@ -205,20 +223,26 @@ def install(pid: str) -> dict:
         return {"ok": False, "error": "preset_protected", "message": "预置插件不可重新安装"}
     if _installed(pid):
         return {"ok": False, "error": "already_installed", "message": "插件已安装"}
-    idx = _index()
-    entry = next((p for p in idx.get("packages") or []
-                  if isinstance(p, dict) and str(p.get("id")) == pid), None)
+    entry = _remote_map().get(pid)
     if entry is None:
-        return {"ok": False, "error": "no_package", "message": "index.json 中没有该插件包"}
+        return {"ok": False, "error": "no_package", "message": "仅公共库（remote_index）插件可安装"}
     if not entry.get("package_ready"):
         return {"ok": False, "error": "package_not_ready", "message": "包未就绪（package_ready=false）"}
+    downloaded = None
     try:
-        data = _fetch_package(entry)
+        data, downloaded = _fetch_package(entry)
         manifest = packaging.install_package(
             entry, data, plugins_dir(), market_dir() / ".tmp")
     except packaging.MarketError as exc:
         return {"ok": False, "error": exc.code, "message": exc.message}
-    _record(pid, str(entry.get("version") or manifest.get("version") or ""), "local", "installed")
+    except index_store.IndexError_ as exc:
+        return {"ok": False, "error": exc.code, "message": exc.message}
+    if downloaded is not None:
+        try:
+            downloaded.unlink(missing_ok=True)
+        except OSError:
+            pass
+    _record(pid, str(entry.get("version") or manifest.get("version") or ""), "market", "installed")
     return {"ok": True, "id": pid, "restart_required": True,
             "message": "安装完成，重启服务后生效"}
 

@@ -16,8 +16,8 @@ shared_features: []
 provides: [webchat]
 consumes: []
 market_package: false
-source: local
-known_limits: 
+source: preset
+known_limits: 预置，不可卸载
 sensitive_data: [data/plugins/webchat/webchat_profile/]
 ---
 # 网页会话 信息卡

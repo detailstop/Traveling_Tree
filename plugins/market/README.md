@@ -23,7 +23,12 @@
 - `market/index.json`（只读）、`market/packages/*.zip`（A 阶段本地包，不进 Git）
 - 预置插件：`market`、`cobuild`、`webchat`、`tts`、`pixel_art`
 - 插件源码试点：`market/sources/sim/`（进 Git，zip 由脚本生成）
-- 本地包：`market/packages/<id>.zip`（18 个非预置已生成；不进 Git；补包不升版；上传 Release 后回填 `download_url`；为空时安装报“包地址未配置”）
+- 本地包：`market/packages/<id>.zip`（18 个本地包保留待下一轮清理；不进 Git；脚本勿随意运行，发版按需使用；Release 上传后回填 `download_url`）
+
+## 双索引与三类插件
+- `remote_index.json`：拉取覆盖，公共库（finance/promptgen）包字段；`local_index.json`：扫描 `plugins/*/INFO.md` 组装（21 条展示）。
+- 展示合并：INFO > remote > local；`downloads/` 存下载 zip，成功后删除、失败保留。
+- 预置 5 不可卸载；公共库 2 可从 Release 安装；本地开发 16 无安装/卸载按钮。
 
 ## 拉取最新插件
 - 运行态：`data/plugins/market/index.json`；首次请求若缺失，从 `market/index.json`（5 条预置模板）复制，已有不覆盖。

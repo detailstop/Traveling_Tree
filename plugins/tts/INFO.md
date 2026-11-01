@@ -16,8 +16,8 @@ shared_features: []
 provides: [tts]
 consumes: []
 market_package: false
-source: local
-known_limits: 
+source: preset
+known_limits: 预置，不可卸载
 sensitive_data: []
 ---
 # 语音朗读 信息卡

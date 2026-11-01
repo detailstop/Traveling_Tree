@@ -104,14 +104,14 @@ live_json TEXT NOT NULL DEFAULT '' -- 当前编辑状态
 | smoke_file_preview.py | 文件预览 | 17/17 |
 | smoke_pdf.py | PDF 与二进制响应 | 17/17 |
 | smoke_plugin_data_dirs.py | 插件 data_dirs | 13/13 |
-| smoke_plugin_decoupling.py | 19 卡片插件改名/重启解耦 | 454/454 |
+| smoke_plugin_decoupling.py | 20 卡片插件改名/重启解耦 | 476/476 |
 | smoke_plugin_module_off.py | 模块关闭 503/不建表 | 10/10 |
-| smoke_plugins.py | manifest/清单/静态资源/后端 | 183/183 |
+| smoke_plugins.py | manifest/清单/静态资源/后端 | 185/185 |
 | smoke_startup_once.py | 首次启动建表/API | 34/34 |
-| smoke_market.py | 市场安全/安装/拉取/开发插件 | 42/42 |
-| smoke_info_cards.py | 22+1 份 INFO.md 字段/一致性 | 10/10 |
+| smoke_market.py | 市场双索引/安装/拉取 | 21/21 |
+| smoke_info_cards.py | 23 份 INFO.md 字段/一致性 | 11/11 |
 
-合计 **996/997**（14 项全 PASS；`smoke_web` 74/75，TTS 502 为唯一允许 FAIL）。
+合计 **1000/1001**（14 项全 PASS；`smoke_web` 74/75，TTS 502 为唯一允许 FAIL）。
 
 已知 FAIL：`smoke_web` 的 TTS 502 来自 edge-tts 外部网络不可用，不阻塞其他断言；出现非 TTS 的 FAIL 按回滚规则处理。
 
@@ -130,6 +130,7 @@ live_json TEXT NOT NULL DEFAULT '' -- 当前编辑状态
 - 主库 `data/russian_tutor.db`（唯一业务主库；文件名与项目目录名解耦，不改）。
 - `data/settings.json`：`download_groups` + `modules.enabled`；插件 settings 在 `data/plugins/<id>/settings.json`。
 - 敏感文件：`data/ai_keys.json`、`data/webchat_sessions.json`、`data/plugins/webchat/webchat_profile/`、`data/plugins/finance/fixtures/rt_fin.json`；只按路径处理，不读正文、不进 Git。
+- 市场双索引：`remote_index.json`（覆盖式，拉取写入，公共库包字段）+ `local_index.json`（组装式，扫描 INFO）；旧 `index.json` 迁移后删除；`downloads/` 存下载 zip。
 - 市场运行态：`data/plugins/market/index.json`（不进 Git；首次请求从 `market/index.json` 复制 5 条预置；远程拉取覆盖）。
 - 市场源：`data/plugins/market/settings.json` 的 `market_source_url`（https raw；空则拉取按钮置灰）。
 - 市场包：`market/packages/<id>.zip`（18 个非预置已生成；不进 Git，补包不升版；需上传 Release 后回填 `download_url`；为空时安装报“包地址未配置”）。

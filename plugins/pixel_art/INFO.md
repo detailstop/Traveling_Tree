@@ -16,8 +16,8 @@ shared_features: []
 provides: [pixel_assets]
 consumes: []
 market_package: false
-source: local
-known_limits: 
+source: preset
+known_limits: 预置，不可卸载
 sensitive_data: []
 ---
 # 像素画与插件绘制 信息卡

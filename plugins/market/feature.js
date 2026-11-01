@@ -40,13 +40,17 @@
     const installed = !!it.installed;
     const preset = !!it.preset;
     const expanded = STATE.expanded === it.id;
+    const pluginSource = it.plugin_source || it.source || 'local';
     const status = preset ? '<span class="mk-badge preset">预置</span>'
+      : pluginSource === 'local' ? '<span class="mk-badge local">本地开发</span>'
       : installed ? '<span class="mk-badge on">已安装</span>'
       : '<span class="mk-badge off">未安装</span>';
     let actions = '';
-    if (!installed && it.package) {
+    if (pluginSource === 'local') {
+      actions = '<span class="mk-hint">本地开发，不通过市场分发</span>';
+    } else if (pluginSource === 'market' && !installed && it.package) {
       actions = `<button class="btn sm" data-install="${esc(it.id)}" ${STATE.busy ? 'disabled' : ''}>安装</button>`;
-    } else if (installed && !preset) {
+    } else if (pluginSource === 'market' && installed && !preset) {
       actions = `<button class="btn soft sm" data-uninstall="${esc(it.id)}" ${STATE.busy ? 'disabled' : ''}>卸载</button>`;
     } else if (preset) {
       actions = `<span class="mk-hint">内置，不可卸载</span>`;
@@ -66,7 +70,7 @@
           <span>版本</span><b>${esc(it.version || '—')}</b>
           <span>包大小</span><b>${fmtSize(it.size)}</b>
           <span>SHA256</span><b class="mono">${esc((it.sha256 || '').slice(0, 8) || '—')}</b>
-          <span>来源</span><b>${esc(it.source || 'local')}</b>
+          <span>类型</span><b>${esc(pluginSource)}</b>
           <span>信息源</span><b>${esc(it.info_source || 'none')}${it.info_error ? '（' + esc(it.info_error) + '）' : ''}</b>
         </div>
         ${(!preset && installed) ? `<label class="mk-danger"><input type="checkbox" data-deldata="${esc(it.id)}"> 同时删除私有数据目录（默认保留）</label>` : ''}
