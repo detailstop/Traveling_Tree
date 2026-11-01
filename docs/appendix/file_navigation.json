@@ -1,9 +1,74 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-01T14:57:43+03:00",
-  "round": 92,
+  "generated_at": "2026-11-01T16:24:31+03:00",
+  "round": 93,
   "pending": [],
   "decided": [
+    {
+      "path": "plugins/market/validate.py",
+      "decision": "新增插件校验打包核心（round 93）",
+      "reason": "validate(path) 固定 JSON（path/id/errors/warnings/checked_at/tool_version）；覆盖 manifest/README/INFO/schema/backend/feature 校验；错误码枚举稳定；pack 仅 ok 时打包到 data/backup/market_build/<id>.zip，排除 __pycache__/data 等并校验 zip；源目录只读。",
+      "status": "done",
+      "round": 93,
+      "at": "2026-11-01T16:24:31+03:00"
+    },
+    {
+      "path": "plugins/market/backend.py",
+      "decision": "新增 validate-pack 路由（round 93）",
+      "reason": "POST /validate-pack/check 与 /pack；路径空/不存在/非目录返回错误码不 Traceback；与 scaffold/refresh 并列，不改既有路由。",
+      "status": "done",
+      "round": 93,
+      "at": "2026-11-01T16:24:31+03:00"
+    },
+    {
+      "path": "plugins/market/feature.js",
+      "decision": "市场顶部“校验打包”面板（round 93）",
+      "reason": "路径输入+datalist、校验/打包按钮、错误/警告分级、输出 zip 路径；不改卡片/开发插件/拉取逻辑；node --check 通过。",
+      "status": "done",
+      "round": 93,
+      "at": "2026-11-01T16:24:31+03:00"
+    },
+    {
+      "path": "tests/smoke_market.py",
+      "decision": "校验打包测试（round 93）",
+      "reason": "正例 plugins/market、缺 manifest/id、source 配对、tables 不一致、打包内容干净、失败拒绝、HTTP/Python 一致；29/29。",
+      "status": "done",
+      "round": 93,
+      "at": "2026-11-01T16:24:31+03:00"
+    },
+    {
+      "path": "docs/plugin-development-guide.md",
+      "decision": "守则 §3/§4 写入必须校验（round 93）",
+      "reason": "§3 增加第 5 步校验（HTTP/Python，ok:true 才继续）；§4 检查清单加校验项；白皮书 §六补“必须通过 market 校验器”。",
+      "status": "done",
+      "round": 93,
+      "at": "2026-11-01T16:24:31+03:00"
+    },
+    {
+      "path": "plugins/market/README.md",
+      "decision": "市场文档补校验打包（round 93）",
+      "reason": "路由、结果结构、错误码/警告码、输出目录、只读源目录；市场草案与 INFO 同步。",
+      "status": "done",
+      "round": 93,
+      "at": "2026-11-01T16:24:31+03:00"
+    },
+    {
+      "path": "data/backup/market_build/",
+      "decision": "样例打包产物（round 93）",
+      "new_path": "data/backup/market_build/market.zip",
+      "reason": "对 plugins/market 自校验通过并打包，zip 26778 B；目录非 Git。",
+      "status": "done",
+      "round": 93,
+      "at": "2026-11-01T16:24:31+03:00"
+    },
+    {
+      "path": "data/bg_import/::round93-none",
+      "decision": "本次无背景库数据（round 93）",
+      "reason": "用户未提供「项目优化与当前综述」导出 json；背景库不可用，本轮未执行 update 导入、未写背景库数据。",
+      "status": "done",
+      "round": 93,
+      "at": "2026-11-01T16:24:31+03:00"
+    },
     {
       "path": "market/packages/",
       "decision": "删除 18 个本地 zip，Release 成为唯一分发源（round 92）",

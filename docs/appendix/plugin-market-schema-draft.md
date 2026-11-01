@@ -120,3 +120,10 @@
 - 三类：预置 5（preset，不可卸载）、公共库 2（market，Release 安装）、本地开发 16（local，无按钮）。
 - 下载目录 `data/plugins/market/downloads/`；成功删除 zip，失败保留。
 - `market/packages/` 原 18 个本地 zip 已删除；目录保留空目录，`.gitignore` 规则保留防误提交。
+
+## 校验打包子功能（round 93）
+
+- 路由 `/api/plugin/market/validate-pack/check|pack`；Python `plugins.market.validate.validate/pack`。
+- 固定结果 `{ok,path,id,errors,warnings,checked_at,tool_version}`；错误阻止打包，警告仅提示。
+- 源目录只读；输出 `data/backup/market_build/<id>.zip`；排除 `__pycache__/`、`data/` 等；不写 `market/packages/`。
+- 错误码见 `plugins/market/README.md`「校验打包」节。

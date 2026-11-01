@@ -14,7 +14,7 @@ import config
 from db.connection import get_conn
 from plugins.market import packaging
 from plugins.market.info import InfoError, read_info
-from plugins.market import index_store, scaffold
+from plugins.market import index_store, scaffold, validate as validate_pack
 
 PRESETS = ("market", "cobuild", "webchat", "tts", "pixel_art")
 _ID_RE = re.compile(r"^[a-z][a-z0-9_]{1,31}$")
@@ -320,6 +320,10 @@ def handle(method: str, subpath: str, query: dict, body: dict):
                     "download_dir": str(out or ""), "configured": out is not None}
         if method == "POST" and route == "scaffold/generate":
             return {"ok": True, **scaffold.generate(body.get("id"), body.get("values") or {})}
+        if method == "POST" and route == "validate-pack/check":
+            return validate_pack.validate(body.get("path"))
+        if method == "POST" and route == "validate-pack/pack":
+            return validate_pack.pack(body.get("path"), body.get("out_dir"))
         if method == "GET" and route == "refresh-index":
             return {"ok": True, "configured": bool(settings().get("market_source_url")),
                     "version": int(_index().get("version", 0) or 0)}
@@ -332,6 +336,7 @@ def handle(method: str, subpath: str, query: dict, body: dict):
     except index_store.IndexError_ as exc:
         return {"ok": False, "error": exc.code, "message": exc.message}
     if route in {"list", "index", "status", "install", "uninstall",
-                 "scaffold/fields", "scaffold/generate", "refresh-index"}:
+                 "scaffold/fields", "scaffold/generate", "refresh-index",
+                 "validate-pack/check", "validate-pack/pack"}:
         return {"ok": False, "error": "method_not_allowed", "__status__": 405}
     return {"ok": False, "error": "not_found", "__status__": 404}

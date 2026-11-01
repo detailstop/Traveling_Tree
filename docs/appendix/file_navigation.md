@@ -2,9 +2,9 @@
 
 > 只读摘要，勿手改。本文件由 docs/appendix/file_navigation.json 生成；结构与去留决定以 JSON 为准。
 
-- 生成时间：2026-11-01T14:57:43+03:00
-- 轮次：92
-- 待办：0 条；已决定：599 条
+- 生成时间：2026-11-01T16:24:31+03:00
+- 轮次：93
+- 待办：0 条；已决定：607 条
 
 ## 待办
 
@@ -15,6 +15,14 @@
 
 | 路径 | 决定 | 原因 | 状态 | 轮次 | 时间 | 备份路径 |
 | --- | --- | --- | --- | --- | --- | --- |
+| plugins/market/validate.py | 新增插件校验打包核心（round 93） | validate(path) 固定 JSON（path/id/errors/warnings/checked_at/tool_version）；覆盖 manifest/README/INFO/schema/backend/feature 校验；错误码枚举稳定；pack 仅 ok 时打包到 data/backup/market_build/<id>.zip，排除 __pycache__/data 等并校验 zip；源目录只读。 | done | 93 | 2026-11-01T16:24:31+03:00 |  |
+| plugins/market/backend.py | 新增 validate-pack 路由（round 93） | POST /validate-pack/check 与 /pack；路径空/不存在/非目录返回错误码不 Traceback；与 scaffold/refresh 并列，不改既有路由。 | done | 93 | 2026-11-01T16:24:31+03:00 |  |
+| plugins/market/feature.js | 市场顶部“校验打包”面板（round 93） | 路径输入+datalist、校验/打包按钮、错误/警告分级、输出 zip 路径；不改卡片/开发插件/拉取逻辑；node --check 通过。 | done | 93 | 2026-11-01T16:24:31+03:00 |  |
+| tests/smoke_market.py | 校验打包测试（round 93） | 正例 plugins/market、缺 manifest/id、source 配对、tables 不一致、打包内容干净、失败拒绝、HTTP/Python 一致；29/29。 | done | 93 | 2026-11-01T16:24:31+03:00 |  |
+| docs/plugin-development-guide.md | 守则 §3/§4 写入必须校验（round 93） | §3 增加第 5 步校验（HTTP/Python，ok:true 才继续）；§4 检查清单加校验项；白皮书 §六补“必须通过 market 校验器”。 | done | 93 | 2026-11-01T16:24:31+03:00 |  |
+| plugins/market/README.md | 市场文档补校验打包（round 93） | 路由、结果结构、错误码/警告码、输出目录、只读源目录；市场草案与 INFO 同步。 | done | 93 | 2026-11-01T16:24:31+03:00 |  |
+| data/backup/market_build/ | 样例打包产物（round 93） | 对 plugins/market 自校验通过并打包，zip 26778 B；目录非 Git。 | done | 93 | 2026-11-01T16:24:31+03:00 |  |
+| data/bg_import/::round93-none | 本次无背景库数据（round 93） | 用户未提供「项目优化与当前综述」导出 json；背景库不可用，本轮未执行 update 导入、未写背景库数据。 | done | 93 | 2026-11-01T16:24:31+03:00 |  |
 | market/packages/ | 删除 18 个本地 zip，Release 成为唯一分发源（round 92） | 18 个 zip 全部删除；目录保留空目录；.gitignore 规则保留；docs 收敛为 Release 唯一源。 | done | 92 | 2026-11-01T14:57:43+03:00 |  |
 | data/plugins/market/downloads/ | 清理 downloads 残留（round 92） | 无残留 zip；空目录保留。 | done | 92 | 2026-11-01T14:57:43+03:00 |  |
 | README.md | 文档收敛 Release 唯一源（round 92） | README §5/§6/§12、白皮书 §7.1/§7.5、守则、市场草案、market README/INFO 统一：market/packages 空目录、脚本备用勿随意运行、公共库 2 从 Release 安装；移除 market/sources 与 18 包保留表述。 | done | 92 | 2026-11-01T14:57:43+03:00 |  |

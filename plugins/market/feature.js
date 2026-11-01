@@ -2,7 +2,8 @@
 (function () {
   'use strict';
   let STATE = { items: [], search: '', kind: '', expanded: null, busy: false,
-    devOpen: false, devFields: [], devConfigured: false, devError: '', devErrorCode: '', devValues: {}, devResult: null, marketSourceUrl: '', indexVersion: 0 };
+    devOpen: false, devFields: [], devConfigured: false, devError: '', devErrorCode: '', devValues: {}, devResult: null, marketSourceUrl: '', indexVersion: 0,
+    vpOpen: false, vpPath: 'plugins/market', vpResult: null, vpBusy: false };
 
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
@@ -78,6 +79,53 @@
     </div>`;
   }
 
+  function drawVp(host) {
+    const panel = host.querySelector('#mk-vp-panel');
+    if (!panel) return;
+    panel.hidden = !STATE.vpOpen;
+    if (!STATE.vpOpen) return;
+    const opts = STATE.items.map(x => `<option value="plugins/${esc(x.id)}">`).join('');
+    const res = STATE.vpResult;
+    let resultHtml = '';
+    if (res) {
+      const list = (arr, cls) => (arr || []).map(e =>
+        `<li class="${cls}"><b>${esc(e.code)}</b> ${esc(e.file || '')}${e.field ? ' · ' + esc(e.field) : ''}<span>${esc(e.message || '')}</span></li>`).join('');
+      resultHtml = `<div class="mk-vp-result">
+        <div class="${res.ok ? 'mk-ok' : 'mk-bad'}">${res.ok ? '校验通过' : '校验失败'} · errors ${res.errors.length} / warnings ${res.warnings.length}</div>
+        <ul>${list(res.errors, 'bad')}${list(res.warnings, 'warn')}</ul>
+        ${res.zip_path ? `<div class="mk-dev-result">已打包：<code>${esc(res.zip_path)}</code></div>` : ''}
+      </div>`;
+    }
+    panel.innerHTML = `<div class="mk-dev-head"><b>校验打包</b>
+      <span>只读校验 plugins/&lt;id&gt; 或绝对路径；通过后打包到 data/backup/market_build/&lt;id&gt;.zip</span></div>
+      <div class="mk-vp-row"><input id="mk-vp-path" class="mk-search" list="mk-vp-list" value="${esc(STATE.vpPath)}">
+        <datalist id="mk-vp-list">${opts}</datalist>
+        <button class="btn sm" data-vp-check ${STATE.vpBusy ? 'disabled' : ''}>校验</button>
+        <button class="btn soft sm" data-vp-pack ${(!res || !res.ok || STATE.vpBusy) ? 'disabled' : ''}>打包</button></div>
+      ${resultHtml}`;
+    const pathEl = panel.querySelector('#mk-vp-path');
+    pathEl.oninput = () => { STATE.vpPath = pathEl.value; };
+    panel.querySelector('[data-vp-check]').onclick = async () => {
+      STATE.vpBusy = true; drawVp(host);
+      try {
+        const r = await api('/api/plugin/market/validate-pack/check', { body: { path: STATE.vpPath } });
+        STATE.vpResult = r;
+        toast(r.ok ? '校验通过' : '校验失败', r.ok ? 'success' : 'error');
+      } catch (e) { toast('校验失败：' + e.message, 'error'); }
+      STATE.vpBusy = false; drawVp(host);
+    };
+    panel.querySelector('[data-vp-pack]').onclick = async () => {
+      STATE.vpBusy = true; drawVp(host);
+      try {
+        const r = await api('/api/plugin/market/validate-pack/pack', { body: { path: STATE.vpPath } });
+        STATE.vpResult = r;
+        if (!r.ok) throw new Error((r.errors && r.errors[0] && r.errors[0].message) || r.message || '打包失败');
+        toast('已打包：' + r.zip_path, 'success');
+      } catch (e) { toast('打包失败：' + e.message, 'error'); }
+      STATE.vpBusy = false; drawVp(host);
+    };
+  }
+
   function drawDev(host) {
     const panel = host.querySelector('#mk-dev-panel');
     const btn = host.querySelector('#mk-dev');
@@ -142,9 +190,11 @@
         <select id="mk-kind" class="mk-kind-sel"><option value="">全部类型</option></select>
         <span id="mk-count" class="mk-count"></span>
         <button id="mk-dev" class="btn sm" title="${STATE.devConfigured ? '填写参数并生成开发提示词' : '请先在设置页填写通用下载地址'}">🛠 开发插件</button>
+        <button id="mk-vp" class="btn soft sm" title="校验插件目录并打包">🧪 校验打包</button>
         <button id="mk-refresh" class="btn soft sm" title="${STATE.marketSourceUrl ? '从 market_source_url 拉取并覆盖运行态 index' : '未配置 market_source_url，请先在 data/plugins/market/settings.json 填写'}">🔄 拉取最新插件</button>
       </div>
       <div id="mk-dev-panel" class="mk-dev-panel"${STATE.devOpen ? '' : ' hidden'}></div>
+      <div id="mk-vp-panel" class="mk-dev-panel"${STATE.vpOpen ? '' : ' hidden'}></div>
       <div id="mk-grid" class="mk-grid"></div>
     </div>`;
     const draw = () => {
@@ -185,6 +235,7 @@
         await loadList();
         draw();
         drawDev(host);
+        drawVp(host);
       } catch (e) { toast('市场加载失败：' + e.message, 'error'); }
       finally { syncRefreshButton(); }
     };
@@ -235,6 +286,10 @@
         await refresh();
       } catch (e) { toast('拉取失败：' + e.message, 'error'); }
       finally { syncRefreshButton(); }
+    };
+    host.querySelector('#mk-vp').onclick = () => {
+      STATE.vpOpen = !STATE.vpOpen;
+      drawVp(host);
     };
     host.querySelector('#mk-dev').onclick = () => {
       if (!STATE.devConfigured && STATE.devErrorCode !== 'template_missing') {

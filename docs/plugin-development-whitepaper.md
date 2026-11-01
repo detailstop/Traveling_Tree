@@ -83,6 +83,7 @@ live_json TEXT NOT NULL DEFAULT '' -- 当前编辑状态
 ## 六、 测试与解耦红线
 
 - **双向绑定校验**：新增插件后必须运行 `python tests/smoke_plugins.py`，确保宿主与插件的清单一致。
+- **插件校验**：新插件必须通过 market 校验器（`plugins/market/validate.py`）；`ok: false` 时错误阻止打包，警告仅提示。
 - **解耦极限测试**：必须通过 `python tests/smoke_plugin_decoupling.py` 的改名/重启测试。如果你的插件消失或损坏，绝不允许导致宿主启动崩溃（日志无 Error/Traceback）。
 
 ## 七、项目状态与交接（2026-10-30）
@@ -108,10 +109,10 @@ live_json TEXT NOT NULL DEFAULT '' -- 当前编辑状态
 | smoke_plugin_module_off.py | 模块关闭 503/不建表 | 10/10 |
 | smoke_plugins.py | manifest/清单/静态资源/后端 | 185/185 |
 | smoke_startup_once.py | 首次启动建表/API | 34/34 |
-| smoke_market.py | 市场双索引/安装/拉取 | 21/21 |
+| smoke_market.py | 市场双索引/安装/拉取/校验打包 | 29/29 |
 | smoke_info_cards.py | 23 份 INFO.md 字段/一致性 | 11/11 |
 
-合计 **1000/1001**（14 项全 PASS；`smoke_web` 74/75，TTS 502 为唯一允许 FAIL）。
+合计 **1008/1009**（14 项全 PASS；`smoke_web` 74/75，TTS 502 为唯一允许 FAIL）。
 
 已知 FAIL：`smoke_web` 的 TTS 502 来自 edge-tts 外部网络不可用，不阻塞其他断言；出现非 TTS 的 FAIL 按回滚规则处理。
 

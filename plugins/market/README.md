@@ -35,6 +35,13 @@
 - 手动点击「拉取最新插件」→ POST `/api/plugin/market/refresh-index`：校验 JSON 结构、id/sha256/size/file/download_url、版本单调递增；通过后只原子覆盖 `remote_index.json`；失败不动本地并返回错误码（not_configured/network_error/http_error/invalid_structure/version_regression/insecure_url）。
 - 生产只接受 https；测试通过注入本地假源，不依赖外网。
 
+## 校验打包
+- 路由：`POST /api/plugin/market/validate-pack/check`（body `path`）、`POST /api/plugin/market/validate-pack/pack`（body `path`、可选 `out_dir`）；Python：`from plugins.market.validate import validate, pack`。
+- 结果固定结构：`{ok, path, id, errors[], warnings[], checked_at, tool_version}`；错误阻止打包，警告仅提示。
+- 错误码：`path_empty`、`path_not_found`、`path_not_dir`、`manifest_missing`、`manifest_invalid`、`manifest_id_invalid`、`manifest_id_mismatch`、`schema_version_invalid`、`feature_missing`、`backend_missing`、`info_missing`、`info_invalid`、`info_field_missing`、`info_id_mismatch`、`source_package_mismatch`、`source_invalid`、`tables_mismatch`、`has_ui_mismatch`、`has_backend_mismatch`、`pack_empty`。
+- 警告码：`readme_missing`、`readme_section_missing`、`info_optional_missing`、`known_limits_empty`。
+- 源目录只读；打包输出 `data/backup/market_build/<id>.zip`，排除 `__pycache__/`、`*.pyc`、`.git/`、`data/`、`*.zip`、`*.tmp`、`.trash/`；不写 `market/packages/`。
+
 ## 注意事项
 - 安装前强制 SHA256 + zip 路径穿越/符号链接校验；安装=解压到 `plugins/<id>/`，重启生效。
 - 卸载=移出 `plugins/<id>/`（保留 `data/plugins/<id>/`）；勾选删除私有数据时先备份到 `data/backup/uninstall_<id>_<ts>/`。

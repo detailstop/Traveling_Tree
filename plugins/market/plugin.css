@@ -50,3 +50,14 @@
 .mk-dev-actions { display: flex; justify-content: flex-end; }
 .mk-dev-result { font-size: 12px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .mk-dev-result code { font-family: ui-monospace, Consolas, monospace; word-break: break-all; }
+
+/* 校验打包 */
+.mk-vp-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.mk-vp-row .mk-search { flex: 1 1 360px; }
+.mk-vp-result { display: flex; flex-direction: column; gap: 6px; font-size: 12px; }
+.mk-vp-result ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 3px; }
+.mk-vp-result li.bad { color: #b04a5a; }
+.mk-vp-result li.warn { color: #a67c00; }
+.mk-vp-result li span { margin-left: 6px; color: var(--text-dim, #8a7480); }
+.mk-ok { color: #2e7d55; font-weight: 600; }
+.mk-bad { color: #b04a5a; font-weight: 600; }

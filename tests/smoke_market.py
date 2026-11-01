@@ -13,7 +13,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 import config
-from plugins.market import backend, index_store, packaging
+from plugins.market import backend, index_store, packaging, validate as vp
 
 results: list[bool] = []
 
@@ -194,6 +194,74 @@ def main() -> int:
     else:
         nc = "no_error"
     check("未配置 not_configured", nc == "not_configured")
+
+    # ---- 校验打包 ----
+    ok_res = vp.validate(str(ROOT / "plugins" / "market"))
+    check("校验 plugins/market 通过", ok_res["ok"] is True and ok_res["id"] == "market")
+    bad = tmp / "badid"; bad.mkdir()
+    (bad / "manifest.json").write_text(json.dumps(
+        {"schema_version": 2, "id": "other", "name": "x", "version": "1", "entries": []}),
+        encoding="utf-8")
+    r = vp.validate(str(bad))
+    check("缺 INFO/manifest 错误码", "info_missing" in [e["code"] for e in r["errors"]]
+          and "manifest_id_mismatch" in [e["code"] for e in r["errors"]])
+    pkgdir = tmp / "badpkg"; pkgdir.mkdir()
+    (pkgdir / "manifest.json").write_text(json.dumps(
+        {"schema_version": 2, "id": "badpkg", "name": "x", "version": "1", "entries": [],
+         "backend": None, "db": None}), encoding="utf-8")
+    (pkgdir / "INFO.md").write_text("""---
+id: badpkg
+name: x
+version: 1
+kind: functional
+has_ui: false
+has_backend: false
+db_module_key: null
+routes_prefix: null
+summary: x
+source: market
+market_package: false
+---
+""", encoding="utf-8")
+    codes = [e["code"] for e in vp.validate(str(pkgdir))["errors"]]
+    check("source/market_package 配对错误", "source_package_mismatch" in codes)
+    tdir = tmp / "badtables"; tdir.mkdir()
+    (tdir / "manifest.json").write_text(json.dumps(
+        {"schema_version": 2, "id": "badtables", "name": "x", "version": "1", "entries": []}),
+        encoding="utf-8")
+    (tdir / "schema.sql").write_text("CREATE TABLE real_table (id TEXT);", encoding="utf-8")
+    (tdir / "INFO.md").write_text("""---
+id: badtables
+name: x
+version: 1
+kind: functional
+has_ui: false
+has_backend: false
+db_module_key: badtables
+routes_prefix: null
+summary: x
+tables: [other_table]
+source: local
+market_package: false
+---
+""", encoding="utf-8")
+    check("tables 与 schema 不一致", "tables_mismatch" in [e["code"] for e in vp.validate(str(tdir))["errors"]])
+
+    out = tmp / "build"
+    packed = vp.pack(str(ROOT / "plugins" / "market"), str(out))
+    check("校验通过后打包", packed.get("ok") is True and Path(packed["zip_path"]).is_file())
+    with zipfile.ZipFile(packed["zip_path"]) as zf:
+        names = zf.namelist()
+    check("zip 内容干净", "manifest.json" in names and "README.md" in names
+          and "INFO.md" in names and not any("__pycache__" in n or n.startswith("data/") for n in names))
+    failed = vp.pack(str(bad), str(out / "bad"))
+    check("校验失败拒绝打包", failed.get("ok") is False
+          and not (out / "bad" / "badid.zip").exists())
+    http_res = backend.handle("POST", "/validate-pack/check", {}, {"path": str(ROOT / "plugins" / "market")})
+    http_pack = backend.handle("POST", "/validate-pack/pack", {},
+                               {"path": str(ROOT / "plugins" / "market"), "out_dir": str(out / "http")})
+    check("HTTP/Python 双出口一致", http_res["ok"] is True and http_pack.get("ok") is True
+          and Path(http_pack["zip_path"]).is_file())
 
     shutil.rmtree(tmp, ignore_errors=True)
     print(f"\nRESULT: {results.count(True)}/{len(results)} PASS")
