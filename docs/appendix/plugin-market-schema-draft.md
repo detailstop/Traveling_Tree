@@ -1,8 +1,8 @@
 # 插件市场数据库设计草案（round 70）
 
-> **状态（round 82 更新）：A 阶段本地市场已落地。** 新建 `plugins/market/`（`backend.py` + `feature.js` + `schema.sql` + `packaging.py`），实际建表为 `market_installed`（id/version/source/installed_at/status/raw_json/live_json）；`market/index.json` 为只读包清单，`market/packages/*.zip` 不进 Git。B 阶段预留 `market_source` 与 `fetch_package` 的 HTTP 分支（当前只读本地包）。本文件其余字段仍为 B 阶段参考，未全部建表。
+> **状态（round 82 更新）：A 阶段本地市场已落地。** 新建 `plugins/market/`（`backend.py` + `feature.js` + `schema.sql` + `packaging.py`），实际建表为 `market_installed`（id/version/source/installed_at/status/raw_json/live_json）；`market/index.json` 为只读包清单，`market/packages/` 为可选发版产物（不进 Git）。B 阶段预留 `market_source` 与 `fetch_package` 的 HTTP 分支（当前只读本地包）。本文件其余字段仍为 B 阶段参考，未全部建表。
 >
-> A 阶段配置：市场源默认 `market/packages/`（`data/plugins/market/settings.json` 的 `market_source`，只读）；B3 已决定接受源码公开：`market/sources/` 与未来市场仓库源码可见，无敏感内容。
+> 配置：市场源 `data/plugins/market/settings.json` 的 `market_source_url`（https raw）；分销以 Release 为唯一源，`market/packages/` 为空目录。B3 已决定接受源码公开。
 >
 > 原说明：后续实现落到 `plugins/market/schema.sql`（新建插件 `plugins/market/`）；届时每张内容表必须含 `raw_json TEXT NOT NULL` 与 `live_json TEXT NOT NULL DEFAULT ''`（白皮书 §五）。
 
@@ -100,14 +100,14 @@
 
 ## B 阶段（round 88）
 
-- 初始化模板：`market/index.json`（5 预置，进 Git）；运行态：`data/plugins/market/index.json`（首次请求复制，之后由拉取覆盖，不进 Git）。
+- 初始化模板：`market/index.json`（5 预置，进 Git）；运行态：`remote_index.json` + `local_index.json`（首次请求生成，旧单文件已删，不进 Git）。
 - 拉取：`data/plugins/market/settings.json` 的 `market_source_url`（https raw）；POST `/api/plugin/market/refresh-index`，校验结构/id/sha256/size/file/download_url/版本递增后原子覆盖；失败不动本地。
 - 运行态本轮 23 条（5 预置 + 17 非预置 + sim），包级字段留空、`package_ready:false`；待用户上传 GitHub raw。
 - 生产只接受 https；`http://`/`file://` 仅测试注入，不进生产路径。
 
 ## 打包与 Release 分发（round 90）
 
-- 18 个非预置插件（17 plugins + sim）已生成 `market/packages/<id>.zip`；zip 不进 Git；预置 5 个不打包。
+- 分发改为 **Release 唯一源**；`market/packages/` 不再保留 zip（空目录，脚本备用）；预置 5 个不打包。
 - `tools/build_market_packages.py` 现算 sha256/size/file 并回填 `data/plugins/market/index.json`；`market/index.json` 模板保持 5 条。
 - `download_url` 留空；上传 GitHub Release 后回填。为空时安装报“包地址未配置”，不静默。
 - 补包不升版（version 保持 1.0）。
@@ -119,4 +119,4 @@
 - 展示合并：INFO > remote > local；旧 `index.json` 迁移后删除。
 - 三类：预置 5（preset，不可卸载）、公共库 2（market，Release 安装）、本地开发 16（local，无按钮）。
 - 下载目录 `data/plugins/market/downloads/`；成功删除 zip，失败保留。
-- `market/packages/` 18 个本地 zip 本轮保留，下一轮验证后删。
+- `market/packages/` 原 18 个本地 zip 已删除；目录保留空目录，`.gitignore` 规则保留防误提交。

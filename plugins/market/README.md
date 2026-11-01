@@ -1,7 +1,7 @@
 # 插件市场（market）
 
 ## 职责
-本地插件市场：读取 `market/index.json`，展示/搜索/过滤插件；安装/卸载本地 zip 包，维护安装记录；预置插件不可卸载。
+本地插件市场：双索引（remote 覆盖 + local INFO 组装），展示/搜索/过滤插件；公共库从 Release 下载安装、卸载，维护安装记录；预置不可卸载、本地开发无按钮。
 
 ## 入口与路由
 - 分类：functional（有卡片；导航型 entry，左侧栏入口）
@@ -20,10 +20,9 @@
 - 未设置/目录不存在/无权限/模板缺失均返回明确错误；模板缺失只影响本功能，市场列表/安装/卸载照常。
 
 ## 依赖
-- `market/index.json`（只读）、`market/packages/*.zip`（A 阶段本地包，不进 Git）
+- `market/index.json`（5 预置出厂模板）、`data/plugins/market/remote_index.json` / `local_index.json`（运行态，不进 Git）
 - 预置插件：`market`、`cobuild`、`webchat`、`tts`、`pixel_art`
-- 插件源码试点：`market/sources/sim/`（进 Git，zip 由脚本生成）
-- 本地包：`market/packages/<id>.zip`（18 个本地包保留待下一轮清理；不进 Git；脚本勿随意运行，发版按需使用；Release 上传后回填 `download_url`）
+- 分发：**Release 为唯一分发源**；`market/packages/` 已清空（仅留空目录，脚本备用、勿随意运行）；`downloads/` 存安装临时 zip。
 
 ## 双索引与三类插件
 - `remote_index.json`：拉取覆盖，公共库（finance/promptgen）包字段；`local_index.json`：扫描 `plugins/*/INFO.md` 组装（21 条展示）。
@@ -31,9 +30,9 @@
 - 预置 5 不可卸载；公共库 2 可从 Release 安装；本地开发 16 无安装/卸载按钮。
 
 ## 拉取最新插件
-- 运行态：`data/plugins/market/index.json`；首次请求若缺失，从 `market/index.json`（5 条预置模板）复制，已有不覆盖。
+- 运行态：`remote_index.json`（拉取覆盖）+ `local_index.json`（扫描 INFO 组装）；旧单文件已迁移删除，首次请求自动生成。
 - 配置：`data/plugins/market/settings.json` 的 `market_source_url`（https raw index）；为空时按钮置灰。
-- 手动点击「拉取最新插件」→ POST `/api/plugin/market/refresh-index`：校验 JSON 结构、id/sha256/size/file/download_url、版本单调递增；通过后原子覆盖运行态；失败不动本地并返回错误码（not_configured/network_error/http_error/invalid_structure/version_regression/insecure_url）。
+- 手动点击「拉取最新插件」→ POST `/api/plugin/market/refresh-index`：校验 JSON 结构、id/sha256/size/file/download_url、版本单调递增；通过后只原子覆盖 `remote_index.json`；失败不动本地并返回错误码（not_configured/network_error/http_error/invalid_structure/version_regression/insecure_url）。
 - 生产只接受 https；测试通过注入本地假源，不依赖外网。
 
 ## 注意事项

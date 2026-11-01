@@ -88,7 +88,7 @@ live_json TEXT NOT NULL DEFAULT '' -- 当前编辑状态
 ## 七、项目状态与交接（2026-10-30）
 
 ### 7.1 插件清单
-- **22 个插件目录**：19 个有前端卡片的插件（ai、aidebug、bg_library、book_reader、expdata、filejudge、finance、market、model_usage、netexp、pdf、pixel_art、project_manager、promptgen、rivet、russian、schedule、screeps、urlarch）；3 个 backend-only 插件（webchat、cobuild、tts，`entries: []`，`/api/plugin/<id>/*` 正常分发）。`sim` 试点包源码在 `market/sources/sim/`，市场安装后进入 `plugins/sim/`。22 个插件目录 + `sim` 源共 **23 份 `INFO.md`** 市场信息卡；规则见 [plugin-info-card-template.md](appendix/plugin-info-card-template.md)。
+- **23 个插件目录**：20 个有前端卡片的插件（ai、aidebug、bg_library、book_reader、expdata、filejudge、finance、market、model_usage、netexp、pdf、pixel_art、project_manager、promptgen、rivet、russian、schedule、screeps、sim、urlarch）；3 个 backend-only 插件（webchat、cobuild、tts，`entries: []`，`/api/plugin/<id>/*` 正常分发）。每个插件目录含 **`INFO.md`** 市场信息卡（共 23 份）；规则见 [plugin-info-card-template.md](appendix/plugin-info-card-template.md)。
 - **russian 定位**：`russian` 是普通功能插件（非预置、可卸载），不是宿主主体或默认必装核心。
 - **宿主剩余**：`modules/__init__.py`、`modules/settings_store.py`、`ui/web/server.py`、`ui/web/static/app.js`。原 `core/` 与 `db/schema/` 业务 DDL 已清除。
 
@@ -131,12 +131,12 @@ live_json TEXT NOT NULL DEFAULT '' -- 当前编辑状态
 - `data/settings.json`：`download_groups` + `modules.enabled`；插件 settings 在 `data/plugins/<id>/settings.json`。
 - 敏感文件：`data/ai_keys.json`、`data/webchat_sessions.json`、`data/plugins/webchat/webchat_profile/`、`data/plugins/finance/fixtures/rt_fin.json`；只按路径处理，不读正文、不进 Git。
 - 市场双索引：`remote_index.json`（覆盖式，拉取写入，公共库包字段）+ `local_index.json`（组装式，扫描 INFO）；旧 `index.json` 迁移后删除；`downloads/` 存下载 zip。
-- 市场运行态：`data/plugins/market/index.json`（不进 Git；首次请求从 `market/index.json` 复制 5 条预置；远程拉取覆盖）。
+- 市场运行态：`remote_index.json`（覆盖式，拉取写入）+ `local_index.json`（扫描 INFO 组装，21 条展示）；旧单文件已迁移删除；不进 Git。
 - 市场源：`data/plugins/market/settings.json` 的 `market_source_url`（https raw；空则拉取按钮置灰）。
-- 市场包：`market/packages/<id>.zip`（18 个非预置已生成；不进 Git，补包不升版；需上传 Release 后回填 `download_url`；为空时安装报“包地址未配置”）。
-- 市场资产：`market/index.json`（进 Git，包清单/SHA256）、`market/packages/*.zip`（不进 Git）、`market/sources/<id>/`（试点源码，进 Git）、`market/.trash/`（卸载备份，不进 Git）；安装记录在 `market_installed` 表。
+- 市场分发：**Release 为唯一源**；`market/packages/` 为空目录（脚本备用、勿随意运行）；`remote_index.json` 的 `download_url` 指向 Release。
+- 市场资产：`market/index.json`（5 预置模板，进 Git）、`market/packages/`（空目录，脚本备用）、`data/plugins/market/{remote,local}_index.json`（运行态）、`market/.trash/`（卸载备份）；安装记录在 `market_installed` 表。
 - 通用下载地址：`data/settings.json` 的 `download_dir`（绝对路径）；市场「开发插件」写盘使用，未设置/目录不存在/无权限时明确报错。该路径仅用于插件服务端写盘；浏览器下载仍走浏览器/统一下载句柄，与该项相互独立。
-- 市场源：`data/plugins/market/settings.json` 的 `market_source` 只读默认 `market/packages/`（A 阶段）；B3 已决定接受源码公开：`market/sources/` 与未来市场仓库源码可见，无敏感内容。
+- 市场源：`data/plugins/market/settings.json` 的 `market_source_url`（https raw）；B3 已决定接受源码公开：插件源码与未来市场仓库可见，无敏感内容。
 
 ### 7.6 round 65 删除前核对结论（round 66 补记）
 round 65 删除 `plugin-development-whitepaper-v2.1-draft.md` 与 `project-closure-2026-10-29.md` 前，逐项核对结论如下；两份源文档未恢复。

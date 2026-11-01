@@ -1,9 +1,50 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-01T14:46:28+03:00",
-  "round": 91,
+  "generated_at": "2026-11-01T14:57:43+03:00",
+  "round": 92,
   "pending": [],
   "decided": [
+    {
+      "path": "market/packages/",
+      "decision": "删除 18 个本地 zip，Release 成为唯一分发源（round 92）",
+      "old_path": "market/packages/*.zip",
+      "reason": "18 个 zip 全部删除；目录保留空目录；.gitignore 规则保留；docs 收敛为 Release 唯一源。",
+      "status": "done",
+      "round": 92,
+      "at": "2026-11-01T14:57:43+03:00"
+    },
+    {
+      "path": "data/plugins/market/downloads/",
+      "decision": "清理 downloads 残留（round 92）",
+      "reason": "无残留 zip；空目录保留。",
+      "status": "done",
+      "round": 92,
+      "at": "2026-11-01T14:57:43+03:00"
+    },
+    {
+      "path": "README.md",
+      "decision": "文档收敛 Release 唯一源（round 92）",
+      "reason": "README §5/§6/§12、白皮书 §7.1/§7.5、守则、市场草案、market README/INFO 统一：market/packages 空目录、脚本备用勿随意运行、公共库 2 从 Release 安装；移除 market/sources 与 18 包保留表述。",
+      "status": "done",
+      "round": 92,
+      "at": "2026-11-01T14:57:43+03:00"
+    },
+    {
+      "path": "plugins/finance/INFO.md",
+      "decision": "恢复 finance 为公共库分类（round 92）",
+      "reason": "发现 finance INFO 回落为 local/false，恢复 source=market、market_package=true、known_limits Release；与 promptgen 一致。",
+      "status": "done",
+      "round": 92,
+      "at": "2026-11-01T14:57:43+03:00"
+    },
+    {
+      "path": "data/bg_import/::round92-none",
+      "decision": "本次无背景库数据（round 92）",
+      "reason": "用户未提供「项目优化与当前综述」导出 json；背景库不可用，本轮未执行 update 导入、未写背景库数据。",
+      "status": "done",
+      "round": 92,
+      "at": "2026-11-01T14:57:43+03:00"
+    },
     {
       "path": "plugins/sim/",
       "decision": "sim 移回 plugins 并删除空 sources（round 91）",

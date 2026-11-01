@@ -2,9 +2,9 @@
 
 > 只读摘要，勿手改。本文件由 docs/appendix/file_navigation.json 生成；结构与去留决定以 JSON 为准。
 
-- 生成时间：2026-11-01T14:46:28+03:00
-- 轮次：91
-- 待办：0 条；已决定：594 条
+- 生成时间：2026-11-01T14:57:43+03:00
+- 轮次：92
+- 待办：0 条；已决定：599 条
 
 ## 待办
 
@@ -15,6 +15,11 @@
 
 | 路径 | 决定 | 原因 | 状态 | 轮次 | 时间 | 备份路径 |
 | --- | --- | --- | --- | --- | --- | --- |
+| market/packages/ | 删除 18 个本地 zip，Release 成为唯一分发源（round 92） | 18 个 zip 全部删除；目录保留空目录；.gitignore 规则保留；docs 收敛为 Release 唯一源。 | done | 92 | 2026-11-01T14:57:43+03:00 |  |
+| data/plugins/market/downloads/ | 清理 downloads 残留（round 92） | 无残留 zip；空目录保留。 | done | 92 | 2026-11-01T14:57:43+03:00 |  |
+| README.md | 文档收敛 Release 唯一源（round 92） | README §5/§6/§12、白皮书 §7.1/§7.5、守则、市场草案、market README/INFO 统一：market/packages 空目录、脚本备用勿随意运行、公共库 2 从 Release 安装；移除 market/sources 与 18 包保留表述。 | done | 92 | 2026-11-01T14:57:43+03:00 |  |
+| plugins/finance/INFO.md | 恢复 finance 为公共库分类（round 92） | 发现 finance INFO 回落为 local/false，恢复 source=market、market_package=true、known_limits Release；与 promptgen 一致。 | done | 92 | 2026-11-01T14:57:43+03:00 |  |
+| data/bg_import/::round92-none | 本次无背景库数据（round 92） | 用户未提供「项目优化与当前综述」导出 json；背景库不可用，本轮未执行 update 导入、未写背景库数据。 | done | 92 | 2026-11-01T14:57:43+03:00 |  |
 | plugins/sim/ | sim 移回 plugins 并删除空 sources（round 91） | market/sources/sim → plugins/sim（含 INFO）；sources 空目录删除；INFO source=local、market_package=false；smoke_plugins 23 目录/185 断言、decoupling 476 断言同步。 | done | 91 | 2026-11-01T14:46:28+03:00 |  |
 | plugins/market/index_store.py | 双索引 remote/local 与旧文件迁移（round 91） | remote 覆盖式、local 组装式（扫描 INFO，21 条）；旧 index.json 迁移 finance/promptgen 到 remote、其余到 local 后删除；刷新只写 remote；下载目录 downloads/。 | done | 91 | 2026-11-01T14:46:28+03:00 |  |
 | plugins/market/backend.py | 四源合并/三类状态/下载安装（round 91） | 展示 INFO > remote > local；preset/market/local 分类；公共库从 download_url 下载到 downloads/，校验后解压并删 zip，失败保留；空地址 package_url_missing，未就绪 package_not_ready；本地开发不可安装。 | done | 91 | 2026-11-01T14:46:28+03:00 |  |

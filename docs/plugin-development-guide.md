@@ -33,7 +33,7 @@ plugins/<id>/
 
 1. **提出**：写清用户场景、卡片还是 backend-only、是否持久化、是否被其他插件调用。检查点：`kind`（functional/library）与 `has_ui` 已定，能对应附录 E 口径。
 2. **设计**：列出目录、manifest 字段、路由子路径、表与数据目录。检查点：`id` 与目录名一致；根路由有语义子路径（附录 B）；schema 含 `raw_json`/`live_json`（§五）。
-3. **打包与分发**：运行 `python tools/build_market_packages.py` 生成 `market/packages/*.zip` 并回填运行态 index；zip 不进 Git，上传 Release 后回填 `download_url`；补包不升版；脚本勿随意运行，发版按需使用。
+3. **打包与分发**：发版时按需运行 `python tools/build_market_packages.py`（勿随意运行）生成 zip，上传 Release 后用输出的 sha256/size 更新远程 index；**Release 为唯一分发源**，`market/packages/` 不作为默认产物。
 4. **市场生成提示词**：在市场页点「开发插件」，按表单填写全部占位符后生成并写盘（或按模板手动替换）。检查点：生成的 prompt 无未替换占位符；不写 `plugins/`。
 5. **实现**：按 feature/backend/schema 分文件落地。检查点：import 用 `from plugins.<id> import <module>`（附录 D）；二进制用 `__binary__: True` + `body`/`mime`/`filename`/`headers`（附录 C）；不在插件里写宿主业务。
 6. **自测**：`python tests/smoke_plugins.py` + 相关功能 smoke（§六、§七.2）。检查点：全绿或仅已知 TTS 502。
@@ -62,7 +62,7 @@ plugins/<id>/
 - [ ] 跨插件直接 import 已在该插件 README 与 `plugins/lib.json` notes 标注（§十.5）
 - [ ] `plugins/<id>/INFO.md` 存在且通过 `smoke_info_cards`（front matter 必需 9 项）
 - [ ] 市场「开发插件」可用：模板存在、`download_dir` 已设置；未设置/缺值/路径穿越均明确报错
-- [ ] INFO 的 `market_package` 与实际包一致（18 个 true）；`smoke_market` 使用临时包
+- [ ] INFO 的 `market_package` 与实际分发一致（仅公共库 2 个 true）；`smoke_market` 使用临时包
 - [ ] 市场运行态 index 可初始化（5 条）、远程拉取可覆盖且失败不动本地；`market_source_url` 空时按钮置灰
 - [ ] 打卡：`cobuild.checkin` 成功
 - [ ] 导航：`file_navigation.json` 已登记并重生成 md
@@ -89,7 +89,7 @@ README 不写实现细节，不复制代码；事实以 manifest/schema/backend 
 - 触发器依赖 SQLite JSON1（≥3.38，本机 3.45）；新插件如采用该方案，须在 README「数据表」与 `migrate.py` 中说明。
 - 合规状态与触发器覆盖见 [plugin-schema-compliance-matrix.md](appendix/plugin-schema-compliance-matrix.md)。
 
-插件打包与本地市场安装：`tools/build_market_packages.py` 从 `market/sources/<id>/` 生成 `market/packages/<id>.zip` 与 `market/index.json`；安装/卸载/安全校验在 `plugins/market/`，使用说明见 README §12。
+插件打包与市场分发：Release 为唯一源；`tools/build_market_packages.py` 仅发版时按需生成 zip（勿随意运行）；安装/下载/校验在 `plugins/market/`，使用说明见 README §12。
 
 > `provides` 示例（round 73 核实）：`webchat` → `["webchat"]`；`ai` → `["ai"]`；`pixel_art` → `["pixel_assets"]`。`cobuild` 不声明 `provides`：它面向用户打卡入口，没有被其他插件调用。`consumes` 可选。
 
