@@ -1,8 +1,9 @@
-"""urlarch 插件 SQL 层：原始网址库资产 + 组别/链接。"""
+"""urlarch 插件 SQL 层：原始网址库资产 + 组别/链接 + 快捷键白名单。"""
 from __future__ import annotations
 
 import hashlib
 import json
+import secrets
 from datetime import datetime, timezone
 
 from db.connection import get_conn
@@ -78,3 +79,67 @@ def import_state(raw: str) -> dict:
 
 def save_state(data: dict) -> dict:
     return import_state(_canon(data))
+
+
+# ------------------------------------------------------------
+# 快捷键白名单（R4）：只做存储；启动在 backend.py，路径/参数一律取自本表
+# ------------------------------------------------------------
+
+class ShortcutConflict(Exception):
+    """同一快捷键重复登记（由 backend 映射为 HOTKEY_CONFLICT）。"""
+
+
+def _shortcut_json(name: str, path: str, args: list, hotkey: str) -> str:
+    payload = {"name": name, "path": path, "args": args, "hotkey": hotkey}
+    return json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
+
+
+def list_shortcuts() -> list[dict]:
+    rows = get_conn().execute(
+        "SELECT id,name,path,args,hotkey,raw_json,live_json,created_at,updated_at "
+        "FROM urlarch_shortcuts ORDER BY created_at, id"
+    ).fetchall()
+    return [dict(row) for row in rows]
+
+
+def get_shortcut(shortcut_id: str) -> dict | None:
+    row = get_conn().execute(
+        "SELECT id,name,path,args,hotkey,raw_json,live_json,created_at,updated_at "
+        "FROM urlarch_shortcuts WHERE id=?", (shortcut_id,)
+    ).fetchone()
+    return dict(row) if row else None
+
+
+def create_shortcut(name: str, path: str, args_text: str, hotkey: str) -> dict:
+    """新增白名单条目；id/时间戳由后端生成，raw_json 与 live_json 同值双写。"""
+    conn = get_conn()
+    now = _now()
+    args = json.loads(args_text)
+    payload = _shortcut_json(name, path, args, hotkey)
+    shortcut_id = "us_" + secrets.token_hex(8)
+    conn.execute("BEGIN IMMEDIATE")
+    try:
+        if conn.execute("SELECT 1 FROM urlarch_shortcuts WHERE hotkey=?",
+                        (hotkey,)).fetchone():
+            conn.rollback()
+            raise ShortcutConflict(hotkey)
+        conn.execute(
+            "INSERT INTO urlarch_shortcuts"
+            "(id,name,path,args,hotkey,raw_json,live_json,created_at,updated_at) "
+            "VALUES(?,?,?,?,?,?,?,?,?)",
+            (shortcut_id, name, path, args_text, hotkey, payload, payload, now, now),
+        )
+        conn.commit()
+    except ShortcutConflict:
+        raise
+    except Exception:
+        conn.rollback()
+        raise
+    return get_shortcut(shortcut_id) or {}
+
+
+def delete_shortcut(shortcut_id: str) -> bool:
+    conn = get_conn()
+    cur = conn.execute("DELETE FROM urlarch_shortcuts WHERE id=?", (shortcut_id,))
+    conn.commit()
+    return cur.rowcount > 0

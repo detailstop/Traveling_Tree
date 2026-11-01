@@ -2,9 +2,9 @@
 
 > 只读摘要，勿手改。本文件由 docs/appendix/file_navigation.json 生成；结构与去留决定以 JSON 为准。
 
-- 生成时间：2026-11-01T17:39:05+03:00
-- 轮次：98
-- 待办：1 条；已决定：627 条
+- 生成时间：2026-11-01T17:53:43+03:00
+- 轮次：99
+- 待办：1 条；已决定：635 条
 
 ## 待办
 
@@ -16,6 +16,14 @@
 
 | 路径 | 决定 | 原因 | 状态 | 轮次 | 时间 | 备份路径 |
 | --- | --- | --- | --- | --- | --- | --- |
+| plugins/urlarch/security.py | 新增 R4 安全校验模块（round 99） | 纯函数校验：路径（绝对、存在、拒绝 ..、UNC、控制字符、脚本/快捷方式扩展名黑名单 PATH_EXT_BLOCKED）、参数（JSON 字符串数组、≤20 项/单项≤200/总长≤1000、拒绝 ; && \|\| \| > < 反引号 $( 与换行）、快捷键（修饰键+A–Z/0–9/F1–F12，需含 Ctrl/Alt/Meta 或 F 键，规范化固定顺序）、名称与 id 形态（us_[0-9a-f]{16}）；稳定错误码由 ShortcutError 携带。 | done | 99 | 2026-11-01T17:53:43+03:00 |  |
+| plugins/urlarch/repo.py | 白名单 SQL CRUD（显式列名 + raw/live 双写，round 99） | list/get/create/delete：INSERT 显式列名并同时写 raw_json/live_json（同值快照）；id 由后端 secrets 生成（us_+16hex）、created_at/updated_at 后端生成；create 用 BEGIN IMMEDIATE 内查 hotkey 冲突（ShortcutConflict → HOTKEY_CONFLICT），失败 rollback；DELETE 只删登记行。 | done | 99 | 2026-11-01T17:53:43+03:00 |  |
+| plugins/urlarch/backend.py | 新增白名单 CRUD 与启动接口（round 99） | 语义子路径 state / shortcuts(GET,POST) / shortcuts/<id>(DELETE) / launch(POST)；launch 只接受 id，路径与参数从库读取并在启动前重新校验，subprocess.Popen([path]+args, shell=False, close_fds=True) 不等待；异常统一转 INTERNAL_ERROR，不向宿主抛 Traceback；原有 state 行为不变。 | done | 99 | 2026-11-01T17:53:43+03:00 |  |
+| plugins/urlarch/feature.js | 白名单管理界面 + 页面内快捷键（round 99） | 新增「⌨️ 快捷键白名单」卡片（列表/登记/删除/快捷键采集）；keydown 监听仅在 urlarch 视图存活、页面聚焦、焦点不在输入框时响应，离开视图由 MutationObserver 自动注销；响应不 preventDefault；错误码映射为中文提示；未改既有组别折叠逻辑、未用 localStorage。 | done | 99 | 2026-11-01T17:53:43+03:00 |  |
+| plugins/urlarch/plugin.css | 白名单卡片样式（round 99） | 新增 .ua-sc-* 命名空间（表单、快捷键徽标、路径省略、空态），不污染共享 .gcard/.btn 组件；折叠相关样式未改。 | done | 99 | 2026-11-01T17:53:43+03:00 |  |
+| plugins/urlarch/README.md | 五节同步 R4 路由、安全边界与错误码（round 99） | 入口与路由补 4 个子路径；注意事项补白名单注册制、路径/参数校验、Popen 列表+shell=False、页面内快捷键作用域、hotkey 冲突、稳定错误码、仅本机/勿暴露 0.0.0.0；五节结构与既有内容保持。 | done | 99 | 2026-11-01T17:53:43+03:00 |  |
+| plugins/urlarch/INFO.md | 注意事项补 R4 安全边界（round 99） | front matter 9 项必需字段与 source=local / market_package=false / tables 4 表不变；正文补白名单注册制、启动接口安全边界、页面内快捷键（非全局热键）、HOTKEY_CONFLICT、仅本机使用。 | done | 99 | 2026-11-01T17:53:43+03:00 |  |
+| docs/appendix/file_navigation.json | 登记 round 99（R4 白名单启动能力） | 追加 8 条 decided 并 round→99、generated_at 更新；pending 保留既有 1 条（round 67–94 的 28 条非文件占位待清理）；resolved 45 条不动；file_navigation.md 由生成器重生成。安全用例 5.1–5.8 全 PASS；真实库首次启动由 init_db 建出 urlarch_shortcuts（旧三表 1/6/15 行不变，备份 data/backup/russian_tutor_before_r4_20261101.db）。本轮无背景库数据、未改 schema/migrate。 | done | 99 | 2026-11-01T17:53:43+03:00 |  |
 | plugins/urlarch/schema.sql | 新增 urlarch_shortcuts 白名单表（round 98） | CREATE TABLE IF NOT EXISTS：id/name/path/args/hotkey/raw_json/live_json/created_at/updated_at，索引 idx_urlarch_shortcuts_hotkey(hotkey)；属内容表不豁免 live_json（白名单为用户登记数据、不可重建），未加触发器（与本插件其余三表一致，由 SQL 层显式双写）；未改动 urlarch_assets/groups/links 三表与既有索引。 | done | 98 | 2026-11-01T17:39:05+03:00 |  |
 | plugins/urlarch/migrate.py | 追加白名单表迁移（round 98） | manifest.json 原已声明 db.migrate（本轮未改 manifest，亦无 tables 字段需同步）；在既有 migrate 追加 _ensure_shortcuts：缺表建表、缺列 ALTER 补列、缺 raw/live 按行回填并建索引，全部加性语句，末尾沿用 conn.commit()、失败由 init_db 统一回滚。验证：真实库副本连跑两次无变更，旧三表行数/内容哈希不变（assets 1 / groups 6 / links 15），缺列形态副本可补列并回填。 | done | 98 | 2026-11-01T17:39:05+03:00 |  |
 | plugins/urlarch/INFO.md | tables 增 urlarch_shortcuts 并补白名单说明（round 98） | front matter tables 与 schema 对齐为 4 表；正文数据表与注意事项补“白名单存数据库表、库文件在 data/ 下不进 Git、本轮只建表、启动接口留 R4”；9 项必需字段与 source=local / market_package=false 不变。 | done | 98 | 2026-11-01T17:39:05+03:00 |  |
