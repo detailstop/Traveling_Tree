@@ -29,6 +29,7 @@ BLOCKED_EXTS = frozenset({
 _SHELL_META = (";", "&&", "||", "|", ">", "<", "`", "$(", "\n", "\r", "\0")
 
 _ID_RE = re.compile(r"^us_[0-9a-f]{16}$")
+_GROUP_ID_RE = re.compile(r"^ug_[0-9a-f]{16}$")
 
 
 class ShortcutError(ValueError):
@@ -136,5 +137,32 @@ def sanitize_hotkey(raw) -> str:
     return text
 
 
+def validate_group_name(raw) -> str:
+    """软件快捷入口组别名：1–64 字符，不允许控制字符与纯空白。"""
+    if not isinstance(raw, str):
+        raise ShortcutError("GROUP_NAME_INVALID", "组别名必须是字符串")
+    name = raw.strip()
+    if not name or len(name) > MAX_NAME:
+        raise ShortcutError("GROUP_NAME_INVALID", f"组别名需为 1–{MAX_NAME} 个字符")
+    if any(ch in name for ch in "\r\n\t\0"):
+        raise ShortcutError("GROUP_NAME_INVALID", "组别名不能包含换行或制表符")
+    return name
+
+
+def validate_sort_order(raw) -> int:
+    """排序值可选：非整数按 0 处理，范围 0–9999。"""
+    if raw is None or raw == "":
+        return 0
+    try:
+        value = int(raw)
+    except (TypeError, ValueError):
+        return 0
+    return max(0, min(9999, value))
+
+
 def valid_id(raw) -> bool:
     return isinstance(raw, str) and bool(_ID_RE.match(raw))
+
+
+def valid_group_id(raw) -> bool:
+    return isinstance(raw, str) and bool(_GROUP_ID_RE.match(raw))

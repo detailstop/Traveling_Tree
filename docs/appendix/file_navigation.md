@@ -2,9 +2,9 @@
 
 > 只读摘要，勿手改。本文件由 docs/appendix/file_navigation.json 生成；结构与去留决定以 JSON 为准。
 
-- 生成时间：2026-11-01T18:09:42+03:00
-- 轮次：100
-- 待办：1 条；已决定：643 条
+- 生成时间：2026-11-01T18:38:15+03:00
+- 轮次：101
+- 待办：1 条；已决定：653 条
 
 ## 待办
 
@@ -16,6 +16,16 @@
 
 | 路径 | 决定 | 原因 | 状态 | 轮次 | 时间 | 备份路径 |
 | --- | --- | --- | --- | --- | --- | --- |
+| plugins/urlarch/schema.sql | 新增 urlarch_shortcut_groups 表 + urlarch_shortcuts.group_id 列（round 101） | 组别表：id/name/sort_order/raw_json/live_json/created_at/updated_at + 索引 idx_urlarch_shortcut_groups_sort(sort_order)；白名单加 group_id TEXT NOT NULL DEFAULT ''（空串=未分组）；未删除既有列（args/hotkey 保留），未改动旧三表。 | done | 101 | 2026-11-01T18:38:15+03:00 |  |
+| plugins/urlarch/migrate.py | 迁移补组别表与 group_id 列（round 101） | 新增 _ensure_shortcut_groups（缺表建表/缺列补列/索引/raw-live 回填）与 _ensure_shortcuts 的 group_id 补列（PRAGMA 检查 + ALTER，旧数据默认空串）；全部加性语句、末尾 commit、失败由 init_db 回滚。验证：真实库副本两次 migrate 幂等，旧三表（1/6/15 行）与 2 条旧白名单内容哈希不变、group_id 均为空串；schema.sql→migrate 启动路径同样通过。 | done | 101 | 2026-11-01T18:38:15+03:00 |  |
+| plugins/urlarch/repo.py | 组别 CRUD + 白名单 group_id 读写（round 101） | list/get/create 组别（id=ug_+16hex、raw/live 双写、显式列名）；白名单 SELECT/INSERT 增加 group_id；delete_shortcut_group 事务内删组并把组内条目 group_id 置空串、按当前列刷新 live_json（raw 保留登记快照），条目不删。 | done | 101 | 2026-11-01T18:38:15+03:00 |  |
+| plugins/urlarch/backend.py | 新增 shortcut-groups 路由与 group_id 校验（round 101） | GET/POST /shortcut-groups、DELETE /shortcut-groups/<id>；POST /shortcuts 接受可选 group_id 并校验组存在（GROUP_NOT_FOUND 404），未传 args 时默认 '[]'；错误码新增 GROUP_NOT_FOUND/GROUP_NAME_INVALID；launch 与安全边界不变。 | done | 101 | 2026-11-01T18:38:15+03:00 |  |
+| plugins/urlarch/security.py | 新增组别名/排序/组 id 校验（round 101） | validate_group_name（1–64 字符、拒绝控制字符 → GROUP_NAME_INVALID）、validate_sort_order（0–9999，非法按 0）、valid_group_id（ug_+16hex）；路径/参数/名称校验不变。 | done | 101 | 2026-11-01T18:38:15+03:00 |  |
+| plugins/urlarch/feature.js | 软件入口改为按组列表 + 组别折叠，移除参数输入（round 101） | 「🚀 软件快捷入口」按组渲染（未分组虚拟组 + 服务端组别），组标题栏点击/▾ 切换折叠，状态存模块内 Set（刷新恢复默认展开）；条目改为列表行（名称 + 完整绝对路径），点击行 → launch（只传 id），✕ 删登记；新增表单仅名称/路径/所属组，删除「参数 JSON 数组」输入框；新增新建组入口，删组提示「组内软件移到未分组」；未改网址组折叠逻辑、未用 localStorage。 | done | 101 | 2026-11-01T18:38:15+03:00 |  |
+| plugins/urlarch/plugin.css | 软件入口列表样式（round 101） | 删除卡片网格样式（.ua-sc-grid/.ua-sc-card/.ua-sc-icon 等），新增 .ua-sg-list/.ua-sc-row 列表行样式（hover/focus-visible），复用 .ua-group/.ua-group-head/.ua-caret 折叠样式；仍限 .ua-sc-*/.ua-sg-* 命名空间。 | done | 101 | 2026-11-01T18:38:15+03:00 |  |
+| plugins/urlarch/README.md | 五节同步组别列表与 group_id（round 101） | 职责/路由/数据表补 shortcut-groups 与 group_id；注意事项补组别折叠（内存态）、删组移到未分组、参数输入已移除与 args 默认 '[]'、错误码新增 GROUP_*；安全边界段落保持。 | done | 101 | 2026-11-01T18:38:15+03:00 |  |
+| plugins/urlarch/INFO.md | tables 增组别表并同步注意事项（round 101） | tables 5 表与 schema 对齐；正文改为按组列表展示、点击行启动、组可折叠、参数输入已移除、删组移到未分组；front matter 9 项与 source=local / market_package=false 不变。 | done | 101 | 2026-11-01T18:38:15+03:00 |  |
+| docs/appendix/file_navigation.json | 登记 round 101（组别表 + group_id + 列表改造） | 追加 10 条 decided 并 round→101、generated_at 更新；pending 保留既有 1 条（round 67–94 的 28 条非文件占位待清理）；resolved 45 条不动；file_navigation.md 由生成器重生成。安全用例 5.1–5.6 全 PASS（API 26/26 + 浏览器 12/12）。真实库未跑 migrate，已备份 data/backup/russian_tutor_before_shortcut_groups_20261101.db，需重启宿主生效。本轮无背景库数据。 | done | 101 | 2026-11-01T18:38:15+03:00 |  |
 | plugins/urlarch/feature.js | R4 方向修正：删除键盘热键层，改为点击式软件快捷入口（round 100） | 移除 keydown 监听、快捷键采集输入框、MutationObserver 注销、组合键解析与 hotkey 提示；新增「🚀 软件快捷入口」卡片网格（首字图标+名称+路径+参数摘要），点击卡片 → POST /launch（只传 id），带删除按钮与添加表单（名称/路径/参数，不再要求 hotkey）；未改既有组别折叠逻辑、未用 localStorage。 | done | 100 | 2026-11-01T18:09:42+03:00 |  |
 | plugins/urlarch/plugin.css | 快捷入口卡片样式替换热键行样式（round 100） | 新增 .ua-sc-grid/.ua-sc-card/.ua-sc-icon 等卡片样式（hover/active/focus-visible 过渡），删除仅在键盘热键层使用的 .ua-sc-kbd/.ua-sc-row/.ua-sc-list；仍限 .ua-sc-* 命名空间。 | done | 100 | 2026-11-01T18:09:42+03:00 |  |
 | plugins/urlarch/backend.py | 移除 hotkey 冲突错误分支，hotkey 改为可选（round 100） | POST /shortcuts 用 security.sanitize_hotkey（可空、仅基础清洗），删除 HOTKEY_CONFLICT 409 分支；launch/CRUD 接口与安全边界不变（仅按 id 启动、路径参数取自库、Popen 列表 + shell=False、忽略请求体 path/args/cmd、异常转 INTERNAL_ERROR）。 | done | 100 | 2026-11-01T18:09:42+03:00 |  |

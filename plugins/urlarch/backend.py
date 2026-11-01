@@ -1,4 +1,4 @@
-"""urlarch 插件后端：网址库状态读写 + 快捷键白名单 CRUD / 启动（R4）。
+"""urlarch 插件后端：网址库状态读写 + 软件快捷入口白名单/组别 CRUD 与启动（R4）。
 
 安全边界（守则第 21 条）：
 - 启动接口只接受白名单 id，path/args 一律从 `urlarch_shortcuts` 读取，忽略请求体里的路径/命令；
@@ -24,6 +24,17 @@ def _public(row: dict) -> dict:
         "path": row.get("path", ""),
         "args": row.get("args", "[]"),
         "hotkey": row.get("hotkey", ""),
+        "group_id": row.get("group_id", ""),
+        "created_at": row.get("created_at", ""),
+        "updated_at": row.get("updated_at", ""),
+    }
+
+
+def _public_group(row: dict) -> dict:
+    return {
+        "id": row.get("id", ""),
+        "name": row.get("name", ""),
+        "sort_order": row.get("sort_order", 0),
         "created_at": row.get("created_at", ""),
         "updated_at": row.get("updated_at", ""),
     }
@@ -50,12 +61,40 @@ def _create_shortcut(body: dict) -> dict:
     try:
         name = security.validate_name(body.get("name"))
         path = security.validate_path(body.get("path"))
+        # 前端不再提供参数输入：未传/空 → 默认 '[]'（仍走同一套参数校验）
         args = security.validate_args(body.get("args"))
         hotkey = security.sanitize_hotkey(body.get("hotkey"))
+        group_id = body.get("group_id") or ""
+        if not isinstance(group_id, str):
+            return _err("GROUP_NOT_FOUND", "group_id 必须是字符串", 404)
+        group_id = group_id.strip()
+        if group_id and repo.get_shortcut_group(group_id) is None:
+            return _err("GROUP_NOT_FOUND", "组别不存在", 404)
     except security.ShortcutError as exc:
         return _err(exc.code, exc.message, 400)
-    row = repo.create_shortcut(name, path, args, hotkey)
+    row = repo.create_shortcut(name, path, args, hotkey, group_id)
     return {"ok": True, "item": _public(row)}
+
+
+def _list_groups() -> dict:
+    items = [_public_group(row) for row in repo.list_shortcut_groups()]
+    return {"ok": True, "items": items, "count": len(items)}
+
+
+def _create_group(body: dict) -> dict:
+    try:
+        name = security.validate_group_name(body.get("name"))
+        sort_order = security.validate_sort_order(body.get("sort_order"))
+    except security.ShortcutError as exc:
+        return _err(exc.code, exc.message, 400)
+    row = repo.create_shortcut_group(name, sort_order)
+    return {"ok": True, "item": _public_group(row)}
+
+
+def _delete_group(group_id: str) -> dict:
+    if not security.valid_group_id(group_id) or not repo.delete_shortcut_group(group_id):
+        return _err("GROUP_NOT_FOUND", "组别不存在", 404)
+    return {"ok": True, "id": group_id, "moved_to_ungrouped": True}
 
 
 def _delete_shortcut(shortcut_id: str) -> dict:
@@ -96,6 +135,16 @@ def _dispatch(method: str, subpath: str, query: dict, body: dict) -> dict:
     if len(parts) == 2 and parts[0] == "shortcuts":
         if method == "DELETE":
             return _delete_shortcut(parts[1])
+        return _err("method_not_allowed", "", 405)
+    if parts == ["shortcut-groups"]:
+        if method == "GET":
+            return _list_groups()
+        if method == "POST":
+            return _create_group(body)
+        return _err("method_not_allowed", "", 405)
+    if len(parts) == 2 and parts[0] == "shortcut-groups":
+        if method == "DELETE":
+            return _delete_group(parts[1])
         return _err("method_not_allowed", "", 405)
     if parts == ["launch"]:
         if method == "POST":

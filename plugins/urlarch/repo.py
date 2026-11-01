@@ -82,45 +82,53 @@ def save_state(data: dict) -> dict:
 
 
 # ------------------------------------------------------------
-# 软件快捷入口白名单（R4）：只做存储；启动在 backend.py，路径/参数一律取自本表
+# 软件快捷入口白名单 / 组别（R4）：只做存储；启动在 backend.py，路径/参数一律取自本表
 # ------------------------------------------------------------
 
-def _shortcut_json(name: str, path: str, args: list, hotkey: str) -> str:
-    payload = {"name": name, "path": path, "args": args, "hotkey": hotkey}
+_SHORTCUT_COLS = "id,name,path,args,hotkey,group_id,raw_json,live_json,created_at,updated_at"
+_GROUP_COLS = "id,name,sort_order,raw_json,live_json,created_at,updated_at"
+
+
+def _shortcut_json(name: str, path: str, args: list, hotkey: str, group_id: str) -> str:
+    payload = {"name": name, "path": path, "group_id": group_id, "args": args, "hotkey": hotkey}
+    return json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
+
+
+def _group_json(name: str, sort_order: int) -> str:
+    payload = {"name": name, "sort_order": sort_order}
     return json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
 
 
 def list_shortcuts() -> list[dict]:
     rows = get_conn().execute(
-        "SELECT id,name,path,args,hotkey,raw_json,live_json,created_at,updated_at "
-        "FROM urlarch_shortcuts ORDER BY created_at, id"
+        f"SELECT {_SHORTCUT_COLS} FROM urlarch_shortcuts ORDER BY created_at, id"
     ).fetchall()
     return [dict(row) for row in rows]
 
 
 def get_shortcut(shortcut_id: str) -> dict | None:
     row = get_conn().execute(
-        "SELECT id,name,path,args,hotkey,raw_json,live_json,created_at,updated_at "
-        "FROM urlarch_shortcuts WHERE id=?", (shortcut_id,)
+        f"SELECT {_SHORTCUT_COLS} FROM urlarch_shortcuts WHERE id=?", (shortcut_id,)
     ).fetchone()
     return dict(row) if row else None
 
 
-def create_shortcut(name: str, path: str, args_text: str, hotkey: str = "") -> dict:
+def create_shortcut(name: str, path: str, args_text: str, hotkey: str = "",
+                    group_id: str = "") -> dict:
     """新增白名单条目；id/时间戳由后端生成，raw_json 与 live_json 同值双写。
 
-    hotkey 为 R3 建表时的历史列（可选、可为空），不参与任何逻辑与去重；
-    同一 path 允许重复登记（常见用途：同一程序挂不同参数或不同入口名）。
+    hotkey 为历史列（可选、可为空），不参与逻辑；group_id 空串表示未分组；
+    同一 path 允许重复登记（常见用途：同一程序不同入口名）。
     """
     conn = get_conn()
     now = _now()
-    payload = _shortcut_json(name, path, json.loads(args_text), hotkey)
+    payload = _shortcut_json(name, path, json.loads(args_text), hotkey, group_id)
     shortcut_id = "us_" + secrets.token_hex(8)
     conn.execute(
         "INSERT INTO urlarch_shortcuts"
-        "(id,name,path,args,hotkey,raw_json,live_json,created_at,updated_at) "
-        "VALUES(?,?,?,?,?,?,?,?,?)",
-        (shortcut_id, name, path, args_text, hotkey, payload, payload, now, now),
+        "(id,name,path,args,hotkey,group_id,raw_json,live_json,created_at,updated_at) "
+        "VALUES(?,?,?,?,?,?,?,?,?,?)",
+        (shortcut_id, name, path, args_text, hotkey, group_id, payload, payload, now, now),
     )
     conn.commit()
     return get_shortcut(shortcut_id) or {}
@@ -131,3 +139,65 @@ def delete_shortcut(shortcut_id: str) -> bool:
     cur = conn.execute("DELETE FROM urlarch_shortcuts WHERE id=?", (shortcut_id,))
     conn.commit()
     return cur.rowcount > 0
+
+
+# ---------------- 软件快捷入口组别 ----------------
+
+def list_shortcut_groups() -> list[dict]:
+    rows = get_conn().execute(
+        f"SELECT {_GROUP_COLS} FROM urlarch_shortcut_groups "
+        "ORDER BY sort_order, created_at, id"
+    ).fetchall()
+    return [dict(row) for row in rows]
+
+
+def get_shortcut_group(group_id: str) -> dict | None:
+    row = get_conn().execute(
+        f"SELECT {_GROUP_COLS} FROM urlarch_shortcut_groups WHERE id=?", (group_id,)
+    ).fetchone()
+    return dict(row) if row else None
+
+
+def create_shortcut_group(name: str, sort_order: int = 0) -> dict:
+    conn = get_conn()
+    now = _now()
+    payload = _group_json(name, sort_order)
+    group_id = "ug_" + secrets.token_hex(8)
+    conn.execute(
+        "INSERT INTO urlarch_shortcut_groups"
+        "(id,name,sort_order,raw_json,live_json,created_at,updated_at) "
+        "VALUES(?,?,?,?,?,?,?)",
+        (group_id, name, sort_order, payload, payload, now, now),
+    )
+    conn.commit()
+    return get_shortcut_group(group_id) or {}
+
+
+def delete_shortcut_group(group_id: str) -> bool:
+    """删除组别：组内条目改到未分组（group_id=''），条目不删。
+
+    组内条目的 live_json 按当前列刷新，raw_json 保留为登记时快照（项目口径）。
+    """
+    conn = get_conn()
+    conn.execute("BEGIN IMMEDIATE")
+    try:
+        cur = conn.execute("DELETE FROM urlarch_shortcut_groups WHERE id=?", (group_id,))
+        if cur.rowcount == 0:
+            conn.rollback()
+            return False
+        moved = conn.execute(
+            "SELECT id,name,path,args,hotkey,created_at,updated_at "
+            "FROM urlarch_shortcuts WHERE group_id=?", (group_id,)
+        ).fetchall()
+        for row in moved:
+            payload = _shortcut_json(row["name"], row["path"], json.loads(row["args"] or "[]"),
+                                     row["hotkey"], "")
+            conn.execute(
+                "UPDATE urlarch_shortcuts SET group_id='', live_json=? WHERE id=?",
+                (payload, row["id"]),
+            )
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
+    return True

@@ -12,20 +12,21 @@ const UA_ERR_TEXT = {
   SHORTCUT_NOT_FOUND: '白名单中找不到该软件（可能已被删除）',
   PATH_INVALID: '可执行路径无效或文件不存在',
   PATH_EXT_BLOCKED: '该扩展名（.bat/.lnk/.ps1 等）被禁止，请登记可执行程序本体',
-  ARGS_INVALID: '参数不合法：需 JSON 字符串数组，且不含 ; && || | > < 等字符',
+  ARGS_INVALID: '参数不合法（后端仍校验历史 args，需 JSON 字符串数组且不含 ; && | 等字符）',
   NAME_INVALID: '名称不合法（1–64 字符）',
+  GROUP_NOT_FOUND: '组别不存在（可能已被删除）',
+  GROUP_NAME_INVALID: '组名不合法（1–64 字符）',
   LAUNCH_FAILED: '启动失败：进程创建被拒绝或系统报错',
   INTERNAL_ERROR: '后端内部错误，未启动',
   METHOD_NOT_ALLOWED: '请求方式不被支持',
   not_found: '接口不存在',
 };
 let uaShortcuts = [];
+let uaShortcutGroups = [];
+// 软件入口组别的折叠状态：仅页面会话内存（刷新恢复默认展开），多组互不影响。
+const uaCollapsedShortcutGroups = new Set();
 function uaShortcutHint(code) {
   return UA_ERR_TEXT[code] || ('操作失败：' + (code || '未知错误'));
-}
-function uaShortcutIcon(name) {
-  const text = String(name || '').trim();
-  return text ? text.slice(0, 1).toUpperCase() : '🧩';
 }
 async function uaFetchShortcuts() {
   try {
@@ -35,12 +36,12 @@ async function uaFetchShortcuts() {
     return [];
   }
 }
-function uaArgsSummary(raw) {
+async function uaFetchShortcutGroups() {
   try {
-    const list = JSON.parse(raw || '[]');
-    return Array.isArray(list) && list.length ? `参数 ${list.length} 项` : '无参数';
+    const d = await api('/api/plugin/urlarch/shortcut-groups');
+    return Array.isArray(d && d.items) ? d.items : [];
   } catch (e) {
-    return '参数异常';
+    return [];
   }
 }
 
@@ -128,16 +129,20 @@ async function renderUrlArchTool() {
     </div>
     <div class="gcard" id="ua-shortcut-card" style="margin-top:14px;">
       <div class="section-title"><span class="st-emoji">🚀</span>软件快捷入口
-        <span style="font-size:12px;color:var(--text-dim);font-weight:400;">点击卡片启动 · 白名单注册制 · 仅本机</span>
+        <span style="font-size:12px;color:var(--text-dim);font-weight:400;">按组展示 · 点击列表行启动 · 白名单注册制 · 仅本机</span>
       </div>
-      <div id="ua-sc-grid" class="ua-sc-grid"></div>
+      <div id="ua-sc-groups" class="ua-sg-list"></div>
       <div class="ua-sc-form">
         <input class="input" id="ua-sc-name" placeholder="名称，如：记事本" style="flex:2;min-width:120px;">
         <input class="input" id="ua-sc-path" placeholder="可执行文件绝对路径，如 C:/Program Files/App/app.exe" style="flex:3;min-width:220px;">
-        <input class="input" id="ua-sc-args" placeholder='参数 JSON 数组（可选），如 ["--new"]' style="flex:2;min-width:150px;">
+        <select class="input" id="ua-sc-group" style="flex:1;min-width:130px;"></select>
         <button class="btn" id="ua-sc-add">＋ 添加软件</button>
       </div>
-      <div class="ua-sc-hint">只启动白名单内已登记的软件：点击卡片后请求 <code>POST /api/plugin/urlarch/launch</code>，入参只有 id；路径与参数由后端从白名单读取并再次校验，前端不能传路径或命令。这是页面内入口，不是系统桌面快捷方式，也不注册键盘快捷键。</div>
+      <div class="ua-sc-form">
+        <input class="input" id="ua-sc-newgroup" placeholder="新建组名，如：写作工具" style="flex:2;min-width:160px;">
+        <button class="btn soft" id="ua-sc-addgroup">＋ 新建组</button>
+      </div>
+      <div class="ua-sc-hint">只启动白名单内已登记的软件：点击列表行后请求 <code>POST /api/plugin/urlarch/launch</code>，入参只有 id；路径与参数由后端从白名单读取并再次校验，前端不能传路径或命令。这是页面内入口，不是系统桌面快捷方式，也不注册键盘快捷键。组别收起/展开只存页面会话内存，刷新恢复默认展开。</div>
     </div>`;
   const listBox = $('#ua-list');
   let blocked = {};
@@ -384,33 +389,77 @@ async function renderUrlArchTool() {
       toast(uaShortcutHint(err && err.message), 'warn', 4600);
     }
   };
-  const renderShortcuts = () => {
-    const box = $('#ua-sc-grid');
+  const shortcutRowHTML = item => `
+    <div class="ua-sc-row" data-sc-launch="${esc(item.id)}" role="button" tabindex="0" title="点击启动 ${esc(item.name)}">
+      <span class="ua-sc-name">${esc(item.name)}</span>
+      <span class="ua-sc-path">${esc(item.path)}</span>
+      <button class="mini-btn danger ua-sc-del" data-sc-del="${esc(item.id)}" title="从白名单删除（不卸载软件）">✕</button>
+    </div>`;
+  const applyShortcutCollapse = () => {
+    const box = $('#ua-sc-groups');
     if (!box) return;
-    if (!uaShortcuts.length) {
-      box.innerHTML = '<div class="ua-sc-empty">还没有软件快捷入口。填写名称、可执行文件绝对路径（参数可选）后点「＋ 添加软件」。</div>';
-      return;
+    box.querySelectorAll('.ua-sg').forEach(sec => {
+      const folded = uaCollapsedShortcutGroups.has(sec.dataset.sgid || '');
+      sec.classList.toggle('collapsed', folded);
+      const caret = sec.querySelector('.ua-caret');
+      if (!caret) return;
+      caret.setAttribute('aria-expanded', folded ? 'false' : 'true');
+      caret.setAttribute('aria-label', folded ? '展开组别' : '收起组别');
+      caret.title = folded ? '展开' : '收起';
+    });
+  };
+  const toggleShortcutGroup = gid => {
+    const key = gid || '';
+    if (uaCollapsedShortcutGroups.has(key)) uaCollapsedShortcutGroups.delete(key);
+    else uaCollapsedShortcutGroups.add(key);
+    applyShortcutCollapse();
+  };
+  const renderShortcuts = () => {
+    const box = $('#ua-sc-groups');
+    if (!box) return;
+    const groups = [{ id: '', name: '未分组', sort_order: -1 }, ...uaShortcutGroups];
+    const sel = $('#ua-sc-group');
+    if (sel) {
+      const cur = sel.value;
+      sel.innerHTML = groups.map(g => `<option value="${esc(g.id)}">${esc(g.name)}</option>`).join('');
+      if (groups.some(g => g.id === cur)) sel.value = cur;
     }
-    box.innerHTML = uaShortcuts.map(item => `
-      <div class="ua-sc-card" data-sc-launch="${esc(item.id)}" role="button" tabindex="0" title="点击启动 ${esc(item.name)}">
-        <span class="ua-sc-icon">${esc(uaShortcutIcon(item.name))}</span>
-        <span class="ua-sc-card-main">
-          <span class="ua-sc-name">${esc(item.name)}</span>
-          <span class="ua-sc-path" title="${esc(item.path)}">${esc(item.path)}</span>
-          <span class="ua-sc-args">${esc(uaArgsSummary(item.args))}</span>
-        </span>
-        <button class="mini-btn danger ua-sc-del" data-sc-del="${esc(item.id)}" title="从白名单删除（不卸载软件）">🗑️</button>
-      </div>`).join('');
-    box.querySelectorAll('[data-sc-launch]').forEach(card => {
-      card.onclick = e => {
+    box.innerHTML = groups.map(g => {
+      const rows = uaShortcuts.filter(x => (x.group_id || '') === g.id);
+      const folded = uaCollapsedShortcutGroups.has(g.id);
+      const del = g.id
+        ? `<span class="ua-group-ops"><button class="mini-btn danger" data-sg-del="${esc(g.id)}" title="删除组（组内软件移到未分组）">🗑️</button></span>`
+        : '';
+      return `<section class="ua-group ua-sg${folded ? ' collapsed' : ''}" data-sgid="${esc(g.id)}">
+        <div class="ua-group-head" data-sghead="${esc(g.id)}">
+          <button type="button" class="ua-caret" data-sg-toggle="${esc(g.id)}" aria-expanded="${folded ? 'false' : 'true'}" aria-label="${folded ? '展开组别' : '收起组别'}" title="${folded ? '展开' : '收起'}">▾</button>
+          <b>${esc(g.name)}</b>
+          <span class="ua-count">${rows.length} 项</span>
+          ${del}
+        </div>
+        <div class="ua-items ua-sg-items">${rows.map(shortcutRowHTML).join('') || '<div class="ua-empty">该组暂无软件</div>'}</div>
+      </section>`;
+    }).join('');
+    box.querySelectorAll('[data-sg-toggle]').forEach(btn => btn.onclick = e => {
+      e.stopPropagation();
+      toggleShortcutGroup(btn.dataset.sgToggle);
+    });
+    // 点组标题栏空白处也可切换；组内按钮保持原行为。
+    box.querySelectorAll('[data-sghead]').forEach(head => head.onclick = e => {
+      if (e.target.closest('button,a,input,select,textarea,label')) return;
+      toggleShortcutGroup(head.dataset.sghead);
+    });
+    box.querySelectorAll('[data-sg-del]').forEach(btn => btn.onclick = () => removeShortcutGroup(btn.dataset.sgDel));
+    box.querySelectorAll('[data-sc-launch]').forEach(row => {
+      row.onclick = e => {
         if (e.target.closest('[data-sc-del]')) return;
-        launchShortcut(card.dataset.scLaunch);
+        launchShortcut(row.dataset.scLaunch);
       };
       // 回车/空格等同点击（可访问性），不是全局键盘快捷键。
-      card.onkeydown = e => {
+      row.onkeydown = e => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
-          launchShortcut(card.dataset.scLaunch);
+          launchShortcut(row.dataset.scLaunch);
         }
       };
     });
@@ -427,26 +476,55 @@ async function renderUrlArchTool() {
       toast(uaShortcutHint(err && err.message), 'warn', 4600);
     }
   };
+  const removeShortcutGroup = async gid => {
+    const g = uaShortcutGroups.find(x => x.id === gid);
+    if (!confirm(`删除组「${(g && g.name) || ''}」？组内软件将移到未分组（不会删除软件）`)) return;
+    try {
+      await api('/api/plugin/urlarch/shortcut-groups/' + encodeURIComponent(gid), { method: 'DELETE' });
+      uaShortcutGroups = await uaFetchShortcutGroups();
+      uaShortcuts = await uaFetchShortcuts();
+      renderShortcuts();
+      toast('已删除组，组内软件移到未分组 ✓', 'success', 2800);
+    } catch (err) {
+      toast(uaShortcutHint(err && err.message), 'warn', 4600);
+    }
+  };
   const addShortcut = async () => {
     const name = $('#ua-sc-name').value.trim();
     const path = $('#ua-sc-path').value.trim();
-    const args = $('#ua-sc-args').value.trim();
+    const groupId = $('#ua-sc-group').value || '';
     if (!name) { toast('请填写名称', 'warn'); return; }
     if (!path) { toast('请填写可执行文件绝对路径', 'warn'); return; }
     const payload = { name, path };
-    if (args) payload.args = args;
+    if (groupId) payload.group_id = groupId;
     try {
       await api('/api/plugin/urlarch/shortcuts', { method: 'POST', body: payload });
       uaShortcuts = await uaFetchShortcuts();
       renderShortcuts();
-      $('#ua-sc-name').value = ''; $('#ua-sc-path').value = ''; $('#ua-sc-args').value = '';
+      $('#ua-sc-name').value = ''; $('#ua-sc-path').value = '';
       toast('已添加快捷入口 ✓', 'success');
     } catch (err) {
       toast(uaShortcutHint(err && err.message), 'warn', 4600);
     }
   };
+  const addShortcutGroup = async () => {
+    const name = $('#ua-sc-newgroup').value.trim();
+    if (!name) { toast('请填写组名', 'warn'); return; }
+    try {
+      const d = await api('/api/plugin/urlarch/shortcut-groups', { method: 'POST', body: { name } });
+      uaShortcutGroups = await uaFetchShortcutGroups();
+      renderShortcuts();
+      if (d && d.item && d.item.id) $('#ua-sc-group').value = d.item.id;
+      $('#ua-sc-newgroup').value = '';
+      toast(`已新建组「${name}」✓`, 'success');
+    } catch (err) {
+      toast(uaShortcutHint(err && err.message), 'warn', 4600);
+    }
+  };
   $('#ua-sc-add').onclick = addShortcut;
+  $('#ua-sc-addgroup').onclick = addShortcutGroup;
   uaShortcuts = await uaFetchShortcuts();
+  uaShortcutGroups = await uaFetchShortcutGroups();
   renderShortcuts();
   draw();
 }
