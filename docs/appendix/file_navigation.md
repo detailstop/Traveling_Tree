@@ -2,9 +2,9 @@
 
 > 只读摘要，勿手改。本文件由 docs/appendix/file_navigation.json 生成；结构与去留决定以 JSON 为准。
 
-- 生成时间：2026-11-02T21:39:46+03:00
-- 轮次：110
-- 待办：1 条；已决定：747 条
+- 生成时间：2026-11-02T21:50:55+03:00
+- 轮次：111
+- 待办：1 条；已决定：758 条
 
 ## 待办
 
@@ -16,6 +16,17 @@
 
 | 路径 | 决定 | 原因 | 状态 | 轮次 | 时间 | 备份路径 |
 | --- | --- | --- | --- | --- | --- | --- |
+| docs/plugin-development-whitepaper.md | §二 新增 provides/consumes 定稿语义；§十 改为引用（round 111） | §二 明确：consumes 写插件 id（插件是依赖最小单元，拆分必改名并同步）；只表直接调用（直接 import / `/api/plugin/<id>/*` / 子进程调插件脚本），宿主中介不算（由 shared_features 表达）；provides 是能力名、不参与依赖检查，二者字段级不对称是有意设计；不区分必需/可选，降级写 README。§十 10.1 改为引用 §二 避免两套措辞；10.4 补“语义见 §二”；10.5 补“直接调用写入 consumes、宿主中介不算”。 | done | 111 | 2026-11-02T21:50:55+03:00 |  |
+| docs/plugin-development-guide.md | §4.1 依赖节与检查清单同步四项语义（round 111） | 第 4 条补 consumes 写插件 id / 只表直接调用 / 宿主中介不算 / provides 能力名且不参与检查 / 不对称有意 / 不区分必需可选；清单两条同步措辞。 | done | 111 | 2026-11-02T21:50:55+03:00 |  |
+| docs/appendix/plugin-info-card-template.md | INFO 模板补 provides/consumes 语义（round 111） | 依赖节新增一条：consumes 写插件 id、只表直接调用；provides 写能力名、不参与依赖检查；不对称有意；宿主中介不计入。 | done | 111 | 2026-11-02T21:50:55+03:00 |  |
+| docs/appendix/prompts/plugin-dev-prompt.md | 脚手架提示词补 provides/consumes 语义（round 111） | §0 新增“跨插件依赖”一行：consumes 写插件 id 且只表直接调用，宿主中介由 shared_features 表达，provides 写能力名不参与检查，不区分必需/可选。 | done | 111 | 2026-11-02T21:50:55+03:00 |  |
+| plugins/market/README.md | 依赖检测说明补 provides/consumes 语义（round 111） | 注明 consumes 写插件 id、只表直接调用，provides 写能力名、不参与依赖检查，二者不对称是有意设计，市场不据此检测/阻断。 | done | 111 | 2026-11-02T21:50:55+03:00 |  |
+| plugins/market/INFO.md | 信息卡依赖检测说明同步语义（round 111） | 同上，精简表述。 | done | 111 | 2026-11-02T21:50:55+03:00 |  |
+| plugins/ai/README.md | 依赖节补降级说明（round 111） | webchat 不可用时：状态显示“网页会话状态获取失败”、会话列表为空、发送消息气泡显示“⚠ 请求失败”；API 直连功能不受影响（依据 feature.js:89-98、:248-262 核实现状）。 | done | 111 | 2026-11-02T21:50:55+03:00 |  |
+| plugins/book_reader/README.md | 依赖节补降级说明（round 111） | pixel_art 不可用时 visual-settings（GET/PUT）与 /assets 报错（后端 500），其余接口不受影响、无 fallback（依据 book_reader.py:1014/1017/1021 + backend.py:24-29 异常处理核实）。 | done | 111 | 2026-11-02T21:50:55+03:00 |  |
+| plugins/promptgen/README.md | 依赖节补降级说明（round 111） | book_reader 书籍列表降级为空列表（:246），bg_library 节点树失败显示错误文案（:798），待清洗/清洗导出/词表/背景库导出失败直接抛错（:908/:930/:988/:1007/:959），webchat 经 window.__webchat（依据 feature.js 核实）。 | done | 111 | 2026-11-02T21:50:55+03:00 |  |
+| plugins/finance/README.md | 依赖节补降级说明（round 111） | webchat 失败/超时返回 {ok:false,error}、restart 静默 {ok:false}；ai/keys 失败仅不显示 Key 标记、ai/chat 失败由审查执行器提示；记账等本插件功能不受影响（依据 feature_finance.js:1502-1512、:4179、:4451 核实）。 | done | 111 | 2026-11-02T21:50:55+03:00 |  |
+| docs/appendix/file_navigation.json | 登记 round 111（依赖声明语义定稿） | 追加 10 条 decided 并 round→111；pending 保留既有 1 条；resolved 45 条不动；md 由生成器重生成。本轮仅文档与 README，未改字段值/代码/validate/version；validate 23/23 ok；相关 smoke（info_cards 11/11、plugins 185/185、market 37/37）通过；生成器幂等。 | done | 111 | 2026-11-02T21:50:55+03:00 |  |
 | plugins/ai/manifest.json | 补 consumes=[webchat]（round 110） | 代码实际调用：feature.js:90/103/120/149/160/248 六处 /api/plugin/webchat/*；原 consumes 为空。条目按既有约定写插件 id；未改 provides 与 version。 | done | 110 | 2026-11-02T21:39:46+03:00 |  |
 | plugins/ai/INFO.md | front matter consumes 与 manifest 同步（round 110） | consumes 改为 [webchat]。 | done | 110 | 2026-11-02T21:39:46+03:00 |  |
 | plugins/ai/README.md | 依赖节补跨插件关系（round 110） | 注明 consumes=[webchat] 与依据；原「调用」说明保留。 | done | 110 | 2026-11-02T21:39:46+03:00 |  |

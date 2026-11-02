@@ -53,12 +53,12 @@ plugins/<id>/
 - [ ] `backend.py` 内部 import 用 `from plugins.<id> import <module>`（附录 D）
 - [ ] `data_dirs` 声明与 `config.plugin_data_dir()` 使用一致（附录 D）
 - [ ] `shared_features` 只引用宿主共享脚本；注入时机标注“需执行 Agent 核实”（附录 D）
-- [ ] `provides`/`consumes` 如声明则与能力一致（§十）
+- [ ] `provides` 写能力名（能力描述、不参与依赖检查）；`consumes` 写插件 id、只表直接调用，宿主中介不算（§二、§十）
 - [ ] 解耦：删除/改名插件后宿主零 Traceback（§六）
 - [ ] 测试：`smoke_plugins` + 相关 smoke 通过（§六）
 - [ ] 文档：README/白皮书/附件已同步，规则不重复（§八、§十一）
 - [ ] 插件 `README.md` 存在且含固定小节：职责 / 入口与路由 / 数据表 / 依赖 / 注意事项（§4.1；白皮书 §十一）
-- [ ] 对外提供能力时已声明 `provides`（§十.4）；`consumes` 可选
+- [ ] 对外提供能力时已声明 `provides`（能力名，§十.4）；`consumes` 可选，写插件 id、只表直接调用（§二）
 - [ ] 派生/缓存/快照表按 G2 口径豁免时，已在 README「数据表」列出，且保留 `raw_json` 或来源说明（白皮书 §五）
 - [ ] 跨插件直接 import 已在该插件 README 与 `plugins/lib.json` notes 标注（§十.5）
 - [ ] `plugins/<id>/INFO.md` 存在且通过 `smoke_info_cards`（front matter 必需 9 项）
@@ -76,7 +76,7 @@ plugins/<id>/
 1. **职责**：一句话说明插件做什么、给谁用。
 2. **入口与路由**：卡片 entry 与 feature 文件；有无后端；路由前缀 `/api/plugin/<id>/*`（子路径见 `backend.py::handle`，已有契约则链接 `docs/appendix/interfaces/<id>.md`）。
 3. **数据表**：表名清单；`raw_json`/`live_json` 状态；按 G2 豁免的表要写明“豁免 `live_json`，保留 `raw_json`/可重建来源”。
-4. **依赖**：`data_dirs`、`shared_features`、跨插件调用（含直接 import 标注）、可选第三方库；第三方 Python 包写 `manifest.dependencies.python`（最终只有 `python` 子键；`plugins`/`plugin`/`shared`/`js` 均不采用——跨插件用 `provides`/`consumes`，宿主公共脚本用 `shared_features`），README 文字与声明保持一致；只声明不安装。
+4. **依赖**：`data_dirs`、`shared_features`、跨插件调用（含直接 import 标注）、可选第三方库；第三方 Python 包写 `manifest.dependencies.python`（最终只有 `python` 子键；`plugins`/`plugin`/`shared`/`js` 均不采用）。跨插件用 `provides`/`consumes`：**`consumes` 写插件 id，只表直接调用**（直接 import、`/api/plugin/<id>/*`、子进程调插件脚本），**宿主中介不算**（由 `shared_features` 表达）；**`provides` 写能力名**，只是能力描述、不参与依赖检查，二者字段级不对称是有意设计；**不区分必需/可选**，降级行为写在本节。README 文字与声明保持一致；只声明不安装。
 5. **注意事项**：敏感数据、破坏性操作、已知环境失败（如 TTS 502）、未核实事项。
 
 README 不写实现细节，不复制代码；事实以 manifest/schema/backend 为准。

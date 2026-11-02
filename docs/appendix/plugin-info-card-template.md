@@ -56,6 +56,7 @@
 
 ## 依赖
 - provides / consumes
+- `consumes` 写插件 id（只表直接调用：直接 import、`/api/plugin/<id>/*`、子进程调插件脚本）；`provides` 写能力名（能力描述、不参与依赖检查）；二者字段级不对称是有意设计；宿主中介调用（宿主函数、共享脚本）不计入 `consumes`，由 `shared_features` 表达
 - 第三方依赖不在 INFO 重复声明，见 `manifest.dependencies.python`（最终只有 `python` 子键；跨插件用 `provides`/`consumes`，宿主公共脚本用 `shared_features`）；市场页依赖状态由只读接口检测
 
 ## 注意事项

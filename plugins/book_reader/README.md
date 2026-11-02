@@ -32,6 +32,7 @@
 ## 依赖
 - 直接 import：`plugins.pixel_art.service`（G4 已标注；计划改走 HTTP——**计划未落地，不写入 `consumes` 之外的任何声明**）
 - 跨插件关系：`consumes: ["pixel_art"]`（round 110 按代码实际调用补全：`visual-settings` GET/PUT 与 `/assets` 三处动态 import）
+- 降级：pixel_art 不可用时，`/api/plugin/book_reader/reader/visual-settings`（GET/PUT）与 `/api/plugin/book_reader/reader/assets` 直接报错（后端 500），阅读、书签、标注等其余接口不受影响；无 fallback。
 - 无外部库硬依赖
 
 ## 注意事项

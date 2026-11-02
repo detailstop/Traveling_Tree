@@ -37,5 +37,5 @@ sensitive_data: []
 - consumes：无
 
 ## 注意事项
-- 依赖检测（round 107/108/109）：`GET /dependencies` 与 `GET /dependencies/<id>` 只读扫描各 `manifest.dependencies`，**最终子键只有 `python`**（跨插件用 `provides`/`consumes`，宿主公共脚本用 `shared_features`；`plugins`/`plugin`/`shared`/`js` 不再采用），缺失/版本不满足/冲突只提示不阻断；`packaging` 未安装时降级为只判存在性（`degraded: true`），无自动安装与多版本隔离。
+- 依赖检测（round 107/108/109）：`GET /dependencies` 与 `GET /dependencies/<id>` 只读扫描各 `manifest.dependencies`，**最终子键只有 `python`**（跨插件用 `provides`/`consumes`：`consumes` 写插件 id、只表直接调用，`provides` 写能力名、不参与依赖检查，二者不对称是有意设计；宿主公共脚本用 `shared_features`；`plugins`/`plugin`/`shared`/`js` 不再采用），缺失/版本不满足/冲突只提示不阻断；`packaging` 未安装时降级为只判存在性（`degraded: true`），无自动安装与多版本隔离。
 - 详见 README.md；本卡为市场精简信息，关键字段由校验脚本与 manifest/schema 保持一致。

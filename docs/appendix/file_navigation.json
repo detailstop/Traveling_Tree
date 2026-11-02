@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-02T21:39:46+03:00",
-  "round": 110,
+  "generated_at": "2026-11-02T21:50:55+03:00",
+  "round": 111,
   "pending": [
     {
       "path": "docs/appendix/file_navigation.json",
@@ -16,6 +16,94 @@
     }
   ],
   "decided": [
+    {
+      "path": "docs/plugin-development-whitepaper.md",
+      "decision": "§二 新增 provides/consumes 定稿语义；§十 改为引用（round 111）",
+      "reason": "§二 明确：consumes 写插件 id（插件是依赖最小单元，拆分必改名并同步）；只表直接调用（直接 import / `/api/plugin/<id>/*` / 子进程调插件脚本），宿主中介不算（由 shared_features 表达）；provides 是能力名、不参与依赖检查，二者字段级不对称是有意设计；不区分必需/可选，降级写 README。§十 10.1 改为引用 §二 避免两套措辞；10.4 补“语义见 §二”；10.5 补“直接调用写入 consumes、宿主中介不算”。",
+      "status": "done",
+      "round": 111,
+      "at": "2026-11-02T21:50:55+03:00"
+    },
+    {
+      "path": "docs/plugin-development-guide.md",
+      "decision": "§4.1 依赖节与检查清单同步四项语义（round 111）",
+      "reason": "第 4 条补 consumes 写插件 id / 只表直接调用 / 宿主中介不算 / provides 能力名且不参与检查 / 不对称有意 / 不区分必需可选；清单两条同步措辞。",
+      "status": "done",
+      "round": 111,
+      "at": "2026-11-02T21:50:55+03:00"
+    },
+    {
+      "path": "docs/appendix/plugin-info-card-template.md",
+      "decision": "INFO 模板补 provides/consumes 语义（round 111）",
+      "reason": "依赖节新增一条：consumes 写插件 id、只表直接调用；provides 写能力名、不参与依赖检查；不对称有意；宿主中介不计入。",
+      "status": "done",
+      "round": 111,
+      "at": "2026-11-02T21:50:55+03:00"
+    },
+    {
+      "path": "docs/appendix/prompts/plugin-dev-prompt.md",
+      "decision": "脚手架提示词补 provides/consumes 语义（round 111）",
+      "reason": "§0 新增“跨插件依赖”一行：consumes 写插件 id 且只表直接调用，宿主中介由 shared_features 表达，provides 写能力名不参与检查，不区分必需/可选。",
+      "status": "done",
+      "round": 111,
+      "at": "2026-11-02T21:50:55+03:00"
+    },
+    {
+      "path": "plugins/market/README.md",
+      "decision": "依赖检测说明补 provides/consumes 语义（round 111）",
+      "reason": "注明 consumes 写插件 id、只表直接调用，provides 写能力名、不参与依赖检查，二者不对称是有意设计，市场不据此检测/阻断。",
+      "status": "done",
+      "round": 111,
+      "at": "2026-11-02T21:50:55+03:00"
+    },
+    {
+      "path": "plugins/market/INFO.md",
+      "decision": "信息卡依赖检测说明同步语义（round 111）",
+      "reason": "同上，精简表述。",
+      "status": "done",
+      "round": 111,
+      "at": "2026-11-02T21:50:55+03:00"
+    },
+    {
+      "path": "plugins/ai/README.md",
+      "decision": "依赖节补降级说明（round 111）",
+      "reason": "webchat 不可用时：状态显示“网页会话状态获取失败”、会话列表为空、发送消息气泡显示“⚠ 请求失败”；API 直连功能不受影响（依据 feature.js:89-98、:248-262 核实现状）。",
+      "status": "done",
+      "round": 111,
+      "at": "2026-11-02T21:50:55+03:00"
+    },
+    {
+      "path": "plugins/book_reader/README.md",
+      "decision": "依赖节补降级说明（round 111）",
+      "reason": "pixel_art 不可用时 visual-settings（GET/PUT）与 /assets 报错（后端 500），其余接口不受影响、无 fallback（依据 book_reader.py:1014/1017/1021 + backend.py:24-29 异常处理核实）。",
+      "status": "done",
+      "round": 111,
+      "at": "2026-11-02T21:50:55+03:00"
+    },
+    {
+      "path": "plugins/promptgen/README.md",
+      "decision": "依赖节补降级说明（round 111）",
+      "reason": "book_reader 书籍列表降级为空列表（:246），bg_library 节点树失败显示错误文案（:798），待清洗/清洗导出/词表/背景库导出失败直接抛错（:908/:930/:988/:1007/:959），webchat 经 window.__webchat（依据 feature.js 核实）。",
+      "status": "done",
+      "round": 111,
+      "at": "2026-11-02T21:50:55+03:00"
+    },
+    {
+      "path": "plugins/finance/README.md",
+      "decision": "依赖节补降级说明（round 111）",
+      "reason": "webchat 失败/超时返回 {ok:false,error}、restart 静默 {ok:false}；ai/keys 失败仅不显示 Key 标记、ai/chat 失败由审查执行器提示；记账等本插件功能不受影响（依据 feature_finance.js:1502-1512、:4179、:4451 核实）。",
+      "status": "done",
+      "round": 111,
+      "at": "2026-11-02T21:50:55+03:00"
+    },
+    {
+      "path": "docs/appendix/file_navigation.json",
+      "decision": "登记 round 111（依赖声明语义定稿）",
+      "reason": "追加 10 条 decided 并 round→111；pending 保留既有 1 条；resolved 45 条不动；md 由生成器重生成。本轮仅文档与 README，未改字段值/代码/validate/version；validate 23/23 ok；相关 smoke（info_cards 11/11、plugins 185/185、market 37/37）通过；生成器幂等。",
+      "status": "done",
+      "round": 111,
+      "at": "2026-11-02T21:50:55+03:00"
+    },
     {
       "path": "plugins/ai/manifest.json",
       "decision": "补 consumes=[webchat]（round 110）",

@@ -61,6 +61,14 @@
 - 同一库被多个插件以互斥约束声明时标记 `conflict`，提示“多版本隔离需后续方案”，不声称已支持。
 - README「依赖」节仍写人类可读说明，须与 `manifest.dependencies` 一致；INFO.md front matter 不重复依赖字段。
 
+**`provides` / `consumes`（跨插件依赖声明，round 111 定稿语义）**：
+
+- **`consumes` 写插件 id**：插件是依赖的最小单元，条目如 `["webchat"]`、`["book_reader"]`。插件拆分时必然改名并同步依赖声明，不存在同名歧义。
+- **只表达“直接调用”**：直接 import 其他插件模块（`from plugins.<id> import ...`）、调用 `/api/plugin/<id>/*`、子进程调用插件脚本。**宿主中介调用不算**（如 `russian` 经宿主 `speakBtn()` 用 tts、`aidebug` 经 `window.__webchat.*` 用 webchat）：宿主中介由 `shared_features` 表达，两者职责分明。
+- **`provides` 写能力名，只是能力描述**（如 `pixel_art` → `["pixel_assets"]`），不参与依赖检查。`consumes`（插件 id）与 `provides`（能力名）**字段级不对称是有意设计，不是缺陷**：`book_reader.consumes = ["pixel_art"]` 对应的是 `pixel_art.provides = ["pixel_assets"]`。
+- **不区分必需/可选**：`consumes` 为字符串数组，声明即视为依赖。降级行为（哪些功能不可用、是否有 fallback）写在插件 README「依赖」节，不新增字段或子键。
+- 宿主与校验器只做“字符串数组”结构校验，不校验能力是否匹配、不阻断加载；市场依赖检测只读 `dependencies.python`，不读这两个字段。
+
 ## 三、 前端开发规范 (feature.js)
 
 - **ESM 动态加载**：插件前端必须是 ES Module，导出 `render(container)` 函数。宿主会在用户点击卡片时通过 `import('/plugins/<id>/feature.js')` 动态加载。
@@ -191,8 +199,8 @@ round 65 删除 `plugin-development-whitepaper-v2.1-draft.md` 与 `project-closu
 ## 十、工程约束补充（round 70）
 
 ### 10.1 `provides` / `consumes`
-- 两者为 manifest v2 的**可选能力声明**数组，用于描述“提供/消费的能力名”；不替代运行时分发或鉴权。
-- 当前宿主对这两个字段的强制程度：**需执行 Agent 核实**（实现见 `ui/web/server.py`）；文档与未来市场索引只把它们当作声明信息。
+- **语义以 §二「`provides` / `consumes`（跨插件依赖声明）」为准**：`consumes` 写插件 id、只表直接调用、宿主中介不算（由 `shared_features` 表达）、`provides` 是能力名且不参与依赖检查、不区分必需/可选。
+- 两者为 manifest v2 的声明信息，不替代运行时分发或鉴权；宿主与市场索引不据此做依赖检查或阻断。
 - 声明应保持稳定、可读（如 `["webchat"]`），不要写临时路径或版本号。
 
 ### 10.2 `plugins/` 目录扫描边界
@@ -206,13 +214,14 @@ round 65 删除 `plugin-development-whitepaper-v2.1-draft.md` 与 `project-closu
 
 ### 10.4 `provides` 必须、`consumes` 可选（round 72 G3）
 - 插件向其他插件或宿主前端提供能力时，必须在 manifest 声明 `provides`（能力名数组，如 `["webchat"]`）。
-- `consumes` 为可选声明；跨插件调用仍以 HTTP `/api/plugin/<id>/*` 为主。
+- `consumes` 为可选声明（语义见 §二：写插件 id、只表直接调用）；跨插件调用仍以 HTTP `/api/plugin/<id>/*` 为主。
 - 宿主是否强制消费这两个字段：**需执行 Agent 核实**；规则层面按声明要求执行。
 
 ### 10.5 跨插件调用与标注（round 72 G4）
 - 跨插件调用优先走 HTTP；不把其他插件的 backend/业务模块当作库直接 import。
 - 历史实现若确需直接 import（如 `book_reader` → `pixel_art.service`），必须在该插件 README 的「依赖」与 `plugins/lib.json` 的 `notes` 中标注，作为已知耦合。
 - 新增直接 import 需在代码评审中说明理由。
+- 直接 import / HTTP / 子进程调插件脚本都要写入 `consumes`（§二）；宿主中介调用（宿主函数、共享脚本）不算，只由 `shared_features` 表达。
 
 ### 10.6 共享缓存路径例外（round 72 G5）
 - 插件私有数据默认放 `data/plugins/<id>/`（`data_dirs`）。

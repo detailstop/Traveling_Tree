@@ -20,6 +20,7 @@ AI 工作台：Key/模型设置、对话代理、前端状态与流水。
 - 跨插件关系：`consumes: ["webchat"]`（round 110 按代码实际调用补全；webchat 为宿主内插件，非第三方包）
 - 对外提供能力：`provides: ["ai"]`（round 73）
 - 被 `finance` 平级调用（`/api/plugin/ai/keys`、`/chat`）
+- 降级：webchat 不可用时，网页会话状态显示「网页会话状态获取失败」、会话列表为空、发送消息在气泡内显示「⚠ 请求失败」；DeepSeek/Kimi 等 API 直连功能不受影响。
 - 外部：AI provider 网络、`data/ai_keys.json`
 
 ## 注意事项

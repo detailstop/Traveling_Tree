@@ -22,6 +22,7 @@
 是否需要业务表：`{{NEEDS_DB}}`；是否需要独立数据目录：`{{NEEDS_DATA_DIR}}`。
 对外提供的能力（`provides`）：`{{PROVIDES}}`。
 第三方依赖：只把第三方 Python 包写入 `manifest.dependencies.python`（最终只有 `python` 子键；`plugins`/`plugin` 不采用——跨插件用 `provides`/`consumes`；`shared`/`js` 不采用——宿主公共脚本用 `shared_features`）；只声明不安装，市场页只读检测。
+跨插件依赖：`consumes` 写**插件 id**且只表直接调用（直接 import、`/api/plugin/<id>/*`、子进程调插件脚本）；宿主中介调用（宿主函数、共享脚本）不算，由 `shared_features` 表达；`provides` 写能力名，只是能力描述、不参与依赖检查（与 `consumes` 字段级不对称是有意设计）；不区分必需/可选，降级行为写进 README「依赖」节。
 落地目录：`{{TARGET_DIR}}`。
 
 ## 1. 已知条件

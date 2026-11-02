@@ -39,6 +39,7 @@
 - `data_dirs: ["finance"]`
 - 调用：`/api/plugin/webchat/*`、`/api/plugin/ai/*`
 - 跨插件关系：`consumes: ["webchat", "ai"]`（webchat / ai 为宿主内插件，非第三方包；本插件无 Python 第三方依赖，故不声明 `dependencies`）
+- 降级：webchat 失败/超时返回 `{ok:false, error}`（手动中止返回「已手动中断」），`/restart` 失败静默返回 `{ok:false}`；`ai/keys` 失败仅不显示 Key 状态标记，`ai/chat` 失败由审查执行器提示错误；记账、快照、归因等本插件功能不受影响。
 - 迁移输入：`data/plugins/finance/fixtures/rt_fin.json`（敏感，不读正文）
 
 ## 注意事项

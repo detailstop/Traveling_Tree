@@ -50,6 +50,6 @@
 - **正式规则：卸载不 DROP 主库表。** 唯一例外是测试规则：插件 id 以 `test` 开头且表名以 `test_` 前缀时，可勾选删除测试表，删前先整库备份到 `data/backup/uninstall_<id>_<ts>/`；其他插件一律拒绝。
 - `market` 自身为预置，不提供卸载；B 阶段远程市场预留 `fetch_package` / `market_source`。
 - 开发插件依赖 `docs/appendix/prompts/plugin-dev-prompt.md`（模板唯一源）；`download_dir` 未设置时按钮置灰。
-- 依赖检测（round 107/108/109）：`deps.py` 只读扫描各 `manifest.dependencies`，**最终子键只有 `python`**（第三方 PyPI 包；`importlib.metadata` 拿版本 → 失败退回 `find_spec`）。跨插件关系只用 `provides`/`consumes`（`plugins`/`plugin` 子键不采用），宿主公共前端脚本只用 `shared_features`（`shared`/`js` 子键不采用）；上述废弃子键出现即由 validate 报 `dependencies_subkey_invalid`。
+- 依赖检测（round 107/108/109）：`deps.py` 只读扫描各 `manifest.dependencies`，**最终子键只有 `python`**（第三方 PyPI 包；`importlib.metadata` 拿版本 → 失败退回 `find_spec`）。跨插件关系只用 `provides`/`consumes`（`plugins`/`plugin` 子键不采用）：`consumes` 写插件 id、只表直接调用，`provides` 写能力名（能力描述、不参与依赖检查），二者字段级不对称是有意设计，市场不据此检测、不阻断；宿主公共前端脚本只用 `shared_features`（`shared`/`js` 子键不采用）。废弃子键出现即由 validate 报 `dependencies_subkey_invalid`。
 - 版本比较依赖 `packaging`：未安装时降级为只判存在性，接口带 `degraded: true` 与提示，前端顶部显示黄色提示条，不抛异常；同一库被多插件以互斥约束声明时标记 `conflict` 并提示“多版本隔离需后续方案”。
 - 依赖状态只提示：不隐藏插件、不禁用安装/卸载/启用、不弹强制确认；不写文件/库，不改四源合并与 `index.json`/`remote_index.json`。
