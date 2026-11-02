@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-02T21:50:55+03:00",
-  "round": 111,
+  "generated_at": "2026-11-02T23:51:38+03:00",
+  "round": 112,
   "pending": [
     {
       "path": "docs/appendix/file_navigation.json",
@@ -16,6 +16,30 @@
     }
   ],
   "decided": [
+    {
+      "path": ".gitignore",
+      "decision": "新增 `_migration/` 忽略规则（round 112）",
+      "reason": "文件末尾新增「待归并区」段：`_migration/`。用于外部项目/文档临时存放，不进 Git；`git check-ignore -v _migration/README.md` 命中 `.gitignore:36:_migration/`；`git status` 不再显示该目录内容。未改动既有忽略规则。",
+      "status": "done",
+      "round": 112,
+      "at": "2026-11-02T23:51:38+03:00"
+    },
+    {
+      "path": "_migration/",
+      "decision": "新增根目录待归并区（本地目录，不入 Git；round 112）",
+      "reason": "仅建本地目录 + 本地说明 `_migration/README.md`（用途：外部项目待归并区，不入 Git，仅供归并流程轮 A 读取；归并完成后内容移入正式位置并清空）。该目录被 .gitignore 整体忽略，未提交任何内容、未使用 git add -f。扫描隔离已核实：db/connection.py:63-68 与 ui/web/server.py:189/278 只遍历 `plugins/`；tests/smoke_plugins.py:71/210 只扫 `plugins/`；plugins/market/index_store.py:126-128 只扫 `plugins/`；tests/smoke_startup_once.py:64-66 只扫 `db/schema/*.sql` 与 `plugins/*/schema.sql`——均不碰项目根，故不影响插件扫描。",
+      "status": "done",
+      "round": 112,
+      "at": "2026-11-02T23:51:38+03:00"
+    },
+    {
+      "path": "docs/appendix/file_navigation.json",
+      "decision": "登记 round 112（待归并区）",
+      "reason": "追加 3 条 decided 并 round→112；pending 保留既有 1 条；resolved 45 条不动；md 由生成器重生成。验证：全量 15 项 smoke 1016/1017（仅 TTS 502）、validate 23/23 ok、`git status` 仅显示 .gitignore、`git check-ignore` 命中、生成器幂等。",
+      "status": "done",
+      "round": 112,
+      "at": "2026-11-02T23:51:38+03:00"
+    },
     {
       "path": "docs/plugin-development-whitepaper.md",
       "decision": "§二 新增 provides/consumes 定稿语义；§十 改为引用（round 111）",

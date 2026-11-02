@@ -31,3 +31,6 @@ Thumbs.db
 market/packages/*.zip
 market/.tmp/
 market/.trash/
+
+# 待归并区：外部项目临时存放，不入 Git（仅供归并流程轮 A 读取）
+_migration/

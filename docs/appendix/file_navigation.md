@@ -2,9 +2,9 @@
 
 > 只读摘要，勿手改。本文件由 docs/appendix/file_navigation.json 生成；结构与去留决定以 JSON 为准。
 
-- 生成时间：2026-11-02T21:50:55+03:00
-- 轮次：111
-- 待办：1 条；已决定：758 条
+- 生成时间：2026-11-02T23:51:38+03:00
+- 轮次：112
+- 待办：1 条；已决定：761 条
 
 ## 待办
 
@@ -16,6 +16,9 @@
 
 | 路径 | 决定 | 原因 | 状态 | 轮次 | 时间 | 备份路径 |
 | --- | --- | --- | --- | --- | --- | --- |
+| .gitignore | 新增 `_migration/` 忽略规则（round 112） | 文件末尾新增「待归并区」段：`_migration/`。用于外部项目/文档临时存放，不进 Git；`git check-ignore -v _migration/README.md` 命中 `.gitignore:36:_migration/`；`git status` 不再显示该目录内容。未改动既有忽略规则。 | done | 112 | 2026-11-02T23:51:38+03:00 |  |
+| _migration/ | 新增根目录待归并区（本地目录，不入 Git；round 112） | 仅建本地目录 + 本地说明 `_migration/README.md`（用途：外部项目待归并区，不入 Git，仅供归并流程轮 A 读取；归并完成后内容移入正式位置并清空）。该目录被 .gitignore 整体忽略，未提交任何内容、未使用 git add -f。扫描隔离已核实：db/connection.py:63-68 与 ui/web/server.py:189/278 只遍历 `plugins/`；tests/smoke_plugins.py:71/210 只扫 `plugins/`；plugins/market/index_store.py:126-128 只扫 `plugins/`；tests/smoke_startup_once.py:64-66 只扫 `db/schema/*.sql` 与 `plugins/*/schema.sql`——均不碰项目根，故不影响插件扫描。 | done | 112 | 2026-11-02T23:51:38+03:00 |  |
+| docs/appendix/file_navigation.json | 登记 round 112（待归并区） | 追加 3 条 decided 并 round→112；pending 保留既有 1 条；resolved 45 条不动；md 由生成器重生成。验证：全量 15 项 smoke 1016/1017（仅 TTS 502）、validate 23/23 ok、`git status` 仅显示 .gitignore、`git check-ignore` 命中、生成器幂等。 | done | 112 | 2026-11-02T23:51:38+03:00 |  |
 | docs/plugin-development-whitepaper.md | §二 新增 provides/consumes 定稿语义；§十 改为引用（round 111） | §二 明确：consumes 写插件 id（插件是依赖最小单元，拆分必改名并同步）；只表直接调用（直接 import / `/api/plugin/<id>/*` / 子进程调插件脚本），宿主中介不算（由 shared_features 表达）；provides 是能力名、不参与依赖检查，二者字段级不对称是有意设计；不区分必需/可选，降级写 README。§十 10.1 改为引用 §二 避免两套措辞；10.4 补“语义见 §二”；10.5 补“直接调用写入 consumes、宿主中介不算”。 | done | 111 | 2026-11-02T21:50:55+03:00 |  |
 | docs/plugin-development-guide.md | §4.1 依赖节与检查清单同步四项语义（round 111） | 第 4 条补 consumes 写插件 id / 只表直接调用 / 宿主中介不算 / provides 能力名且不参与检查 / 不对称有意 / 不区分必需可选；清单两条同步措辞。 | done | 111 | 2026-11-02T21:50:55+03:00 |  |
 | docs/appendix/plugin-info-card-template.md | INFO 模板补 provides/consumes 语义（round 111） | 依赖节新增一条：consumes 写插件 id、只表直接调用；provides 写能力名、不参与依赖检查；不对称有意；宿主中介不计入。 | done | 111 | 2026-11-02T21:50:55+03:00 |  |
