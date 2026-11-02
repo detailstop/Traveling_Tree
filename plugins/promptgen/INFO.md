@@ -14,7 +14,7 @@ tables: [pg_assets, pg_flows, pg_modules, pg_tasks, pg_flow_groups]
 data_dirs: []
 shared_features: [webchat]
 provides: []
-consumes: [webchat]
+consumes: [webchat, book_reader, bg_library]
 market_package: true
 source: market
 known_limits: Release v1，download_url 见远程 index

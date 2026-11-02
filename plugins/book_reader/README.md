@@ -30,7 +30,8 @@
   3. raw/live 由 AFTER INSERT/UPDATE 触发器维护，业务 SQL 不显式写入；在 `repo.py`/`book_reader.py` 看不到 raw/live 写入属正常。
 
 ## 依赖
-- 直接 import：`plugins.pixel_art.service`（G4 已标注；计划改走 HTTP）
+- 直接 import：`plugins.pixel_art.service`（G4 已标注；计划改走 HTTP——**计划未落地，不写入 `consumes` 之外的任何声明**）
+- 跨插件关系：`consumes: ["pixel_art"]`（round 110 按代码实际调用补全：`visual-settings` GET/PUT 与 `/assets` 三处动态 import）
 - 无外部库硬依赖
 
 ## 注意事项

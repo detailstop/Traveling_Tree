@@ -27,5 +27,9 @@
     "webchat"
   ],
   "provides": [],
-  "consumes": ["webchat"]
+  "consumes": [
+    "webchat",
+    "book_reader",
+    "bg_library"
+  ]
 }

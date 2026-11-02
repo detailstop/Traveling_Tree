@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-02T21:12:49+03:00",
-  "round": 109,
+  "generated_at": "2026-11-02T21:39:46+03:00",
+  "round": 110,
   "pending": [
     {
       "path": "docs/appendix/file_navigation.json",
@@ -16,6 +16,86 @@
     }
   ],
   "decided": [
+    {
+      "path": "plugins/ai/manifest.json",
+      "decision": "补 consumes=[webchat]（round 110）",
+      "reason": "代码实际调用：feature.js:90/103/120/149/160/248 六处 /api/plugin/webchat/*；原 consumes 为空。条目按既有约定写插件 id；未改 provides 与 version。",
+      "status": "done",
+      "round": 110,
+      "at": "2026-11-02T21:39:46+03:00"
+    },
+    {
+      "path": "plugins/ai/INFO.md",
+      "decision": "front matter consumes 与 manifest 同步（round 110）",
+      "reason": "consumes 改为 [webchat]。",
+      "status": "done",
+      "round": 110,
+      "at": "2026-11-02T21:39:46+03:00"
+    },
+    {
+      "path": "plugins/ai/README.md",
+      "decision": "依赖节补跨插件关系（round 110）",
+      "reason": "注明 consumes=[webchat] 与依据；原「调用」说明保留。",
+      "status": "done",
+      "round": 110,
+      "at": "2026-11-02T21:39:46+03:00"
+    },
+    {
+      "path": "plugins/book_reader/manifest.json",
+      "decision": "补 consumes=[pixel_art]（round 110）",
+      "reason": "代码实际调用：book_reader.py:1014/1017 动态 import plugins.pixel_art.service（visual-settings GET/PUT）、:1021 import plugins.pixel_art.backend.assets_payload（/assets）；原 consumes 为空，schema 注释与 README 已记直接 import。未改 provides/version。",
+      "status": "done",
+      "round": 110,
+      "at": "2026-11-02T21:39:46+03:00"
+    },
+    {
+      "path": "plugins/book_reader/INFO.md",
+      "decision": "front matter consumes 与 manifest 同步（round 110）",
+      "reason": "consumes 改为 [pixel_art]。",
+      "status": "done",
+      "round": 110,
+      "at": "2026-11-02T21:39:46+03:00"
+    },
+    {
+      "path": "plugins/book_reader/README.md",
+      "decision": "依赖节补 consumes 并标注“计划改走 HTTP”未落地（round 110）",
+      "reason": "明确 plans 不写入依赖声明；consumes=[pixel_art] 依据三处动态 import；保留原有 G4 标注说明。",
+      "status": "done",
+      "round": 110,
+      "at": "2026-11-02T21:39:46+03:00"
+    },
+    {
+      "path": "plugins/promptgen/manifest.json",
+      "decision": "consumes 追加 book_reader、bg_library（round 110）",
+      "reason": "代码实际调用：feature.js:243/908/930/988/1007 → /api/plugin/book_reader/*；:792/959 → /api/plugin/bg_library/*；原有 webchat（经 window.__webchat 共享脚本）保留。未改 provides/version。",
+      "status": "done",
+      "round": 110,
+      "at": "2026-11-02T21:39:46+03:00"
+    },
+    {
+      "path": "plugins/promptgen/INFO.md",
+      "decision": "front matter consumes 与 manifest 同步（round 110）",
+      "reason": "consumes 改为 [webchat, book_reader, bg_library]。",
+      "status": "done",
+      "round": 110,
+      "at": "2026-11-02T21:39:46+03:00"
+    },
+    {
+      "path": "plugins/promptgen/README.md",
+      "decision": "依赖节补 book_reader/bg_library 调用说明（round 110）",
+      "reason": "写明三类调用路径与 consumes 三项；保留 shared_features 与“无第三方依赖”说明。",
+      "status": "done",
+      "round": 110,
+      "at": "2026-11-02T21:39:46+03:00"
+    },
+    {
+      "path": "docs/appendix/file_navigation.json",
+      "decision": "登记 round 110（跨插件 consumes 全量核对）",
+      "reason": "追加 9 条 decided 并 round→110；pending 保留既有 1 条；resolved 45 条不动；md 由生成器重生成。核对结论：23 个插件中只有 ai/book_reader/promptgen 缺声明，已补；finance 原声明 webchat/ai 与代码一致；其余 19 个无跨插件直接调用（无直接 import、无 /api/plugin 调用、无跨插件读表）。未发现多声明；未改 provides；未升 version。验证：validate 23/23 ok、manifest/INFO consumes 全一致、smoke 1016/1017（仅 TTS 502）。",
+      "status": "done",
+      "round": 110,
+      "at": "2026-11-02T21:39:46+03:00"
+    },
     {
       "path": "plugins/market/deps.py",
       "decision": "dependencies 最终只保留 python；回退 plugins/shared 检测（round 109）",

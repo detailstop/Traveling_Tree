@@ -24,5 +24,7 @@
   },
   "style": "plugin.css",
   "provides": [],
-  "consumes": []
+  "consumes": [
+    "pixel_art"
+  ]
 }

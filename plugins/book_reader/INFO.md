@@ -14,7 +14,7 @@ tables: [reader_books, reader_sections, reader_sentences, reader_placeholders, r
 data_dirs: []
 shared_features: []
 provides: []
-consumes: []
+consumes: [pixel_art]
 market_package: false
 source: local
 known_limits: 本地开发，不通过市场分发

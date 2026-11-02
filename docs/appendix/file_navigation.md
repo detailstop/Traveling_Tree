@@ -2,9 +2,9 @@
 
 > 只读摘要，勿手改。本文件由 docs/appendix/file_navigation.json 生成；结构与去留决定以 JSON 为准。
 
-- 生成时间：2026-11-02T21:12:49+03:00
-- 轮次：109
-- 待办：1 条；已决定：737 条
+- 生成时间：2026-11-02T21:39:46+03:00
+- 轮次：110
+- 待办：1 条；已决定：747 条
 
 ## 待办
 
@@ -16,6 +16,16 @@
 
 | 路径 | 决定 | 原因 | 状态 | 轮次 | 时间 | 备份路径 |
 | --- | --- | --- | --- | --- | --- | --- |
+| plugins/ai/manifest.json | 补 consumes=[webchat]（round 110） | 代码实际调用：feature.js:90/103/120/149/160/248 六处 /api/plugin/webchat/*；原 consumes 为空。条目按既有约定写插件 id；未改 provides 与 version。 | done | 110 | 2026-11-02T21:39:46+03:00 |  |
+| plugins/ai/INFO.md | front matter consumes 与 manifest 同步（round 110） | consumes 改为 [webchat]。 | done | 110 | 2026-11-02T21:39:46+03:00 |  |
+| plugins/ai/README.md | 依赖节补跨插件关系（round 110） | 注明 consumes=[webchat] 与依据；原「调用」说明保留。 | done | 110 | 2026-11-02T21:39:46+03:00 |  |
+| plugins/book_reader/manifest.json | 补 consumes=[pixel_art]（round 110） | 代码实际调用：book_reader.py:1014/1017 动态 import plugins.pixel_art.service（visual-settings GET/PUT）、:1021 import plugins.pixel_art.backend.assets_payload（/assets）；原 consumes 为空，schema 注释与 README 已记直接 import。未改 provides/version。 | done | 110 | 2026-11-02T21:39:46+03:00 |  |
+| plugins/book_reader/INFO.md | front matter consumes 与 manifest 同步（round 110） | consumes 改为 [pixel_art]。 | done | 110 | 2026-11-02T21:39:46+03:00 |  |
+| plugins/book_reader/README.md | 依赖节补 consumes 并标注“计划改走 HTTP”未落地（round 110） | 明确 plans 不写入依赖声明；consumes=[pixel_art] 依据三处动态 import；保留原有 G4 标注说明。 | done | 110 | 2026-11-02T21:39:46+03:00 |  |
+| plugins/promptgen/manifest.json | consumes 追加 book_reader、bg_library（round 110） | 代码实际调用：feature.js:243/908/930/988/1007 → /api/plugin/book_reader/*；:792/959 → /api/plugin/bg_library/*；原有 webchat（经 window.__webchat 共享脚本）保留。未改 provides/version。 | done | 110 | 2026-11-02T21:39:46+03:00 |  |
+| plugins/promptgen/INFO.md | front matter consumes 与 manifest 同步（round 110） | consumes 改为 [webchat, book_reader, bg_library]。 | done | 110 | 2026-11-02T21:39:46+03:00 |  |
+| plugins/promptgen/README.md | 依赖节补 book_reader/bg_library 调用说明（round 110） | 写明三类调用路径与 consumes 三项；保留 shared_features 与“无第三方依赖”说明。 | done | 110 | 2026-11-02T21:39:46+03:00 |  |
+| docs/appendix/file_navigation.json | 登记 round 110（跨插件 consumes 全量核对） | 追加 9 条 decided 并 round→110；pending 保留既有 1 条；resolved 45 条不动；md 由生成器重生成。核对结论：23 个插件中只有 ai/book_reader/promptgen 缺声明，已补；finance 原声明 webchat/ai 与代码一致；其余 19 个无跨插件直接调用（无直接 import、无 /api/plugin 调用、无跨插件读表）。未发现多声明；未改 provides；未升 version。验证：validate 23/23 ok、manifest/INFO consumes 全一致、smoke 1016/1017（仅 TTS 502）。 | done | 110 | 2026-11-02T21:39:46+03:00 |  |
 | plugins/market/deps.py | dependencies 最终只保留 python；回退 plugins/shared 检测（round 109） | KINDS=('python',)；删除 shared_features_dir/shared_feature_path/shared_present/plugin_present 与对应分支；未知子键 plugins/plugin/shared/js 统一报 dependencies_subkey_invalid 并给出替代（provides/consumes 或 shared_features）；python 检测/版本比较/冲突/降级/六态不变。 | done | 109 | 2026-11-02T21:12:49+03:00 |  |
 | plugins/market/validate.py | 子键集合随 deps.KINDS 收敛为 python（round 109） | 合法子键只剩 python；plugins/plugin/shared/js 均按未知子键拒绝，错误码 dependencies_subkey_invalid 已在 ERROR_CODES 与 README 声明。 | done | 109 | 2026-11-02T21:12:49+03:00 |  |
 | plugins/market/feature.js | 前端依赖明细只渲染 python 类别（round 109） | kindName 只保留 Python 包，rows 只遍历 python；不再渲染 plugins/shared 类别；badge/明细/冲突/降级行为不变。 | done | 109 | 2026-11-02T21:12:49+03:00 |  |

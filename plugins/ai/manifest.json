@@ -28,5 +28,7 @@
   "provides": [
     "ai"
   ],
-  "consumes": []
+  "consumes": [
+    "webchat"
+  ]
 }

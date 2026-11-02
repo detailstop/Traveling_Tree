@@ -17,6 +17,7 @@ AI 工作台：Key/模型设置、对话代理、前端状态与流水。
 ## 依赖
 - `shared_features: ["webchat"]`
 - 调用：`/api/plugin/webchat/*`
+- 跨插件关系：`consumes: ["webchat"]`（round 110 按代码实际调用补全；webchat 为宿主内插件，非第三方包）
 - 对外提供能力：`provides: ["ai"]`（round 73）
 - 被 `finance` 平级调用（`/api/plugin/ai/keys`、`/chat`）
 - 外部：AI provider 网络、`data/ai_keys.json`

@@ -19,8 +19,8 @@
 
 ## 依赖
 - `shared_features: ["webchat"]`（宿主公共前端脚本，按既有 shared_features 加载）
-- 调用：`/api/plugin/webchat/*`
-- 跨插件关系：`consumes: ["webchat"]`（webchat 为宿主内插件，非第三方包；本插件无 Python 第三方依赖，故不声明 `dependencies`）
+- 调用：`/api/plugin/webchat/*`（经 `window.__webchat` 共享脚本）、`/api/plugin/book_reader/*`、`/api/plugin/bg_library/*`
+- 跨插件关系：`consumes: ["webchat", "book_reader", "bg_library"]`（round 110 按代码实际调用补全；均为宿主内插件，非第三方包；本插件无 Python 第三方依赖，故不声明 `dependencies`）
 
 ## 注意事项
 - `pg_assets` 为迁移兜底；round 72 已补 `live_json` 并加幂等 migrate。

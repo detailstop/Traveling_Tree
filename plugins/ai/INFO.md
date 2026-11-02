@@ -14,7 +14,7 @@ tables: [ai_sessions, ai_tx_logs]
 data_dirs: []
 shared_features: [webchat]
 provides: [ai]
-consumes: []
+consumes: [webchat]
 market_package: false
 source: local
 known_limits: 本地开发，不通过市场分发
