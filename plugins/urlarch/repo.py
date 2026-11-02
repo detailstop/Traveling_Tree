@@ -7,6 +7,7 @@ import secrets
 from datetime import datetime, timezone
 
 from db.connection import get_conn
+from plugins.urlarch import security
 
 ASSET_KEY = "url_archive_v1"
 
@@ -62,12 +63,15 @@ def import_state(raw: str) -> dict:
             if not isinstance(item, dict) or not item.get("url"):
                 continue
             group_id = str(item.get("groupId") or "ungrouped")
+            image = str(item.get("image") or "")
+            if image:
+                image = security.validate_image_name(image)
             conn.execute(
-                "INSERT INTO urlarch_links(link_id,title,url,note,ts,group_id,raw_json,live_json) "
-                "VALUES(?,?,?,?,?,?,?,?)",
+                "INSERT INTO urlarch_links(link_id,title,url,note,ts,group_id,image,raw_json,live_json) "
+                "VALUES(?,?,?,?,?,?,?,?,?)",
                 (_link_id(group_id, idx, str(item["url"])), str(item.get("title") or ""),
                  str(item["url"]), str(item.get("note") or ""), str(item.get("ts") or ""),
-                 group_id, _canon(item), _canon(item)),
+                 group_id, image, _canon(item), _canon(item)),
             )
             links += 1
         conn.commit()
@@ -82,15 +86,84 @@ def save_state(data: dict) -> dict:
 
 
 # ------------------------------------------------------------
+# 网址条目（state JSON 为唯一真源，urlarch_links 为镜像；image 存文件名）
+# ------------------------------------------------------------
+
+def _link_items(state) -> list[tuple[str, int, dict]]:
+    out = []
+    for idx, item in enumerate(state.get("items") or []):
+        if not isinstance(item, dict) or not item.get("url"):
+            continue
+        group_id = str(item.get("groupId") or "ungrouped")
+        out.append((_link_id(group_id, idx, str(item["url"])), idx, item))
+    return out
+
+
+def find_link(link_id: str):
+    state = load_state()
+    if not isinstance(state, dict):
+        return None
+    for lid, idx, item in _link_items(state):
+        if lid == link_id:
+            return state, idx, item
+    return None
+
+
+def get_link(link_id: str) -> dict | None:
+    found = find_link(link_id)
+    return found[2] if found else None
+
+
+def link_ids(state) -> list[dict]:
+    """供 GET /state 附带：items 下标 → link_id（不落库，仅接口返回）。"""
+    return [{"index": idx, "id": lid} for lid, idx, _item in _link_items(state)]
+
+
+def patch_link(link_id: str, fields: dict) -> dict | None:
+    """更新单条网址卡（title/url/image），返回新 id、条目与旧图片名。"""
+    found = find_link(link_id)
+    if found is None:
+        return None
+    state, idx, item = found
+    old_image = str(item.get("image") or "")
+    if "title" in fields:
+        item["title"] = fields["title"]
+    if "url" in fields:
+        item["url"] = fields["url"]
+    if "image" in fields:
+        item["image"] = fields["image"]
+    save_state(state)
+    new_id = _link_id(str(item.get("groupId") or "ungrouped"), idx, str(item["url"]))
+    return {"id": new_id, "item": item, "old_image": old_image}
+
+
+def delete_link(link_id: str) -> dict | None:
+    """删除单条网址卡，返回其图片文件名（由 backend 清理文件）。"""
+    found = find_link(link_id)
+    if found is None:
+        return None
+    state, idx, item = found
+    image = str(item.get("image") or "")
+    items = state.get("items") or []
+    del items[idx]
+    state["items"] = items
+    save_state(state)
+    return {"id": link_id, "image": image}
+
+
+# ------------------------------------------------------------
 # 软件快捷入口白名单 / 组别（R4）：只做存储；启动在 backend.py，路径/参数一律取自本表
 # ------------------------------------------------------------
 
-_SHORTCUT_COLS = "id,name,path,args,hotkey,group_id,raw_json,live_json,created_at,updated_at"
+_SHORTCUT_COLS = ("id,name,path,args,hotkey,group_id,image,raw_json,live_json,"
+                  "created_at,updated_at")
 _GROUP_COLS = "id,name,sort_order,raw_json,live_json,created_at,updated_at"
 
 
-def _shortcut_json(name: str, path: str, args: list, hotkey: str, group_id: str) -> str:
-    payload = {"name": name, "path": path, "group_id": group_id, "args": args, "hotkey": hotkey}
+def _shortcut_json(name: str, path: str, args: list, hotkey: str, group_id: str,
+                   image: str = "") -> str:
+    payload = {"name": name, "path": path, "group_id": group_id, "image": image,
+               "args": args, "hotkey": hotkey}
     return json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
 
 
@@ -114,21 +187,21 @@ def get_shortcut(shortcut_id: str) -> dict | None:
 
 
 def create_shortcut(name: str, path: str, args_text: str, hotkey: str = "",
-                    group_id: str = "") -> dict:
+                    group_id: str = "", image: str = "") -> dict:
     """新增白名单条目；id/时间戳由后端生成，raw_json 与 live_json 同值双写。
 
     hotkey 为历史列（可选、可为空），不参与逻辑；group_id 空串表示未分组；
-    同一 path 允许重复登记（常见用途：同一程序不同入口名）。
+    image 为卡片图片文件名（空串 = 无图）；同一 path 允许重复登记。
     """
     conn = get_conn()
     now = _now()
-    payload = _shortcut_json(name, path, json.loads(args_text), hotkey, group_id)
+    payload = _shortcut_json(name, path, json.loads(args_text), hotkey, group_id, image)
     shortcut_id = "us_" + secrets.token_hex(8)
     conn.execute(
         "INSERT INTO urlarch_shortcuts"
-        "(id,name,path,args,hotkey,group_id,raw_json,live_json,created_at,updated_at) "
-        "VALUES(?,?,?,?,?,?,?,?,?,?)",
-        (shortcut_id, name, path, args_text, hotkey, group_id, payload, payload, now, now),
+        "(id,name,path,args,hotkey,group_id,image,raw_json,live_json,created_at,updated_at) "
+        "VALUES(?,?,?,?,?,?,?,?,?,?,?)",
+        (shortcut_id, name, path, args_text, hotkey, group_id, image, payload, payload, now, now),
     )
     conn.commit()
     return get_shortcut(shortcut_id) or {}
@@ -141,16 +214,38 @@ def delete_shortcut(shortcut_id: str) -> bool:
     return cur.rowcount > 0
 
 
+def update_shortcut(shortcut_id: str, name: str | None = None, path: str | None = None,
+                    image: str | None = None, group_id: str | None = None) -> dict | None:
+    """编辑卡片：只更新传入的字段，刷新 live_json 与 updated_at（raw 保留登记快照）。"""
+    row = get_shortcut(shortcut_id)
+    if row is None:
+        return None
+    new_name = row["name"] if name is None else name
+    new_path = row["path"] if path is None else path
+    new_image = row["image"] if image is None else image
+    new_group = row["group_id"] if group_id is None else group_id
+    payload = _shortcut_json(new_name, new_path, json.loads(row["args"] or "[]"),
+                             row["hotkey"], new_group, new_image)
+    conn = get_conn()
+    conn.execute(
+        "UPDATE urlarch_shortcuts SET name=?, path=?, group_id=?, image=?, live_json=?, "
+        "updated_at=? WHERE id=?",
+        (new_name, new_path, new_group, new_image, payload, _now(), shortcut_id),
+    )
+    conn.commit()
+    return get_shortcut(shortcut_id)
+
+
 def set_shortcut_group(shortcut_id: str, group_id: str) -> dict | None:
     """只改 group_id（拖拽改组）：刷新 live_json 与 updated_at，raw_json 保留登记快照。
 
-    不动 path/args/name/hotkey，也不触发任何启动逻辑。
+    不动 path/args/name/image/hotkey，也不触发任何启动逻辑。
     """
     row = get_shortcut(shortcut_id)
     if row is None:
         return None
     payload = _shortcut_json(row["name"], row["path"], json.loads(row["args"] or "[]"),
-                             row["hotkey"], group_id)
+                             row["hotkey"], group_id, row.get("image") or "")
     conn = get_conn()
     conn.execute(
         "UPDATE urlarch_shortcuts SET group_id=?, live_json=?, updated_at=? WHERE id=?",
@@ -267,12 +362,12 @@ def delete_shortcut_group(group_id: str) -> bool:
             conn.rollback()
             return False
         moved = conn.execute(
-            "SELECT id,name,path,args,hotkey,created_at,updated_at "
+            "SELECT id,name,path,args,hotkey,image,created_at,updated_at "
             "FROM urlarch_shortcuts WHERE group_id=?", (group_id,)
         ).fetchall()
         for row in moved:
             payload = _shortcut_json(row["name"], row["path"], json.loads(row["args"] or "[]"),
-                                     row["hotkey"], "")
+                                     row["hotkey"], "", row["image"] or "")
             conn.execute(
                 "UPDATE urlarch_shortcuts SET group_id='', live_json=? WHERE id=?",
                 (payload, row["id"]),

@@ -2,9 +2,9 @@
 
 > 只读摘要，勿手改。本文件由 docs/appendix/file_navigation.json 生成；结构与去留决定以 JSON 为准。
 
-- 生成时间：2026-11-02T13:57:05+03:00
-- 轮次：104
-- 待办：1 条；已决定：673 条
+- 生成时间：2026-11-02T14:29:10+03:00
+- 轮次：105
+- 待办：1 条；已决定：684 条
 
 ## 待办
 
@@ -16,6 +16,17 @@
 
 | 路径 | 决定 | 原因 | 状态 | 轮次 | 时间 | 备份路径 |
 | --- | --- | --- | --- | --- | --- | --- |
+| plugins/urlarch/schema.sql | urlarch_links / urlarch_shortcuts 各加 image 列（round 105） | 两表新增 image TEXT NOT NULL DEFAULT ''（卡片图片文件名，空串=无图）；未改其他列与索引；旧库由 migrate 补列。 | done | 105 | 2026-11-02T14:29:10+03:00 |  |
+| plugins/urlarch/manifest.json | 声明 data_dirs: [urlarch]（round 105） | 按项目 data_dirs 机制创建 data/plugins/urlarch/，后端在其下建 images/ 子目录存图片（data_dirs 单段命名，不能写 urlarch/images）；manifest 其他字段未改。 | done | 105 | 2026-11-02T14:29:10+03:00 |  |
+| plugins/urlarch/migrate.py | 补 image 列迁移（round 105） | 新增 _ensure_links（PRAGMA 检查后 ALTER urlarch_links ADD image）；_SHORTCUTS_COLUMNS/_DDL/_BUSINESS 同步 image；全部加性语句。强制验证停点 13/13 PASS：真实库副本两次 migrate 幂等、旧 links 18 行/白名单 15 行内容哈希不变、image 全为空串、schema→migrate 启动路径同样幂等；备份 data/backup/russian_tutor_before_images_20261102.db。 | done | 105 | 2026-11-02T14:29:10+03:00 |  |
+| plugins/urlarch/security.py | 图片与网址卡字段校验（round 105） | 新增 valid_image_name/validate_image_name（^img_[0-9a-f]{16}\.(png\|jpg\|jpeg\|webp\|gif)$）、image_extension（扩展名白名单）、validate_image_bytes（PNG/JPEG/GIF/WEBP magic）、image_mime、MAX_IMAGE_BYTES=2MB、validate_link_title/validate_link_url；既有路径/参数校验不变。 | done | 105 | 2026-11-02T14:29:10+03:00 |  |
+| plugins/urlarch/repo.py | 网址卡单条读写 + 白名单 image 支持（round 105） | import_state 写 image 列（非法文件名抛 IMAGE_INVALID）；新增 link_ids/find_link/get_link/patch_link/delete_link（state JSON 为真源，表为镜像；link_id 用既有 _link_id 公式重算）；白名单 SELECT/INSERT/UPDATE 带 image，新增 update_shortcut；删除组时条目 image 保留。 | done | 105 | 2026-11-02T14:29:10+03:00 |  |
+| plugins/urlarch/backend.py | 图片上传/读取 + links PATCH/DELETE + shortcuts PATCH 扩展（round 105） | GET /state 附 link_ids；新增 POST /images（JSON {filename,data(base64)}——宿主只解析 JSON 请求体、未改宿主故未用 multipart，且不落 Base64 入库；扩展名+文件头+≤2MB 三重校验，文件名后端生成，临时文件+os.replace）、GET /images/<filename>（正则校验后 __binary__ 返回，no-store）、PATCH/DELETE /links/<id>、PATCH /shortcuts/<id> 扩为 name/path/image/group_id（忽略 args/hotkey/cmd）、删除条目清理图片文件（幂等）；launch 与 R4 安全边界不变。 | done | 105 | 2026-11-02T14:29:10+03:00 |  |
+| plugins/urlarch/feature.js | 两视图改「架子 + 卡片」+ 编辑弹层 + 图片上传 + 删除二次确认（round 105） | 网址/软件条目统一渲染为 .ua-card（名称 + 图片，无图显示名称首字色块，按名称哈希取色）；卡片右下角 ✎ 打开弹层（网址卡：网址/名称/图片；软件卡：名称/路径/图片，隐藏 args/hotkey），保存走 PATCH；图片经本地选择 → 前端扩展名/2MB 快校验 → 上传接口 → 预览 → 随保存提交；删除按钮两次点击确认（3 秒窗口）；软件卡点击启动与拖拽改组保留（拖后抑制点击）；视图切换/上栏收起/全部收起语义未改，未用 localStorage。 | done | 105 | 2026-11-02T14:29:10+03:00 |  |
+| plugins/urlarch/plugin.css | 卡片与编辑弹层样式（round 105） | 新增 .ua-cards 网格、.ua-card/图片/首字色块/编辑按钮、.ua-modal 弹层与表单样式；旧行式 .ua-sc-row 样式保留（无引用但无害）；仍限 .ua-* 命名空间。 | done | 105 | 2026-11-02T14:29:10+03:00 |  |
+| plugins/urlarch/README.md | 五节同步图片/卡片/接口（round 105） | 入口与路由补 links/<id>、images、images/<filename> 与新 PATCH 入参；数据表节补 image 列语义与 images 目录；注意事项补卡片 UI、上传安全规则（含未用 multipart 的原因）、删除清理、错误码。 | done | 105 | 2026-11-02T14:29:10+03:00 |  |
+| plugins/urlarch/INFO.md | 信息卡同步 data_dirs 与图片规则（round 105） | front matter data_dirs 改为 [urlarch]（与 manifest 一致），tables 仍 5 表，source=local / market_package=false 不变；正文补卡片、图片存储位置与上传限制、删除清理。 | done | 105 | 2026-11-02T14:29:10+03:00 |  |
+| docs/appendix/file_navigation.json | 登记 round 105（图片列 + 上传 + 架子卡片 UI） | 追加 11 条 decided 并 round→105、generated_at 更新；pending 保留既有 1 条（round 67–94 的 28 条非文件占位待清理）；resolved 45 条不动；file_navigation.md 由生成器重生成。安全用例 6.1–6.8 全 PASS（API 32/32 + 浏览器走查 13/13）。真实库未跑 migrate（需重启宿主），已备份。本轮无背景库数据。 | done | 105 | 2026-11-02T14:29:10+03:00 |  |
 | plugins/urlarch/feature.js | 删除「站点统筹·网址归档」卡片 + 启动间隔迁入上栏 + 一键收起改为当前视图全部组（round 104） | 删除网址视图中含标题/计数/间隔的功能卡片（同容器无中栏标题条，标题条与按钮不受影响），移除随之失效的 #ua-count 更新；#ua-interval 迁入上栏 #ua-actions-links（标签「⏱ 启动间隔时间」，保留 id、默认 5、0–30 整数校验与 PUT /state 保存路径，软件模式随操作组隐藏）；中栏按钮改为 toggleAllGroups：对当前视图全部组（网址组 / 软件组含未分组）统一折叠或展开，文字在「▾ 全部收起 / ▸ 全部展开」间切换，视图切换与单组折叠互不影响；状态仍为模块内存（uaCollapsedGroups / uaCollapsedShortcutGroups），未用 localStorage。 | done | 104 | 2026-11-02T13:57:05+03:00 |  |
 | plugins/urlarch/plugin.css | 清理孤儿样式并新增上栏内联字段样式（round 104） | 删除仅服务被删卡片的 .ua-global-row(.label/.input)、早已不用的 .ua-group-create、以及旧中栏收起用的 .ua-mid[hidden]；新增 .ua-inline-field（启动间隔时间的标签+输入行）；组折叠、列表行、拖拽高亮等样式未改。 | done | 104 | 2026-11-02T13:57:05+03:00 |  |
 | plugins/urlarch/README.md | 五节同步：删卡片、间隔位置、一键收起语义（round 104） | 布局段落补「⏱ 启动间隔时间」位于上栏网址操作组；新增 round 104 说明（旧功能卡片与「共 N 条」计数已删除、间隔输入保持 id/校验/API 不变、软件模式不显示）；将中栏「一键收起/展开」改写为「▾ 全部收起 / ▸ 全部展开」，明确只作用于当前视图所有组、两视图折叠互不影响、中栏内容区不再被收起、单组折叠语义不变。 | done | 104 | 2026-11-02T13:57:05+03:00 |  |

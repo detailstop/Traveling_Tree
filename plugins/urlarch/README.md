@@ -10,21 +10,25 @@
 - 入口：entry `urlarch` → `feature.js`；样式 `plugin.css`
 - 后端：`backend.py`（安全校验在 `security.py`，SQL 在 `repo.py`），路由前缀 `/api/plugin/urlarch/*`
 - 子路径：
-  - `state`（GET 读 / PUT、POST 写网址库）
-  - `shortcuts`（GET 列表 / POST 登记，入口自 `urlarch_shortcuts`；POST 可选 `group_id`）
-  - `shortcuts/<id>`（DELETE 只删登记，不卸载软件；PATCH **只接受** `group_id`，用于拖动改组）
+  - `state`（GET 读 / PUT、POST 写网址库；GET 额外返回 `link_ids`＝items 下标→link_id）
+  - `shortcuts`（GET 列表 / POST 登记；POST 可选 `group_id`、`image`）
+  - `shortcuts/<id>`（DELETE 删登记并清理图片、不卸载软件；PATCH 接受 `name`/`path`/`image`/`group_id`）
   - `shortcut-groups`（GET 列表 / POST 新建，按 `sort_order` 排序；同名新建 409）
   - `shortcut-groups/<id>`（DELETE 删组，组内条目 `group_id` 置空串、条目不删；PATCH 接受 `name`/`sort_order`）
+  - `links/<id>`（PATCH 改 `title`/`url`/`image`；DELETE 删网址卡并清理其图片）
+  - `images`（POST 上传：JSON `{filename, data(base64)}`，返回 `{filename}`）
+  - `images/<filename>`（GET 读图，`__binary__` 响应）
   - `launch`（POST，请求体只接受 `{"id": "<白名单id>"}`）
 
 ## 数据表
 - `urlarch_assets`
 - `urlarch_groups`
-- `urlarch_links`
-- `urlarch_shortcuts`（白名单，round 98 新增，round 101 加 `group_id`）：`id`（后端生成的主键）、`name`、`path`（绝对路径，敏感）、`args`（历史列，前端不再录入，新增默认 `[]`）、`hotkey`（历史列，可选不参与逻辑）、`group_id`（空串 = 未分组）、`raw_json`、`live_json`、`created_at`、`updated_at`；索引 `idx_urlarch_shortcuts_hotkey(hotkey)`。属内容表，不豁免 `live_json`；不建触发器，由 SQL 层显式双写（与本插件其余三表一致）。
+- `urlarch_links`（round 105 加 `image`）：`link_id`、`title`、`url`、`note`、`ts`、`group_id`、`image`（卡片图片文件名，空串=无图）、`raw_json`、`live_json`；索引 `idx_urlarch_links_group(group_id)`。state JSON 为真源，本表为镜像（`import_state` 显式列名重写）。
+- `urlarch_shortcuts`（白名单，round 98 新增，round 101 加 `group_id`，round 105 加 `image`）：`id`（后端生成的主键）、`name`、`path`（绝对路径，敏感）、`args`（历史列，前端不再录入，新增默认 `[]`）、`hotkey`（历史列，可选不参与逻辑）、`group_id`（空串 = 未分组）、`image`（卡片图片文件名，空串=无图）、`raw_json`、`live_json`、`created_at`、`updated_at`；索引 `idx_urlarch_shortcuts_hotkey(hotkey)`。属内容表，不豁免 `live_json`；不建触发器，由 SQL 层显式双写（与本插件其余三表一致）。
 - `urlarch_shortcut_groups`（软件入口组别，round 101 新增）：`id`（`ug_` + 16 hex，后端生成）、`name`、`sort_order`、`raw_json`、`live_json`、`created_at`、`updated_at`；索引 `idx_urlarch_shortcut_groups_sort(sort_order)`。内容表，同口径双写 raw/live。
 
-- raw/live 状态：全部表含 `raw_json` + `live_json`（round 72 补齐；round 73 核实写入路径同时写 `live_json`；round 98/101 新增表同口径）
+- 图片文件：`data/plugins/urlarch/images/`（`manifest.data_dirs: ["urlarch"]` + 后端按需建 `images/` 子目录；不进 Git，库里只存文件名）
+- raw/live 状态：全部表含 `raw_json` + `live_json`（round 72 补齐；round 73 核实写入路径同时写 `live_json`；round 98/101/105 新增表/列同口径）
 
 ## 依赖
 - 无跨插件依赖
@@ -43,6 +47,10 @@
 - 布局（round 103/104，纯前端）：左栏（宿主侧栏）不变；上栏——「📚 网址 / 🚀 软件」二选一切换 + 当前视图操作按钮组（网址：标题/网址/备注/组别 + 「＋ 归档」、新组名/类型 + 「＋ 新建组别」、「📤 导出 JSON」、「⏱ 启动间隔时间」输入；软件：「＋ 添加软件」名称/路径/所属组、新组名 + 「＋ 新建组」），按钮与调用 API 与搬迁前一致；中栏——标题条 + 随切换显示网址视图或软件视图（同一容器，切换只改显示，不重复请求接口）。
 - round 104：「站点统筹 · 网址归档」功能卡片已删除（卡片内的「共 N 条」计数随之移除）；「启动间隔时间」输入迁入上栏网址模式操作组，保持 `#ua-interval`、默认 5、0–30 整数校验与 `PUT /api/plugin/urlarch/state` 保存路径不变，软件模式不显示该字段。中栏标题条与其上的按钮保留。
 - 上栏可收起 / 展开（收起后仅保留标题行与「▾ 展开上栏」）；中栏标题条上的按钮改为「▾ 全部收起 / ▸ 全部展开」，仅作用于**当前视图的所有组**（网址模式=所有网址组；软件模式=所有软件组，含「未分组」虚拟组），两视图折叠状态互不影响，中栏内容区本身不再被收起；单组折叠语义不变。视图选择、上栏收起、各组折叠状态**只存模块内存**，刷新恢复默认（网址视图、上栏展开、所有组展开），不写 localStorage、不写库、不写文件。
+- 架子 + 卡片（round 105）：网址视图与软件视图统一为「组（架子）+ 卡片」，卡片显示名称 + 图片；无 `image` 时显示名称首字色块（按名称哈希取色，刷新不变），旧条目默认走文字块、不出现破图。卡片右下角 ✎ 打开编辑弹层（网址卡：网址/名称/图片；软件卡：名称/可执行路径/图片，不显示 args/hotkey），保存走 `PATCH links/<id>` / `PATCH shortcuts/<id>`。
+- 图片上传（round 105 安全规则）：接口 `POST /images` 走 JSON `{filename, data(base64)}`（宿主只提供 JSON 请求体解析，未引入 multipart 解析、未改宿主），后端按**扩展名白名单**（png/jpg/jpeg/webp/gif）+ **文件头 magic**（PNG/JPEG/GIF/WEBP）+ **≤2MB** 三重校验，扩展名与内容不一致拒绝；文件名一律后端生成 `img_<16hex>.<ext>`，落 `data/plugins/urlarch/images/`，库里只存文件名；读取 `GET /images/<filename>` 仅接受该正则、其余（含 `../`、绝对路径）一律 404，不返回目录列表、不读 images 之外的文件。
+- 删除清理（round 105）：删除网址卡/软件卡时后端先取 `image` 再删行，随后删除图片文件（幂等，文件不存在不报错）；删除组仍是「条目移到未分组、条目不删、图片保留」。删除卡片需在弹层内二次确认（第一次点击只进入确认态，3 秒内再点才真正删除）。
+- 错误码补充（round 105）：`LINK_NOT_FOUND`(404)、`URL_INVALID`、`IMAGE_INVALID`、`IMAGE_TYPE_INVALID`、`IMAGE_TOO_LARGE`、`IMAGE_HEADER_INVALID`(400)、`IMAGE_NOT_FOUND`(404)、`IMAGE_WRITE_FAILED`(500)。
 - 组名唯一（round 102）：新建 / 改名时事务内查同名（排除自身），冲突返回 `GROUP_NAME_CONFLICT`(409)，前端提示“组名已存在”并恢复服务端名称；**历史已存在的同名组保留不改**（本轮不做数据清理）。
 - 组排序（round 102）：用 ✏️ / ↑ / ↓ / 🗑️ 按钮管理，不做组拖拽；↑/↓ 按相邻交换并把全部组的 `sort_order` 规范化为 `index*10` 后逐个 `PATCH`，首组 ↑、末组 ↓ 置灰禁用；排序持久化，刷新保持。
 - 条目拖拽改组（round 102）：条目行 `draggable`，拖到任意组容器（含「未分组」）后 `PATCH /shortcuts/<id>` **只改 `group_id`**；不重新校验 path/args、不触发启动；拖动结束会短暂抑制点击，避免误启动；失败 toast 并重新拉取服务端状态（无乐观残留）。目标组若处于折叠态保持折叠，拖动不改折叠状态。

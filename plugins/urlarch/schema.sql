@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS urlarch_links (
   note       TEXT NOT NULL DEFAULT '',
   ts         TEXT NOT NULL DEFAULT '',
   group_id   TEXT NOT NULL DEFAULT 'ungrouped',
+  image      TEXT NOT NULL DEFAULT '',
   raw_json   TEXT NOT NULL,
   live_json  TEXT NOT NULL DEFAULT ''
 );
@@ -33,6 +34,7 @@ CREATE INDEX IF NOT EXISTS idx_urlarch_links_group ON urlarch_links(group_id);
 -- 内容表：raw_json 为登记时快照，live_json 由 SQL 层显式双写（与本插件其余三表一致，不建触发器）；
 -- 白名单是用户登记数据、无法重建，故不豁免 live_json。
 -- group_id 为空字符串表示「未分组」（round 101 新增，旧数据迁移后默认空串）。
+-- image 为卡片图片文件名（round 105 新增，空串 = 无图；图片文件落 data/plugins/urlarch/images/）。
 CREATE TABLE IF NOT EXISTS urlarch_shortcuts (
   id         TEXT PRIMARY KEY,
   name       TEXT NOT NULL DEFAULT '',
@@ -40,6 +42,7 @@ CREATE TABLE IF NOT EXISTS urlarch_shortcuts (
   args       TEXT NOT NULL DEFAULT '[]',
   hotkey     TEXT NOT NULL DEFAULT '',
   group_id   TEXT NOT NULL DEFAULT '',
+  image      TEXT NOT NULL DEFAULT '',
   raw_json   TEXT NOT NULL,
   live_json  TEXT NOT NULL DEFAULT '',
   created_at TEXT NOT NULL,

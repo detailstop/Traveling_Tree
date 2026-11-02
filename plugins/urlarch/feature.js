@@ -20,6 +20,14 @@ const UA_ERR_TEXT = {
   SORT_ORDER_INVALID: '排序值不合法（需 -10000~10000 的整数）',
   INVALID_REQUEST: '请求缺少必要字段',
   LAUNCH_FAILED: '启动失败：进程创建被拒绝或系统报错',
+  LINK_NOT_FOUND: '网址卡不存在（可能已被删除）',
+  URL_INVALID: '网址不合法（需 http:// 或 https:// 开头）',
+  IMAGE_INVALID: '图片文件名不合法',
+  IMAGE_TYPE_INVALID: '仅支持 png / jpg / jpeg / webp / gif 图片',
+  IMAGE_TOO_LARGE: '图片不能超过 2MB',
+  IMAGE_HEADER_INVALID: '图片内容与扩展名不符（文件头校验失败）',
+  IMAGE_NOT_FOUND: '图片不存在',
+  IMAGE_WRITE_FAILED: '图片写入失败',
   INTERNAL_ERROR: '后端内部错误，未启动',
   METHOD_NOT_ALLOWED: '请求方式不被支持',
   not_found: '接口不存在',
@@ -31,8 +39,42 @@ const uaCollapsedShortcutGroups = new Set();
 // 拖拽状态：仅内存；拖动结束后短暂抑制点击，避免“拖动结束误触发启动”。
 let uaDraggingShortcutId = '';
 let uaSuppressRowClickUntil = 0;
-// 布局状态（round 103）：仅页面会话内存，刷新恢复默认（网址视图 / 上栏展开 / 中栏展开）。
+// 布局状态（round 103）：仅页面会话内存，刷新恢复默认（网址视图 / 上栏展开）。
 const uaLayout = { view: 'links', topbarCollapsed: false };
+// 卡片图片（round 105）：只走本地上传接口，前端先做扩展名/大小快速校验。
+const UA_IMAGE_EXTS = ['png', 'jpg', 'jpeg', 'webp', 'gif'];
+const UA_IMAGE_MAX = 2 * 1024 * 1024;
+function uaImageURL(name) {
+  return name ? '/api/plugin/urlarch/images/' + encodeURIComponent(name) : '';
+}
+function uaInitialOf(text) {
+  const s = String(text || '').trim();
+  return s ? s.slice(0, 1).toUpperCase() : '🧩';
+}
+function uaSeedOf(text) {
+  let hash = 0;
+  const s = String(text || '');
+  for (let i = 0; i < s.length; i += 1) hash = (hash * 31 + s.charCodeAt(i)) % 360;
+  return hash;
+}
+function uaBase64(buf) {
+  const bytes = new Uint8Array(buf);
+  let out = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) {
+    out += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  }
+  return btoa(out);
+}
+async function uaUploadImageFile(file) {
+  const name = String((file && file.name) || '');
+  const ext = name.includes('.') ? name.split('.').pop().toLowerCase() : '';
+  if (!UA_IMAGE_EXTS.includes(ext)) throw new Error('IMAGE_TYPE_INVALID');
+  if (!file || !file.size || file.size > UA_IMAGE_MAX) throw new Error('IMAGE_TOO_LARGE');
+  const data = uaBase64(await file.arrayBuffer());
+  const d = await api('/api/plugin/urlarch/images', { method: 'POST', body: { filename: name, data } });
+  if (!d || !d.filename) throw new Error('IMAGE_WRITE_FAILED');
+  return String(d.filename);
+}
 function uaShortcutHint(code) {
   return UA_ERR_TEXT[code] || ('操作失败：' + (code || '未知错误'));
 }
@@ -75,9 +117,18 @@ function uaDefaultGroup() {
 function uaNewGroupId() {
   return 'g' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 }
+// 网址卡片：state.items 的下标 → 后端 link_id（编辑/删除图片时需要）。
+let uaLinkIdByIndex = new Map();
 async function uaFetch() {
   let raw = null;
-  try { const d = await api('/api/plugin/urlarch/state'); raw = d && d.state; } catch (e) { raw = null; }
+  let linkIds = [];
+  try {
+    const d = await api('/api/plugin/urlarch/state?t=' + Date.now());
+    raw = d && d.state;
+    linkIds = (d && d.link_ids) || [];
+  } catch (e) { raw = null; }
+  uaLinkIdByIndex = new Map((Array.isArray(linkIds) ? linkIds : [])
+    .map(x => [Number(x.index), String(x.id || '')]));
   // 旧数组格式：仅内存兼容为默认组，不在本版做迁移备份（当前通常无旧数据）。
   if (Array.isArray(raw)) {
     return {
@@ -85,6 +136,7 @@ async function uaFetch() {
       items: raw.filter(x => x && x.url).map(x => ({
         title: String(x.title || ''), url: String(x.url || ''), note: String(x.note || ''),
         ts: String(x.ts || new Date().toISOString()), groupId: UA_DEFAULT_GROUP,
+        image: '',
       })),
       launchInterval: 5,
     };
@@ -105,6 +157,7 @@ async function uaFetch() {
     title: String(x.title || ''), url: String(x.url || ''), note: String(x.note || ''),
     ts: String(x.ts || new Date().toISOString()),
     groupId: ids.has(x.groupId) ? x.groupId : UA_DEFAULT_GROUP,
+    image: String(x.image || ''),
   }));
   const interval = raw.launchInterval;
   // 0 = 同时打开；旧数据缺省/非法值（含 null、空串、字符串）仍回退 5。
@@ -174,10 +227,45 @@ async function renderUrlArchTool() {
         <div class="ua-view" id="ua-view-apps" hidden>
           <div class="gcard" id="ua-shortcut-card">
             <div class="section-title"><span class="st-emoji">🚀</span>软件快捷入口
-              <span style="font-size:12px;color:var(--text-dim);font-weight:400;">按组展示 · 点击列表行启动 · 白名单注册制 · 仅本机</span>
+              <span style="font-size:12px;color:var(--text-dim);font-weight:400;">按组展示 · 点击卡片启动 · 白名单注册制 · 仅本机</span>
             </div>
             <div id="ua-sc-groups" class="ua-sg-list"></div>
-            <div class="ua-sc-hint">只启动白名单内已登记的软件：点击列表行后请求 <code>POST /api/plugin/urlarch/launch</code>，入参只有 id；路径与参数由后端从白名单读取并再次校验，前端不能传路径或命令。这是页面内入口，不是系统桌面快捷方式，也不注册键盘快捷键。组别收起/展开只存页面会话内存，刷新恢复默认展开。</div>
+            <div class="ua-sc-hint">只启动白名单内已登记的软件：点击卡片后请求 <code>POST /api/plugin/urlarch/launch</code>，入参只有 id；路径与参数由后端从白名单读取并再次校验，前端不能传路径或命令。这是页面内入口，不是系统桌面快捷方式，也不注册键盘快捷键。组别收起/展开只存页面会话内存，刷新恢复默认展开。</div>
+          </div>
+        </div>
+      </div>
+      <div class="ua-modal" id="ua-modal" hidden>
+        <div class="ua-modal-box" role="dialog" aria-modal="true" aria-labelledby="ua-modal-title">
+          <div class="ua-modal-head">
+            <b id="ua-modal-title">编辑</b>
+            <button type="button" class="mini-btn" id="ua-modal-close" title="关闭">✕</button>
+          </div>
+          <div class="ua-modal-body">
+            <label class="ua-field" id="ua-modal-url-field">网址
+              <input class="input" id="ua-modal-url" placeholder="https://…">
+            </label>
+            <label class="ua-field" id="ua-modal-name-field">名称
+              <input class="input" id="ua-modal-name" placeholder="显示名称">
+            </label>
+            <label class="ua-field" id="ua-modal-path-field">可执行路径
+              <input class="input" id="ua-modal-path" placeholder="C:/Program Files/App/app.exe">
+            </label>
+            <div class="ua-field">显示图片
+              <div class="ua-modal-img">
+                <img id="ua-modal-img" alt="图片预览" hidden>
+                <span class="ua-card-ph" id="ua-modal-ph"></span>
+              </div>
+              <div class="ua-modal-img-ops">
+                <input type="file" id="ua-modal-file" accept=".png,.jpg,.jpeg,.webp,.gif" hidden>
+                <button type="button" class="btn sm soft" id="ua-modal-upload">选择图片</button>
+                <button type="button" class="btn sm soft" id="ua-modal-clear">清除图片</button>
+                <span class="ua-modal-img-name" id="ua-modal-img-name"></span>
+              </div>
+            </div>
+          </div>
+          <div class="ua-modal-foot">
+            <button type="button" class="btn soft" id="ua-modal-save">保存</button>
+            <button type="button" class="btn danger" id="ua-modal-delete">删除</button>
           </div>
         </div>
       </div>
@@ -227,13 +315,19 @@ async function renderUrlArchTool() {
   };
   const uaGroupHTML = (state, g, rows, blockedMap) => {
     const folded = uaCollapsedGroups.has(g.id);
-    const items = rows.map(({ it, idx }) => `
-      <div class="ua-item" draggable="true" data-idx="${idx}">
-        <a href="${esc(it.url)}" target="_blank" rel="noopener noreferrer" draggable="false">${esc(it.title || it.url)}</a>
-        <span class="ua-item-url">${esc(it.url)}${it.note ? ' · ' + esc(it.note) : ''}</span>
-        <span class="ua-item-ts">${esc((it.ts || '').slice(5, 16))}</span>
-        <button class="btn sm soft" data-delitem="${idx}" title="删除">✕</button>
-      </div>`).join('');
+    const items = rows.map(({ it, idx }) => {
+      const img = it.image ? uaImageURL(it.image) : '';
+      const label = it.title || it.url;
+      const lid = uaLinkIdByIndex.get(idx) || '';
+      return `<div class="ua-card" draggable="true" data-idx="${idx}" data-link-id="${esc(lid)}" title="${esc(it.url)}">
+        ${img
+          ? `<img class="ua-card-img" src="${esc(img)}" alt="${esc(label)}" loading="lazy" draggable="false">`
+          : `<span class="ua-card-ph" style="--ua-seed:${uaSeedOf(label)}">${esc(uaInitialOf(label))}</span>`}
+        <span class="ua-card-name">${esc(label)}</span>
+        <span class="ua-card-sub">${esc(it.note || it.url)}</span>
+        <button type="button" class="ua-card-edit" data-edit-link="${idx}" title="编辑网址卡">✎</button>
+      </div>`;
+    }).join('');
     const bl = (blockedMap && blockedMap[g.id]) || [];
     const blHTML = bl.length ? `<div class="ua-blocked"><b>以下网址被浏览器拦截，请逐个点击；将网址加入浏览器白名单后通常不再拦截：</b>${bl.map(x => `<a href="${esc(x.url)}" target="_blank" rel="noopener noreferrer">${esc(x.title || x.url)}${x.title ? ' · ' + esc(x.url) : ''}</a>`).join('')}</div>` : '';
     const launching = uaLaunching[g.id];
@@ -251,7 +345,7 @@ async function renderUrlArchTool() {
           <button class="mini-btn danger" data-delgroup="${esc(g.id)}" title="删除空组" ${g.id === UA_DEFAULT_GROUP ? 'disabled' : ''}>🗑️</button>
         </span>
       </div>
-      <div class="ua-items" data-drop="${esc(g.id)}">${items || '<div class="ua-empty">拖拽网址到此组…</div>'}</div>
+      <div class="ua-items ua-cards" data-drop="${esc(g.id)}">${items || '<div class="ua-empty">拖拽网址到此组…</div>'}</div>
       ${blHTML}
     </section>`;
   };
@@ -265,10 +359,24 @@ async function renderUrlArchTool() {
       if (e.target.closest('button,a,input,select,textarea,label')) return;
       toggleGroupCollapse(head.dataset.grouphead);
     });
-    listBox.querySelectorAll('[data-delitem]').forEach(btn => btn.onclick = () => {
-      const state = uaLoad();
-      state.items.splice(Number(btn.dataset.delitem), 1);
-      uaSave(state); draw();
+    // 点击卡片（编辑按钮以外）打开网址
+    listBox.querySelectorAll('.ua-card[data-idx]').forEach(card => {
+      card.onclick = e => {
+        if (e.target.closest('[data-edit-link]')) return;
+        const it = (uaLoad().items || [])[Number(card.dataset.idx)];
+        if (!it) return;
+        try { window.open(it.url, '_blank', 'noopener'); } catch (err) { /* 忽略弹窗拦截 */ }
+      };
+      card.onkeydown = e => {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        e.preventDefault();
+        const it = (uaLoad().items || [])[Number(card.dataset.idx)];
+        if (it) { try { window.open(it.url, '_blank', 'noopener'); } catch (err) { /* 忽略 */ } }
+      };
+    });
+    listBox.querySelectorAll('[data-edit-link]').forEach(btn => btn.onclick = e => {
+      e.stopPropagation();
+      openLinkEditor(Number(btn.dataset.editLink));
     });
     listBox.querySelectorAll('[data-rename]').forEach(btn => btn.onclick = () => {
       const state = uaLoad();
@@ -292,7 +400,7 @@ async function renderUrlArchTool() {
       uaSave(state); draw();
     });
     listBox.querySelectorAll('[data-launch]').forEach(btn => btn.onclick = () => launchGroup(btn.dataset.launch));
-    listBox.querySelectorAll('.ua-item[draggable]').forEach(row => {
+    listBox.querySelectorAll('.ua-card[draggable]').forEach(row => {
       row.ondragstart = e => {
         e.dataTransfer.effectAllowed = 'move';
         e.dataTransfer.setData('text/plain', row.dataset.idx);
@@ -427,12 +535,17 @@ async function renderUrlArchTool() {
       toast(uaShortcutHint(err && err.message), 'warn', 4600);
     }
   };
-  const shortcutRowHTML = item => `
-    <div class="ua-sc-row" data-sc-launch="${esc(item.id)}" draggable="true" role="button" tabindex="0" title="点击启动 ${esc(item.name)}；可拖到其他组">
-      <span class="ua-sc-name">${esc(item.name)}</span>
-      <span class="ua-sc-path">${esc(item.path)}</span>
-      <button class="mini-btn danger ua-sc-del" data-sc-del="${esc(item.id)}" title="从白名单删除（不卸载软件）">✕</button>
+  const shortcutCardHTML = item => {
+    const img = item.image ? uaImageURL(item.image) : '';
+    return `<div class="ua-card ua-sc-card" data-sc-launch="${esc(item.id)}" draggable="true" role="button" tabindex="0" title="点击启动 ${esc(item.name)}；可拖到其他组">
+      ${img
+        ? `<img class="ua-card-img" src="${esc(img)}" alt="${esc(item.name)}" loading="lazy" draggable="false">`
+        : `<span class="ua-card-ph" style="--ua-seed:${uaSeedOf(item.name)}">${esc(uaInitialOf(item.name))}</span>`}
+      <span class="ua-card-name">${esc(item.name)}</span>
+      <span class="ua-card-sub">${esc(item.path)}</span>
+      <button type="button" class="ua-card-edit" data-sc-edit="${esc(item.id)}" title="编辑软件卡">✎</button>
     </div>`;
+  };
   const applyShortcutCollapse = () => {
     const box = $('#ua-sc-groups');
     if (!box) return;
@@ -481,7 +594,7 @@ async function renderUrlArchTool() {
           <span class="ua-count">${rows.length} 项</span>
           ${ops}
         </div>
-        <div class="ua-items ua-sg-items">${rows.map(shortcutRowHTML).join('') || '<div class="ua-empty">该组暂无软件</div>'}</div>
+        <div class="ua-items ua-sg-items ua-cards">${rows.map(shortcutCardHTML).join('') || '<div class="ua-empty">该组暂无软件</div>'}</div>
       </section>`;
     }).join('');
     box.querySelectorAll('[data-sg-toggle]').forEach(btn => btn.onclick = e => {
@@ -499,7 +612,7 @@ async function renderUrlArchTool() {
     box.querySelectorAll('[data-sg-del]').forEach(btn => btn.onclick = () => removeShortcutGroup(btn.dataset.sgDel));
     box.querySelectorAll('[data-sc-launch]').forEach(row => {
       row.onclick = e => {
-        if (e.target.closest('[data-sc-del]')) return;
+        if (e.target.closest('[data-sc-edit]')) return;
         if (Date.now() < uaSuppressRowClickUntil) return; // 拖动结束不触发启动
         launchShortcut(row.dataset.scLaunch);
       };
@@ -549,7 +662,10 @@ async function renderUrlArchTool() {
         moveShortcutToGroup(sid, target);
       };
     });
-    box.querySelectorAll('[data-sc-del]').forEach(btn => btn.onclick = () => removeShortcut(btn.dataset.scDel));
+    box.querySelectorAll('[data-sc-edit]').forEach(btn => btn.onclick = e => {
+      e.stopPropagation();
+      openAppEditor(btn.dataset.scEdit);
+    });
   };
   const moveShortcutToGroup = async (id, groupId) => {
     try {
@@ -611,17 +727,6 @@ async function renderUrlArchTool() {
       renderShortcuts();
     }
   };
-  const removeShortcut = async id => {
-    if (!confirm('从白名单删除该软件？（只删登记，不卸载软件）')) return;
-    try {
-      await api('/api/plugin/urlarch/shortcuts/' + encodeURIComponent(id), { method: 'DELETE' });
-      uaShortcuts = uaShortcuts.filter(x => x.id !== id);
-      renderShortcuts();
-      toast('已从白名单删除 ✓', 'success');
-    } catch (err) {
-      toast(uaShortcutHint(err && err.message), 'warn', 4600);
-    }
-  };
   const removeShortcutGroup = async gid => {
     const g = uaShortcutGroups.find(x => x.id === gid);
     if (!confirm(`删除组「${(g && g.name) || ''}」？组内软件将移到未分组（不会删除软件）`)) return;
@@ -672,6 +777,174 @@ async function renderUrlArchTool() {
   uaShortcuts = await uaFetchShortcuts();
   uaShortcutGroups = await uaFetchShortcutGroups();
   renderShortcuts();
+
+  /* ---------------- 卡片编辑弹层（网址 / 软件） ----------------
+     图片：本地文件 → 前端先校验扩展名与大小 → 上传接口（后端再校验扩展名/文件头/大小）→ 回填文件名。 */
+  const modal = {
+    el: $('#ua-modal'),
+    kind: '',        // 'link' | 'app'
+    id: '',
+    index: -1,
+    image: '',
+    confirmUntil: 0,
+  };
+  const modalEls = {
+    title: $('#ua-modal-title'),
+    urlField: $('#ua-modal-url-field'), url: $('#ua-modal-url'),
+    nameField: $('#ua-modal-name-field'), name: $('#ua-modal-name'),
+    pathField: $('#ua-modal-path-field'), path: $('#ua-modal-path'),
+    img: $('#ua-modal-img'), ph: $('#ua-modal-ph'), imgName: $('#ua-modal-img-name'),
+    file: $('#ua-modal-file'), upload: $('#ua-modal-upload'), clear: $('#ua-modal-clear'),
+    save: $('#ua-modal-save'), del: $('#ua-modal-delete'), close: $('#ua-modal-close'),
+  };
+  const renderModalImage = () => {
+    const has = !!modal.image;
+    modalEls.img.hidden = !has;
+    modalEls.ph.hidden = has;
+    if (has) modalEls.img.src = uaImageURL(modal.image);
+    modalEls.imgName.textContent = has ? modal.image : '（无图，卡片显示名称首字）';
+  };
+  const resetDeleteConfirm = () => {
+    modal.confirmUntil = 0;
+    modalEls.del.textContent = '删除';
+    modalEls.del.classList.remove('confirming');
+  };
+  const closeModal = () => {
+    if (!modal.el) return;
+    modal.el.hidden = true;
+    modal.kind = '';
+    modal.id = '';
+    modal.index = -1;
+    modal.image = '';
+    resetDeleteConfirm();
+  };
+  const openModal = (kind, title) => {
+    if (!modal.el) return;
+    modal.kind = kind;
+    modalEls.title.textContent = title;
+    const isLink = kind === 'link';
+    modalEls.urlField.hidden = !isLink;
+    modalEls.pathField.hidden = isLink;
+    resetDeleteConfirm();
+    modal.el.hidden = false;
+  };
+  const openLinkEditor = idx => {
+    const item = (uaLoad().items || [])[idx];
+    if (!item) return;
+    modal.index = idx;
+    modal.id = uaLinkIdByIndex.get(idx) || '';
+    modal.image = item.image || '';
+    modalEls.url.value = item.url || '';
+    modalEls.name.value = item.title || '';
+    modalEls.path.value = '';
+    renderModalImage();
+    openModal('link', '编辑网址卡');
+    modalEls.url.focus();
+  };
+  const openAppEditor = id => {
+    const item = uaShortcuts.find(x => x.id === id);
+    if (!item) return;
+    modal.id = id;
+    modal.index = -1;
+    modal.image = item.image || '';
+    modalEls.url.value = '';
+    modalEls.name.value = item.name || '';
+    modalEls.path.value = item.path || '';
+    renderModalImage();
+    openModal('app', '编辑软件卡');
+    modalEls.name.focus();
+  };
+  const saveModal = async () => {
+    if (!modal.kind) return;
+    modalEls.save.disabled = true;
+    try {
+      if (modal.kind === 'link') {
+        if (!modal.id) throw new Error('LINK_NOT_FOUND');
+        const payload = {
+          title: modalEls.name.value.trim(),
+          url: modalEls.url.value.trim(),
+          image: modal.image || '',
+        };
+        const d = await uaPatch('/api/plugin/urlarch/links/' + encodeURIComponent(modal.id), payload);
+        uaState = await uaFetch();
+        draw();
+        closeModal();
+        toast('已保存网址卡 ✓', 'success');
+        return d;
+      }
+      const payload = {
+        name: modalEls.name.value.trim(),
+        path: modalEls.path.value.trim(),
+        image: modal.image || '',
+      };
+      await uaPatch('/api/plugin/urlarch/shortcuts/' + encodeURIComponent(modal.id), payload);
+      uaShortcuts = await uaFetchShortcuts();
+      renderShortcuts();
+      closeModal();
+      toast('已保存软件卡 ✓', 'success');
+    } catch (err) {
+      toast(uaShortcutHint(err && err.message), 'warn', 4600);
+      resetDeleteConfirm();
+    } finally {
+      modalEls.save.disabled = false;
+    }
+  };
+  const deleteEditing = async () => {
+    if (!modal.kind) return;
+    const now = Date.now();
+    if (now > modal.confirmUntil) {
+      // 二次确认：第一次点击只进入确认态，3 秒内再点才真正删除。
+      modal.confirmUntil = now + 3000;
+      modalEls.del.textContent = '再点一次确认删除';
+      modalEls.del.classList.add('confirming');
+      toast('再次点击「确认删除」才会删除（3 秒内有效）', 'warn', 3000);
+      setTimeout(() => { if (Date.now() > modal.confirmUntil) resetDeleteConfirm(); }, 3100);
+      return;
+    }
+    modalEls.del.disabled = true;
+    try {
+      if (modal.kind === 'link') {
+        if (!modal.id) throw new Error('LINK_NOT_FOUND');
+        await api('/api/plugin/urlarch/links/' + encodeURIComponent(modal.id), { method: 'DELETE' });
+        uaState = await uaFetch();
+        draw();
+      } else {
+        await api('/api/plugin/urlarch/shortcuts/' + encodeURIComponent(modal.id), { method: 'DELETE' });
+        uaShortcuts = await uaFetchShortcuts();
+        renderShortcuts();
+      }
+      closeModal();
+      toast('已删除 ✓', 'success');
+    } catch (err) {
+      toast(uaShortcutHint(err && err.message), 'warn', 4600);
+      resetDeleteConfirm();
+    } finally {
+      modalEls.del.disabled = false;
+    }
+  };
+  if (modal.el) {
+    modalEls.close.onclick = closeModal;
+    modal.el.addEventListener('mousedown', e => { if (e.target === modal.el) closeModal(); });
+    modal.el.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeModal();
+    });
+    modalEls.save.onclick = saveModal;
+    modalEls.del.onclick = deleteEditing;
+    modalEls.upload.onclick = () => modalEls.file.click();
+    modalEls.clear.onclick = () => { modal.image = ''; renderModalImage(); };
+    modalEls.file.onchange = async () => {
+      const file = modalEls.file.files && modalEls.file.files[0];
+      modalEls.file.value = '';
+      if (!file) return;
+      try {
+        modal.image = await uaUploadImageFile(file);
+        renderModalImage();
+        toast('图片已上传，保存后生效 ✓', 'success');
+      } catch (err) {
+        toast(uaShortcutHint(err && err.message), 'warn', 4600);
+      }
+    };
+  }
   // 中栏标题条上的「全部收起 / 全部展开」：只作用于当前视图的所有组，状态仍为内存态。
   const currentViewGroupIds = () => (uaLayout.view === 'links'
     ? (uaLoad() ? uaLoad().groups.map(g => g.id) : [])

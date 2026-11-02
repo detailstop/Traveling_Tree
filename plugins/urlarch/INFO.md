@@ -11,7 +11,7 @@ summary: 归档网址信息 · 后续接入网址爬虫
 icon: 🔖
 entries: [urlarch]
 tables: [urlarch_assets, urlarch_groups, urlarch_links, urlarch_shortcuts, urlarch_shortcut_groups]
-data_dirs: []
+data_dirs: [urlarch]
 shared_features: []
 provides: []
 consumes: []
@@ -32,16 +32,19 @@ sensitive_data: []
 ## 数据表
 - `urlarch_assets`
 - `urlarch_groups`
-- `urlarch_links`
-- `urlarch_shortcuts`（白名单：本地软件条目；round 101 加 `group_id`）
+- `urlarch_links`（round 105 加 `image`：卡片图片文件名，空串=无图）
+- `urlarch_shortcuts`（白名单：本地软件条目；round 101 加 `group_id`，round 105 加 `image`）
 - `urlarch_shortcut_groups`（软件入口组别，round 101 新增）
+- 图片文件落 `data/plugins/urlarch/images/`（`manifest.data_dirs=[urlarch]`，不进 Git）
 
 ## 依赖
 - provides：无
 - consumes：无
 
 ## 注意事项
-- 布局（round 103/104）：上栏为视图切换（网址 / 软件）与当前视图操作按钮组，含「启动间隔时间」；网址视图的旧功能卡片已删除；上栏可收起；中栏标题条上的按钮为「全部收起 / 全部展开」，只作用于当前视图的所有组。以上状态仅存页面会话内存，刷新恢复默认，不写 localStorage / 不写库 / 不写文件。
+- 布局（round 103/104/105）：上栏为视图切换（网址 / 软件）与当前视图操作按钮组，含「启动间隔时间」；网址视图的旧功能卡片已删除；上栏可收起；中栏标题条上的按钮为「全部收起 / 全部展开」，只作用于当前视图的所有组。以上状态仅存页面会话内存，刷新恢复默认，不写 localStorage / 不写库 / 不写文件。
+- 卡片（round 105）：网址视图与软件视图统一为「组（架子）+ 卡片」，卡片显示名称与图片；无图时显示名称首字色块（旧条目默认如此）；卡片右下角 ✎ 打开编辑弹层，删除需二次确认。
+- 图片：只接受 png/jpg/jpeg/webp/gif、≤2MB、后端校验扩展名 + 文件头，文件名一律后端生成（`img_<16hex>.<ext>`），落 `data/plugins/urlarch/images/`，库里只存文件名；删除条目会清理其图片，删除组时条目移到未分组且图片保留。
 - 组别级收起 / 展开：点某组标题栏或 ▾ 按钮切换该组链接与拦截提示的显隐（▾→▸）；状态仅存页面会话内存，刷新恢复展开；不改后端与表结构。
 - 白名单存数据库表 `urlarch_shortcuts`，组别存 `urlarch_shortcut_groups`，数据库文件在 `data/` 下不进 Git；接口为 `shortcuts`、`shortcuts/<id>`、`shortcut-groups`、`shortcut-groups/<id>`、`launch`。
 - 软件快捷入口按组列表展示（名称 + 完整路径），点击列表行 → `POST /launch`（只传 id）启动；组可收缩/展开（状态仅存内存，刷新恢复展开）；**不是键盘热键、不是系统桌面快捷方式**，不创建 `.lnk`、不写桌面/开始菜单。

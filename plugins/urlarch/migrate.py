@@ -18,6 +18,7 @@ _SHORTCUTS_DDL = (
     " args TEXT NOT NULL DEFAULT '[]',"
     " hotkey TEXT NOT NULL DEFAULT '',"
     " group_id TEXT NOT NULL DEFAULT '',"
+    " image TEXT NOT NULL DEFAULT '',"
     " raw_json TEXT NOT NULL,"
     " live_json TEXT NOT NULL DEFAULT '',"
     " created_at TEXT NOT NULL,"
@@ -34,13 +35,20 @@ _SHORTCUTS_COLUMNS = (
     ("args", "TEXT NOT NULL DEFAULT '[]'"),
     ("hotkey", "TEXT NOT NULL DEFAULT ''"),
     ("group_id", "TEXT NOT NULL DEFAULT ''"),
+    ("image", "TEXT NOT NULL DEFAULT ''"),
     ("raw_json", "TEXT NOT NULL DEFAULT ''"),
     ("live_json", "TEXT NOT NULL DEFAULT ''"),
     ("created_at", "TEXT NOT NULL DEFAULT ''"),
     ("updated_at", "TEXT NOT NULL DEFAULT ''"),
 )
 _SHORTCUTS_BUSINESS = (
-    "id", "name", "path", "group_id", "args", "hotkey", "created_at", "updated_at",
+    "id", "name", "path", "group_id", "image", "args", "hotkey", "created_at", "updated_at",
+)
+
+# round 105：网址条目加 image 列（卡片图片文件名，空串 = 无图）。
+_LINKS_TABLE = "urlarch_links"
+_LINKS_COLUMNS = (
+    ("image", "TEXT NOT NULL DEFAULT ''"),
 )
 
 _SHORTCUT_GROUPS_TABLE = "urlarch_shortcut_groups"
@@ -118,9 +126,20 @@ def _ensure_shortcut_groups(conn) -> None:
     _backfill_raw_live(conn, _SHORTCUT_GROUPS_TABLE, _SHORTCUT_GROUPS_BUSINESS)
 
 
+def _ensure_links(conn) -> None:
+    """网址条目表补 image 列（round 105）；旧数据默认空串。表不存在时跳过（由 schema 建）。"""
+    cols = {r["name"] for r in conn.execute(f"PRAGMA table_info({_LINKS_TABLE})")}
+    if not cols:
+        return
+    for column, decl in _LINKS_COLUMNS:
+        if column not in cols:
+            conn.execute(f"ALTER TABLE {_LINKS_TABLE} ADD COLUMN {column} {decl}")
+
+
 def migrate(conn) -> None:
     for table in ("urlarch_assets", "urlarch_groups", "urlarch_links"):
         _add_live_json(conn, table)
+    _ensure_links(conn)
     _ensure_shortcuts(conn)
     _ensure_shortcut_groups(conn)
     conn.commit()

@@ -23,6 +23,7 @@
     "migrate": "migrate.py"
   },
   "style": "plugin.css",
+  "data_dirs": ["urlarch"],
   "provides": [],
   "consumes": []
 }

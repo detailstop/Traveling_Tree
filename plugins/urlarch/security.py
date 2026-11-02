@@ -175,3 +175,94 @@ def valid_id(raw) -> bool:
 
 def valid_group_id(raw) -> bool:
     return isinstance(raw, str) and bool(_GROUP_ID_RE.match(raw))
+
+
+# ---------------- 卡片图片（round 105） ----------------
+# 图片只存本地文件（data/plugins/urlarch/images/），库里只存文件名；
+# 上传必须同时满足：扩展名白名单 + 文件头 magic + 大小上限，文件名一律后端生成。
+
+MAX_IMAGE_BYTES = 2 * 1024 * 1024
+IMAGE_EXTENSIONS = ("png", "jpg", "jpeg", "webp", "gif")
+IMAGE_MIME = {"png": "image/png", "jpg": "image/jpeg", "jpeg": "image/jpeg",
+              "webp": "image/webp", "gif": "image/gif"}
+_IMAGE_NAME_RE = re.compile(r"^img_[0-9a-f]{16}\.(?:png|jpg|jpeg|webp|gif)$")
+
+
+def valid_image_name(raw) -> bool:
+    return isinstance(raw, str) and bool(_IMAGE_NAME_RE.match(raw))
+
+
+def validate_image_name(raw) -> str:
+    """条目上的 image 字段：空串（无图）或后端生成的图片文件名；不接受任何路径。"""
+    if raw is None:
+        return ""
+    if not isinstance(raw, str):
+        raise ShortcutError("IMAGE_INVALID", "image 必须是文件名或空串")
+    text = raw.strip()
+    if not text:
+        return ""
+    if not _IMAGE_NAME_RE.match(text):
+        raise ShortcutError("IMAGE_INVALID", "image 必须是后端生成的图片文件名")
+    return text
+
+
+def image_extension(filename) -> str:
+    """按扩展名白名单取小写扩展名；非法 → IMAGE_TYPE_INVALID。"""
+    if not isinstance(filename, str):
+        raise ShortcutError("IMAGE_TYPE_INVALID", "缺少文件名")
+    name = filename.strip().replace("\\", "/").split("/")[-1]
+    if "." not in name:
+        raise ShortcutError("IMAGE_TYPE_INVALID", "图片需要扩展名（png/jpg/jpeg/webp/gif）")
+    ext = name.rsplit(".", 1)[1].lower()
+    if ext not in IMAGE_EXTENSIONS:
+        raise ShortcutError("IMAGE_TYPE_INVALID", "仅支持 png/jpg/jpeg/webp/gif")
+    return "jpeg" if ext == "jpg" else ext
+
+
+def validate_image_bytes(ext: str, data: bytes) -> None:
+    """文件头 magic 校验；扩展名与内容不一致 → IMAGE_HEADER_INVALID。"""
+    if not data:
+        raise ShortcutError("IMAGE_HEADER_INVALID", "图片内容为空")
+    head = data[:16]
+    if ext == "png" and not head.startswith(b"\x89PNG\r\n\x1a\n"):
+        raise ShortcutError("IMAGE_HEADER_INVALID", "文件头与 .png 不符")
+    if ext == "jpeg" and not head.startswith(b"\xff\xd8\xff"):
+        raise ShortcutError("IMAGE_HEADER_INVALID", "文件头与 .jpg 不符")
+    if ext == "gif" and head[:6] not in (b"GIF87a", b"GIF89a"):
+        raise ShortcutError("IMAGE_HEADER_INVALID", "文件头与 .gif 不符")
+    if ext == "webp" and not (head[:4] == b"RIFF" and head[8:12] == b"WEBP"):
+        raise ShortcutError("IMAGE_HEADER_INVALID", "文件头与 .webp 不符")
+
+
+def image_mime(name: str) -> str:
+    ext = name.rsplit(".", 1)[-1].lower()
+    return IMAGE_MIME.get("jpeg" if ext == "jpg" else ext, "application/octet-stream")
+
+
+def validate_link_title(raw) -> str:
+    """网址卡名称：可空，≤200 字符，不允许控制字符。"""
+    if not isinstance(raw, str):
+        raise ShortcutError("NAME_INVALID", "名称必须是字符串")
+    title = raw.strip()
+    if len(title) > 200:
+        raise ShortcutError("NAME_INVALID", "名称不能超过 200 字符")
+    if any(ch in title for ch in "\r\n\t\0"):
+        raise ShortcutError("NAME_INVALID", "名称不能包含控制字符")
+    return title
+
+
+def validate_link_url(raw) -> str:
+    """网址卡 URL：仅 http/https，长度受限，拒绝控制字符与空白。"""
+    if not isinstance(raw, str):
+        raise ShortcutError("URL_INVALID", "网址必须是字符串")
+    url = raw.strip()
+    if not url or len(url) > 2048:
+        raise ShortcutError("URL_INVALID", "网址需为 1–2048 个字符")
+    if any(ch in url for ch in "\r\n\t\0 "):
+        raise ShortcutError("URL_INVALID", "网址不能包含空白或控制字符")
+    low = url.lower()
+    if not (low.startswith("http://") or low.startswith("https://")):
+        raise ShortcutError("URL_INVALID", "网址需以 http:// 或 https:// 开头")
+    if len(low.split("://", 1)[1].split("/", 1)[0]) < 1:
+        raise ShortcutError("URL_INVALID", "网址缺少主机名")
+    return url
