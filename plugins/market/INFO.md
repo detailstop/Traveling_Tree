@@ -37,5 +37,5 @@ sensitive_data: []
 - consumes：无
 
 ## 注意事项
-- 依赖检测（round 107）：`GET /dependencies` 与 `GET /dependencies/<id>` 只读扫描各 `manifest.dependencies`（python/js/plugins），缺失/版本不满足/冲突只提示不阻断；`packaging` 未安装时降级为只判存在性（`degraded: true`），无自动安装与多版本隔离。
+- 依赖检测（round 107/108）：`GET /dependencies` 与 `GET /dependencies/<id>` 只读扫描各 `manifest.dependencies`（python/shared/plugins；`shared` 与 `shared_features` 同义，旧 `js` 已废弃），缺失/版本不满足/冲突只提示不阻断；`packaging` 未安装时降级为只判存在性（`degraded: true`），无自动安装与多版本隔离。
 - 详见 README.md；本卡为市场精简信息，关键字段由校验脚本与 manifest/schema 保持一致。

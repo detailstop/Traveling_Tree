@@ -1,15 +1,19 @@
 """插件依赖检测（只读）：读取各插件 `manifest.dependencies`，判断本机是否满足。
 
-字段契约（manifest v2 扩展，本轮新增）：
+字段契约（manifest v2 扩展）：
 
     "dependencies": {
       "python": ["pikepdf", {"name": "edge-tts", "version": ">=6.1.0"}],
-      "js": ["webchat"],          // 宿主公共前端模块 ui/web/static/features/<name>.js
+      "shared": ["webchat"],      // 宿主公共前端脚本，与 manifest.shared_features 同义
       "plugins": ["pixel_art"]    // 其他插件 plugins/<id>/manifest.json
     }
 
 约定：
 - 三类子键均可省略；每项为字符串，`python` 另可用 `{name, version}` 对象写版本约束。
+- `shared` 的规则来源：宿主 `ui/web/static/app.js::loadToolFeature()`
+  （`new URL('features/' + file + '.js', APP_ASSET_BASE)`，APP_ASSET_BASE = `/static/`），
+  即脚本实际路径为 `ui/web/static/features/<name>.js`；`manifest.shared_features` 用的就是这条规则。
+  旧子键 `js` 已废弃（零存量），按未知子键报错。
 - 只检测、不安装、不写文件、不写库；缺失只提示，不阻断安装/启用/加载。
 - 存在性：PyPI 包用 `importlib.metadata`（拿版本），失败再退回 `importlib.util.find_spec`
   （兼容以单文件/本地方式安装的模块）。
@@ -49,10 +53,9 @@ STATUS_TEXT = {
 }
 _STATUS_RANK = {"missing": 5, "conflict": 4, "version_mismatch": 3, "unknown": 2, "ok": 1,
                 "undeclared": 0}
-KINDS = ("python", "js", "plugins")
+KINDS = ("python", "shared", "plugins")
 
 _NAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$")
-_JS_RE = re.compile(r"^[a-z][a-z0-9_]{0,31}$")
 _PLUGIN_RE = re.compile(r"^[a-z][a-z0-9_-]{1,31}$")
 _SPEC_ITEM_RE = re.compile(r"^(==|!=|>=|<=|>|<|~=)\s*v?\d+(?:\.\d+)*(?:\.\*)?$")
 _MODULE_ALIASES = {"python-docx": "docx", "pillow": "PIL", "edge-tts": "edge_tts",
@@ -65,8 +68,20 @@ def plugins_dir() -> Path:
     return Path(config.BASE_DIR) / "plugins"
 
 
-def features_dir() -> Path:
+def shared_features_dir() -> Path:
+    """宿主公共前端脚本目录：ui/web/static/features/。
+
+    规则来源：`ui/web/static/app.js::loadToolFeature()`（`new URL('features/' + file + '.js',
+    APP_ASSET_BASE)`，APP_ASSET_BASE 由 `document.currentScript.src` 推出 `/static/`）；
+    宿主 `ui/web/server.py` 只对 `manifest.shared_features` 做名称白名单清洗，不改路径映射。
+    因此 `dependencies.shared` 与该字段同规则、同目录，不另设别名表。
+    """
     return Path(config.BASE_DIR) / "ui" / "web" / "static" / "features"
+
+
+def shared_feature_path(name: str) -> Path:
+    """shared 依赖名 → 实际脚本路径（与 shared_features 加载路径一致）。"""
+    return shared_features_dir() / f"{name}.js"
 
 
 def plugin_manifest_path(pid: str) -> Path:
@@ -245,8 +260,9 @@ def python_present(name: str) -> tuple[bool, str]:
     return (found is not None), ""
 
 
-def js_present(name: str) -> bool:
-    return (features_dir() / f"{name}.js").is_file()
+def shared_present(name: str) -> bool:
+    """按 shared_features 的加载路径规则判存在性（features/<name>.js）。"""
+    return shared_feature_path(name).is_file()
 
 
 def plugin_present(pid: str) -> bool:
@@ -279,8 +295,12 @@ def declaration_errors(manifest: dict) -> list[tuple[str, str, str]]:
 
     for key in data:
         if key not in KINDS:
-            fail(f"dependencies.{key}", "dependencies_invalid",
-                 f"dependencies 只支持 {', '.join(KINDS)} 三类子键")
+            if key == "js":
+                fail(f"dependencies.{key}", "dependencies_subkey_invalid",
+                     "子键 js 已废弃：宿主公共前端脚本请改用 shared（与 manifest.shared_features 同义）")
+            else:
+                fail(f"dependencies.{key}", "dependencies_subkey_invalid",
+                     f"dependencies 只支持 {' / '.join(KINDS)} 三类子键")
     for key in KINDS:
         if key not in data:
             continue
@@ -316,12 +336,9 @@ def declaration_errors(manifest: dict) -> list[tuple[str, str, str]]:
                 fail(field, "dependencies_invalid", f"{key} 依赖必须是字符串或（python 的）对象")
                 continue
             text = item.strip()
-            if key == "python" and not _NAME_RE.match(text):
+            if key in ("python", "shared") and not _NAME_RE.match(text):
                 fail(field, "dependency_name_invalid",
                      f"依赖名非法：{item!r}（字母/数字开头，可含 . _ -）")
-            elif key == "js" and not _JS_RE.match(text):
-                fail(field, "dependency_name_invalid",
-                     f"前端模块名非法：{item!r}（小写字母/数字/下划线）")
             elif key == "plugins" and not _PLUGIN_RE.match(text):
                 fail(field, "dependency_name_invalid", f"插件 id 非法：{item!r}")
     return errors
@@ -427,10 +444,10 @@ def _entry_status(kind: str, dep: dict, conflict: dict | None) -> tuple[str, str
             if not result:
                 return "version_mismatch", version, f"已安装 {version}，不满足 {spec}"
         return "ok", version, (f"{version} 满足 {spec}" if spec else f"已安装 {version}")
-    if kind == "js":
-        if js_present(name):
-            return "ok", "", f"宿主公共模块 features/{name}.js 存在"
-        return "missing", "", f"缺少宿主公共模块 features/{name}.js"
+    if kind == "shared":
+        if shared_present(name):
+            return "ok", "", f"宿主公共前端脚本 features/{name}.js 存在"
+        return "missing", "", f"缺少宿主公共前端脚本 features/{name}.js"
     if plugin_present(name):
         return "ok", "", f"插件 {name} 已安装"
     return "missing", "", f"插件 {name} 未安装"

@@ -44,7 +44,7 @@
   "shared_features": [],        // 依赖的宿主公共脚本，如 ["webchat"]
   "dependencies": {             // 可选：第三方/跨插件依赖声明；只声明不安装
     "python": ["pikepdf", {"name": "edge-tts", "version": ">=6.1.0"}],
-    "js": ["webchat"],          // 宿主公共前端模块 ui/web/static/features/<name>.js
+    "shared": ["webchat"],      // 宿主公共前端脚本，与 manifest.shared_features 同义同规则
     "plugins": ["pixel_art"]    // 其他插件（plugins/<id>/manifest.json）
   }
 }
@@ -52,7 +52,8 @@
 
 **`dependencies`（round 107，可选）规则**：
 
-- 三类子键 `python` / `js` / `plugins` 均可省略；每项为字符串，`python` 另可用 `{name, version}` 对象写版本约束（PEP 440 比较子句，如 `>=6.1.0`、`>=1,<2`）。
+- 三类子键 `python` / `shared` / `plugins` 均可省略；每项为字符串，`python` 另可用 `{name, version}` 对象写版本约束（PEP 440 比较子句，如 `>=6.1.0`、`>=1,<2`）。
+- `shared` 与 manifest 既有 `shared_features` **同义、同规则**：条目为宿主公共前端脚本名称，检测按 `shared_features` 的加载路径解析（规则来源：`ui/web/static/app.js::loadToolFeature()`，即 `ui/web/static/features/<name>.js`；宿主 `server.py` 只做名称白名单清洗）。旧子键 `js` 已废弃（零存量），按未知子键报错 `dependencies_subkey_invalid`。
 - **只声明、不安装**：本轮不实现自动安装，也不做多版本隔离；安装方式仍由使用者自行 `pip install`。
 - 检测归市场：`GET /api/plugin/market/dependencies`（全部）与 `GET /api/plugin/market/dependencies/<plugin_id>`（单个），只读、不写文件/库；缺失、版本不满足、冲突**只提示，不阻断**安装/启用/加载。
 - 版本比较依赖第三方 `packaging`；未安装时降级为“只判存在性”，接口返回 `degraded: true` 与提示，不抛异常。

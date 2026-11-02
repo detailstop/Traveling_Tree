@@ -76,7 +76,7 @@ plugins/<id>/
 1. **职责**：一句话说明插件做什么、给谁用。
 2. **入口与路由**：卡片 entry 与 feature 文件；有无后端；路由前缀 `/api/plugin/<id>/*`（子路径见 `backend.py::handle`，已有契约则链接 `docs/appendix/interfaces/<id>.md`）。
 3. **数据表**：表名清单；`raw_json`/`live_json` 状态；按 G2 豁免的表要写明“豁免 `live_json`，保留 `raw_json`/可重建来源”。
-4. **依赖**：`data_dirs`、`shared_features`、跨插件调用（含直接 import 标注）、可选第三方库；第三方/跨插件依赖须在 `manifest.dependencies` 声明（`python`/`js`/`plugins` 三类，见白皮书 §二），README 文字与声明保持一致；只声明不安装。
+4. **依赖**：`data_dirs`、`shared_features`、跨插件调用（含直接 import 标注）、可选第三方库；第三方/跨插件依赖须在 `manifest.dependencies` 声明（`python`/`shared`/`plugins` 三类，`shared` 与 `shared_features` 同义同规则，见白皮书 §二），README 文字与声明保持一致；只声明不安装。
 5. **注意事项**：敏感数据、破坏性操作、已知环境失败（如 TTS 502）、未核实事项。
 
 README 不写实现细节，不复制代码；事实以 manifest/schema/backend 为准。

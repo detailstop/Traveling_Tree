@@ -56,7 +56,7 @@
 
 ## 依赖
 - provides / consumes
-- 第三方/跨插件依赖不在 INFO 重复声明，见 `manifest.dependencies`（python / js / plugins）；市场页依赖状态由只读接口检测
+- 第三方/跨插件依赖不在 INFO 重复声明，见 `manifest.dependencies`（python / shared / plugins；`shared` 与 `shared_features` 同义）；市场页依赖状态由只读接口检测
 
 ## 注意事项
 - 详见 README.md；本卡为市场精简信息，关键字段由校验脚本保持一致。

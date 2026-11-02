@@ -67,8 +67,8 @@
     if (!entry.total) {
       return `<div class="mk-deps"><b>依赖</b><span class="mk-dep-empty">未声明依赖（manifest.dependencies 为空）</span></div>`;
     }
-    const kindName = { python: 'Python 包', js: '宿主公共前端', plugins: '插件' };
-    const rows = ['python', 'js', 'plugins'].flatMap(kind =>
+    const kindName = { python: 'Python 包', shared: '宿主公共前端脚本', plugins: '插件' };
+    const rows = ['python', 'shared', 'plugins'].flatMap(kind =>
       (entry.declared && entry.declared[kind] || []).map(d => `<div class="mk-dep-row mk-dep-${esc(d.status)}">
         <span class="mk-dep-kind">${esc(kindName[kind] || kind)}</span>
         <b class="mk-dep-name">${esc(d.name)}</b>

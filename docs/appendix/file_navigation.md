@@ -2,9 +2,9 @@
 
 > 只读摘要，勿手改。本文件由 docs/appendix/file_navigation.json 生成；结构与去留决定以 JSON 为准。
 
-- 生成时间：2026-11-02T20:22:46+03:00
-- 轮次：107
-- 待办：1 条；已决定：709 条
+- 生成时间：2026-11-02T20:42:12+03:00
+- 轮次：108
+- 待办：1 条；已决定：720 条
 
 ## 待办
 
@@ -16,6 +16,17 @@
 
 | 路径 | 决定 | 原因 | 状态 | 轮次 | 时间 | 备份路径 |
 | --- | --- | --- | --- | --- | --- | --- |
+| plugins/market/deps.py | dependencies 子键 js 改名 shared，检测对齐 shared_features（round 108） | KINDS 改为 (python, shared, plugins)；删除硬编码判定与 _JS_RE，改为 shared_features_dir()/shared_feature_path()/shared_present()，规则来源注明 ui/web/static/app.js::loadToolFeature（features/<name>.js，APP_ASSET_BASE=/static/）；未知子键（含 js）报 dependencies_subkey_invalid；python/plugins/版本/冲突/降级/六态逻辑未变。 | done | 108 | 2026-11-02T20:42:12+03:00 |  |
+| plugins/market/validate.py | 新增 dependencies_subkey_invalid 错误码（round 108） | ERROR_CODES 增加 dependencies_subkey_invalid；合法子键集合由 deps.KINDS 提供（python/shared/plugins），js 作为未知子键被拒；shared 条目按字符串名称校验、不做版本校验。 | done | 108 | 2026-11-02T20:42:12+03:00 |  |
+| plugins/market/feature.js | 依赖明细类别名同步 shared（round 108） | kindName 与遍历数组改为 shared，显示「宿主公共前端脚本」；其余 badge/明细/冲突/降级行为不变。 | done | 108 | 2026-11-02T20:42:12+03:00 |  |
+| plugins/market/README.md | 五节同步 shared 子键与错误码（round 108） | 依赖检测条目改为 python/shared/plugins，注明 shared 与 shared_features 同义、规则来源 app.js::loadToolFeature、js 已废弃；错误码清单补 dependencies_subkey_invalid。 | done | 108 | 2026-11-02T20:42:12+03:00 |  |
+| plugins/market/INFO.md | 信息卡同步 shared 子键（round 108） | 依赖检测条目改为 python/shared/plugins，注明 shared 与 shared_features 同义、旧 js 废弃。 | done | 108 | 2026-11-02T20:42:12+03:00 |  |
+| docs/plugin-development-whitepaper.md | Manifest v2 契约 dependencies 子键 js→shared（round 108） | 示例与规则段改为 shared，补充「与 shared_features 同义同规则、规则来源 app.js::loadToolFeature、宿主只做名称白名单清洗」，并注明 js 废弃报 dependencies_subkey_invalid。 | done | 108 | 2026-11-02T20:42:12+03:00 |  |
+| docs/plugin-development-guide.md | README 依赖节要求同步 shared（round 108） | §4.1 第 4 条改为 python/shared/plugins，注明 shared 与 shared_features 同义同规则。 | done | 108 | 2026-11-02T20:42:12+03:00 |  |
+| docs/appendix/plugin-info-card-template.md | INFO 依赖说明同步 shared（round 108） | 改为 python/shared/plugins，注明 shared 与 shared_features 同义。 | done | 108 | 2026-11-02T20:42:12+03:00 |  |
+| docs/appendix/prompts/plugin-dev-prompt.md | 脚手架提示词同步 shared（round 108） | §0 依赖声明说明改为 python/shared/plugins，注明 shared 与 shared_features 同义同规则。 | done | 108 | 2026-11-02T20:42:12+03:00 |  |
+| tests/smoke_market.py | 补 dependencies 子键用例（round 108） | 新增 3 条：js 作为未知子键被拒（dependencies_subkey_invalid）、shared 合法通过、shared 非数组被拒；用例在临时插件副本上执行，测后随临时目录删除。 | done | 108 | 2026-11-02T20:42:12+03:00 |  |
+| docs/appendix/file_navigation.json | 登记 round 108（js→shared + 对齐 shared_features） | 追加 10 条 decided 并 round→108；pending 保留既有 1 条；resolved 45 条不动；md 由生成器重生成。核实：4 个样本与全部 23 个 manifest 均无 js 子键（零存量）。验证：validate market/4 样本 ok、js 被拒、shared 通过、smoke 1013/1014（仅 TTS 502）、node --check/py_compile 通过、INFO check PASS、生成器幂等。 | done | 108 | 2026-11-02T20:42:12+03:00 |  |
 | plugins/market/deps.py | 新增依赖检测模块（manifest.dependencies 三类子键，只读） | 字段契约为 python/js/plugins 三类子键（python 项可字符串或 {name, version}）：python 用 importlib.metadata 取版本、失败退回 find_spec；js 判 ui/web/static/features/<name>.js；plugins 判 plugins/<id>/manifest.json。版本比较用 packaging（缺失时降级为只判存在性并返回 degraded/hint）；同一库多插件互斥约束用区间交集判定 conflict（与 packaging 无关，stdlib 实现）；输出 ok/missing/version_mismatch/conflict/unknown/undeclared 六态与 summary/conflicts。不写文件、不写库、不安装。 | done | 107 | 2026-11-02T20:22:46+03:00 |  |
 | plugins/market/backend.py | 新增 GET /dependencies 与 GET /dependencies/<plugin_id>（round 107） | 语义子路径、非空；单个插件不存在返回 404 PLUGIN_NOT_FOUND；非 GET 返回 405；不改 list/install/uninstall 与四源合并逻辑。 | done | 107 | 2026-11-02T20:22:46+03:00 |  |
 | plugins/market/validate.py | 校验 manifest.dependencies 结构与版本约束（round 107） | 新增 dependencies_invalid / dependency_name_invalid / dependency_version_invalid 三个错误码；复用 deps.declaration_errors；只校验声明结构，不做存在性判定。非法字段用临时插件副本实测被拒绝。 | done | 107 | 2026-11-02T20:22:46+03:00 |  |
