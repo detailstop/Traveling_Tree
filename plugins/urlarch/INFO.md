@@ -1,6 +1,6 @@
 ---
 id: urlarch
-name: 网址归档
+name: 站点统筹
 version: 1.0
 kind: functional
 has_ui: true
@@ -20,10 +20,10 @@ source: local
 known_limits: 本地开发，不通过市场分发
 sensitive_data: []
 ---
-# 网址归档 信息卡
+# 站点统筹 信息卡
 
 ## 职责
-归档网址信息 · 后续接入网址爬虫
+归档网址信息 · 后续接入网址爬虫（显示名：站点统筹；插件 id 仍为 `urlarch`）
 
 ## 入口与路由
 - entry：urlarch
@@ -41,6 +41,7 @@ sensitive_data: []
 - consumes：无
 
 ## 注意事项
+- 布局（round 103）：上栏为视图切换（网址 / 软件）与当前视图操作按钮组；上栏可收起，中栏可一键收起；两栏状态仅存页面会话内存，刷新恢复默认（网址视图、上栏展开、中栏展开），不写 localStorage / 不写库 / 不写文件。
 - 组别级收起 / 展开：点某组标题栏或 ▾ 按钮切换该组链接与拦截提示的显隐（▾→▸）；状态仅存页面会话内存，刷新恢复展开；不改后端与表结构。
 - 白名单存数据库表 `urlarch_shortcuts`，组别存 `urlarch_shortcut_groups`，数据库文件在 `data/` 下不进 Git；接口为 `shortcuts`、`shortcuts/<id>`、`shortcut-groups`、`shortcut-groups/<id>`、`launch`。
 - 软件快捷入口按组列表展示（名称 + 完整路径），点击列表行 → `POST /launch`（只传 id）启动；组可收缩/展开（状态仅存内存，刷新恢复展开）；**不是键盘热键、不是系统桌面快捷方式**，不创建 `.lnk`、不写桌面/开始菜单。

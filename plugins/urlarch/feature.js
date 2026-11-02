@@ -1,5 +1,5 @@
 'use strict';
-/* 按需加载的功能模块：urlarch（网址归档） */
+/* 按需加载的功能模块：urlarch（站点统筹 · 显示名） */
 (function () {
 let uaState = null;
 // 单组折叠状态：只存在页面会话内存（刷新后恢复默认展开），不写 localStorage。
@@ -31,6 +31,8 @@ const uaCollapsedShortcutGroups = new Set();
 // 拖拽状态：仅内存；拖动结束后短暂抑制点击，避免“拖动结束误触发启动”。
 let uaDraggingShortcutId = '';
 let uaSuppressRowClickUntil = 0;
+// 布局状态（round 103）：仅页面会话内存，刷新恢复默认（网址视图 / 上栏展开 / 中栏展开）。
+const uaLayout = { view: 'links', topbarCollapsed: false, midCollapsed: false };
 function uaShortcutHint(code) {
   return UA_ERR_TEXT[code] || ('操作失败：' + (code || '未知错误'));
 }
@@ -121,49 +123,73 @@ async function renderUrlArchTool() {
   try { uaState = await uaFetch(); }
   catch (e) { box.innerHTML = emptyHTML('⚠️', '网址库加载失败', esc(e.message)); return; }
   box.innerHTML = `
-    <div class="gcard" style="margin-bottom:14px;">
-      <div class="section-title"><span class="st-emoji">🔖</span>网址归档
-        <span style="font-size:12px;color:var(--text-dim);font-weight:400;">本地归档 · 组别 · 拖拽 · 导出 JSON · 爬虫后续接入</span>
-        <button class="btn sm" id="ua-export" style="margin-left:auto;">📤 导出 JSON</button>
+    <div class="ua-shell">
+      <div class="gcard ua-topbar" id="ua-topbar">
+        <div class="ua-topbar-head">
+          <span class="ua-brand"><span class="st-emoji">🗂</span>站点统筹</span>
+          <div class="ua-view-switch" role="tablist" aria-label="视图切换">
+            <button type="button" class="ua-vtab active" data-ua-view="links" role="tab" aria-selected="true">📚 网址</button>
+            <button type="button" class="ua-vtab" data-ua-view="apps" role="tab" aria-selected="false">🚀 软件</button>
+          </div>
+          <span class="ua-topbar-hint" id="ua-topbar-hint">当前：网址归档</span>
+          <button type="button" class="mini-btn" id="ua-topbar-toggle" title="收起上栏" aria-expanded="true" style="margin-left:auto;">▴ 收起上栏</button>
+        </div>
+        <div class="ua-topbar-body" id="ua-topbar-body">
+          <div class="ua-actions" id="ua-actions-links">
+            <input class="input" id="ua-title" placeholder="标题，如：国家统计局 PMI 数据页" style="flex:2;min-width:150px;">
+            <input class="input" id="ua-url" placeholder="网址 https://…" style="flex:3;min-width:200px;">
+            <input class="input" id="ua-note" placeholder="备注（可选）" style="flex:2;min-width:120px;">
+            <select class="input" id="ua-group" style="flex:1;min-width:110px;"></select>
+            <button class="btn" id="ua-add">＋ 归档</button>
+            <input class="input" id="ua-newgroup" placeholder="新组别名" style="flex:2;min-width:130px;">
+            <select class="input" id="ua-newtype" style="flex:1;min-width:110px;"><option value="normal">普通组</option><option value="functional">功能性组</option></select>
+            <button class="btn soft" id="ua-addgroup">＋ 新建组别</button>
+            <button class="btn sm soft" id="ua-export">📤 导出 JSON</button>
+          </div>
+          <div class="ua-actions" id="ua-actions-apps" hidden>
+            <input class="input" id="ua-sc-name" placeholder="名称，如：记事本" style="flex:2;min-width:120px;">
+            <input class="input" id="ua-sc-path" placeholder="可执行文件绝对路径，如 C:/Program Files/App/app.exe" style="flex:3;min-width:220px;">
+            <select class="input" id="ua-sc-group" style="flex:1;min-width:130px;"></select>
+            <button class="btn" id="ua-sc-add">＋ 添加软件</button>
+            <input class="input" id="ua-sc-newgroup" placeholder="新建组名，如：写作工具" style="flex:2;min-width:150px;">
+            <button class="btn soft" id="ua-sc-addgroup">＋ 新建组</button>
+          </div>
+        </div>
       </div>
-      <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
-        <input class="input" id="ua-title" placeholder="标题，如：国家统计局 PMI 数据页" style="flex:2;min-width:160px;">
-        <input class="input" id="ua-url" placeholder="网址 https://…" style="flex:3;min-width:220px;">
-        <input class="input" id="ua-note" placeholder="备注（可选）" style="flex:2;min-width:140px;">
-        <select class="input" id="ua-group" style="flex:1;min-width:120px;"></select>
-        <button class="btn" id="ua-add">＋ 归档</button>
+      <div class="ua-midbar">
+        <span class="ua-mid-title" id="ua-mid-title">网址归档 · 归档列表</span>
+        <span class="ua-mid-hint" id="ua-mid-hint">组别可折叠 · 拖拽移动</span>
+        <button type="button" class="mini-btn" id="ua-mid-toggle" title="收起中栏" aria-expanded="true">▴ 收起中栏</button>
       </div>
-      <div class="ua-group-create">
-        <input class="input" id="ua-newgroup" placeholder="新组别名" style="flex:2;min-width:160px;">
-        <select class="input" id="ua-newtype" style="flex:1;min-width:120px;"><option value="normal">普通组</option><option value="functional">功能性组</option></select>
-        <button class="btn soft" id="ua-addgroup">＋ 新建组别</button>
+      <div class="ua-mid" id="ua-mid">
+        <div class="ua-view" id="ua-view-links">
+          <div class="gcard">
+            <div class="section-title"><span class="st-emoji">🔖</span>站点统筹 · 网址归档
+              <span style="font-size:12px;color:var(--text-dim);font-weight:400;">本地归档 · 组别 · 拖拽 · 导出 JSON · 爬虫后续接入</span>
+            </div>
+            <div class="ua-global-row" style="margin-top:10px;">
+              <span>共 <span id="ua-count">0</span> 条 · 数据保存在本机 SQLite · 功能性组可一键启动组内全部网址</span>
+            </div>
+            <div class="ua-global-row">
+              <label>⏱ 一键启动间隔 <input class="input" id="ua-interval" type="number" min="0" max="30" step="1" value="5" style="width:68px;padding:5px 7px;"> 秒</label>
+              <span>0 = 同一批同时尝试打开；1–30 = 首个立即、其余每隔 n 秒；仅接受 0–30 的整数</span>
+            </div>
+          </div>
+          <div class="gcard">
+            <div class="section-title"><span class="st-emoji">📚</span>归档列表</div>
+            <div id="ua-list" style="min-height:40px;"></div>
+          </div>
+        </div>
+        <div class="ua-view" id="ua-view-apps" hidden>
+          <div class="gcard" id="ua-shortcut-card">
+            <div class="section-title"><span class="st-emoji">🚀</span>软件快捷入口
+              <span style="font-size:12px;color:var(--text-dim);font-weight:400;">按组展示 · 点击列表行启动 · 白名单注册制 · 仅本机</span>
+            </div>
+            <div id="ua-sc-groups" class="ua-sg-list"></div>
+            <div class="ua-sc-hint">只启动白名单内已登记的软件：点击列表行后请求 <code>POST /api/plugin/urlarch/launch</code>，入参只有 id；路径与参数由后端从白名单读取并再次校验，前端不能传路径或命令。这是页面内入口，不是系统桌面快捷方式，也不注册键盘快捷键。组别收起/展开只存页面会话内存，刷新恢复默认展开。</div>
+          </div>
+        </div>
       </div>
-      <div style="font-size:12px;color:var(--text-dim);margin-top:6px;">共 <span id="ua-count">0</span> 条 · 数据保存在本机 SQLite · 功能性组可一键启动组内全部网址</div>
-      <div class="ua-global-row">
-        <label>⏱ 一键启动间隔 <input class="input" id="ua-interval" type="number" min="0" max="30" step="1" value="5" style="width:68px;padding:5px 7px;"> 秒</label>
-        <span>0 = 同一批同时尝试打开；1–30 = 首个立即、其余每隔 n 秒；仅接受 0–30 的整数</span>
-      </div>
-    </div>
-    <div class="gcard">
-      <div class="section-title"><span class="st-emoji">📚</span>归档列表</div>
-      <div id="ua-list" style="min-height:40px;"></div>
-    </div>
-    <div class="gcard" id="ua-shortcut-card" style="margin-top:14px;">
-      <div class="section-title"><span class="st-emoji">🚀</span>软件快捷入口
-        <span style="font-size:12px;color:var(--text-dim);font-weight:400;">按组展示 · 点击列表行启动 · 白名单注册制 · 仅本机</span>
-      </div>
-      <div id="ua-sc-groups" class="ua-sg-list"></div>
-      <div class="ua-sc-form">
-        <input class="input" id="ua-sc-name" placeholder="名称，如：记事本" style="flex:2;min-width:120px;">
-        <input class="input" id="ua-sc-path" placeholder="可执行文件绝对路径，如 C:/Program Files/App/app.exe" style="flex:3;min-width:220px;">
-        <select class="input" id="ua-sc-group" style="flex:1;min-width:130px;"></select>
-        <button class="btn" id="ua-sc-add">＋ 添加软件</button>
-      </div>
-      <div class="ua-sc-form">
-        <input class="input" id="ua-sc-newgroup" placeholder="新建组名，如：写作工具" style="flex:2;min-width:160px;">
-        <button class="btn soft" id="ua-sc-addgroup">＋ 新建组</button>
-      </div>
-      <div class="ua-sc-hint">只启动白名单内已登记的软件：点击列表行后请求 <code>POST /api/plugin/urlarch/launch</code>，入参只有 id；路径与参数由后端从白名单读取并再次校验，前端不能传路径或命令。这是页面内入口，不是系统桌面快捷方式，也不注册键盘快捷键。组别收起/展开只存页面会话内存，刷新恢复默认展开。</div>
     </div>`;
   const listBox = $('#ua-list');
   let blocked = {};
@@ -654,6 +680,55 @@ async function renderUrlArchTool() {
   uaShortcuts = await uaFetchShortcuts();
   uaShortcutGroups = await uaFetchShortcutGroups();
   renderShortcuts();
+  // 上栏/中栏/视图切换：仅内存状态，不写 localStorage、不写库、不写文件
+  const applyLayout = () => {
+    const links = $('#ua-view-links'), apps = $('#ua-view-apps');
+    if (links) links.hidden = uaLayout.view !== 'links';
+    if (apps) apps.hidden = uaLayout.view !== 'apps';
+    document.querySelectorAll('.ua-vtab').forEach(b => {
+      const on = b.dataset.uaView === uaLayout.view;
+      b.classList.toggle('active', on);
+      b.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    const al = $('#ua-actions-links'), aa = $('#ua-actions-apps');
+    if (al) al.hidden = uaLayout.view !== 'links';
+    if (aa) aa.hidden = uaLayout.view !== 'apps';
+    const hint = $('#ua-topbar-hint');
+    if (hint) hint.textContent = '当前：' + (uaLayout.view === 'links' ? '网址归档' : '软件快捷入口');
+    const midTitle = $('#ua-mid-title');
+    if (midTitle) midTitle.textContent = uaLayout.view === 'links' ? '网址归档 · 归档列表' : '软件快捷入口 · 按组列表';
+    const midHint = $('#ua-mid-hint');
+    if (midHint) midHint.textContent = uaLayout.view === 'links' ? '组别可折叠 · 拖拽移动' : '组别可折叠 · 拖拽改组 · 点击启动';
+    const top = $('#ua-topbar'), tb = $('#ua-topbar-toggle');
+    if (top) top.classList.toggle('ua-topbar-collapsed', uaLayout.topbarCollapsed);
+    if (tb) {
+      tb.textContent = uaLayout.topbarCollapsed ? '▾ 展开上栏' : '▴ 收起上栏';
+      tb.title = uaLayout.topbarCollapsed ? '展开上栏' : '收起上栏';
+      tb.setAttribute('aria-expanded', uaLayout.topbarCollapsed ? 'false' : 'true');
+    }
+    const mid = $('#ua-mid'), mt = $('#ua-mid-toggle');
+    if (mid) mid.hidden = uaLayout.midCollapsed;
+    if (mt) {
+      mt.textContent = uaLayout.midCollapsed ? '▾ 展开中栏' : '▴ 收起中栏';
+      mt.title = uaLayout.midCollapsed ? '展开中栏' : '收起中栏';
+      mt.setAttribute('aria-expanded', uaLayout.midCollapsed ? 'false' : 'true');
+    }
+  };
+  document.querySelectorAll('.ua-vtab').forEach(btn => btn.onclick = () => {
+    uaLayout.view = btn.dataset.uaView === 'apps' ? 'apps' : 'links';
+    applyLayout();
+  });
+  const topToggle = $('#ua-topbar-toggle');
+  if (topToggle) topToggle.onclick = () => {
+    uaLayout.topbarCollapsed = !uaLayout.topbarCollapsed;
+    applyLayout();
+  };
+  const midToggle = $('#ua-mid-toggle');
+  if (midToggle) midToggle.onclick = () => {
+    uaLayout.midCollapsed = !uaLayout.midCollapsed;
+    applyLayout();
+  };
+  applyLayout();
   draw();
 }
 

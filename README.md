@@ -124,7 +124,7 @@ Traveling_Tree/
 其中：
 - **批量压缩**会原位改写/替换所选目录中的原文件；**文件判官**可按确认删除文件。使用前先预览。文件判官的图片/PDF/DOCX 预览分别依赖 Pillow/PyPDF2/python-docx，缺失时返回 `missing_dependency` 提示，不影响插件加载。
 - **记账本**数据存于主库 `finance_*` 表（经 `/api/plugin/finance/*`），旧 `rt_fin` 仅保留为只读历史备份；提示词工作流、周计划、网址库、Screeps 工作区已迁入 SQLite，页面通过插件 API 读写；仅 UI 偏好仍存浏览器 localStorage。**理财量化**数据已重置，当前仅保留占位入口，待后续重构。
-- **网址归档**的组别、网址与启动间隔已迁入 SQLite（`urlarch_*` 表，经 `/api/plugin/urlarch/*`）。
+- **站点统筹**（插件 id `urlarch`；round 103 起显示名由「网址归档」改为「站点统筹」，id / 目录 / 路由 / 表名不变）的组别、网址与启动间隔已迁入 SQLite（`urlarch_*` 表，经 `/api/plugin/urlarch/*`）。
 - **项目优化与当前综述**提供树形背景库、导入/导出、历史归档与手动变更留痕；其「文件预览与说明卡片」可浏览工作区文件树、标注数据库文件、维护 `file_notes` / `db_rules`，并导出 `docs/appendix/files_manifest.json`。文件预览只写说明元数据，不改源码。
 
 ## 6. 数据保存与备份

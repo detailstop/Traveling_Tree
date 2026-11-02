@@ -2,9 +2,9 @@
 
 > 只读摘要，勿手改。本文件由 docs/appendix/file_navigation.json 生成；结构与去留决定以 JSON 为准。
 
-- 生成时间：2026-11-01T19:25:02+03:00
-- 轮次：102
-- 待办：1 条；已决定：661 条
+- 生成时间：2026-11-02T10:08:11+03:00
+- 轮次：103
+- 待办：1 条；已决定：668 条
 
 ## 待办
 
@@ -16,6 +16,13 @@
 
 | 路径 | 决定 | 原因 | 状态 | 轮次 | 时间 | 备份路径 |
 | --- | --- | --- | --- | --- | --- | --- |
+| plugins/urlarch/manifest.json | 显示名改为「站点统筹」（round 103，R0） | name 与 entries[0].name 改为「站点统筹」；id=urlarch、目录、路由前缀、表名、version、desc 均不变；schema_version 仍为 2，db.migrate 未动。 | done | 103 | 2026-11-02T10:08:11+03:00 |  |
+| plugins/urlarch/INFO.md | 信息卡 name 同步「站点统筹」并补布局说明（round 103） | front matter name 改为「站点统筹」（9 项必需字段齐全、source=local / market_package=false / tables 5 表不变）；标题与职责同步显示名；注意事项新增布局条目（上栏/中栏状态仅内存、刷新恢复默认、不写 localStorage/库/文件）。 | done | 103 | 2026-11-02T10:08:11+03:00 |  |
+| plugins/urlarch/README.md | README 标题/职责/注意事项同步「站点统筹」与新布局（round 103） | 标题+# 站点统筹（urlarch）并注明显示名变更、id/目录/路由/表名不变；职责改为站点统筹；注意事项新增布局段落（上栏视图切换与按钮组映射、上栏收起、中栏一键收起、三状态仅内存不持久化）；五节结构不变。 | done | 103 | 2026-11-02T10:08:11+03:00 |  |
+| plugins/urlarch/feature.js | 前端布局重构：上栏 + 视图切换 + 上栏/中栏收起（round 103，R1） | 新增 .ua-shell 结构：上栏（品牌「站点统筹」+ 📚网址/🚀软件 切换 + 当前视图操作按钮组 + 收起按钮）、中栏标题条（中栏收起按钮）与中栏内容区（网址视图/软件视图二选一显示）；操作按钮与输入从原卡片搬入上栏且行为/API 不变；视图、上栏收起、中栏收起三项状态存模块内 uaLayout，刷新恢复默认，未使用 localStorage；网址/软件组折叠、拖拽改组、点击启动、改名、调序均未改动。 | done | 103 | 2026-11-02T10:08:11+03:00 |  |
+| plugins/urlarch/plugin.css | 布局样式：上栏/中栏/视图切换（round 103） | 新增 .ua-shell/.ua-topbar(.ua-topbar-collapsed)/.ua-view-switch/.ua-vtab/.ua-actions/.ua-midbar/.ua-mid/.ua-view 等样式，含 [hidden] 强制隐藏与折叠过渡；移除已不再使用的 .ua-sc-form；仍限 .ua-* 命名空间。 | done | 103 | 2026-11-02T10:08:11+03:00 |  |
+| README.md | 根 README 插件显示名同步「站点统筹」（round 103） | 根 README「通用工具」段落中列出该插件显示名，已改为「站点统筹」并注明插件 id `urlarch` 与 id/目录/路由/表名不变；其余目录/清单条目为 id 或目录名，未改动。 | done | 103 | 2026-11-02T10:08:11+03:00 |  |
+| docs/appendix/file_navigation.json | 登记 round 103（改名 + 布局重构） | 追加 7 条 decided 并 round→103、generated_at 更新；pending 保留既有 1 条（round 67–94 的 28 条非文件占位待清理）；resolved 45 条不动；file_navigation.md 由生成器重生成。走查 21/21 PASS（显示名、默认视图、切换、上栏收起、中栏收起、刷新默认、无 localStorage 写入、网址/软件组折叠与启动/拖拽/改名回归、路由仍 200）。plugins/lib.json 无显示名字段（仅 id/kind/has_ui/called_by/notes），按约定未改。本轮无背景库数据。 | done | 103 | 2026-11-02T10:08:11+03:00 |  |
 | plugins/urlarch/repo.py | 组名唯一 + 组/条目 PATCH 的 SQL 层（round 102） | create_shortcut_group 与新增 update_shortcut_group 在 BEGIN IMMEDIATE 内查同名（排除自身），冲突抛 GroupNameConflict → 409；update_shortcut_group 只更新 name/sort_order 并同步 live_json/updated_at（raw 保留建组快照）；set_shortcut_group 只改 group_id 并刷新 live_json/updated_at，不动 path/args/name/hotkey。 | done | 102 | 2026-11-01T19:25:02+03:00 |  |
 | plugins/urlarch/backend.py | 新增两个 PATCH 路由与错误码（round 102） | PATCH /shortcut-groups/<id> 仅接受 name/sort_order（至少一项，否则 INVALID_REQUEST）；PATCH /shortcuts/<id> 只接受 group_id 并忽略 path/args/name/hotkey/cmd，不触发启动；错误码新增 GROUP_NAME_CONFLICT(409)/SORT_ORDER_INVALID(400)/INVALID_REQUEST(400)；POST 建组同名同样 409。 | done | 102 | 2026-11-01T19:25:02+03:00 |  |
 | plugins/urlarch/security.py | 新增严格 sort_order 校验（round 102） | validate_sort_order_strict：仅接受 -10000~10000 的整数（布尔/浮点/字符串/越界 → SORT_ORDER_INVALID 400）；既有 validate_group_name（GROUP_NAME_INVALID）复用于新建与改名；路径/参数校验未变。 | done | 102 | 2026-11-01T19:25:02+03:00 |  |
