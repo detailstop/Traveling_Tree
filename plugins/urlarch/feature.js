@@ -317,14 +317,14 @@ async function renderUrlArchTool() {
     const folded = uaCollapsedGroups.has(g.id);
     const items = rows.map(({ it, idx }) => {
       const img = it.image ? uaImageURL(it.image) : '';
-      const label = it.title || it.url;
+      // 卡片只显示名称与图片：无名称时给中性占位名，不在卡片上暴露网址（网址仅在编辑弹层可见）。
+      const label = String(it.title || '').trim() || '未命名网址';
       const lid = uaLinkIdByIndex.get(idx) || '';
-      return `<div class="ua-card" draggable="true" data-idx="${idx}" data-link-id="${esc(lid)}" title="${esc(it.url)}">
+      return `<div class="ua-card" draggable="true" data-idx="${idx}" data-link-id="${esc(lid)}">
         ${img
           ? `<img class="ua-card-img" src="${esc(img)}" alt="${esc(label)}" loading="lazy" draggable="false">`
           : `<span class="ua-card-ph" style="--ua-seed:${uaSeedOf(label)}">${esc(uaInitialOf(label))}</span>`}
         <span class="ua-card-name">${esc(label)}</span>
-        <span class="ua-card-sub">${esc(it.note || it.url)}</span>
         <button type="button" class="ua-card-edit" data-edit-link="${idx}" title="编辑网址卡">✎</button>
       </div>`;
     }).join('');
@@ -542,7 +542,6 @@ async function renderUrlArchTool() {
         ? `<img class="ua-card-img" src="${esc(img)}" alt="${esc(item.name)}" loading="lazy" draggable="false">`
         : `<span class="ua-card-ph" style="--ua-seed:${uaSeedOf(item.name)}">${esc(uaInitialOf(item.name))}</span>`}
       <span class="ua-card-name">${esc(item.name)}</span>
-      <span class="ua-card-sub">${esc(item.path)}</span>
       <button type="button" class="ua-card-edit" data-sc-edit="${esc(item.id)}" title="编辑软件卡">✎</button>
     </div>`;
   };

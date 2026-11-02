@@ -80,7 +80,6 @@
 .ua-card-img { width:100%; height:86px; object-fit:cover; border-radius:8px; display:block; background:#f3eef1; }
 .ua-card-ph { display:flex; align-items:center; justify-content:center; width:100%; height:86px; border-radius:8px; font-weight:800; font-size:26px; color:var(--accent); background:hsl(var(--ua-seed, 330), 55%, 92%); }
 .ua-card-name { font-weight:700; font-size:12.5px; line-height:1.35; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
-.ua-card-sub { font-size:10.5px; color:var(--text-dim); word-break:break-all; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
 .ua-card-edit { position:absolute; right:6px; bottom:6px; border:0; border-radius:8px; padding:2px 7px; font-size:12px; line-height:1.3; background:rgba(var(--accent-rgb),.14); color:var(--accent); cursor:pointer; }
 .ua-card-edit:hover { background:rgba(var(--accent-rgb),.24); }
 /* 卡片编辑弹层（round 105） */

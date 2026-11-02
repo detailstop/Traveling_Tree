@@ -2,9 +2,9 @@
 
 > 只读摘要，勿手改。本文件由 docs/appendix/file_navigation.json 生成；结构与去留决定以 JSON 为准。
 
-- 生成时间：2026-11-02T14:29:10+03:00
-- 轮次：105
-- 待办：1 条；已决定：684 条
+- 生成时间：2026-11-02T14:36:12+03:00
+- 轮次：106
+- 待办：1 条；已决定：689 条
 
 ## 待办
 
@@ -16,6 +16,11 @@
 
 | 路径 | 决定 | 原因 | 状态 | 轮次 | 时间 | 备份路径 |
 | --- | --- | --- | --- | --- | --- | --- |
+| plugins/urlarch/feature.js | 卡片只显示名称与图片，网址/可执行路径仅在编辑弹层可见（round 106） | 网址卡移除 .ua-card-sub 副行（原显示 note 或 url）与卡片 title 上的 URL tooltip；软件卡移除 .ua-card-sub（原显示 path）；无标题网址卡改为显示「未命名网址」占位名、不再回落展示网址；卡片名称、图片/首字色块、✎ 编辑入口、点击启动与拖拽绑定均未改；数据未删（state/库中 url、path 原样保留，编辑弹层仍读写）。 | done | 106 | 2026-11-02T14:36:12+03:00 |  |
+| plugins/urlarch/plugin.css | 清理卡片副行样式（round 106） | 删除仅服务卡片网址/路径副行的 .ua-card-sub 规则；.ua-card-name / 图片 / 首字色块 / 编辑按钮样式保留（无其他使用处）。 | done | 106 | 2026-11-02T14:36:12+03:00 |  |
+| plugins/urlarch/README.md | 五节同步卡片展示口径（round 106） | 「架子 + 卡片」注意事项改为：卡片只显示名称与图片，网址/可执行路径仅在编辑弹层查看/编辑；无名称网址卡显示「未命名网址」占位名不回落展示网址；其余接口/数据表/安全段落未变。 | done | 106 | 2026-11-02T14:36:12+03:00 |  |
+| plugins/urlarch/INFO.md | 信息卡同步卡片展示口径（round 106） | 卡片条目补「只显示名称与图片，网址 / 可执行路径仅在编辑弹层可见」；front matter 9 项、source=local、market_package=false、tables/data_dirs 均不变。 | done | 106 | 2026-11-02T14:36:12+03:00 |  |
+| docs/appendix/file_navigation.json | 登记 round 106（卡片仅名称+图片） | 追加 5 条 decided 并 round→106、generated_at 更新；pending 保留既有 1 条（round 67–94 的 28 条非文件占位待清理）；resolved 45 条不动；file_navigation.md 由生成器重生成。走查 11/11 PASS（卡片无网址/路径文本、弹层字段完整并可保存、删除二次确认、点击启动/拖拽改组/组折叠/全部收起/视图切换/上栏收起/间隔输入均未回归）。本轮无背景库数据，未改后端/schema/migrate。 | done | 106 | 2026-11-02T14:36:12+03:00 |  |
 | plugins/urlarch/schema.sql | urlarch_links / urlarch_shortcuts 各加 image 列（round 105） | 两表新增 image TEXT NOT NULL DEFAULT ''（卡片图片文件名，空串=无图）；未改其他列与索引；旧库由 migrate 补列。 | done | 105 | 2026-11-02T14:29:10+03:00 |  |
 | plugins/urlarch/manifest.json | 声明 data_dirs: [urlarch]（round 105） | 按项目 data_dirs 机制创建 data/plugins/urlarch/，后端在其下建 images/ 子目录存图片（data_dirs 单段命名，不能写 urlarch/images）；manifest 其他字段未改。 | done | 105 | 2026-11-02T14:29:10+03:00 |  |
 | plugins/urlarch/migrate.py | 补 image 列迁移（round 105） | 新增 _ensure_links（PRAGMA 检查后 ALTER urlarch_links ADD image）；_SHORTCUTS_COLUMNS/_DDL/_BUSINESS 同步 image；全部加性语句。强制验证停点 13/13 PASS：真实库副本两次 migrate 幂等、旧 links 18 行/白名单 15 行内容哈希不变、image 全为空串、schema→migrate 启动路径同样幂等；备份 data/backup/russian_tutor_before_images_20261102.db。 | done | 105 | 2026-11-02T14:29:10+03:00 |  |
