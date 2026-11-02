@@ -14,7 +14,7 @@ tables: [finance_account_groups, finance_accounts, finance_fx_history, finance_i
 data_dirs: [finance]
 shared_features: []
 provides: []
-consumes: []
+consumes: [webchat, ai]
 market_package: true
 source: market
 known_limits: Release v1，download_url 见远程 index

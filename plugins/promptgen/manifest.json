@@ -27,5 +27,5 @@
     "webchat"
   ],
   "provides": [],
-  "consumes": []
+  "consumes": ["webchat"]
 }

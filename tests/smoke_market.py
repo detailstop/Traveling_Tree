@@ -264,26 +264,27 @@ market_package: false
     check("HTTP/Python 双出口一致", http_res["ok"] is True and http_pack.get("ok") is True
           and Path(http_pack["zip_path"]).is_file())
 
-    # ---- dependencies 子键：js 废弃、shared 合法（round 108） ----
+    # ---- dependencies 子键：最终只保留 python（round 109） ----
     dep_src = tmp / "urlarch"
     shutil.copytree(ROOT / "plugins" / "urlarch", dep_src)
     dep_manifest = dep_src / "manifest.json"
     base_manifest = json.loads(dep_manifest.read_text(encoding="utf-8"))
-    with_js = dict(base_manifest, dependencies={"python": ["pip"], "js": ["webchat"]})
-    dep_manifest.write_text(json.dumps(with_js, ensure_ascii=False, indent=2), encoding="utf-8")
+    for key in ("plugins", "plugin", "shared", "js"):
+        bad = dict(base_manifest, dependencies={key: ["x"]})
+        dep_manifest.write_text(json.dumps(bad, ensure_ascii=False, indent=2), encoding="utf-8")
+        r = vp.validate(str(dep_src))
+        check(f"dependencies.{key} 子键被拒",
+              r["ok"] is False and "dependencies_subkey_invalid" in [e["code"] for e in r["errors"]],
+              str([e["code"] for e in r["errors"]]))
+    with_python = dict(base_manifest, dependencies={"python": ["pip", {"name": "edge-tts", "version": ">=6.1"}]})
+    dep_manifest.write_text(json.dumps(with_python, ensure_ascii=False, indent=2), encoding="utf-8")
     r = vp.validate(str(dep_src))
-    check("dependencies.js 作为未知子键被拒",
-          r["ok"] is False and "dependencies_subkey_invalid" in [e["code"] for e in r["errors"]],
+    check("dependencies.python 合法通过", r["ok"] is True and not r["errors"],
           str([e["code"] for e in r["errors"]]))
-    with_shared = dict(base_manifest, dependencies={"shared": ["webchat"], "plugins": ["pixel_art"]})
-    dep_manifest.write_text(json.dumps(with_shared, ensure_ascii=False, indent=2), encoding="utf-8")
+    with_bad_python = dict(base_manifest, dependencies={"python": "pip"})
+    dep_manifest.write_text(json.dumps(with_bad_python, ensure_ascii=False, indent=2), encoding="utf-8")
     r = vp.validate(str(dep_src))
-    check("dependencies.shared 合法通过", r["ok"] is True and not r["errors"],
-          str([e["code"] for e in r["errors"]]))
-    with_bad_shared = dict(base_manifest, dependencies={"shared": "webchat"})
-    dep_manifest.write_text(json.dumps(with_bad_shared, ensure_ascii=False, indent=2), encoding="utf-8")
-    r = vp.validate(str(dep_src))
-    check("dependencies.shared 非数组被拒",
+    check("dependencies.python 非数组被拒",
           r["ok"] is False and "dependencies_invalid" in [e["code"] for e in r["errors"]],
           str([e["code"] for e in r["errors"]]))
 

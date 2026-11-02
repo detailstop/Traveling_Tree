@@ -1,19 +1,17 @@
 """插件依赖检测（只读）：读取各插件 `manifest.dependencies`，判断本机是否满足。
 
-字段契约（manifest v2 扩展）：
+字段契约（manifest v2 扩展，最终子键集合 **只有 `python`**）：
 
     "dependencies": {
-      "python": ["pikepdf", {"name": "edge-tts", "version": ">=6.1.0"}],
-      "shared": ["webchat"],      // 宿主公共前端脚本，与 manifest.shared_features 同义
-      "plugins": ["pixel_art"]    // 其他插件 plugins/<id>/manifest.json
+      "python": ["pikepdf", {"name": "edge-tts", "version": ">=6.1.0"}]
     }
 
 约定：
-- 三类子键均可省略；每项为字符串，`python` 另可用 `{name, version}` 对象写版本约束。
-- `shared` 的规则来源：宿主 `ui/web/static/app.js::loadToolFeature()`
-  （`new URL('features/' + file + '.js', APP_ASSET_BASE)`，APP_ASSET_BASE = `/static/`），
-  即脚本实际路径为 `ui/web/static/features/<name>.js`；`manifest.shared_features` 用的就是这条规则。
-  旧子键 `js` 已废弃（零存量），按未知子键报错。
+- `python` 可省略；每项为字符串，也可用 `{name, version}` 对象写版本约束（PEP 440 比较子句）。
+- 只声明第三方 PyPI 包。**不收录**：标准库、本插件模块、宿主模块、跨插件 import / HTTP 调用
+  （跨插件关系用既有 `provides`/`consumes` 表达），宿主公共前端脚本（用既有 `shared_features`）。
+- 已废弃且**不再接受**的子键：`plugins`（跨插件关系）、`shared`（与 shared_features 重复）、
+  早期 `plugin`、`js`；出现即报 `dependencies_subkey_invalid`。
 - 只检测、不安装、不写文件、不写库；缺失只提示，不阻断安装/启用/加载。
 - 存在性：PyPI 包用 `importlib.metadata`（拿版本），失败再退回 `importlib.util.find_spec`
   （兼容以单文件/本地方式安装的模块）。
@@ -53,10 +51,9 @@ STATUS_TEXT = {
 }
 _STATUS_RANK = {"missing": 5, "conflict": 4, "version_mismatch": 3, "unknown": 2, "ok": 1,
                 "undeclared": 0}
-KINDS = ("python", "shared", "plugins")
+KINDS = ("python",)
 
 _NAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$")
-_PLUGIN_RE = re.compile(r"^[a-z][a-z0-9_-]{1,31}$")
 _SPEC_ITEM_RE = re.compile(r"^(==|!=|>=|<=|>|<|~=)\s*v?\d+(?:\.\d+)*(?:\.\*)?$")
 _MODULE_ALIASES = {"python-docx": "docx", "pillow": "PIL", "edge-tts": "edge_tts",
                    "pyyaml": "yaml", "beautifulsoup4": "bs4"}
@@ -66,22 +63,6 @@ _MODULE_ALIASES = {"python-docx": "docx", "pillow": "PIL", "edge-tts": "edge_tts
 
 def plugins_dir() -> Path:
     return Path(config.BASE_DIR) / "plugins"
-
-
-def shared_features_dir() -> Path:
-    """宿主公共前端脚本目录：ui/web/static/features/。
-
-    规则来源：`ui/web/static/app.js::loadToolFeature()`（`new URL('features/' + file + '.js',
-    APP_ASSET_BASE)`，APP_ASSET_BASE 由 `document.currentScript.src` 推出 `/static/`）；
-    宿主 `ui/web/server.py` 只对 `manifest.shared_features` 做名称白名单清洗，不改路径映射。
-    因此 `dependencies.shared` 与该字段同规则、同目录，不另设别名表。
-    """
-    return Path(config.BASE_DIR) / "ui" / "web" / "static" / "features"
-
-
-def shared_feature_path(name: str) -> Path:
-    """shared 依赖名 → 实际脚本路径（与 shared_features 加载路径一致）。"""
-    return shared_features_dir() / f"{name}.js"
 
 
 def plugin_manifest_path(pid: str) -> Path:
@@ -260,15 +241,6 @@ def python_present(name: str) -> tuple[bool, str]:
     return (found is not None), ""
 
 
-def shared_present(name: str) -> bool:
-    """按 shared_features 的加载路径规则判存在性（features/<name>.js）。"""
-    return shared_feature_path(name).is_file()
-
-
-def plugin_present(pid: str) -> bool:
-    return plugin_manifest_path(pid).is_file()
-
-
 def satisfies(version: str, spec: str) -> bool | None:
     """True/False；无 packaging 或缺版本时返回 None（无法判断）。"""
     if not HAVE_PACKAGING or not version or not spec:
@@ -295,12 +267,15 @@ def declaration_errors(manifest: dict) -> list[tuple[str, str, str]]:
 
     for key in data:
         if key not in KINDS:
-            if key == "js":
+            if key in ("plugins", "plugin"):
                 fail(f"dependencies.{key}", "dependencies_subkey_invalid",
-                     "子键 js 已废弃：宿主公共前端脚本请改用 shared（与 manifest.shared_features 同义）")
+                     f"子键 {key} 不再采用：跨插件关系请改用 provides / consumes")
+            elif key in ("shared", "js"):
+                fail(f"dependencies.{key}", "dependencies_subkey_invalid",
+                     f"子键 {key} 不再采用：宿主公共前端脚本请改用 shared_features")
             else:
                 fail(f"dependencies.{key}", "dependencies_subkey_invalid",
-                     f"dependencies 只支持 {' / '.join(KINDS)} 三类子键")
+                     f"dependencies 只支持 {' / '.join(KINDS)} 子键")
     for key in KINDS:
         if key not in data:
             continue
@@ -336,11 +311,9 @@ def declaration_errors(manifest: dict) -> list[tuple[str, str, str]]:
                 fail(field, "dependencies_invalid", f"{key} 依赖必须是字符串或（python 的）对象")
                 continue
             text = item.strip()
-            if key in ("python", "shared") and not _NAME_RE.match(text):
+            if not _NAME_RE.match(text):
                 fail(field, "dependency_name_invalid",
                      f"依赖名非法：{item!r}（字母/数字开头，可含 . _ -）")
-            elif key == "plugins" and not _PLUGIN_RE.match(text):
-                fail(field, "dependency_name_invalid", f"插件 id 非法：{item!r}")
     return errors
 
 
@@ -424,33 +397,25 @@ def _entry_status(kind: str, dep: dict, conflict: dict | None) -> tuple[str, str
     """返回 (status, installed, message)。"""
     name = dep["name"]
     spec = dep["version"]
-    if kind == "python":
-        present, version = python_present(name)
-        if not present:
-            return "missing", "", f"未检测到已安装的 {name}"
-        if conflict:
-            others = "、".join(p for p in conflict["plugins"])
-            return "conflict", version, (
-                f"与 {others} 的约束互斥（{ ' / '.join(conflict['constraints']) }）；"
-                "多版本隔离需后续方案（当前只提示）")
-        if spec:
-            result = satisfies(version, spec)
-            if result is None:
-                if not HAVE_PACKAGING:
-                    return "unknown", version, DEGRADED_HINT
-                if not version:
-                    return "unknown", version, "已安装但无法获取版本号"
-                return "unknown", version, f"版本号 {version} 无法与约束 {spec} 比较"
-            if not result:
-                return "version_mismatch", version, f"已安装 {version}，不满足 {spec}"
-        return "ok", version, (f"{version} 满足 {spec}" if spec else f"已安装 {version}")
-    if kind == "shared":
-        if shared_present(name):
-            return "ok", "", f"宿主公共前端脚本 features/{name}.js 存在"
-        return "missing", "", f"缺少宿主公共前端脚本 features/{name}.js"
-    if plugin_present(name):
-        return "ok", "", f"插件 {name} 已安装"
-    return "missing", "", f"插件 {name} 未安装"
+    present, version = python_present(name)
+    if not present:
+        return "missing", "", f"未检测到已安装的 {name}"
+    if conflict:
+        others = "、".join(p for p in conflict["plugins"])
+        return "conflict", version, (
+            f"与 {others} 的约束互斥（{ ' / '.join(conflict['constraints']) }）；"
+            "多版本隔离需后续方案（当前只提示）")
+    if spec:
+        result = satisfies(version, spec)
+        if result is None:
+            if not HAVE_PACKAGING:
+                return "unknown", version, DEGRADED_HINT
+            if not version:
+                return "unknown", version, "已安装但无法获取版本号"
+            return "unknown", version, f"版本号 {version} 无法与约束 {spec} 比较"
+        if not result:
+            return "version_mismatch", version, f"已安装 {version}，不满足 {spec}"
+    return "ok", version, (f"{version} 满足 {spec}" if spec else f"已安装 {version}")
 
 
 def detect_plugin(pid: str, manifests: dict[str, dict] | None = None,

@@ -2,9 +2,9 @@
 
 > 只读摘要，勿手改。本文件由 docs/appendix/file_navigation.json 生成；结构与去留决定以 JSON 为准。
 
-- 生成时间：2026-11-02T20:42:12+03:00
-- 轮次：108
-- 待办：1 条；已决定：720 条
+- 生成时间：2026-11-02T21:12:49+03:00
+- 轮次：109
+- 待办：1 条；已决定：737 条
 
 ## 待办
 
@@ -16,6 +16,23 @@
 
 | 路径 | 决定 | 原因 | 状态 | 轮次 | 时间 | 备份路径 |
 | --- | --- | --- | --- | --- | --- | --- |
+| plugins/market/deps.py | dependencies 最终只保留 python；回退 plugins/shared 检测（round 109） | KINDS=('python',)；删除 shared_features_dir/shared_feature_path/shared_present/plugin_present 与对应分支；未知子键 plugins/plugin/shared/js 统一报 dependencies_subkey_invalid 并给出替代（provides/consumes 或 shared_features）；python 检测/版本比较/冲突/降级/六态不变。 | done | 109 | 2026-11-02T21:12:49+03:00 |  |
+| plugins/market/validate.py | 子键集合随 deps.KINDS 收敛为 python（round 109） | 合法子键只剩 python；plugins/plugin/shared/js 均按未知子键拒绝，错误码 dependencies_subkey_invalid 已在 ERROR_CODES 与 README 声明。 | done | 109 | 2026-11-02T21:12:49+03:00 |  |
+| plugins/market/feature.js | 前端依赖明细只渲染 python 类别（round 109） | kindName 只保留 Python 包，rows 只遍历 python；不再渲染 plugins/shared 类别；badge/明细/冲突/降级行为不变。 | done | 109 | 2026-11-02T21:12:49+03:00 |  |
+| plugins/market/README.md | 五节同步最终子键集合与废弃说明（round 109） | 依赖检测条目标明最终只有 python；plugins/plugin 不采用（跨插件用 provides/consumes）、shared/js 不采用（宿主公共脚本用 shared_features）。 | done | 109 | 2026-11-02T21:12:49+03:00 |  |
+| plugins/market/INFO.md | 信息卡同步最终子键集合（round 109） | 同上：python 唯一子键、废弃子键与替代方案。 | done | 109 | 2026-11-02T21:12:49+03:00 |  |
+| plugins/finance/manifest.json | 回填 consumes=[webchat, ai]（round 109，version 未变） | 源码无第三方 Python 依赖（仅 stdlib + 插件内模块 + 宿主模块）；对 webchat/ai 是 HTTP 调用，按最终契约写入 consumes。manifest 内容变更需重新上传覆盖。 | done | 109 | 2026-11-02T21:12:49+03:00 |  |
+| plugins/finance/INFO.md | INFO front matter consumes 与 manifest 同步（round 109） | consumes 改为 [webchat, ai]，满足 smoke_info_cards 的 manifest/INFO 一致性检查。 | done | 109 | 2026-11-02T21:12:49+03:00 |  |
+| plugins/finance/README.md | 依赖节补跨插件关系与“无第三方依赖”（round 109） | 写明 consumes=[webchat, ai] 与不声明 dependencies 的原因。 | done | 109 | 2026-11-02T21:12:49+03:00 |  |
+| plugins/promptgen/manifest.json | 回填 consumes=[webchat]（round 109，version 未变） | 源码无第三方 Python 依赖；对 webchat 是 HTTP 调用 + shared_features 加载脚本，按最终契约写入 consumes。manifest 内容变更需重新上传覆盖。 | done | 109 | 2026-11-02T21:12:49+03:00 |  |
+| plugins/promptgen/INFO.md | INFO front matter consumes 与 manifest 同步（round 109） | consumes 改为 [webchat]。 | done | 109 | 2026-11-02T21:12:49+03:00 |  |
+| plugins/promptgen/README.md | 依赖节补跨插件关系与“无第三方依赖”（round 109） | 写明 consumes=[webchat]、shared_features 用途与不声明 dependencies 的原因。 | done | 109 | 2026-11-02T21:12:49+03:00 |  |
+| tests/smoke_market.py | dependencies 子键用例改为最终契约（round 109） | 新增 plugins/plugin/shared/js 四种子键被拒用例、python 合法通过与 python 非数组被拒；替代 round 108 的 js/shared 用例。 | done | 109 | 2026-11-02T21:12:49+03:00 |  |
+| docs/plugin-development-whitepaper.md | Manifest v2 契约 dependencies 收敛为 python（round 109） | 示例只留 python；规则段写明最终子键集合、只写第三方 PyPI 包、plugins/plugin 不再采用（provides/consumes）、shared/js 不再采用（shared_features）、废弃子键报 dependencies_subkey_invalid。 | done | 109 | 2026-11-02T21:12:49+03:00 |  |
+| docs/plugin-development-guide.md | README 依赖节要求同步最终子键（round 109） | §4.1 第 4 条改为 manifest.dependencies.python 单一子键，并列出四类废弃子键及替代。 | done | 109 | 2026-11-02T21:12:49+03:00 |  |
+| docs/appendix/plugin-info-card-template.md | INFO 依赖说明同步最终子键（round 109） | 改为 manifest.dependencies.python；跨插件用 provides/consumes、宿主公共脚本用 shared_features。 | done | 109 | 2026-11-02T21:12:49+03:00 |  |
+| docs/appendix/prompts/plugin-dev-prompt.md | 脚手架提示词同步最终子键（round 109） | 只写第三方 Python 包到 dependencies.python；plugins/plugin/shared/js 不采用及替代。 | done | 109 | 2026-11-02T21:12:49+03:00 |  |
+| docs/appendix/file_navigation.json | 登记 round 109（依赖管理收口） | 追加 15 条 decided 并 round→109；pending 保留既有 1 条；resolved 45 条不动；md 由生成器重生成。核实：23 个插件中仅 pdf/filejudge/webchat/tts 有第三方 Python 依赖，其余 19 个省略；finance/promptgen 无第三方依赖，改回填 consumes。验证：validate 23/23 ok、deps 单测 14/14、走查 9/9、smoke 1015/1016（仅 TTS 502）。 | done | 109 | 2026-11-02T21:12:49+03:00 |  |
 | plugins/market/deps.py | dependencies 子键 js 改名 shared，检测对齐 shared_features（round 108） | KINDS 改为 (python, shared, plugins)；删除硬编码判定与 _JS_RE，改为 shared_features_dir()/shared_feature_path()/shared_present()，规则来源注明 ui/web/static/app.js::loadToolFeature（features/<name>.js，APP_ASSET_BASE=/static/）；未知子键（含 js）报 dependencies_subkey_invalid；python/plugins/版本/冲突/降级/六态逻辑未变。 | done | 108 | 2026-11-02T20:42:12+03:00 |  |
 | plugins/market/validate.py | 新增 dependencies_subkey_invalid 错误码（round 108） | ERROR_CODES 增加 dependencies_subkey_invalid；合法子键集合由 deps.KINDS 提供（python/shared/plugins），js 作为未知子键被拒；shared 条目按字符串名称校验、不做版本校验。 | done | 108 | 2026-11-02T20:42:12+03:00 |  |
 | plugins/market/feature.js | 依赖明细类别名同步 shared（round 108） | kindName 与遍历数组改为 shared，显示「宿主公共前端脚本」；其余 badge/明细/冲突/降级行为不变。 | done | 108 | 2026-11-02T20:42:12+03:00 |  |

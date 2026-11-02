@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-02T20:42:12+03:00",
-  "round": 108,
+  "generated_at": "2026-11-02T21:12:49+03:00",
+  "round": 109,
   "pending": [
     {
       "path": "docs/appendix/file_navigation.json",
@@ -16,6 +16,142 @@
     }
   ],
   "decided": [
+    {
+      "path": "plugins/market/deps.py",
+      "decision": "dependencies 最终只保留 python；回退 plugins/shared 检测（round 109）",
+      "reason": "KINDS=('python',)；删除 shared_features_dir/shared_feature_path/shared_present/plugin_present 与对应分支；未知子键 plugins/plugin/shared/js 统一报 dependencies_subkey_invalid 并给出替代（provides/consumes 或 shared_features）；python 检测/版本比较/冲突/降级/六态不变。",
+      "status": "done",
+      "round": 109,
+      "at": "2026-11-02T21:12:49+03:00"
+    },
+    {
+      "path": "plugins/market/validate.py",
+      "decision": "子键集合随 deps.KINDS 收敛为 python（round 109）",
+      "reason": "合法子键只剩 python；plugins/plugin/shared/js 均按未知子键拒绝，错误码 dependencies_subkey_invalid 已在 ERROR_CODES 与 README 声明。",
+      "status": "done",
+      "round": 109,
+      "at": "2026-11-02T21:12:49+03:00"
+    },
+    {
+      "path": "plugins/market/feature.js",
+      "decision": "前端依赖明细只渲染 python 类别（round 109）",
+      "reason": "kindName 只保留 Python 包，rows 只遍历 python；不再渲染 plugins/shared 类别；badge/明细/冲突/降级行为不变。",
+      "status": "done",
+      "round": 109,
+      "at": "2026-11-02T21:12:49+03:00"
+    },
+    {
+      "path": "plugins/market/README.md",
+      "decision": "五节同步最终子键集合与废弃说明（round 109）",
+      "reason": "依赖检测条目标明最终只有 python；plugins/plugin 不采用（跨插件用 provides/consumes）、shared/js 不采用（宿主公共脚本用 shared_features）。",
+      "status": "done",
+      "round": 109,
+      "at": "2026-11-02T21:12:49+03:00"
+    },
+    {
+      "path": "plugins/market/INFO.md",
+      "decision": "信息卡同步最终子键集合（round 109）",
+      "reason": "同上：python 唯一子键、废弃子键与替代方案。",
+      "status": "done",
+      "round": 109,
+      "at": "2026-11-02T21:12:49+03:00"
+    },
+    {
+      "path": "plugins/finance/manifest.json",
+      "decision": "回填 consumes=[webchat, ai]（round 109，version 未变）",
+      "reason": "源码无第三方 Python 依赖（仅 stdlib + 插件内模块 + 宿主模块）；对 webchat/ai 是 HTTP 调用，按最终契约写入 consumes。manifest 内容变更需重新上传覆盖。",
+      "status": "done",
+      "round": 109,
+      "at": "2026-11-02T21:12:49+03:00"
+    },
+    {
+      "path": "plugins/finance/INFO.md",
+      "decision": "INFO front matter consumes 与 manifest 同步（round 109）",
+      "reason": "consumes 改为 [webchat, ai]，满足 smoke_info_cards 的 manifest/INFO 一致性检查。",
+      "status": "done",
+      "round": 109,
+      "at": "2026-11-02T21:12:49+03:00"
+    },
+    {
+      "path": "plugins/finance/README.md",
+      "decision": "依赖节补跨插件关系与“无第三方依赖”（round 109）",
+      "reason": "写明 consumes=[webchat, ai] 与不声明 dependencies 的原因。",
+      "status": "done",
+      "round": 109,
+      "at": "2026-11-02T21:12:49+03:00"
+    },
+    {
+      "path": "plugins/promptgen/manifest.json",
+      "decision": "回填 consumes=[webchat]（round 109，version 未变）",
+      "reason": "源码无第三方 Python 依赖；对 webchat 是 HTTP 调用 + shared_features 加载脚本，按最终契约写入 consumes。manifest 内容变更需重新上传覆盖。",
+      "status": "done",
+      "round": 109,
+      "at": "2026-11-02T21:12:49+03:00"
+    },
+    {
+      "path": "plugins/promptgen/INFO.md",
+      "decision": "INFO front matter consumes 与 manifest 同步（round 109）",
+      "reason": "consumes 改为 [webchat]。",
+      "status": "done",
+      "round": 109,
+      "at": "2026-11-02T21:12:49+03:00"
+    },
+    {
+      "path": "plugins/promptgen/README.md",
+      "decision": "依赖节补跨插件关系与“无第三方依赖”（round 109）",
+      "reason": "写明 consumes=[webchat]、shared_features 用途与不声明 dependencies 的原因。",
+      "status": "done",
+      "round": 109,
+      "at": "2026-11-02T21:12:49+03:00"
+    },
+    {
+      "path": "tests/smoke_market.py",
+      "decision": "dependencies 子键用例改为最终契约（round 109）",
+      "reason": "新增 plugins/plugin/shared/js 四种子键被拒用例、python 合法通过与 python 非数组被拒；替代 round 108 的 js/shared 用例。",
+      "status": "done",
+      "round": 109,
+      "at": "2026-11-02T21:12:49+03:00"
+    },
+    {
+      "path": "docs/plugin-development-whitepaper.md",
+      "decision": "Manifest v2 契约 dependencies 收敛为 python（round 109）",
+      "reason": "示例只留 python；规则段写明最终子键集合、只写第三方 PyPI 包、plugins/plugin 不再采用（provides/consumes）、shared/js 不再采用（shared_features）、废弃子键报 dependencies_subkey_invalid。",
+      "status": "done",
+      "round": 109,
+      "at": "2026-11-02T21:12:49+03:00"
+    },
+    {
+      "path": "docs/plugin-development-guide.md",
+      "decision": "README 依赖节要求同步最终子键（round 109）",
+      "reason": "§4.1 第 4 条改为 manifest.dependencies.python 单一子键，并列出四类废弃子键及替代。",
+      "status": "done",
+      "round": 109,
+      "at": "2026-11-02T21:12:49+03:00"
+    },
+    {
+      "path": "docs/appendix/plugin-info-card-template.md",
+      "decision": "INFO 依赖说明同步最终子键（round 109）",
+      "reason": "改为 manifest.dependencies.python；跨插件用 provides/consumes、宿主公共脚本用 shared_features。",
+      "status": "done",
+      "round": 109,
+      "at": "2026-11-02T21:12:49+03:00"
+    },
+    {
+      "path": "docs/appendix/prompts/plugin-dev-prompt.md",
+      "decision": "脚手架提示词同步最终子键（round 109）",
+      "reason": "只写第三方 Python 包到 dependencies.python；plugins/plugin/shared/js 不采用及替代。",
+      "status": "done",
+      "round": 109,
+      "at": "2026-11-02T21:12:49+03:00"
+    },
+    {
+      "path": "docs/appendix/file_navigation.json",
+      "decision": "登记 round 109（依赖管理收口）",
+      "reason": "追加 15 条 decided 并 round→109；pending 保留既有 1 条；resolved 45 条不动；md 由生成器重生成。核实：23 个插件中仅 pdf/filejudge/webchat/tts 有第三方 Python 依赖，其余 19 个省略；finance/promptgen 无第三方依赖，改回填 consumes。验证：validate 23/23 ok、deps 单测 14/14、走查 9/9、smoke 1015/1016（仅 TTS 502）。",
+      "status": "done",
+      "round": 109,
+      "at": "2026-11-02T21:12:49+03:00"
+    },
     {
       "path": "plugins/market/deps.py",
       "decision": "dependencies 子键 js 改名 shared，检测对齐 shared_features（round 108）",

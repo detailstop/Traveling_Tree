@@ -21,7 +21,7 @@
 依赖的底层下沉插件：`{{DEPENDS_ON_LIB}}`。
 是否需要业务表：`{{NEEDS_DB}}`；是否需要独立数据目录：`{{NEEDS_DATA_DIR}}`。
 对外提供的能力（`provides`）：`{{PROVIDES}}`。
-第三方/跨插件依赖：在 `manifest.dependencies` 声明（`python`/`shared`/`plugins` 三类子键，`shared` 与 `shared_features` 同义同规则，见白皮书 §二）；只声明不安装，市场页只读检测。
+第三方依赖：只把第三方 Python 包写入 `manifest.dependencies.python`（最终只有 `python` 子键；`plugins`/`plugin` 不采用——跨插件用 `provides`/`consumes`；`shared`/`js` 不采用——宿主公共脚本用 `shared_features`）；只声明不安装，市场页只读检测。
 落地目录：`{{TARGET_DIR}}`。
 
 ## 1. 已知条件

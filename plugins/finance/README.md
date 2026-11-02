@@ -38,6 +38,7 @@
 ## 依赖
 - `data_dirs: ["finance"]`
 - 调用：`/api/plugin/webchat/*`、`/api/plugin/ai/*`
+- 跨插件关系：`consumes: ["webchat", "ai"]`（webchat / ai 为宿主内插件，非第三方包；本插件无 Python 第三方依赖，故不声明 `dependencies`）
 - 迁移输入：`data/plugins/finance/fixtures/rt_fin.json`（敏感，不读正文）
 
 ## 注意事项

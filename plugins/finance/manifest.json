@@ -33,5 +33,5 @@
   "style": "plugin.css",
   "data_dirs": ["finance"],
   "provides": [],
-  "consumes": []
+  "consumes": ["webchat", "ai"]
 }
