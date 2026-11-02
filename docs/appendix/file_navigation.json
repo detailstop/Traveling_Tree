@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-02T10:08:11+03:00",
-  "round": 103,
+  "generated_at": "2026-11-02T13:57:05+03:00",
+  "round": 104,
   "pending": [
     {
       "path": "docs/appendix/file_navigation.json",
@@ -16,6 +16,46 @@
     }
   ],
   "decided": [
+    {
+      "path": "plugins/urlarch/feature.js",
+      "decision": "删除「站点统筹·网址归档」卡片 + 启动间隔迁入上栏 + 一键收起改为当前视图全部组（round 104）",
+      "reason": "删除网址视图中含标题/计数/间隔的功能卡片（同容器无中栏标题条，标题条与按钮不受影响），移除随之失效的 #ua-count 更新；#ua-interval 迁入上栏 #ua-actions-links（标签「⏱ 启动间隔时间」，保留 id、默认 5、0–30 整数校验与 PUT /state 保存路径，软件模式随操作组隐藏）；中栏按钮改为 toggleAllGroups：对当前视图全部组（网址组 / 软件组含未分组）统一折叠或展开，文字在「▾ 全部收起 / ▸ 全部展开」间切换，视图切换与单组折叠互不影响；状态仍为模块内存（uaCollapsedGroups / uaCollapsedShortcutGroups），未用 localStorage。",
+      "status": "done",
+      "round": 104,
+      "at": "2026-11-02T13:57:05+03:00"
+    },
+    {
+      "path": "plugins/urlarch/plugin.css",
+      "decision": "清理孤儿样式并新增上栏内联字段样式（round 104）",
+      "reason": "删除仅服务被删卡片的 .ua-global-row(.label/.input)、早已不用的 .ua-group-create、以及旧中栏收起用的 .ua-mid[hidden]；新增 .ua-inline-field（启动间隔时间的标签+输入行）；组折叠、列表行、拖拽高亮等样式未改。",
+      "status": "done",
+      "round": 104,
+      "at": "2026-11-02T13:57:05+03:00"
+    },
+    {
+      "path": "plugins/urlarch/README.md",
+      "decision": "五节同步：删卡片、间隔位置、一键收起语义（round 104）",
+      "reason": "布局段落补「⏱ 启动间隔时间」位于上栏网址操作组；新增 round 104 说明（旧功能卡片与「共 N 条」计数已删除、间隔输入保持 id/校验/API 不变、软件模式不显示）；将中栏「一键收起/展开」改写为「▾ 全部收起 / ▸ 全部展开」，明确只作用于当前视图所有组、两视图折叠互不影响、中栏内容区不再被收起、单组折叠语义不变。",
+      "status": "done",
+      "round": 104,
+      "at": "2026-11-02T13:57:05+03:00"
+    },
+    {
+      "path": "plugins/urlarch/INFO.md",
+      "decision": "注意事项同步布局与一键收起语义（round 104）",
+      "reason": "布局条目更新为：上栏含「启动间隔时间」、网址视图旧功能卡片已删除、中栏按钮为「全部收起 / 全部展开」且只作用于当前视图所有组、状态仅内存不持久化；front matter 9 项与 source=local / market_package=false / tables 5 表不变。",
+      "status": "done",
+      "round": 104,
+      "at": "2026-11-02T13:57:05+03:00"
+    },
+    {
+      "path": "docs/appendix/file_navigation.json",
+      "decision": "登记 round 104（删卡片 / 间隔迁入上栏 / 一键收起改语义）",
+      "reason": "追加 5 条 decided 并 round→104、generated_at 更新；pending 保留既有 1 条（round 67–94 的 28 条非文件占位待清理）；resolved 45 条不动；file_navigation.md 由生成器重生成。走查 18/18 PASS（卡片已删、间隔改 7 秒写入 state、软件模式隐藏、网址/软件模式全部收起与展开、两视图独立、单组折叠可用、点击启动/改名/上栏收起回归、无 localStorage 新增、刷新恢复默认）。本轮无背景库数据，未改后端/schema/migrate。",
+      "status": "done",
+      "round": 104,
+      "at": "2026-11-02T13:57:05+03:00"
+    },
     {
       "path": "plugins/urlarch/manifest.json",
       "decision": "显示名改为「站点统筹」（round 103，R0）",

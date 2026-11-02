@@ -2,9 +2,9 @@
 
 > 只读摘要，勿手改。本文件由 docs/appendix/file_navigation.json 生成；结构与去留决定以 JSON 为准。
 
-- 生成时间：2026-11-02T10:08:11+03:00
-- 轮次：103
-- 待办：1 条；已决定：668 条
+- 生成时间：2026-11-02T13:57:05+03:00
+- 轮次：104
+- 待办：1 条；已决定：673 条
 
 ## 待办
 
@@ -16,6 +16,11 @@
 
 | 路径 | 决定 | 原因 | 状态 | 轮次 | 时间 | 备份路径 |
 | --- | --- | --- | --- | --- | --- | --- |
+| plugins/urlarch/feature.js | 删除「站点统筹·网址归档」卡片 + 启动间隔迁入上栏 + 一键收起改为当前视图全部组（round 104） | 删除网址视图中含标题/计数/间隔的功能卡片（同容器无中栏标题条，标题条与按钮不受影响），移除随之失效的 #ua-count 更新；#ua-interval 迁入上栏 #ua-actions-links（标签「⏱ 启动间隔时间」，保留 id、默认 5、0–30 整数校验与 PUT /state 保存路径，软件模式随操作组隐藏）；中栏按钮改为 toggleAllGroups：对当前视图全部组（网址组 / 软件组含未分组）统一折叠或展开，文字在「▾ 全部收起 / ▸ 全部展开」间切换，视图切换与单组折叠互不影响；状态仍为模块内存（uaCollapsedGroups / uaCollapsedShortcutGroups），未用 localStorage。 | done | 104 | 2026-11-02T13:57:05+03:00 |  |
+| plugins/urlarch/plugin.css | 清理孤儿样式并新增上栏内联字段样式（round 104） | 删除仅服务被删卡片的 .ua-global-row(.label/.input)、早已不用的 .ua-group-create、以及旧中栏收起用的 .ua-mid[hidden]；新增 .ua-inline-field（启动间隔时间的标签+输入行）；组折叠、列表行、拖拽高亮等样式未改。 | done | 104 | 2026-11-02T13:57:05+03:00 |  |
+| plugins/urlarch/README.md | 五节同步：删卡片、间隔位置、一键收起语义（round 104） | 布局段落补「⏱ 启动间隔时间」位于上栏网址操作组；新增 round 104 说明（旧功能卡片与「共 N 条」计数已删除、间隔输入保持 id/校验/API 不变、软件模式不显示）；将中栏「一键收起/展开」改写为「▾ 全部收起 / ▸ 全部展开」，明确只作用于当前视图所有组、两视图折叠互不影响、中栏内容区不再被收起、单组折叠语义不变。 | done | 104 | 2026-11-02T13:57:05+03:00 |  |
+| plugins/urlarch/INFO.md | 注意事项同步布局与一键收起语义（round 104） | 布局条目更新为：上栏含「启动间隔时间」、网址视图旧功能卡片已删除、中栏按钮为「全部收起 / 全部展开」且只作用于当前视图所有组、状态仅内存不持久化；front matter 9 项与 source=local / market_package=false / tables 5 表不变。 | done | 104 | 2026-11-02T13:57:05+03:00 |  |
+| docs/appendix/file_navigation.json | 登记 round 104（删卡片 / 间隔迁入上栏 / 一键收起改语义） | 追加 5 条 decided 并 round→104、generated_at 更新；pending 保留既有 1 条（round 67–94 的 28 条非文件占位待清理）；resolved 45 条不动；file_navigation.md 由生成器重生成。走查 18/18 PASS（卡片已删、间隔改 7 秒写入 state、软件模式隐藏、网址/软件模式全部收起与展开、两视图独立、单组折叠可用、点击启动/改名/上栏收起回归、无 localStorage 新增、刷新恢复默认）。本轮无背景库数据，未改后端/schema/migrate。 | done | 104 | 2026-11-02T13:57:05+03:00 |  |
 | plugins/urlarch/manifest.json | 显示名改为「站点统筹」（round 103，R0） | name 与 entries[0].name 改为「站点统筹」；id=urlarch、目录、路由前缀、表名、version、desc 均不变；schema_version 仍为 2，db.migrate 未动。 | done | 103 | 2026-11-02T10:08:11+03:00 |  |
 | plugins/urlarch/INFO.md | 信息卡 name 同步「站点统筹」并补布局说明（round 103） | front matter name 改为「站点统筹」（9 项必需字段齐全、source=local / market_package=false / tables 5 表不变）；标题与职责同步显示名；注意事项新增布局条目（上栏/中栏状态仅内存、刷新恢复默认、不写 localStorage/库/文件）。 | done | 103 | 2026-11-02T10:08:11+03:00 |  |
 | plugins/urlarch/README.md | README 标题/职责/注意事项同步「站点统筹」与新布局（round 103） | 标题+# 站点统筹（urlarch）并注明显示名变更、id/目录/路由/表名不变；职责改为站点统筹；注意事项新增布局段落（上栏视图切换与按钮组映射、上栏收起、中栏一键收起、三状态仅内存不持久化）；五节结构不变。 | done | 103 | 2026-11-02T10:08:11+03:00 |  |

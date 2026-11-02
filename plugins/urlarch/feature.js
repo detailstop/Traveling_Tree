@@ -32,7 +32,7 @@ const uaCollapsedShortcutGroups = new Set();
 let uaDraggingShortcutId = '';
 let uaSuppressRowClickUntil = 0;
 // 布局状态（round 103）：仅页面会话内存，刷新恢复默认（网址视图 / 上栏展开 / 中栏展开）。
-const uaLayout = { view: 'links', topbarCollapsed: false, midCollapsed: false };
+const uaLayout = { view: 'links', topbarCollapsed: false };
 function uaShortcutHint(code) {
   return UA_ERR_TEXT[code] || ('操作失败：' + (code || '未知错误'));
 }
@@ -145,6 +145,9 @@ async function renderUrlArchTool() {
             <select class="input" id="ua-newtype" style="flex:1;min-width:110px;"><option value="normal">普通组</option><option value="functional">功能性组</option></select>
             <button class="btn soft" id="ua-addgroup">＋ 新建组别</button>
             <button class="btn sm soft" id="ua-export">📤 导出 JSON</button>
+            <label class="ua-inline-field" title="0 = 同一批同时打开；1–30 = 首个立即、其余每隔 n 秒；仅接受 0–30 的整数">⏱ 启动间隔时间
+              <input class="input" id="ua-interval" type="number" min="0" max="30" step="1" value="5" style="width:64px;padding:5px 7px;"> 秒
+            </label>
           </div>
           <div class="ua-actions" id="ua-actions-apps" hidden>
             <input class="input" id="ua-sc-name" placeholder="名称，如：记事本" style="flex:2;min-width:120px;">
@@ -159,22 +162,10 @@ async function renderUrlArchTool() {
       <div class="ua-midbar">
         <span class="ua-mid-title" id="ua-mid-title">网址归档 · 归档列表</span>
         <span class="ua-mid-hint" id="ua-mid-hint">组别可折叠 · 拖拽移动</span>
-        <button type="button" class="mini-btn" id="ua-mid-toggle" title="收起中栏" aria-expanded="true">▴ 收起中栏</button>
+        <button type="button" class="mini-btn" id="ua-mid-toggle" title="收起当前视图所有组" aria-expanded="true">▾ 全部收起</button>
       </div>
       <div class="ua-mid" id="ua-mid">
         <div class="ua-view" id="ua-view-links">
-          <div class="gcard">
-            <div class="section-title"><span class="st-emoji">🔖</span>站点统筹 · 网址归档
-              <span style="font-size:12px;color:var(--text-dim);font-weight:400;">本地归档 · 组别 · 拖拽 · 导出 JSON · 爬虫后续接入</span>
-            </div>
-            <div class="ua-global-row" style="margin-top:10px;">
-              <span>共 <span id="ua-count">0</span> 条 · 数据保存在本机 SQLite · 功能性组可一键启动组内全部网址</span>
-            </div>
-            <div class="ua-global-row">
-              <label>⏱ 一键启动间隔 <input class="input" id="ua-interval" type="number" min="0" max="30" step="1" value="5" style="width:68px;padding:5px 7px;"> 秒</label>
-              <span>0 = 同一批同时尝试打开；1–30 = 首个立即、其余每隔 n 秒；仅接受 0–30 的整数</span>
-            </div>
-          </div>
           <div class="gcard">
             <div class="section-title"><span class="st-emoji">📚</span>归档列表</div>
             <div id="ua-list" style="min-height:40px;"></div>
@@ -205,6 +196,7 @@ async function renderUrlArchTool() {
       caret.setAttribute('aria-label', folded ? '展开组别' : '收起组别');
       caret.title = folded ? '展开' : '收起';
     });
+    updateMidToggle();
   };
   const toggleGroupCollapse = gid => {
     if (!gid) return;
@@ -214,7 +206,6 @@ async function renderUrlArchTool() {
   };
   const draw = () => {
     const state = uaLoad();
-    $('#ua-count').textContent = state.items.length;
     const iv = $('#ua-interval');
     if (iv && document.activeElement !== iv) iv.value = state.launchInterval;
     const sel = $('#ua-group');
@@ -454,6 +445,7 @@ async function renderUrlArchTool() {
       caret.setAttribute('aria-label', folded ? '展开组别' : '收起组别');
       caret.title = folded ? '展开' : '收起';
     });
+    updateMidToggle();
   };
   const toggleShortcutGroup = gid => {
     const key = gid || '';
@@ -680,7 +672,34 @@ async function renderUrlArchTool() {
   uaShortcuts = await uaFetchShortcuts();
   uaShortcutGroups = await uaFetchShortcutGroups();
   renderShortcuts();
-  // 上栏/中栏/视图切换：仅内存状态，不写 localStorage、不写库、不写文件
+  // 中栏标题条上的「全部收起 / 全部展开」：只作用于当前视图的所有组，状态仍为内存态。
+  const currentViewGroupIds = () => (uaLayout.view === 'links'
+    ? (uaLoad() ? uaLoad().groups.map(g => g.id) : [])
+    : ['', ...uaShortcutGroups.map(g => g.id)]);
+  const anyGroupExpanded = () => currentViewGroupIds().some(
+    id => (uaLayout.view === 'links' ? !uaCollapsedGroups.has(id) : !uaCollapsedShortcutGroups.has(id)));
+  const updateMidToggle = () => {
+    const btn = $('#ua-mid-toggle');
+    if (!btn) return;
+    const open = anyGroupExpanded();
+    btn.textContent = open ? '▾ 全部收起' : '▸ 全部展开';
+    btn.title = open ? '收起当前视图所有组' : '展开当前视图所有组';
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  };
+  const toggleAllGroups = () => {
+    const ids = currentViewGroupIds();
+    const collapse = anyGroupExpanded();
+    ids.forEach(id => {
+      if (uaLayout.view === 'links') {
+        if (collapse) uaCollapsedGroups.add(id); else uaCollapsedGroups.delete(id);
+      } else {
+        if (collapse) uaCollapsedShortcutGroups.add(id); else uaCollapsedShortcutGroups.delete(id);
+      }
+    });
+    if (uaLayout.view === 'links') applyGroupCollapse(); else applyShortcutCollapse();
+    updateMidToggle();
+  };
+  // 上栏/视图切换：仅内存状态，不写 localStorage、不写库、不写文件
   const applyLayout = () => {
     const links = $('#ua-view-links'), apps = $('#ua-view-apps');
     if (links) links.hidden = uaLayout.view !== 'links';
@@ -707,12 +726,8 @@ async function renderUrlArchTool() {
       tb.setAttribute('aria-expanded', uaLayout.topbarCollapsed ? 'false' : 'true');
     }
     const mid = $('#ua-mid'), mt = $('#ua-mid-toggle');
-    if (mid) mid.hidden = uaLayout.midCollapsed;
-    if (mt) {
-      mt.textContent = uaLayout.midCollapsed ? '▾ 展开中栏' : '▴ 收起中栏';
-      mt.title = uaLayout.midCollapsed ? '展开中栏' : '收起中栏';
-      mt.setAttribute('aria-expanded', uaLayout.midCollapsed ? 'false' : 'true');
-    }
+    if (mid) mid.hidden = false;
+    if (mt) updateMidToggle();
   };
   document.querySelectorAll('.ua-vtab').forEach(btn => btn.onclick = () => {
     uaLayout.view = btn.dataset.uaView === 'apps' ? 'apps' : 'links';
@@ -724,10 +739,7 @@ async function renderUrlArchTool() {
     applyLayout();
   };
   const midToggle = $('#ua-mid-toggle');
-  if (midToggle) midToggle.onclick = () => {
-    uaLayout.midCollapsed = !uaLayout.midCollapsed;
-    applyLayout();
-  };
+  if (midToggle) midToggle.onclick = () => toggleAllGroups();
   applyLayout();
   draw();
 }
