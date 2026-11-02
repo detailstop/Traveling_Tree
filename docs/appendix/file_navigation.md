@@ -2,9 +2,9 @@
 
 > 只读摘要，勿手改。本文件由 docs/appendix/file_navigation.json 生成；结构与去留决定以 JSON 为准。
 
-- 生成时间：2026-11-02T14:36:12+03:00
-- 轮次：106
-- 待办：1 条；已决定：689 条
+- 生成时间：2026-11-02T20:22:46+03:00
+- 轮次：107
+- 待办：1 条；已决定：709 条
 
 ## 待办
 
@@ -16,6 +16,26 @@
 
 | 路径 | 决定 | 原因 | 状态 | 轮次 | 时间 | 备份路径 |
 | --- | --- | --- | --- | --- | --- | --- |
+| plugins/market/deps.py | 新增依赖检测模块（manifest.dependencies 三类子键，只读） | 字段契约为 python/js/plugins 三类子键（python 项可字符串或 {name, version}）：python 用 importlib.metadata 取版本、失败退回 find_spec；js 判 ui/web/static/features/<name>.js；plugins 判 plugins/<id>/manifest.json。版本比较用 packaging（缺失时降级为只判存在性并返回 degraded/hint）；同一库多插件互斥约束用区间交集判定 conflict（与 packaging 无关，stdlib 实现）；输出 ok/missing/version_mismatch/conflict/unknown/undeclared 六态与 summary/conflicts。不写文件、不写库、不安装。 | done | 107 | 2026-11-02T20:22:46+03:00 |  |
+| plugins/market/backend.py | 新增 GET /dependencies 与 GET /dependencies/<plugin_id>（round 107） | 语义子路径、非空；单个插件不存在返回 404 PLUGIN_NOT_FOUND；非 GET 返回 405；不改 list/install/uninstall 与四源合并逻辑。 | done | 107 | 2026-11-02T20:22:46+03:00 |  |
+| plugins/market/validate.py | 校验 manifest.dependencies 结构与版本约束（round 107） | 新增 dependencies_invalid / dependency_name_invalid / dependency_version_invalid 三个错误码；复用 deps.declaration_errors；只校验声明结构，不做存在性判定。非法字段用临时插件副本实测被拒绝。 | done | 107 | 2026-11-02T20:22:46+03:00 |  |
+| plugins/market/feature.js | 市场卡片/详情展示依赖状态（round 107） | 列表加载后调 GET /dependencies 并合并；每卡显示依赖 badge（满足/缺失/版本不满足/冲突/无法判断/未声明），展开卡片显示逐项明细（类别/依赖/声明约束/已装版本/状态/说明）与冲突提示；packaging 缺失时顶部黄色提示条；不禁用安装/卸载、不隐藏插件；状态仅内存，不写 localStorage。 | done | 107 | 2026-11-02T20:22:46+03:00 |  |
+| plugins/market/plugin.css | 依赖 badge / 明细 / 降级提示条样式（round 107） | 新增 .mk-dep-* 六态配色、.mk-deps 明细网格、.mk-dep-warn 冲突提示、.mk-deps-banner 降级横幅；仍限 .mk-* 命名空间。 | done | 107 | 2026-11-02T20:22:46+03:00 |  |
+| plugins/market/README.md | 五节同步依赖接口与检测规则（round 107） | 入口与路由补 GET /dependencies 与 /dependencies/<id>；注意事项补检测方式、packaging 降级、冲突提示、不阻断与只读约束。 | done | 107 | 2026-11-02T20:22:46+03:00 |  |
+| plugins/market/INFO.md | 信息卡补依赖检测说明（round 107） | 注意事项新增依赖检测要点（只读、六态、degraded、无自动安装与多版本隔离）；front matter 9 项与 tables/source/market_package 未变。 | done | 107 | 2026-11-02T20:22:46+03:00 |  |
+| plugins/pdf/manifest.json | 样本回填 dependencies.python = [pikepdf, Pillow]（round 107） | 按源码实际 import 声明；PyPDF2 未在 pdf 中使用，已从 README 依赖节移除并说明。 | done | 107 | 2026-11-02T20:22:46+03:00 |  |
+| plugins/filejudge/manifest.json | 样本回填 dependencies.python = [Pillow, PyPDF2, python-docx]（round 107） | 对应 backend 内惰性 import 的可选预览依赖；缺失时插件自身返回 missing_dependency。 | done | 107 | 2026-11-02T20:22:46+03:00 |  |
+| plugins/webchat/manifest.json | 样本回填 dependencies.python = [playwright]（round 107） | playwright 在工作线程内 import；浏览器二进制仍由 data/ 下目录与 settings 覆盖，不写入依赖字段。 | done | 107 | 2026-11-02T20:22:46+03:00 |  |
+| plugins/tts/manifest.json | 样本回填 dependencies.python = [edge-tts]（round 107） | edge-tts 由 sys.executable -m edge_tts 调用；无最小版本约束要求，故用字符串形式。 | done | 107 | 2026-11-02T20:22:46+03:00 |  |
+| plugins/pdf/README.md | 依赖节与 manifest 对齐（round 107） | 移除未使用的 PyPDF2，注明 pikepdf/Pillow 已声明且缺失时返回 missing_dependency。 | done | 107 | 2026-11-02T20:22:46+03:00 |  |
+| plugins/filejudge/README.md | 依赖节与 manifest 对齐（round 107） | 注明可选依赖已声明于 manifest.dependencies.python。 | done | 107 | 2026-11-02T20:22:46+03:00 |  |
+| plugins/webchat/README.md | 依赖节与 manifest 对齐（round 107） | 注明 playwright 已声明于 manifest.dependencies.python。 | done | 107 | 2026-11-02T20:22:46+03:00 |  |
+| plugins/tts/README.md | 依赖节与 manifest 对齐（round 107） | 注明 edge-tts 已声明于 manifest.dependencies.python。 | done | 107 | 2026-11-02T20:22:46+03:00 |  |
+| docs/plugin-development-whitepaper.md | Manifest v2 契约新增 dependencies 字段（round 107） | §二 标准结构补 dependencies 示例，并新增规则段：三类子键、只声明不安装、检测归市场、packaging 降级、冲突提示、README 与字段一致、INFO 不重复。 | done | 107 | 2026-11-02T20:22:46+03:00 |  |
+| docs/plugin-development-guide.md | README 依赖节要求补 manifest.dependencies（round 107） | §4.1 第 4 条：第三方/跨插件依赖须在 manifest.dependencies 声明，README 文字与声明一致，只声明不安装。 | done | 107 | 2026-11-02T20:22:46+03:00 |  |
+| docs/appendix/plugin-info-card-template.md | INFO 依赖节说明不重复声明（round 107） | 注明第三方/跨插件依赖看 manifest.dependencies，市场页依赖状态由只读接口检测。 | done | 107 | 2026-11-02T20:22:46+03:00 |  |
+| docs/appendix/prompts/plugin-dev-prompt.md | 脚手架提示词要求声明 dependencies（round 107） | §0 与占位符表补：依赖须写入 manifest.dependencies（python/js/plugins），只声明不安装。 | done | 107 | 2026-11-02T20:22:46+03:00 |  |
+| docs/appendix/file_navigation.json | 登记 round 107（dependencies 字段 + 检测 + 前端展示 + 4 样本） | 追加 20 条 decided 并 round→107；pending 保留既有 1 条（round 67–94 的 28 条非文件占位）；resolved 45 条不动；md 由生成器重生成。验证：deps 单测 21/21、API 13/13、浏览器走查 default 8/8 + conflict 2/2、validate 5 个插件 ok、非法声明被拒绝、smoke 1010/1011（仅 TTS 502）。未安装任何依赖、未改宿主、未写 requirements.txt。 | done | 107 | 2026-11-02T20:22:46+03:00 |  |
 | plugins/urlarch/feature.js | 卡片只显示名称与图片，网址/可执行路径仅在编辑弹层可见（round 106） | 网址卡移除 .ua-card-sub 副行（原显示 note 或 url）与卡片 title 上的 URL tooltip；软件卡移除 .ua-card-sub（原显示 path）；无标题网址卡改为显示「未命名网址」占位名、不再回落展示网址；卡片名称、图片/首字色块、✎ 编辑入口、点击启动与拖拽绑定均未改；数据未删（state/库中 url、path 原样保留，编辑弹层仍读写）。 | done | 106 | 2026-11-02T14:36:12+03:00 |  |
 | plugins/urlarch/plugin.css | 清理卡片副行样式（round 106） | 删除仅服务卡片网址/路径副行的 .ua-card-sub 规则；.ua-card-name / 图片 / 首字色块 / 编辑按钮样式保留（无其他使用处）。 | done | 106 | 2026-11-02T14:36:12+03:00 |  |
 | plugins/urlarch/README.md | 五节同步卡片展示口径（round 106） | 「架子 + 卡片」注意事项改为：卡片只显示名称与图片，网址/可执行路径仅在编辑弹层查看/编辑；无名称网址卡显示「未命名网址」占位名不回落展示网址；其余接口/数据表/安全段落未变。 | done | 106 | 2026-11-02T14:36:12+03:00 |  |

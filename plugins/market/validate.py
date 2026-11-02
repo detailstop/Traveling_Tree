@@ -13,6 +13,7 @@ import time
 import zipfile
 from pathlib import Path
 
+from plugins.market import deps
 from plugins.market.info import OPTIONAL, REQUIRED, InfoError, parse_front_matter
 
 TOOL_VERSION = "1.0"
@@ -20,6 +21,7 @@ ERROR_CODES = (
     "path_empty", "path_not_found", "path_not_dir", "manifest_missing",
     "manifest_invalid", "manifest_id_invalid", "manifest_id_mismatch",
     "schema_version_invalid", "feature_missing", "backend_missing",
+    "dependencies_invalid", "dependency_name_invalid", "dependency_version_invalid",
     "info_missing", "info_invalid", "info_field_missing", "info_id_mismatch",
     "source_package_mismatch", "source_invalid", "tables_mismatch",
     "has_ui_mismatch", "has_backend_mismatch", "pack_empty",
@@ -109,6 +111,10 @@ def validate(path: str) -> dict:
         backend_file = backend.get("file") if isinstance(backend, dict) else backend
         if not isinstance(backend_file, str) or not (root / backend_file).is_file():
             _err(errors, "backend_missing", str(backend_file or "backend.py"), "声明 backend 但文件缺失")
+
+    # manifest.dependencies（round 107）：只校验声明结构，不做存在性/版本判定（检测在 market 接口）。
+    for field, code, message in deps.declaration_errors(manifest):
+        _err(errors, code, "manifest.json", message, field)
 
     info_path = root / "INFO.md"
     info = None

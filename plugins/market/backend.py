@@ -12,6 +12,7 @@ from pathlib import Path
 
 import config
 from db.connection import get_conn
+from plugins.market import deps
 from plugins.market import packaging
 from plugins.market.info import InfoError, read_info
 from plugins.market import index_store, scaffold, validate as validate_pack
@@ -309,6 +310,15 @@ def handle(method: str, subpath: str, query: dict, body: dict):
             return {"ok": True, "id": pid, "installed": _installed(pid),
                     "preset": pid in PRESETS,
                     "record": _records().get(pid)}
+        if method == "GET" and route == "dependencies":
+            return deps.detect_all()
+        if method == "GET" and route.startswith("dependencies/"):
+            pid = route.split("/", 1)[1].strip()
+            data = deps.detect_one(pid) if pid else None
+            if data is None:
+                return {"ok": False, "error": "PLUGIN_NOT_FOUND",
+                        "message": "插件不存在或缺少 manifest.json", "__status__": 404}
+            return data
         if method == "POST" and route == "install":
             return install(body.get("id"))
         if method == "POST" and route == "uninstall":
@@ -335,8 +345,8 @@ def handle(method: str, subpath: str, query: dict, body: dict):
         return {"ok": False, "error": exc.code, "message": exc.message}
     except index_store.IndexError_ as exc:
         return {"ok": False, "error": exc.code, "message": exc.message}
-    if route in {"list", "index", "status", "install", "uninstall",
+    if route in {"list", "index", "status", "dependencies", "install", "uninstall",
                  "scaffold/fields", "scaffold/generate", "refresh-index",
-                 "validate-pack/check", "validate-pack/pack"}:
+                 "validate-pack/check", "validate-pack/pack"} or route.startswith("dependencies/"):
         return {"ok": False, "error": "method_not_allowed", "__status__": 405}
     return {"ok": False, "error": "not_found", "__status__": 404}

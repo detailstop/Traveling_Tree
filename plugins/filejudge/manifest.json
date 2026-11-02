@@ -20,6 +20,7 @@
   "db": null,
   "style": "plugin.css",
   "data_dirs": ["filejudge"],
+  "dependencies": { "python": ["Pillow", "PyPDF2", "python-docx"] },
   "provides": [],
   "consumes": []
 }

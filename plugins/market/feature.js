@@ -3,7 +3,8 @@
   'use strict';
   let STATE = { items: [], search: '', kind: '', expanded: null, busy: false,
     devOpen: false, devFields: [], devConfigured: false, devError: '', devErrorCode: '', devValues: {}, devResult: null, marketSourceUrl: '', indexVersion: 0,
-    vpOpen: false, vpPath: 'plugins/market', vpResult: null, vpBusy: false };
+    vpOpen: false, vpPath: 'plugins/market', vpResult: null, vpBusy: false,
+    deps: null, depsError: '' };
 
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
@@ -37,6 +38,55 @@
     STATE.indexVersion = r.index_version || 0;
   }
 
+  /* 依赖状态（round 107）：只读接口；缺失/版本不满足/冲突只提示，不禁用任何按钮。 */
+  async function loadDeps() {
+    try {
+      const r = await api('/api/plugin/market/dependencies?t=' + Date.now());
+      const byId = {};
+      (r.plugins || []).forEach(p => { byId[p.id] = p; });
+      STATE.deps = { byId, degraded: !!r.degraded, hint: r.hint || '',
+        summary: r.summary || {}, conflicts: r.conflicts || [] };
+      STATE.depsError = '';
+    } catch (e) {
+      STATE.deps = null;
+      STATE.depsError = e.message || '依赖检测失败';
+    }
+  }
+
+  function depBadge(it) {
+    const entry = STATE.deps && STATE.deps.byId && STATE.deps.byId[it.id];
+    if (!entry) return '';
+    const status = entry.status || 'undeclared';
+    return `<span class="mk-dep mk-dep-${esc(status)}" title="${esc(entry.message || '')}">依赖：${esc(entry.status_text || '未声明')}</span>`;
+  }
+
+  function depDetail(it) {
+    if (STATE.depsError) return `<div class="mk-deps"><b>依赖</b><span class="mk-dep-empty">检测失败：${esc(STATE.depsError)}</span></div>`;
+    const entry = STATE.deps && STATE.deps.byId && STATE.deps.byId[it.id];
+    if (!entry) return '';
+    if (!entry.total) {
+      return `<div class="mk-deps"><b>依赖</b><span class="mk-dep-empty">未声明依赖（manifest.dependencies 为空）</span></div>`;
+    }
+    const kindName = { python: 'Python 包', js: '宿主公共前端', plugins: '插件' };
+    const rows = ['python', 'js', 'plugins'].flatMap(kind =>
+      (entry.declared && entry.declared[kind] || []).map(d => `<div class="mk-dep-row mk-dep-${esc(d.status)}">
+        <span class="mk-dep-kind">${esc(kindName[kind] || kind)}</span>
+        <b class="mk-dep-name">${esc(d.name)}</b>
+        <span class="mk-dep-spec">${esc(d.version || '（未指定版本）')}</span>
+        <span class="mk-dep-installed">${esc(d.installed || '—')}</span>
+        <span class="mk-dep-status">${esc(d.status_text || d.status)}</span>
+        <span class="mk-dep-msg">${esc(d.message || '')}</span>
+      </div>`)).join('');
+    const conflictRows = (STATE.deps.conflicts || [])
+      .filter(c => (c.plugins || []).includes(it.id))
+      .map(c => `<div class="mk-dep-warn">冲突：<b>${esc(c.name)}</b> 被 ${esc((c.plugins || []).join('、'))} 以 ${esc((c.constraints || []).join(' / '))} 声明；${esc(c.note || '')}</div>`)
+      .join('');
+    return `<div class="mk-deps"><b>依赖</b>
+      <div class="mk-dep-head"><span>类别</span><span>依赖</span><span>声明约束</span><span>已装版本</span><span>状态</span><span>说明</span></div>
+      ${rows}${conflictRows}
+    </div>`;
+  }
+
   function cardHTML(it) {
     const installed = !!it.installed;
     const preset = !!it.preset;
@@ -62,7 +112,7 @@
       <div class="mk-head" data-toggle="${esc(it.id)}">
         <span class="mk-icon">${esc(it.icon || '🧩')}</span>
         <span class="mk-title"><b>${esc(it.name)}</b><i>${esc(it.desc)}</i></span>
-        <span class="mk-meta">${status}<span class="mk-kind">${esc(it.kind || 'functional')}</span></span>
+        <span class="mk-meta">${status}${depBadge(it)}<span class="mk-kind">${esc(it.kind || 'functional')}</span></span>
       </div>
       <div class="mk-actions">${actions}</div>
       ${expanded ? `<div class="mk-detail">
@@ -74,6 +124,7 @@
           <span>类型</span><b>${esc(pluginSource)}</b>
           <span>信息源</span><b>${esc(it.info_source || 'none')}${it.info_error ? '（' + esc(it.info_error) + '）' : ''}</b>
         </div>
+        ${depDetail(it)}
         ${(!preset && installed) ? `<label class="mk-danger"><input type="checkbox" data-deldata="${esc(it.id)}"> 同时删除私有数据目录（默认保留）</label>` : ''}
       </div>` : ''}
     </div>`;
@@ -195,6 +246,7 @@
       </div>
       <div id="mk-dev-panel" class="mk-dev-panel"${STATE.devOpen ? '' : ' hidden'}></div>
       <div id="mk-vp-panel" class="mk-dev-panel"${STATE.vpOpen ? '' : ' hidden'}></div>
+      <div id="mk-deps-banner" class="mk-deps-banner" hidden></div>
       <div id="mk-grid" class="mk-grid"></div>
     </div>`;
     const draw = () => {
@@ -204,6 +256,16 @@
       sel.innerHTML = '<option value="">全部类型</option>' + kinds(STATE.items)
         .map(k => `<option value="${esc(k)}"${k === cur ? ' selected' : ''}>${esc(k)}</option>`).join('');
       host.querySelector('#mk-count').textContent = `${list.length} / ${STATE.items.length}`;
+      const banner = host.querySelector('#mk-deps-banner');
+      if (banner) {
+        let text = '';
+        if (STATE.depsError) text = '⚠ 依赖检测不可用：' + STATE.depsError;
+        else if (STATE.deps && STATE.deps.degraded) {
+          text = '⚠ ' + (STATE.deps.hint || '版本检测不可用，仅检测存在性；请安装 packaging');
+        }
+        banner.hidden = !text;
+        banner.textContent = text;
+      }
       const grid = host.querySelector('#mk-grid');
       grid.innerHTML = list.length ? list.map(cardHTML).join('')
         : '<div class="mk-empty">没有匹配的插件</div>';
@@ -233,6 +295,7 @@
           STATE.devError = e.message || '开发插件不可用';
         }
         await loadList();
+        await loadDeps();
         draw();
         drawDev(host);
         drawVp(host);

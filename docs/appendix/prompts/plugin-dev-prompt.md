@@ -21,6 +21,7 @@
 依赖的底层下沉插件：`{{DEPENDS_ON_LIB}}`。
 是否需要业务表：`{{NEEDS_DB}}`；是否需要独立数据目录：`{{NEEDS_DATA_DIR}}`。
 对外提供的能力（`provides`）：`{{PROVIDES}}`。
+第三方/跨插件依赖：在 `manifest.dependencies` 声明（`python`/`js`/`plugins` 三类子键，见白皮书 §二）；只声明不安装，市场页只读检测。
 落地目录：`{{TARGET_DIR}}`。
 
 ## 1. 已知条件
@@ -77,7 +78,7 @@
 | `{{PLUGIN_KIND}}` | `functional` / `library` | `functional` |
 | `{{HAS_UI}}` | 是否有卡片 | `是` / `否` |
 | `{{ENTRY_OR_BACKEND}}` | 入口形态 | `feature.js` / `backend.py（entries=[]）` |
-| `{{DEPENDS_ON_LIB}}` | 依赖的底层插件 | `webchat` / `无` |
+| `{{DEPENDS_ON_LIB}}` | 依赖的底层插件 | `webchat` / `无`（另需在 `manifest.dependencies` 声明） |
 | `{{NEEDS_DB}}` | 是否需要业务表 | `是` / `否` |
 | `{{NEEDS_DATA_DIR}}` | 是否需要 data_dirs | `是` / `否` |
 | `{{PROVIDES}}` | 对外能力声明 | `["tts"]` / `无` |

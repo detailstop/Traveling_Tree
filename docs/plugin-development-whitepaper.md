@@ -41,9 +41,23 @@
   },
   "style": "plugin.css",        // 若无专属样式填 null
   "data_dirs": ["your_plugin_id"], // 宿主自动在 data/plugins/ 下建目录
-  "shared_features": []         // 依赖的宿主公共脚本，如 ["webchat"]
+  "shared_features": [],        // 依赖的宿主公共脚本，如 ["webchat"]
+  "dependencies": {             // 可选：第三方/跨插件依赖声明；只声明不安装
+    "python": ["pikepdf", {"name": "edge-tts", "version": ">=6.1.0"}],
+    "js": ["webchat"],          // 宿主公共前端模块 ui/web/static/features/<name>.js
+    "plugins": ["pixel_art"]    // 其他插件（plugins/<id>/manifest.json）
+  }
 }
 ```
+
+**`dependencies`（round 107，可选）规则**：
+
+- 三类子键 `python` / `js` / `plugins` 均可省略；每项为字符串，`python` 另可用 `{name, version}` 对象写版本约束（PEP 440 比较子句，如 `>=6.1.0`、`>=1,<2`）。
+- **只声明、不安装**：本轮不实现自动安装，也不做多版本隔离；安装方式仍由使用者自行 `pip install`。
+- 检测归市场：`GET /api/plugin/market/dependencies`（全部）与 `GET /api/plugin/market/dependencies/<plugin_id>`（单个），只读、不写文件/库；缺失、版本不满足、冲突**只提示，不阻断**安装/启用/加载。
+- 版本比较依赖第三方 `packaging`；未安装时降级为“只判存在性”，接口返回 `degraded: true` 与提示，不抛异常。
+- 同一库被多个插件以互斥约束声明时标记 `conflict`，提示“多版本隔离需后续方案”，不声称已支持。
+- README「依赖」节仍写人类可读说明，须与 `manifest.dependencies` 一致；INFO.md front matter 不重复依赖字段。
 
 ## 三、 前端开发规范 (feature.js)
 

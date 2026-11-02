@@ -11,6 +11,7 @@
   "db": null,
   "style": null,
   "data_dirs": [],
+  "dependencies": { "python": ["edge-tts"] },
   "shared_features": [],
   "provides": ["tts"],
   "consumes": []

@@ -13,7 +13,7 @@
 
 ## 依赖
 - `data_dirs: ["filejudge"]`
-- 可选：Pillow / PyPDF2 / python-docx（预览）
+- 可选：Pillow / PyPDF2 / python-docx（预览；`manifest.dependencies.python` 已声明，缺失时返回 `missing_dependency`）
 
 ## 注意事项
 - 删除为破坏性操作，使用前必须预览确认。

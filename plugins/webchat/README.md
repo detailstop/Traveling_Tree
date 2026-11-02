@@ -14,7 +14,7 @@
 ## 依赖
 - `data_dirs: ["webchat"]`
 - 调用方：ai、aidebug、finance、promptgen、宿主 `app.js` 与共享 `features/webchat.js`
-- 外部：Playwright 与浏览器二进制
+- 外部：Playwright 与浏览器二进制（`manifest.dependencies.python` 已声明 playwright）
 
 ## 注意事项
 - profile 为敏感登录态，不读正文、不进 Git。

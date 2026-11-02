@@ -11,6 +11,7 @@
   "db": null,
   "style": null,
   "data_dirs": ["webchat"],
+  "dependencies": { "python": ["playwright"] },
   "shared_features": [],
   "provides": ["webchat"],
   "consumes": []

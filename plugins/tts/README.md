@@ -13,7 +13,7 @@
 
 ## 依赖
 - 调用方：`ui/web/static/app.js`（russian 间接）
-- 外部：edge-tts 在线合成；失败回退系统语音
+- 外部：edge-tts 在线合成（`manifest.dependencies.python` 已声明）；失败回退系统语音
 - 共享缓存例外（G5）
 
 ## 注意事项

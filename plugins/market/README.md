@@ -8,6 +8,7 @@
 - 入口：entry `market` → `feature.js`（`nav: true`）
 - 后端：`backend.py`；路由前缀 `/api/plugin/market/*`
   - `GET /list`、`GET /index`、`GET /status?id=`
+  - `GET /dependencies`（全部插件依赖检测）、`GET /dependencies/<plugin_id>`（单个，缺失 404）
   - `POST /install`（body `id`）、`POST /uninstall`（body `id`、`delete_data`）
 
 ## 数据表
@@ -38,7 +39,7 @@
 ## 校验打包
 - 路由：`POST /api/plugin/market/validate-pack/check`（body `path`）、`POST /api/plugin/market/validate-pack/pack`（body `path`、可选 `out_dir`）；Python：`from plugins.market.validate import validate, pack`。
 - 结果固定结构：`{ok, path, id, errors[], warnings[], checked_at, tool_version}`；错误阻止打包，警告仅提示。
-- 错误码：`path_empty`、`path_not_found`、`path_not_dir`、`manifest_missing`、`manifest_invalid`、`manifest_id_invalid`、`manifest_id_mismatch`、`schema_version_invalid`、`feature_missing`、`backend_missing`、`info_missing`、`info_invalid`、`info_field_missing`、`info_id_mismatch`、`source_package_mismatch`、`source_invalid`、`tables_mismatch`、`has_ui_mismatch`、`has_backend_mismatch`、`pack_empty`。
+- 错误码：`path_empty`、`path_not_found`、`path_not_dir`、`manifest_missing`、`manifest_invalid`、`manifest_id_invalid`、`manifest_id_mismatch`、`schema_version_invalid`、`feature_missing`、`backend_missing`、`dependencies_invalid`、`dependency_name_invalid`、`dependency_version_invalid`、`info_missing`、`info_invalid`、`info_field_missing`、`info_id_mismatch`、`source_package_mismatch`、`source_invalid`、`tables_mismatch`、`has_ui_mismatch`、`has_backend_mismatch`、`pack_empty`。
 - 警告码：`readme_missing`、`readme_section_missing`、`info_optional_missing`、`known_limits_empty`。
 - **打包脱敏提醒**：打包会将 `INFO.md` 原样入包，`sensitive_data` 字段会公开；请确认只写路径类别、不写敏感内容。
 - 源目录只读；打包输出 `data/backup/market_build/<id>.zip`，排除 `__pycache__/`、`*.pyc`、`.git/`、`data/`、`*.zip`、`*.tmp`、`.trash/`；不写 `market/packages/`。
@@ -49,3 +50,6 @@
 - **正式规则：卸载不 DROP 主库表。** 唯一例外是测试规则：插件 id 以 `test` 开头且表名以 `test_` 前缀时，可勾选删除测试表，删前先整库备份到 `data/backup/uninstall_<id>_<ts>/`；其他插件一律拒绝。
 - `market` 自身为预置，不提供卸载；B 阶段远程市场预留 `fetch_package` / `market_source`。
 - 开发插件依赖 `docs/appendix/prompts/plugin-dev-prompt.md`（模板唯一源）；`download_dir` 未设置时按钮置灰。
+- 依赖检测（round 107）：`deps.py` 只读扫描各 `manifest.dependencies`（`python`/`js`/`plugins`），Python 包用 `importlib.metadata`（拿版本）→ 失败退回 `importlib.util.find_spec`；`js` 判 `ui/web/static/features/<name>.js`，`plugins` 判 `plugins/<id>/manifest.json`。
+- 版本比较依赖 `packaging`：未安装时降级为只判存在性，接口带 `degraded: true` 与提示，前端顶部显示黄色提示条，不抛异常；同一库被多插件以互斥约束声明时标记 `conflict` 并提示“多版本隔离需后续方案”。
+- 依赖状态只提示：不隐藏插件、不禁用安装/卸载/启用、不弹强制确认；不写文件/库，不改四源合并与 `index.json`/`remote_index.json`。

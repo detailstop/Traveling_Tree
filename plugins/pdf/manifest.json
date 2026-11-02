@@ -27,6 +27,7 @@
   "backend": "backend.py",
   "db": null,
   "style": "plugin.css",
+  "dependencies": { "python": ["pikepdf", "Pillow"] },
   "provides": [],
   "consumes": []
 }

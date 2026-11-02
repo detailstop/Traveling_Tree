@@ -12,7 +12,7 @@ PDF 工具与批量压缩：合并/拆分/压缩、图片转 PDF。
 - 无业务表
 
 ## 依赖
-- 可选：pikepdf / Pillow / PyPDF2
+- 可选：pikepdf / Pillow（`manifest.dependencies.python` 已声明；两者缺失时 `handle()` 返回 `missing_dependency`，`batch/scan` 仍可用）
 - 二进制响应按 `__binary__` 协议（附录 C）
 
 ## 注意事项
