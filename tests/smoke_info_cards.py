@@ -21,7 +21,7 @@ def check(name: str, cond, extra: str = "") -> None:
 def main() -> int:
     targets = gen._targets()
     kinds = gen._kind_map()
-    check("信息卡数量", len(targets) == 23, str(len(targets)))
+    check("信息卡数量", len(targets) == 24, str(len(targets)))
     missing = [pid for pid, base in targets if not (base / "INFO.md").is_file()]
     check("INFO.md 齐全", not missing, ",".join(missing))
     errors = []

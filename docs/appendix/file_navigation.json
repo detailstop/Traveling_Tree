@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-02T23:51:38+03:00",
-  "round": 112,
+  "generated_at": "2026-11-03T01:30:19+03:00",
+  "round": 113,
   "pending": [
     {
       "path": "docs/appendix/file_navigation.json",
@@ -16,6 +16,134 @@
     }
   ],
   "decided": [
+    {
+      "path": "plugins/css_exp/manifest.json",
+      "decision": "新增第 24 个平级插件（round 113）",
+      "reason": "id=css_exp、显示名 CSS 动效组件库、entry css-exp → feature.js；backend/backend.py、db.module_key=css_exp、schema.sql + migrate.py；独立目录/路由，不挂任何现有插件。",
+      "status": "done",
+      "round": 113,
+      "at": "2026-11-03T01:30:19+03:00"
+    },
+    {
+      "path": "plugins/css_exp/schema.sql",
+      "decision": "新增收藏表 css_exp_favorites（round 113）",
+      "reason": "字段 id/title/category/made_by/css/html/source_url/raw_json/live_json/created_at；索引 idx_css_exp_fav_url(source_url)；全部 IF NOT EXISTS。",
+      "status": "done",
+      "round": 113,
+      "at": "2026-11-03T01:30:19+03:00"
+    },
+    {
+      "path": "plugins/css_exp/migrate.py",
+      "decision": "收藏表迁移与幂等（round 113）",
+      "reason": "缺表建表、缺列补列（ALTER 带默认值）、缺 raw/live 回填、确保索引；强制停点 7/7 PASS：真实库备份 data/backup/russian_tutor_before_css_exp_20261103.db，副本两次 migrate 幂等、旧表（urlarch_assets/links/shortcuts、finance_settings）行数与哈希不变、真实库未动。",
+      "status": "done",
+      "round": 113,
+      "at": "2026-11-03T01:30:19+03:00"
+    },
+    {
+      "path": "plugins/css_exp/backend.py",
+      "decision": "静态产物兜底 + 收藏 CRUD（round 113）",
+      "reason": "GET /app/<path> → static/app/<path>（__binary__、mime、目录默认 index.html、拒绝 .. 与越界、404 FILE_NOT_FOUND）；GET/POST /favorites、DELETE /favorites/<id>（409 FAVORITE_DUPLICATE、404 FAVORITE_NOT_FOUND、400 INVALID_REQUEST）；显式列名 INSERT，raw/live 同值双写；所有异常转 INTERNAL_ERROR 不向宿主抛 Traceback。",
+      "status": "done",
+      "round": 113,
+      "at": "2026-11-03T01:30:19+03:00"
+    },
+    {
+      "path": "plugins/css_exp/feature.js",
+      "decision": "iframe 壳 + 收藏当前组件 + 我的收藏（round 113）",
+      "reason": "文档走宿主静态路由 /plugins/css_exp/static/app/...（宿主的 __binary__ 响应固定带 Content-Disposition: attachment，顶层文档会被当下载，已实测）；页面内资源仍走 /api/plugin/css_exp/app/...；捕获 iframe 内链接与卡片点击改整页导航；收藏时从 pre.language-css / pre.language-html 取 textContent，标题/作者解析 article [class*=\"content__title\"]；重复收藏 409 提示；预览用 sandbox=allow-scripts 的 srcdoc。",
+      "status": "done",
+      "round": 113,
+      "at": "2026-11-03T01:30:19+03:00"
+    },
+    {
+      "path": "plugins/css_exp/plugin.css",
+      "decision": "iframe 工具栏/收藏列表/预览弹层样式（round 113）",
+      "reason": "仅 .cx-* 命名空间；iframe 占满高度，列表与预览弹层样式。",
+      "status": "done",
+      "round": 113,
+      "at": "2026-11-03T01:30:19+03:00"
+    },
+    {
+      "path": "plugins/css_exp/README.md",
+      "decision": "五节文档（round 113）",
+      "reason": "职责/入口与路由/数据表/依赖/注意事项；写明构建期需 Node 18+ 在项目外构建、产物拷贝；同源抓取与外部 DOM/URL 耦合；弱沙箱安全取舍；MIT 与 made_by 署名。",
+      "status": "done",
+      "round": 113,
+      "at": "2026-11-03T01:30:19+03:00"
+    },
+    {
+      "path": "plugins/css_exp/INFO.md",
+      "decision": "信息卡（round 113）",
+      "reason": "front matter 9 项 + tables=[css_exp_favorites]、data_dirs=[]、source=local、market_package=false；注意事项写明抓取耦合与沙箱取舍。",
+      "status": "done",
+      "round": 113,
+      "at": "2026-11-03T01:30:19+03:00"
+    },
+    {
+      "path": "plugins/css_exp/static/app/",
+      "decision": "外部项目静态导出产物（round 113）",
+      "reason": "AWA UI（MIT）next export 产物：181 个 HTML + _next 静态资源，共 403 文件 / 28.4 MB；assetPrefix 已为 /api/plugin/css_exp/app；作为插件运行必需静态资源进 Git；外部源码（_migration/css_exp）未改、未重新构建。",
+      "status": "done",
+      "round": 113,
+      "at": "2026-11-03T01:30:19+03:00"
+    },
+    {
+      "path": "plugins/lib.json",
+      "decision": "追加 css_exp 条目（round 113）",
+      "reason": "只追加一条（id/kind/has_ui/called_by/notes），不改结构；该文件仅作文档索引，宿主与测试不读取。",
+      "status": "done",
+      "round": 113,
+      "at": "2026-11-03T01:30:19+03:00"
+    },
+    {
+      "path": "tests/smoke_plugins.py",
+      "decision": "插件数量/entry 数/单入口数/恢复数/CSS 归属用例适配（round 113）",
+      "reason": "新增插件后：插件数量 21、entry 数量 23、单入口 entry 19、卡片总数 23、恢复后 21；插件 CSS 归属检查排除 plugins/<id>/static/（外部产物样式不属于 manifest.style）。",
+      "status": "done",
+      "round": 113,
+      "at": "2026-11-03T01:30:19+03:00"
+    },
+    {
+      "path": "tests/smoke_plugin_decoupling.py",
+      "decision": "TARGETS 增加 css_exp（round 113）",
+      "reason": "解耦测试逐插件改名/删除，TOTAL 由 TARGETS 推导；新增 css_exp（/api/plugin/css_exp/favorites）后 500/500 PASS。",
+      "status": "done",
+      "round": 113,
+      "at": "2026-11-03T01:30:19+03:00"
+    },
+    {
+      "path": "tests/smoke_info_cards.py",
+      "decision": "信息卡数量 23→24（round 113）",
+      "reason": "新增插件后按实际数量断言。",
+      "status": "done",
+      "round": 113,
+      "at": "2026-11-03T01:30:19+03:00"
+    },
+    {
+      "path": "tests/smoke_startup_once.py",
+      "decision": "插件 schema 数量 14→15（round 113）",
+      "reason": "新增 schema.sql 后按实际数量断言。",
+      "status": "done",
+      "round": 113,
+      "at": "2026-11-03T01:30:19+03:00"
+    },
+    {
+      "path": "tests/smoke_market.py",
+      "decision": "local_index 迁移数量 21→22（round 113）",
+      "reason": "新增 INFO 后 local 索引条目数 +1。",
+      "status": "done",
+      "round": 113,
+      "at": "2026-11-03T01:30:19+03:00"
+    },
+    {
+      "path": "docs/appendix/file_navigation.json",
+      "decision": "登记 round 113（css_exp 插件）",
+      "reason": "追加 16 条 decided 并 round→113；pending 保留既有 1 条；resolved 45 条不动；md 由生成器重生成。验证：migrate 停点 7/7、API 14/14、浏览器走查 10/10、validate 24/24 ok、smoke 1044/1045（仅 TTS 502）、node/py_compile 通过、INFO check PASS、生成器幂等。",
+      "status": "done",
+      "round": 113,
+      "at": "2026-11-03T01:30:19+03:00"
+    },
     {
       "path": ".gitignore",
       "decision": "新增 `_migration/` 忽略规则（round 112）",

@@ -81,7 +81,7 @@ def main() -> int:
                      "aidebug_history", "reader_bookmarks", "finance_quant_assets",
                      "finance_fund_cache", "market_installed")
     check("schema 单一源（核心 + 插件）",
-          len(schema_files) == 0 and len(plugin_schema_files) == 14
+          len(schema_files) == 0 and len(plugin_schema_files) == 15
           and all(f"CREATE TABLE IF NOT EXISTS {table}" in schema_text
                   for table in schema_tables),
           f"core={len(schema_files)} plugin={len(plugin_schema_files)}")

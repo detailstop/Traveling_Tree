@@ -661,7 +661,7 @@ def main() -> int:
         plugins = data.get("plugins") if isinstance(data, dict) else None
         check("GET /api/plugins/list", status == 200 and data.get("ok") is True,
               f"HTTP {status}")
-        check("插件数量", isinstance(plugins, list) and len(plugins) == 20,
+        check("插件数量", isinstance(plugins, list) and len(plugins) == 21,
               f"{len(plugins) if isinstance(plugins, list) else 'N/A'}")
         check("插件 id 集合", isinstance(plugins, list) and
               [p.get("id") for p in plugins] == EXPECTED_PLUGIN_IDS)
@@ -671,7 +671,7 @@ def main() -> int:
             for entry in (plugin.get("entries") or [])
             if isinstance(entry, dict)
         ]
-        check("entry 数量", len(all_entries) == 22, str(len(all_entries)))
+        check("entry 数量", len(all_entries) == 23, str(len(all_entries)))
         check("entry id 集合",
               sorted(e.get("id") for e in all_entries) == EXPECTED_ENTRY_IDS)
         list_field_errors: list[str] = []
@@ -758,7 +758,7 @@ def main() -> int:
             for entry in (plugin.get("entries") or [])
             if len(plugin.get("entries") or []) == 1
         ]
-        check("单入口 entry 18 个", len(singles) == 18, str(len(singles)))
+        check("单入口 entry 19 个", len(singles) == 19, str(len(singles)))
         check("单入口 entry.plugin_id == plugin.id",
               all(entry.get("plugin_id") == plugin.get("id") for plugin, entry in singles))
         pdf_plugin = next((p for p in (plugins or []) if p.get("id") == "pdf"), None)
@@ -766,7 +766,7 @@ def main() -> int:
               isinstance(pdf_plugin, dict)
               and [e.get("id") for e in (pdf_plugin.get("entries") or [])] == ["pdf", "batch"])
         check("卡片总数 21", isinstance(plugins, list) and
-              len(builtin_ids) + len(all_entries) == 22,
+              len(builtin_ids) + len(all_entries) == 23,
               f"{len(builtin_ids)}+{len(all_entries)}")
 
         field_errors: list[str] = []
@@ -1068,7 +1068,7 @@ def main() -> int:
         status, _, body = get("/api/plugins/list")
         restored = json.loads(body.decode("utf-8")) if body else {}
         check("恢复真实插件根",
-              status == 200 and len(restored.get("plugins", [])) == 20,
+              status == 200 and len(restored.get("plugins", [])) == 21,
               f"{len(restored.get('plugins', []))} 个")
     finally:
         httpd.shutdown()
@@ -1101,7 +1101,9 @@ def main() -> int:
     ]
     check("共享样式保留在 app.css", not shared_missing, " | ".join(shared_missing))
 
-    plugin_css_paths = {p.resolve() for p in PLUGINS.rglob("*.css")}
+    plugin_css_paths = {p.resolve() for p in PLUGINS.rglob("*.css")
+                        if p.relative_to(PLUGINS).parts[1:2] != ("static",)}
+    # 静态产物目录（plugins/<id>/static/**）是外部项目资源，不属于插件自有样式
     style_diff = sorted(
         str(p.relative_to(ROOT)) for p in (plugin_css_paths ^ declared_style_paths))
     check("插件 CSS 与 manifest.style 一致", plugin_css_paths == declared_style_paths,

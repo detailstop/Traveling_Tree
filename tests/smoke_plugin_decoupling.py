@@ -53,6 +53,7 @@ TARGETS = [
     {"id": "market", "api": "/api/plugin/market/list", "api_ok": 200},
     {"id": "sim", "api": None},
     {"id": "urlarch", "api": "/api/plugin/urlarch/state", "api_ok": 200},
+    {"id": "css_exp", "api": "/api/plugin/css_exp/favorites", "api_ok": 200},
 ]
 TOTAL = len(TARGETS)
 TMP = Path(tempfile.mkdtemp(prefix="rt_decouple_test_"))

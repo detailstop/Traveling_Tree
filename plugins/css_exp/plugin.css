@@ -1,0 +1,28 @@
+/* css_exp（CSS 动效组件库）样式：iframe 工具栏 + 收藏列表 + 预览弹层。仅 .cx-* 命名空间。 */
+.cx-shell { display: flex; flex-direction: column; gap: 8px; min-height: 70vh; }
+.cx-bar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 2px 2px 6px; border-bottom: 1px solid rgba(var(--accent-rgb), .16); }
+.cx-brand { font-weight: 800; font-size: 14px; display: flex; align-items: center; gap: 4px; }
+.cx-status { font-size: 11.5px; color: var(--text-dim); }
+.cx-ops { margin-left: auto; display: flex; gap: 6px; flex-wrap: wrap; }
+.cx-ops .btn[disabled] { opacity: .45; cursor: default; }
+.cx-body { flex: 1; display: flex; min-height: 0; }
+.cx-frame { flex: 1; width: 100%; min-height: 74vh; border: 0; border-radius: 10px; background: #fff; }
+.cx-frame[hidden] { display: none !important; }
+.cx-mine { flex: 1; min-height: 74vh; display: flex; flex-direction: column; gap: 8px; }
+.cx-mine[hidden] { display: none !important; }
+.cx-mine-head { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.cx-count { font-size: 11px; color: var(--text-dim); }
+.cx-list { display: flex; flex-direction: column; gap: 8px; }
+.cx-fav { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 9px 10px; border: 1px solid rgba(var(--accent-rgb), .16); border-radius: 10px; background: rgba(255, 255, 255, .55); }
+.cx-fav-main { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 12.5px; flex: 1; min-width: 220px; }
+.cx-fav-main b { font-size: 13px; }
+.cx-tag { font-size: 10.5px; padding: 1px 7px; border-radius: 999px; background: rgba(var(--accent-rgb), .12); color: var(--accent); }
+.cx-by { font-size: 11px; color: var(--text-dim); }
+.cx-time { font-size: 10.5px; color: var(--text-dim); }
+.cx-fav-ops { display: flex; gap: 6px; flex-wrap: wrap; }
+.cx-empty { padding: 24px; text-align: center; color: var(--text-dim); font-size: 12.5px; border: 1px dashed rgba(var(--accent-rgb), .22); border-radius: 10px; }
+.cx-overlay { position: fixed; inset: 0; z-index: 80; background: rgba(25, 18, 24, .48); display: flex; align-items: center; justify-content: center; padding: 20px; }
+.cx-preview { width: min(860px, 96vw); height: min(640px, 88vh); background: var(--card, #fff); border-radius: 14px; box-shadow: 0 20px 50px rgba(0, 0, 0, .3); display: flex; flex-direction: column; overflow: hidden; }
+.cx-preview-head { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-bottom: 1px solid rgba(var(--accent-rgb), .16); font-size: 13px; }
+.cx-preview-head .mini-btn { margin-left: auto; }
+.cx-preview-frame { flex: 1; width: 100%; border: 0; background: #fff; }

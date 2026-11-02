@@ -34,3 +34,7 @@ market/.trash/
 
 # 待归并区：外部项目临时存放，不入 Git（仅供归并流程轮 A 读取）
 _migration/
+
+# 例外：css_exp 的 Next 导出产物里 _next/data/ 是静态路由数据（不是项目 data/），需随插件入库
+!plugins/css_exp/static/app/_next/data/
+!plugins/css_exp/static/app/_next/data/**

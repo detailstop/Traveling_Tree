@@ -161,7 +161,7 @@ def main() -> int:
     lm = json.loads((mig / "local_index.json").read_text(encoding="utf-8"))
     rm = json.loads((mig / "remote_index.json").read_text(encoding="utf-8"))
     check("旧文件迁移 local21/remote2 并删除旧文件",
-          len(lm["packages"]) == 21 and [p["id"] for p in rm["packages"]] == ["finance", "promptgen"]
+          len(lm["packages"]) == 22 and [p["id"] for p in rm["packages"]] == ["finance", "promptgen"]
           and not legacy.exists())
 
     before_local = (mig / "local_index.json").read_bytes()

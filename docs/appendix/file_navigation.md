@@ -2,9 +2,9 @@
 
 > 只读摘要，勿手改。本文件由 docs/appendix/file_navigation.json 生成；结构与去留决定以 JSON 为准。
 
-- 生成时间：2026-11-02T23:51:38+03:00
-- 轮次：112
-- 待办：1 条；已决定：761 条
+- 生成时间：2026-11-03T01:30:19+03:00
+- 轮次：113
+- 待办：1 条；已决定：777 条
 
 ## 待办
 
@@ -16,6 +16,22 @@
 
 | 路径 | 决定 | 原因 | 状态 | 轮次 | 时间 | 备份路径 |
 | --- | --- | --- | --- | --- | --- | --- |
+| plugins/css_exp/manifest.json | 新增第 24 个平级插件（round 113） | id=css_exp、显示名 CSS 动效组件库、entry css-exp → feature.js；backend/backend.py、db.module_key=css_exp、schema.sql + migrate.py；独立目录/路由，不挂任何现有插件。 | done | 113 | 2026-11-03T01:30:19+03:00 |  |
+| plugins/css_exp/schema.sql | 新增收藏表 css_exp_favorites（round 113） | 字段 id/title/category/made_by/css/html/source_url/raw_json/live_json/created_at；索引 idx_css_exp_fav_url(source_url)；全部 IF NOT EXISTS。 | done | 113 | 2026-11-03T01:30:19+03:00 |  |
+| plugins/css_exp/migrate.py | 收藏表迁移与幂等（round 113） | 缺表建表、缺列补列（ALTER 带默认值）、缺 raw/live 回填、确保索引；强制停点 7/7 PASS：真实库备份 data/backup/russian_tutor_before_css_exp_20261103.db，副本两次 migrate 幂等、旧表（urlarch_assets/links/shortcuts、finance_settings）行数与哈希不变、真实库未动。 | done | 113 | 2026-11-03T01:30:19+03:00 |  |
+| plugins/css_exp/backend.py | 静态产物兜底 + 收藏 CRUD（round 113） | GET /app/<path> → static/app/<path>（__binary__、mime、目录默认 index.html、拒绝 .. 与越界、404 FILE_NOT_FOUND）；GET/POST /favorites、DELETE /favorites/<id>（409 FAVORITE_DUPLICATE、404 FAVORITE_NOT_FOUND、400 INVALID_REQUEST）；显式列名 INSERT，raw/live 同值双写；所有异常转 INTERNAL_ERROR 不向宿主抛 Traceback。 | done | 113 | 2026-11-03T01:30:19+03:00 |  |
+| plugins/css_exp/feature.js | iframe 壳 + 收藏当前组件 + 我的收藏（round 113） | 文档走宿主静态路由 /plugins/css_exp/static/app/...（宿主的 __binary__ 响应固定带 Content-Disposition: attachment，顶层文档会被当下载，已实测）；页面内资源仍走 /api/plugin/css_exp/app/...；捕获 iframe 内链接与卡片点击改整页导航；收藏时从 pre.language-css / pre.language-html 取 textContent，标题/作者解析 article [class*="content__title"]；重复收藏 409 提示；预览用 sandbox=allow-scripts 的 srcdoc。 | done | 113 | 2026-11-03T01:30:19+03:00 |  |
+| plugins/css_exp/plugin.css | iframe 工具栏/收藏列表/预览弹层样式（round 113） | 仅 .cx-* 命名空间；iframe 占满高度，列表与预览弹层样式。 | done | 113 | 2026-11-03T01:30:19+03:00 |  |
+| plugins/css_exp/README.md | 五节文档（round 113） | 职责/入口与路由/数据表/依赖/注意事项；写明构建期需 Node 18+ 在项目外构建、产物拷贝；同源抓取与外部 DOM/URL 耦合；弱沙箱安全取舍；MIT 与 made_by 署名。 | done | 113 | 2026-11-03T01:30:19+03:00 |  |
+| plugins/css_exp/INFO.md | 信息卡（round 113） | front matter 9 项 + tables=[css_exp_favorites]、data_dirs=[]、source=local、market_package=false；注意事项写明抓取耦合与沙箱取舍。 | done | 113 | 2026-11-03T01:30:19+03:00 |  |
+| plugins/css_exp/static/app/ | 外部项目静态导出产物（round 113） | AWA UI（MIT）next export 产物：181 个 HTML + _next 静态资源，共 403 文件 / 28.4 MB；assetPrefix 已为 /api/plugin/css_exp/app；作为插件运行必需静态资源进 Git；外部源码（_migration/css_exp）未改、未重新构建。 | done | 113 | 2026-11-03T01:30:19+03:00 |  |
+| plugins/lib.json | 追加 css_exp 条目（round 113） | 只追加一条（id/kind/has_ui/called_by/notes），不改结构；该文件仅作文档索引，宿主与测试不读取。 | done | 113 | 2026-11-03T01:30:19+03:00 |  |
+| tests/smoke_plugins.py | 插件数量/entry 数/单入口数/恢复数/CSS 归属用例适配（round 113） | 新增插件后：插件数量 21、entry 数量 23、单入口 entry 19、卡片总数 23、恢复后 21；插件 CSS 归属检查排除 plugins/<id>/static/（外部产物样式不属于 manifest.style）。 | done | 113 | 2026-11-03T01:30:19+03:00 |  |
+| tests/smoke_plugin_decoupling.py | TARGETS 增加 css_exp（round 113） | 解耦测试逐插件改名/删除，TOTAL 由 TARGETS 推导；新增 css_exp（/api/plugin/css_exp/favorites）后 500/500 PASS。 | done | 113 | 2026-11-03T01:30:19+03:00 |  |
+| tests/smoke_info_cards.py | 信息卡数量 23→24（round 113） | 新增插件后按实际数量断言。 | done | 113 | 2026-11-03T01:30:19+03:00 |  |
+| tests/smoke_startup_once.py | 插件 schema 数量 14→15（round 113） | 新增 schema.sql 后按实际数量断言。 | done | 113 | 2026-11-03T01:30:19+03:00 |  |
+| tests/smoke_market.py | local_index 迁移数量 21→22（round 113） | 新增 INFO 后 local 索引条目数 +1。 | done | 113 | 2026-11-03T01:30:19+03:00 |  |
+| docs/appendix/file_navigation.json | 登记 round 113（css_exp 插件） | 追加 16 条 decided 并 round→113；pending 保留既有 1 条；resolved 45 条不动；md 由生成器重生成。验证：migrate 停点 7/7、API 14/14、浏览器走查 10/10、validate 24/24 ok、smoke 1044/1045（仅 TTS 502）、node/py_compile 通过、INFO check PASS、生成器幂等。 | done | 113 | 2026-11-03T01:30:19+03:00 |  |
 | .gitignore | 新增 `_migration/` 忽略规则（round 112） | 文件末尾新增「待归并区」段：`_migration/`。用于外部项目/文档临时存放，不进 Git；`git check-ignore -v _migration/README.md` 命中 `.gitignore:36:_migration/`；`git status` 不再显示该目录内容。未改动既有忽略规则。 | done | 112 | 2026-11-02T23:51:38+03:00 |  |
 | _migration/ | 新增根目录待归并区（本地目录，不入 Git；round 112） | 仅建本地目录 + 本地说明 `_migration/README.md`（用途：外部项目待归并区，不入 Git，仅供归并流程轮 A 读取；归并完成后内容移入正式位置并清空）。该目录被 .gitignore 整体忽略，未提交任何内容、未使用 git add -f。扫描隔离已核实：db/connection.py:63-68 与 ui/web/server.py:189/278 只遍历 `plugins/`；tests/smoke_plugins.py:71/210 只扫 `plugins/`；plugins/market/index_store.py:126-128 只扫 `plugins/`；tests/smoke_startup_once.py:64-66 只扫 `db/schema/*.sql` 与 `plugins/*/schema.sql`——均不碰项目根，故不影响插件扫描。 | done | 112 | 2026-11-02T23:51:38+03:00 |  |
 | docs/appendix/file_navigation.json | 登记 round 112（待归并区） | 追加 3 条 decided 并 round→112；pending 保留既有 1 条；resolved 45 条不动；md 由生成器重生成。验证：全量 15 项 smoke 1016/1017（仅 TTS 502）、validate 23/23 ok、`git status` 仅显示 .gitignore、`git check-ignore` 命中、生成器幂等。 | done | 112 | 2026-11-02T23:51:38+03:00 |  |
