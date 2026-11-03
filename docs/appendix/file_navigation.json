@@ -1,12 +1,12 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-03T23:08:06+03:00",
-  "round": 119,
+  "generated_at": "2026-11-04T00:04:20+03:00",
+  "round": 120,
   "pending": [
     {
       "path": "_migration/css_exp/",
-      "decision": "待用户确认删除 _migration/css_exp（round 119 核实完成）",
-      "reason": "核实：_migration/css_exp 共 25001 文件 / 637.6MB（含 out、node_modules、.next 缓存），其 out/ 403 文件与 plugins/css_exp/static/app/ 403 文件相对路径与大小完全一致；插件目录含 manifest/backend/schema/migrate/feature/plugin.css/README/INFO；报告 _migration/reports/css_exp-understanding.md 不在迁移目录内；无可归并的独有文档/配置。删除不可逆且 _migration/ 不进 Git，按约定须先报告并等待用户明确确认。",
+      "decision": "已核实完整；用户确认保留 _migration/css_exp（round 120），待未来需要时再处理",
+      "reason": "核实：_migration/css_exp 共 25001 文件 / 637.6MB（含 out、node_modules、.next 缓存），其 out/ 403 文件与 plugins/css_exp/static/app/ 403 文件相对路径与大小完全一致；插件目录含 manifest/backend/schema/migrate/feature/plugin.css/README/INFO；报告 _migration/reports/css_exp-understanding.md 不在迁移目录内；无可归并的独有文档/配置。删除不可逆且 _migration/ 不进 Git，按约定须先报告并等待用户明确确认。 用户已确认保留、本轮不删除；插件可独立运行，将来改组件源码或升级需用该目录重新构建/导出，届时再按流程处理。",
       "status": "pending",
       "round": 119,
       "created_at": "2026-11-03T23:08:06+03:00"
@@ -24,6 +24,38 @@
     }
   ],
   "decided": [
+    {
+      "path": ".gitignore",
+      "decision": "澄清 css_exp/_next/data 例外当前不生效（round 120）",
+      "reason": "css_exp 已整体进插件库并被 plugins/css_exp/ 排除，Git 无法在已忽略目录内 re-include；保留两条例外规则并改注释说明“当前不生效、若未来移回白名单需保留”。当前 175 个 JSON 已不在 Git 索引，与白名单策略一致。",
+      "status": "done",
+      "round": 120,
+      "at": "2026-11-04T00:04:20+03:00"
+    },
+    {
+      "path": "tests/smoke_plugin_decoupling.py",
+      "decision": "补断言数公式说明并动态化全局标签（round 120）",
+      "reason": "注释写明断言总数 = 每插件 22 条固定 + 2×（有 API 插件）+（book_reader 联动 1）+ 1 全局；TARGETS 运行时扫描，本地 24 为 500/500（21 卡片：22×21+2×18+1+1），白名单 5 为 49/49（2 卡片：22×2+2×2+1）；全局 check 标签由“十九个”改为 f\"{TOTAL} 个\"。",
+      "status": "done",
+      "round": 120,
+      "at": "2026-11-04T00:04:20+03:00"
+    },
+    {
+      "path": "README.md",
+      "decision": "补 _migration/css_exp 保留说明（round 120）",
+      "reason": "§12 写明用户确认保留、未删除；插件可独立运行；将来改组件源码或升级需用该目录重新构建/导出；并记录核实数据（25001 文件/637.6MB、out 403 与 static/app 403 一致）。",
+      "status": "done",
+      "round": 120,
+      "at": "2026-11-04T00:04:20+03:00"
+    },
+    {
+      "path": "docs/appendix/file_navigation.json",
+      "decision": "登记 round 120 收尾并更新 pending（round 120）",
+      "reason": "追加 4 条 decided；pending 的 _migration/css_exp 条目改为“已核实完整；用户确认保留，待未来需要时再处理”；resolved 45 条不动；md 由生成器重生成。验证：git ls-files _next/data=0、静态产物 403 不变、smoke_plugins 190/190。",
+      "status": "done",
+      "round": 120,
+      "at": "2026-11-04T00:04:20+03:00"
+    },
     {
       "path": ".gitignore",
       "decision": "新增“插件库插件”排除节（round 119）",

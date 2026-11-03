@@ -268,7 +268,7 @@ python tests/smoke_pm.py
 
 ## 12. 项目状态与交接（2026-11-03，round 119 后）
 
-- **round 119 主仓库白名单**：`.gitignore` 逐目录排除 19 个非白名单插件（白名单 5 个：market/cobuild/webchat/tts/pixel_art），`plugins/lib.json` 每条加 `in_main_repo`；4 个 smoke 改为按实际插件数动态断言（本地 24 全绿；模拟新克隆 5 个：smoke_plugins 86/86、decoupling 49/49、info_cards 11/11、market 37/37）；白皮书新增 §十二。`_migration/css_exp` 已核实完整（文件数/大小/结构一致，无未归并独有文件），**待用户确认后删除**。
+- **round 119 主仓库白名单**：`.gitignore` 逐目录排除 19 个非白名单插件（白名单 5 个：market/cobuild/webchat/tts/pixel_art），`plugins/lib.json` 每条加 `in_main_repo`；4 个 smoke 改为按实际插件数动态断言（本地 24 全绿；模拟新克隆 5 个：smoke_plugins 86/86、decoupling 49/49、info_cards 11/11、market 37/37）；白皮书新增 §十二。`_migration/css_exp` 已核实完整（25001 文件/637.6MB；`out/` 403 文件与 `plugins/css_exp/static/app/` 403 文件路径与大小完全一致；报告不在迁移目录内；无未归并独有文件）。**用户确认保留、本轮未删除**；插件可独立运行，不依赖该目录；将来要改组件源码或升级，需用此目录重新构建/导出。
 - **round 118 全屏视图**：右栏上区新增全屏按钮（`⤢`/`⤡` 两态）；工具内容区 CSS 覆盖铺满视口、三栏隐藏、分屏保持 50/50；ESC 全屏态一律退出（含输入框），非全屏不绑定；退出恢复原布局/插件/聚焦，状态存内存、刷新退出；空区提示按全屏态切换。未改插件、未改 settings 结构、未建表。全量 15 项 smoke 仍为 **1045/1046**（仅 TTS 502）。
 - **round 117 渲染契约**：宿主分屏改为两区独立容器，不再设置/切换 `#tool-view`；20 个插件入口统一 `render(container)` 并使用传入容器（`filejudge`/`finance` 的异步回调、`model_usage` 的作用域查询一并迁移）；`smoke_plugins` 新增静态检查，直接引用 `#tool-view` 即 FAIL。全量 15 项 smoke **1045/1046**（仅 TTS 502）。
 - **round 115 宿主视图**：新增可收缩右栏快捷按钮与上下分屏（`ui/web/static/index.html`、`app.js`、`app.css`、`modules/settings_store.py`、`ui/web/server.py` 的 `/api/settings/quickbar`）。快捷按钮列表存 `data/settings.json` 的 `quickbar.pinned`（宿主偏好，非业务数据）；右栏收缩存 localStorage；分屏开关、上下区插件、聚焦区为内存态，刷新回单视图。未改任何插件代码、未建表、未向 `plugins/` 写运行时数据。已知限制见 §7 第 13 条。

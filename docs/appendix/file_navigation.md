@@ -2,9 +2,9 @@
 
 > 只读摘要，勿手改。本文件由 docs/appendix/file_navigation.json 生成；结构与去留决定以 JSON 为准。
 
-- 生成时间：2026-11-03T23:08:06+03:00
-- 轮次：119
-- 待办：2 条；已决定：834 条
+- 生成时间：2026-11-04T00:04:20+03:00
+- 轮次：120
+- 待办：2 条；已决定：838 条
 
 ## 待办
 
@@ -17,6 +17,10 @@
 
 | 路径 | 决定 | 原因 | 状态 | 轮次 | 时间 | 备份路径 |
 | --- | --- | --- | --- | --- | --- | --- |
+| .gitignore | 澄清 css_exp/_next/data 例外当前不生效（round 120） | css_exp 已整体进插件库并被 plugins/css_exp/ 排除，Git 无法在已忽略目录内 re-include；保留两条例外规则并改注释说明“当前不生效、若未来移回白名单需保留”。当前 175 个 JSON 已不在 Git 索引，与白名单策略一致。 | done | 120 | 2026-11-04T00:04:20+03:00 |  |
+| tests/smoke_plugin_decoupling.py | 补断言数公式说明并动态化全局标签（round 120） | 注释写明断言总数 = 每插件 22 条固定 + 2×（有 API 插件）+（book_reader 联动 1）+ 1 全局；TARGETS 运行时扫描，本地 24 为 500/500（21 卡片：22×21+2×18+1+1），白名单 5 为 49/49（2 卡片：22×2+2×2+1）；全局 check 标签由“十九个”改为 f"{TOTAL} 个"。 | done | 120 | 2026-11-04T00:04:20+03:00 |  |
+| README.md | 补 _migration/css_exp 保留说明（round 120） | §12 写明用户确认保留、未删除；插件可独立运行；将来改组件源码或升级需用该目录重新构建/导出；并记录核实数据（25001 文件/637.6MB、out 403 与 static/app 403 一致）。 | done | 120 | 2026-11-04T00:04:20+03:00 |  |
+| docs/appendix/file_navigation.json | 登记 round 120 收尾并更新 pending（round 120） | 追加 4 条 decided；pending 的 _migration/css_exp 条目改为“已核实完整；用户确认保留，待未来需要时再处理”；resolved 45 条不动；md 由生成器重生成。验证：git ls-files _next/data=0、静态产物 403 不变、smoke_plugins 190/190。 | done | 120 | 2026-11-04T00:04:20+03:00 |  |
 | .gitignore | 新增“插件库插件”排除节（round 119） | 白名单 5 个（market/cobuild/webchat/tts/pixel_art）不排除，其余 19 个逐目录显式忽略；节首注明白名单见 plugins/lib.json 的 in_main_repo 并需同步；未使用 plugins/*/ 宽泛排除；plugins/lib.json 与 plugins/market/ 仍跟踪。 | done | 119 | 2026-11-03T23:08:06+03:00 |  |
 | plugins/lib.json | 每条新增 in_main_repo 字段（round 119） | 24 条与本地插件目录一致，白名单 5 条 true、其余 19 条 false；不改其他字段与 notes 语义；宿主运行时仍不读。 | done | 119 | 2026-11-03T23:08:06+03:00 |  |
 | tests/smoke_plugins.py | 插件数/entry 数/INFO 相关断言动态化（round 119） | 插件数量、entry 数量、单入口数、卡片总数、恢复数改为 EXPECTED_PLUGIN_IDS/EXPECTED_ENTRY_IDS 运行时扫描；插件专属 API/作品/依赖块按插件存在性跳过；CSS 锚点跳过不存在的插件；本地 24 仍 190/190。 | done | 119 | 2026-11-03T23:08:06+03:00 |  |

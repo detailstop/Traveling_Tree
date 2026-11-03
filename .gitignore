@@ -57,6 +57,8 @@ plugins/screeps/
 plugins/sim/
 plugins/urlarch/
 
-# 例外：css_exp 的 Next 导出产物里 _next/data/ 是静态路由数据（不是项目 data/），需随插件入库
+# 例外（当前不生效，保留备用）：css_exp 已整体移入插件库（plugins/css_exp/ 被上面的排除节整体忽略），
+# 因此下面两条 _next/data 例外无法重新纳入（Git 不能在已忽略目录内 re-include）。
+# 若未来把 css_exp 移回主仓库白名单，需保留这两条规则，让 Next 静态路由数据随插件入库。
 !plugins/css_exp/static/app/_next/data/
 !plugins/css_exp/static/app/_next/data/**

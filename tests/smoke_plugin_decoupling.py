@@ -82,6 +82,8 @@ def _discover_targets() -> list[dict]:
 
 TARGETS = _discover_targets()
 TOTAL = len(TARGETS)
+# 断言总数 = 每插件 22 条固定断言 + 2×（有 API 的插件）+（存在 book_reader 时 1 条联动）+ 1 条全局恢复断言；
+# TARGETS 按本地实际有卡片插件扫描，白名单变化时总数随之变化，不做写死。
 TMP = Path(tempfile.mkdtemp(prefix="rt_decouple_test_"))
 
 SERVER_CODE = r"""
@@ -366,7 +368,7 @@ def main() -> int:
         if not (ROOT / "plugins" / pid).is_dir()
         or (ROOT / "plugins" / f"{pid}_test").exists()
     ]
-    check("十九个插件目录已恢复", not restore_errors, " | ".join(restore_errors))
+    check(f"{TOTAL} 个插件目录已恢复", not restore_errors, " | ".join(restore_errors))
     print(f"\nRESULT: {results.count(True)}/{len(results)} PASS")
     return 0 if all(results) else 1
 
