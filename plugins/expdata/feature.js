@@ -1,6 +1,7 @@
 'use strict';
 /* 按需加载的功能模块：expdata */
 (function () {
+  let ROOT = null;
 /* ---------- 实验数据获取（导入/粘贴图片 → 开始按钮 → A 读数 / N 重置 · 图片上点击取点） ---------- */
 function expStatusHTML(E) {
   if (!E.img) return '🖼 请先导入或粘贴图片（📁 导入图片 / Ctrl+V）';
@@ -32,7 +33,7 @@ function expPaint() {
     cv.width = 800; cv.height = 450;
     return;
   }
-  const tv = document.getElementById('tool-view');
+  const tv = ROOT;
   const maxW = Math.max(320, Math.min(940, (tv && tv.getBoundingClientRect ? tv.getBoundingClientRect().width : 940) - 24));
   const maxH = Math.max(240, innerHeight * 0.62);
   const sc = Math.min(maxW / imgEl.width, maxH / imgEl.height, 1);
@@ -124,8 +125,9 @@ function updateExpUI() {
   const cp = $('#exp-copy'); if (cp) { if (E.mode === 'done') cp.removeAttribute('disabled'); else cp.setAttribute('disabled', 'disabled'); }
   expPaint();
 }
-function renderExpDataTool() {
-  const box = $('#tool-view');
+function renderExpDataTool(container) {
+  ROOT = container;
+  const box = ROOT;
   if (!S.exp) S.exp = { mode: 'idle', clicks: [], img: null, imgName: '', imgW: 0, imgH: 0, imgEl: null };
   const E = S.exp;
   box.innerHTML = `

@@ -1,6 +1,7 @@
 'use strict';
 /* 按需加载的功能模块：promptgen */
 (function () {
+  let ROOT = null;
 /* ============================================================
    提示词生成器 · 四界面体系（按设计文档阶段 0–7）
    工作流提示词：完整实现
@@ -176,8 +177,9 @@ function pgFmt(d) {
 }
 function pgNextV(map, id) { map[id] = (map[id] || 0) + 1; return map[id]; }
 
-async function renderPromptGenTool() {
-  const box = $('#tool-view');
+async function renderPromptGenTool(container) {
+  ROOT = container;
+  const box = ROOT;
   if (!PG) {
     box.innerHTML = '<div class="gcard" style="padding:24px;color:var(--text-dim);">正在读取提示词资产…</div>';
     PG = await pgLoad();

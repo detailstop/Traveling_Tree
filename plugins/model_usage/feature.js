@@ -1,6 +1,7 @@
 'use strict';
 /* 按需加载的功能模块：model-usage（模型用量与消费） */
 (function () {
+  let ROOT = null;
 /* ============================================================
    模型用量与消费（第二版）
    - 单次调用手动录入；四 token 字段必填，总 token 只读自动求和；
@@ -171,7 +172,7 @@ function muSetCard(id, open) {
   muApplyCardState();
 }
 function muApplyCardState() {
-  $$('#tool-view .mu-card[data-mu-card]').forEach(card => {
+  Array.from(ROOT.querySelectorAll('.mu-card[data-mu-card]')).forEach(card => {
     const id = card.dataset.muCard;
     card.classList.toggle('mu-collapsed', !MU.cards[id]);
     const title = card.querySelector(':scope > .section-title');
@@ -186,7 +187,7 @@ function muApplyCardState() {
   });
 }
 function muBindCardToggles() {
-  $$('#tool-view .mu-card > .section-title').forEach(title => {
+  Array.from(ROOT.querySelectorAll('.mu-card > .section-title')).forEach(title => {
     title.onclick = e => {
       if (e.target.closest('button,input,select,textarea,a,label,.mu-switches,.mu-viz-controls,.mu-filters,.pills')) return;
       const card = title.closest('.mu-card');
@@ -197,7 +198,7 @@ function muBindCardToggles() {
   });
 }
 function muSetAllCards(open) {
-  $$('#tool-view .mu-card[data-mu-card]').forEach(card => { MU.cards[card.dataset.muCard] = !!open; });
+  Array.from(ROOT.querySelectorAll('.mu-card[data-mu-card]')).forEach(card => { MU.cards[card.dataset.muCard] = !!open; });
   muSaveCards();
   muApplyCardState();
 }
@@ -302,8 +303,9 @@ function muUpdateCalc() {
 }
 
 /* ---------------- 页面骨架 ---------------- */
-function renderModelUsageTool() {
-  const box = $('#tool-view');
+function renderModelUsageTool(container) {
+  ROOT = container;
+  const box = ROOT;
   MU.cards = muLoadCards();
   box.innerHTML = `
     <div class="gcard mu-card" data-mu-card="overview" style="margin-bottom:14px;">
@@ -609,7 +611,7 @@ async function muRefresh() {
     if ($('#mu-group')) $('#mu-group').innerHTML = muErrorHTML(msg);
     if ($('#mu-table')) $('#mu-table').innerHTML = muErrorHTML(msg);
     if ($('#mu-viz')) $('#mu-viz').innerHTML = muErrorHTML(msg);
-    $$('#tool-view [data-mu-retry]').forEach(btn => { btn.onclick = () => muRefresh(); });
+    Array.from(ROOT.querySelectorAll('[data-mu-retry]')).forEach(btn => { btn.onclick = () => muRefresh(); });
     return;
   }
   MU.records = Array.isArray(d.records) ? d.records : [];

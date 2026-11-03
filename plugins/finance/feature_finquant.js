@@ -1,8 +1,10 @@
 'use strict';
 /* 理财量化占位：旧 finquant 数据已丢弃，不读写任何 API/表。 */
 (function () {
-  function renderFinQuantTool() {
-    const box = $('#tool-view');
+  let ROOT = null;
+  function renderFinQuantTool(container) {
+  ROOT = container;
+    const box = ROOT;
     box.innerHTML = `<div class="gcard" style="padding:28px;line-height:1.9;">
       <div class="section-title"><span class="st-emoji">📊</span>理财量化</div>
       <div style="font-size:14px;color:var(--text-dim);">

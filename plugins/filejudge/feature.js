@@ -1,11 +1,13 @@
 'use strict';
 /* 按需加载的功能模块：filejudge */
 (function () {
+  let ROOT = null;
 /* ============================================================
    文件判官（扫描筛选 · 逐张审判 · 确认删除）
    ============================================================ */
-function renderFileJudgeTool() {
-  const box = $('#tool-view');
+function renderFileJudgeTool(container) {
+  ROOT = container;
+  const box = ROOT;
   if (!S.fj) S.fj = { mode: 'setup', files: [], idx: 0, del: [], keep: [], delKb: 0, view: 'card' };
   if (S.fj.mode === 'judge') { if (S.fj.view === 'grid') fjRenderGrid(box); else fjRenderJudge(box); }
   else if (S.fj.mode === 'tree') fjRenderTree(box);
@@ -47,7 +49,7 @@ function fjRenderSetup(box) {
       if (!r || !r.ok) return toast((r && r.error) || '扫描失败', 'error');
       if (!r.count) return toast('该条件下没有匹配文件' + (r.skipped ? `（已自动略过 ${r.skipped} 个曾保留的文件）` : ''), 'warn');
       S.fj = { mode: 'judge', files: r.files, idx: 0, del: [], keep: [], delKb: 0, skipped: r.skipped || 0 };
-      fjRenderJudge($('#tool-view'));
+      fjRenderJudge(ROOT);
       toast(`共 ${r.count} 个文件待审判 ✓` + (r.skipped ? `（已自动略过 ${r.skipped} 个曾保留的文件）` : ''), 'success');
     });
   };
@@ -59,7 +61,7 @@ function fjRenderSetup(box) {
       if (!r || !r.ok) return toast((r && r.error) || '扫描失败', 'error');
       S.fj.mode = 'tree'; S.fj.tree = r.root; S.fj.treeTrunc = !!r.truncated;
       if (!S.fj.treeView) S.fj.treeView = fjCountNodes(r.root) > 150 ? 'list' : 'chart';
-      fjRenderTree($('#tool-view'));
+      fjRenderTree(ROOT);
       toast('占用分布图已生成 ✓' + (r.truncated ? '（节点过多已截断）' : ''), 'success');
     });
   };
@@ -165,7 +167,7 @@ function fjRenderTree(box) {
   if (vl) vl.onclick = () => { S.fj.treeView = 'list'; fjRenderTree(box); };
   $('#fj-tree-expand').onclick = () => { S.fj.collapsed = new Set(); fjRenderTree(box); toast('已全部展开 ✓', 'success'); };
   $('#fj-tree-collapse').onclick = () => { S.fj.collapsed = new Set(fjDirPaths(S.fj.tree, [], true)); fjRenderTree(box); toast('已全部收起（保留根目录）✓', 'success'); };
-  $('#fj-tree-back').onclick = () => { S.fj.mode = 'setup'; renderFileJudgeTool(); };
+  $('#fj-tree-back').onclick = () => { S.fj.mode = 'setup'; renderFileJudgeTool(ROOT); };
   $('#fj-tree-refresh').onclick = () => {
     const path = (S.fj.tree && S.fj.tree.path) || '';
     if (!path) return;
@@ -173,7 +175,7 @@ function fjRenderTree(box) {
     apiPost('/api/plugin/filejudge/tree', { path }).then(r => {
       if (!r || !r.ok) return toast((r && r.error) || '扫描失败', 'error');
       S.fj.tree = r.root; S.fj.treeTrunc = !!r.truncated;
-      fjRenderTree($('#tool-view'));
+      fjRenderTree(ROOT);
       toast('已刷新 ✓', 'success');
     });
   };
@@ -218,7 +220,7 @@ function fjRenderTreeChart(body) {
     if (tg) {
       const p = tg.dataset.toggle;
       if (S.fj.collapsed.has(p)) S.fj.collapsed.delete(p); else S.fj.collapsed.add(p);
-      fjRenderTree($('#tool-view'));
+      fjRenderTree(ROOT);
       return;
     }
     const g = e.target.closest('[data-path]');
@@ -257,7 +259,7 @@ function fjRenderTreeList(body) {
     if (tg && tg.dataset.toggle) {
       const p = tg.dataset.toggle;
       if (S.fj.collapsed.has(p)) S.fj.collapsed.delete(p); else S.fj.collapsed.add(p);
-      fjRenderTree($('#tool-view'));
+      fjRenderTree(ROOT);
       return;
     }
     const row = e.target.closest('.fj-lrow');
@@ -265,7 +267,7 @@ function fjRenderTreeList(body) {
     if (row.dataset.dir === 'true') {
       const p = row.dataset.path;
       if (S.fj.collapsed.has(p)) S.fj.collapsed.delete(p); else S.fj.collapsed.add(p);
-      fjRenderTree($('#tool-view'));
+      fjRenderTree(ROOT);
       return;
     }
     fjReveal(row.dataset.path);
@@ -298,11 +300,11 @@ function fjRenderJudge(box) {
       </div>
     </div>`;
   fjLoadPreview(cur, d);
-  $('#fj-prev').onclick = () => { if (d.idx > 0) { d.idx--; fjRenderJudge($('#tool-view')); } };
+  $('#fj-prev').onclick = () => { if (d.idx > 0) { d.idx--; fjRenderJudge(ROOT); } };
   $('#fj-skip').onclick = () => fjAdvance(d, null);
   $('#fj-keep').onclick = () => fjAdvance(d, 'keep');
   $('#fj-del').onclick = () => fjAdvance(d, 'del');
-  $('#fj-grid').onclick = () => { S.fj.view = 'grid'; fjRenderGrid($('#tool-view')); };
+  $('#fj-grid').onclick = () => { S.fj.view = 'grid'; fjRenderGrid(ROOT); };
   $('#fj-exit').onclick = () => fjExit(d);
 }
 function fjAdvance(d, mark) {
@@ -319,9 +321,9 @@ function fjAdvance(d, mark) {
   }
   if (d.idx + 1 >= d.files.length) { fjFinish(d); return; }
   d.idx++;
-  fjRenderJudge($('#tool-view'));
+  fjRenderJudge(ROOT);
 }
-function fjReset() { S.fj = { mode: 'setup', files: [], idx: 0, del: [], keep: [], delKb: 0 }; renderFileJudgeTool(); }
+function fjReset() { S.fj = { mode: 'setup', files: [], idx: 0, del: [], keep: [], delKb: 0 }; renderFileJudgeTool(ROOT); }
 function fjFinish(d) {
   if (!d.del.length) { toast('全部审判完毕，未标记删除', 'success'); fjReset(); return; }
   const names = d.del.slice(0, 6).map(fjBase).join('、') + (d.del.length > 6 ? ' 等' : '');
@@ -396,7 +398,7 @@ function fjRenderGrid(box) {
     </div>`;
   $('#fj-cols').onchange = e => { d.cols = +e.target.value; fjRenderGrid(box); };
   $('#fj-del-sel').onclick = () => fjGridDeleteSel(box);
-  $('#fj-grid-back').onclick = () => { S.fj.view = 'card'; fjRenderJudge($('#tool-view')); };
+  $('#fj-grid-back').onclick = () => { S.fj.view = 'card'; fjRenderJudge(ROOT); };
   const g = $('#fj-grid');
   g.onclick = e => {
     const cell = e.target.closest('.fj-cell');
@@ -414,7 +416,7 @@ function fjGridUpdateBar(d) {
   const n = d.sel ? d.sel.size : 0;
   b.disabled = !n;
   b.textContent = `🗑 删除选中（${n}）`;
-  const t = document.querySelector('#tool-view .section-title span[style*="font-size:12px"]');
+  const t = ROOT.querySelector('.section-title span[style*="font-size:12px"]');
   if (t) t.textContent = `共 ${d.files.length} 个 · 已选 ${n}`;
 }
 function fjGridLoadMore(d) {
@@ -490,7 +492,7 @@ function fjGridDeleteSel(box) {
     d.sel = new Set(); d.thumbsLoaded = 0;
     if (!d.files.length) { toast('已全部删除', 'success'); fjReset(); return; }
     d.idx = Math.min(d.idx, d.files.length - 1);
-    fjRenderGrid($('#tool-view'));
+    fjRenderGrid(ROOT);
   });
 }
 

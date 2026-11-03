@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-03T17:05:34+03:00",
-  "round": 115,
+  "generated_at": "2026-11-03T21:50:34+03:00",
+  "round": 117,
   "pending": [
     {
       "path": "docs/appendix/file_navigation.json",
@@ -16,6 +16,230 @@
     }
   ],
   "decided": [
+    {
+      "path": "plugins/ai/feature.js",
+      "decision": "前端入口迁移到 render(container)（round 117）",
+      "reason": "入口改为 render(container) 并在首行 ROOT = container；内部 #tool-view 直接引用改为 ROOT 或 ROOT.querySelector(All)，异步回调使用入口容器，不再依赖全局 id；配合宿主两区独立容器修复后台异步重绘覆盖另一区的问题。",
+      "status": "done",
+      "round": 117,
+      "at": "2026-11-03T21:50:34+03:00"
+    },
+    {
+      "path": "plugins/aidebug/feature.js",
+      "decision": "前端入口迁移到 render(container)（round 117）",
+      "reason": "入口改为 render(container) 并在首行 ROOT = container；内部 #tool-view 直接引用改为 ROOT 或 ROOT.querySelector(All)，异步回调使用入口容器，不再依赖全局 id；配合宿主两区独立容器修复后台异步重绘覆盖另一区的问题。",
+      "status": "done",
+      "round": 117,
+      "at": "2026-11-03T21:50:34+03:00"
+    },
+    {
+      "path": "plugins/bg_library/feature.js",
+      "decision": "前端入口迁移到 render(container)（round 117）",
+      "reason": "入口改为 render(container) 并在首行 ROOT = container；内部 #tool-view 直接引用改为 ROOT 或 ROOT.querySelector(All)，异步回调使用入口容器，不再依赖全局 id；配合宿主两区独立容器修复后台异步重绘覆盖另一区的问题。",
+      "status": "done",
+      "round": 117,
+      "at": "2026-11-03T21:50:34+03:00"
+    },
+    {
+      "path": "plugins/book_reader/feature.js",
+      "decision": "前端入口迁移到 render(container)（round 117）",
+      "reason": "入口改为 render(container) 并在首行 ROOT = container；内部 #tool-view 直接引用改为 ROOT 或 ROOT.querySelector(All)，异步回调使用入口容器，不再依赖全局 id；配合宿主两区独立容器修复后台异步重绘覆盖另一区的问题。",
+      "status": "done",
+      "round": 117,
+      "at": "2026-11-03T21:50:34+03:00"
+    },
+    {
+      "path": "plugins/css_exp/feature.js",
+      "decision": "前端入口迁移到 render(container)（round 117）",
+      "reason": "入口改为 render(container) 并在首行 ROOT = container；内部 #tool-view 直接引用改为 ROOT 或 ROOT.querySelector(All)，异步回调使用入口容器，不再依赖全局 id；配合宿主两区独立容器修复后台异步重绘覆盖另一区的问题。",
+      "status": "done",
+      "round": 117,
+      "at": "2026-11-03T21:50:34+03:00"
+    },
+    {
+      "path": "plugins/expdata/feature.js",
+      "decision": "前端入口迁移到 render(container)（round 117）",
+      "reason": "入口改为 render(container) 并在首行 ROOT = container；内部 #tool-view 直接引用改为 ROOT 或 ROOT.querySelector(All)，异步回调使用入口容器，不再依赖全局 id；配合宿主两区独立容器修复后台异步重绘覆盖另一区的问题。",
+      "status": "done",
+      "round": 117,
+      "at": "2026-11-03T21:50:34+03:00"
+    },
+    {
+      "path": "plugins/filejudge/feature.js",
+      "decision": "前端入口迁移到 render(container)（round 117）",
+      "reason": "入口改为 render(container) 并在首行 ROOT = container；内部 #tool-view 直接引用改为 ROOT 或 ROOT.querySelector(All)，异步回调使用入口容器，不再依赖全局 id；配合宿主两区独立容器修复后台异步重绘覆盖另一区的问题。",
+      "status": "done",
+      "round": 117,
+      "at": "2026-11-03T21:50:34+03:00"
+    },
+    {
+      "path": "plugins/finance/feature_finance.js",
+      "decision": "前端入口迁移到 render(container)（round 117）",
+      "reason": "入口改为 render(container) 并在首行 ROOT = container；内部 #tool-view 直接引用改为 ROOT 或 ROOT.querySelector(All)，异步回调使用入口容器，不再依赖全局 id；配合宿主两区独立容器修复后台异步重绘覆盖另一区的问题。",
+      "status": "done",
+      "round": 117,
+      "at": "2026-11-03T21:50:34+03:00"
+    },
+    {
+      "path": "plugins/finance/feature_finquant.js",
+      "decision": "前端入口迁移到 render(container)（round 117）",
+      "reason": "入口改为 render(container) 并在首行 ROOT = container；内部 #tool-view 直接引用改为 ROOT 或 ROOT.querySelector(All)，异步回调使用入口容器，不再依赖全局 id；配合宿主两区独立容器修复后台异步重绘覆盖另一区的问题。",
+      "status": "done",
+      "round": 117,
+      "at": "2026-11-03T21:50:34+03:00"
+    },
+    {
+      "path": "plugins/model_usage/feature.js",
+      "decision": "前端入口迁移到 render(container)（round 117）",
+      "reason": "入口改为 render(container) 并在首行 ROOT = container；内部 #tool-view 直接引用改为 ROOT 或 ROOT.querySelector(All)，异步回调使用入口容器，不再依赖全局 id；配合宿主两区独立容器修复后台异步重绘覆盖另一区的问题。",
+      "status": "done",
+      "round": 117,
+      "at": "2026-11-03T21:50:34+03:00"
+    },
+    {
+      "path": "plugins/netexp/feature.js",
+      "decision": "前端入口迁移到 render(container)（round 117）",
+      "reason": "入口改为 render(container) 并在首行 ROOT = container；内部 #tool-view 直接引用改为 ROOT 或 ROOT.querySelector(All)，异步回调使用入口容器，不再依赖全局 id；配合宿主两区独立容器修复后台异步重绘覆盖另一区的问题。",
+      "status": "done",
+      "round": 117,
+      "at": "2026-11-03T21:50:34+03:00"
+    },
+    {
+      "path": "plugins/pdf/feature_batch.js",
+      "decision": "前端入口迁移到 render(container)（round 117）",
+      "reason": "入口改为 render(container) 并在首行 ROOT = container；内部 #tool-view 直接引用改为 ROOT 或 ROOT.querySelector(All)，异步回调使用入口容器，不再依赖全局 id；配合宿主两区独立容器修复后台异步重绘覆盖另一区的问题。",
+      "status": "done",
+      "round": 117,
+      "at": "2026-11-03T21:50:34+03:00"
+    },
+    {
+      "path": "plugins/pdf/feature_pdf.js",
+      "decision": "前端入口迁移到 render(container)（round 117）",
+      "reason": "入口改为 render(container) 并在首行 ROOT = container；内部 #tool-view 直接引用改为 ROOT 或 ROOT.querySelector(All)，异步回调使用入口容器，不再依赖全局 id；配合宿主两区独立容器修复后台异步重绘覆盖另一区的问题。",
+      "status": "done",
+      "round": 117,
+      "at": "2026-11-03T21:50:34+03:00"
+    },
+    {
+      "path": "plugins/pixel_art/feature.js",
+      "decision": "前端入口迁移到 render(container)（round 117）",
+      "reason": "入口改为 render(container) 并在首行 ROOT = container；内部 #tool-view 直接引用改为 ROOT 或 ROOT.querySelector(All)，异步回调使用入口容器，不再依赖全局 id；配合宿主两区独立容器修复后台异步重绘覆盖另一区的问题。",
+      "status": "done",
+      "round": 117,
+      "at": "2026-11-03T21:50:34+03:00"
+    },
+    {
+      "path": "plugins/project_manager/feature.js",
+      "decision": "前端入口迁移到 render(container)（round 117）",
+      "reason": "入口改为 render(container) 并在首行 ROOT = container；内部 #tool-view 直接引用改为 ROOT 或 ROOT.querySelector(All)，异步回调使用入口容器，不再依赖全局 id；配合宿主两区独立容器修复后台异步重绘覆盖另一区的问题。",
+      "status": "done",
+      "round": 117,
+      "at": "2026-11-03T21:50:34+03:00"
+    },
+    {
+      "path": "plugins/promptgen/feature.js",
+      "decision": "前端入口迁移到 render(container)（round 117）",
+      "reason": "入口改为 render(container) 并在首行 ROOT = container；内部 #tool-view 直接引用改为 ROOT 或 ROOT.querySelector(All)，异步回调使用入口容器，不再依赖全局 id；配合宿主两区独立容器修复后台异步重绘覆盖另一区的问题。",
+      "status": "done",
+      "round": 117,
+      "at": "2026-11-03T21:50:34+03:00"
+    },
+    {
+      "path": "plugins/rivet/feature.js",
+      "decision": "前端入口迁移到 render(container)（round 117）",
+      "reason": "入口改为 render(container) 并在首行 ROOT = container；内部 #tool-view 直接引用改为 ROOT 或 ROOT.querySelector(All)，异步回调使用入口容器，不再依赖全局 id；配合宿主两区独立容器修复后台异步重绘覆盖另一区的问题。",
+      "status": "done",
+      "round": 117,
+      "at": "2026-11-03T21:50:34+03:00"
+    },
+    {
+      "path": "plugins/russian/feature.js",
+      "decision": "前端入口迁移到 render(container)（round 117）",
+      "reason": "入口改为 render(container) 并在首行 ROOT = container；内部 #tool-view 直接引用改为 ROOT 或 ROOT.querySelector(All)，异步回调使用入口容器，不再依赖全局 id；配合宿主两区独立容器修复后台异步重绘覆盖另一区的问题。",
+      "status": "done",
+      "round": 117,
+      "at": "2026-11-03T21:50:34+03:00"
+    },
+    {
+      "path": "plugins/schedule/feature.js",
+      "decision": "前端入口迁移到 render(container)（round 117）",
+      "reason": "入口改为 render(container) 并在首行 ROOT = container；内部 #tool-view 直接引用改为 ROOT 或 ROOT.querySelector(All)，异步回调使用入口容器，不再依赖全局 id；配合宿主两区独立容器修复后台异步重绘覆盖另一区的问题。",
+      "status": "done",
+      "round": 117,
+      "at": "2026-11-03T21:50:34+03:00"
+    },
+    {
+      "path": "plugins/screeps/feature.js",
+      "decision": "前端入口迁移到 render(container)（round 117）",
+      "reason": "入口改为 render(container) 并在首行 ROOT = container；内部 #tool-view 直接引用改为 ROOT 或 ROOT.querySelector(All)，异步回调使用入口容器，不再依赖全局 id；配合宿主两区独立容器修复后台异步重绘覆盖另一区的问题。",
+      "status": "done",
+      "round": 117,
+      "at": "2026-11-03T21:50:34+03:00"
+    },
+    {
+      "path": "plugins/sim/feature.js",
+      "decision": "前端入口迁移到 render(container)（round 117）",
+      "reason": "入口改为 render(container) 并在首行 ROOT = container；内部 #tool-view 直接引用改为 ROOT 或 ROOT.querySelector(All)，异步回调使用入口容器，不再依赖全局 id；配合宿主两区独立容器修复后台异步重绘覆盖另一区的问题。",
+      "status": "done",
+      "round": 117,
+      "at": "2026-11-03T21:50:34+03:00"
+    },
+    {
+      "path": "plugins/urlarch/feature.js",
+      "decision": "前端入口迁移到 render(container)（round 117）",
+      "reason": "入口改为 render(container) 并在首行 ROOT = container；内部 #tool-view 直接引用改为 ROOT 或 ROOT.querySelector(All)，异步回调使用入口容器，不再依赖全局 id；配合宿主两区独立容器修复后台异步重绘覆盖另一区的问题。",
+      "status": "done",
+      "round": 117,
+      "at": "2026-11-03T21:50:34+03:00"
+    },
+    {
+      "path": "ui/web/static/app.js",
+      "decision": "分屏改为两区独立容器，移除 #tool-view id 切换（round 117）",
+      "reason": "删除 setToolViewId 及所有调用；toolsSplitHTML 两个 .tool-pane-body 均不设 id；loadAndRenderTool 必须接收容器并调用 render(box)；聚焦逻辑只保留高亮/落点判定，不再切 id。",
+      "status": "done",
+      "round": 117,
+      "at": "2026-11-03T21:50:34+03:00"
+    },
+    {
+      "path": "tests/smoke_plugins.py",
+      "decision": "新增 render 容器契约静态检查（round 117）",
+      "reason": "扫描 plugins/*/feature*.js，命中 getElementById('tool-view') / querySelector(All)('#tool-view…') / $('#tool-view…') / $$('#tool-view…') / 裸 '#tool-view' 即 FAIL 并列出 插件:行号；注释行豁免、白名单默认空；断言总数 189→190。",
+      "status": "done",
+      "round": 117,
+      "at": "2026-11-03T21:50:34+03:00"
+    },
+    {
+      "path": "docs/plugin-development-whitepaper.md",
+      "decision": "§三 render(container) 从约定升级为必须使用传入容器（round 117）",
+      "reason": "写明入口签名与 window.__toolRenderers 注册、必须用传入 container、禁止直接取 #tool-view、smoke 静态检查；§7.2 smoke_plugins 基线 190/190，合计 1045/1046。规则本体未改。",
+      "status": "done",
+      "round": 117,
+      "at": "2026-11-03T21:50:34+03:00"
+    },
+    {
+      "path": "docs/plugin-development-guide.md",
+      "decision": "§4 检查清单增加 render(container) 容器要求（round 117）",
+      "reason": "新增一条：入口使用传入容器（container.querySelector 等），禁止直接取 #tool-view，smoke_plugins 会检查。",
+      "status": "done",
+      "round": 117,
+      "at": "2026-11-03T21:50:34+03:00"
+    },
+    {
+      "path": "README.md",
+      "decision": "同步渲染契约、风险与状态（round 117）",
+      "reason": "§4 分层约定去掉 id 切换说法；§7 第 13 条改写为容器契约与静态防回归；§12 新增 round 117 条目、smoke 基线 1045/1046。",
+      "status": "done",
+      "round": 117,
+      "at": "2026-11-03T21:50:34+03:00"
+    },
+    {
+      "path": "docs/appendix/file_navigation.json",
+      "decision": "登记 round 117（render(container) 迁移）",
+      "reason": "追加 28 条 decided 并 round→117；pending 保留既有 1 条（非本轮事项）；resolved 45 条不动；md 由生成器重生成。验证：走查 5/5（22 entry 逐个加载、4 重点插件、异步隔离）、全量 smoke 1045/1046（仅 TTS 502）、node --check/py_compile 通过。",
+      "status": "done",
+      "round": 117,
+      "at": "2026-11-03T21:50:34+03:00"
+    },
     {
       "path": "ui/web/static/index.html",
       "decision": "新增右栏容器（round 115）",

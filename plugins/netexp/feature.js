@@ -1,8 +1,10 @@
 'use strict';
 /* 按需加载的功能模块：netexp（网络与互联探索，纯占位） */
 (function () {
-function renderNetExpTool() {
-  const box = $('#tool-view');
+  let ROOT = null;
+function renderNetExpTool(container) {
+  ROOT = container;
+  const box = ROOT;
   box.innerHTML = `
     <div class="gcard" style="margin-bottom:14px;">
       <div class="section-title"><span class="st-emoji">🌐</span>网络与互联探索

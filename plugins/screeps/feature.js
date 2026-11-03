@@ -1,6 +1,7 @@
 'use strict';
 /* 按需加载的功能模块：screeps */
 (function () {
+  let ROOT = null;
 /* ---------- Screeps Arena：三模式入口（Pain and Gain / Spawn and Swamp / Escort Run） ---------- */
 let SC_VIEW = 'home'; // home | pain | sas | escort（与 hash 路由同步）
 const SC_MODES = [
@@ -18,8 +19,9 @@ function scIdOfRoute(route) {
   return m ? m.id : null;
 }
 
-function renderScreepsTool() {
-  const box = $('#tool-view');
+function renderScreepsTool(container) {
+  ROOT = container;
+  const box = ROOT;
   const fromHash = scIdOfRoute(location.hash);
   if (fromHash) {
     SC_VIEW = fromHash;
@@ -50,7 +52,7 @@ function renderScreepsTool() {
     </div>`;
   box.querySelectorAll('[data-route]').forEach(el => el.onclick = () => {
     location.hash = el.dataset.route;
-    renderScreepsTool();
+    renderScreepsTool(ROOT);
   });
 }
 
@@ -487,7 +489,7 @@ function scVfsClose() {
 }
 
 async function renderScreepsSasPage() {
-  const box = $('#tool-view');
+  const box = ROOT;
   const restored = await scSasLoad();
   const totalBlocks = SC_SAS_UNITS.reduce((s, u) => s + u.blocks.length, 0);
   box.innerHTML = `
@@ -540,7 +542,7 @@ async function renderScreepsSasPage() {
         <span id="sc-st-orphan"></span>
       </div>
     </div>`;
-  $('#sc-back').onclick = () => { location.hash = ''; renderScreepsTool(); };
+  $('#sc-back').onclick = () => { location.hash = ''; renderScreepsTool(ROOT); };
   $('#sc-vfs').onclick = () => scVfsOpen();
   $('#sc-save').onclick = () => scSasSave();
   $('#sc-gen').onclick = () => scSasGenPrompt();
@@ -1059,7 +1061,7 @@ function scSasFillPreview() {
 
 function renderScreepsModePage(mode) {
   const m = SC_MODES.find(x => x.id === mode);
-  const box = $('#tool-view');
+  const box = ROOT;
   box.innerHTML = `
     <div class="gcard" style="min-height:300px;">
       <div class="section-title"><span class="st-emoji">${m.icon}</span>${m.name}
@@ -1072,12 +1074,12 @@ function renderScreepsModePage(mode) {
     </div>`;
   $('#sc-back').onclick = () => {
     location.hash = '';
-    renderScreepsTool();
+    renderScreepsTool(ROOT);
   };
 }
 
 window.addEventListener('hashchange', () => {
-  if (S && S.tool === 'screeps') renderScreepsTool();
+  if (S && S.tool === 'screeps') renderScreepsTool(ROOT);
 });
 
 

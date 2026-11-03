@@ -6,6 +6,7 @@
    数据：/api/plugin/bg_library/bg/*；节点只存出向关系，入向由后端推导；导入分 new / update 两种包。
    ============================================================================ */
 (function () {
+  let ROOT = null;
   const TYPES = { project: '项目', module: '模块', feature: '功能', flow: '流程', interface: '接口', other: '其他' };
   const STATUS = { planned: '计划', active: '在用', deprecated: '作废', broken: '异常', unknown: '未知' };
   const REL = { call: '调用', called_by: '被调用', data_input: '数据输入', data_output: '数据输出' };
@@ -1386,8 +1387,9 @@
   }
 
   /* ---------------- 入口 ---------------- */
-  function renderTool() {
-    const root = document.querySelector('#tool-view');
+  function renderTool(container) {
+  ROOT = container;
+    const root = ROOT;
     if (!root) return;
     B.root = root;
     if (!root.dataset.bgBound) {

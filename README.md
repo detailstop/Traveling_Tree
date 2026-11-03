@@ -83,7 +83,7 @@ Traveling_Tree/
 └── tests/                   冒烟测试（多数使用临时数据库）
 ```
 
-分层约定：`ui/` 通过 `/api/plugin/<id>/*` 动态分发到各插件 backend；宿主不再有 `core/`，全部 SQL 在插件内（model_usage/pixel_art/finance/bg_library/book_reader/russian/project_manager）；`db/schema/` 为空，新增表只写 `plugins/<id>/schema.sql` 并由 manifest 的 `db` 声明，`db/connection.py` 启动时扫描执行；`data/settings.json` 的 `modules.enabled` 控制按模块建表，默认全启用。宿主视图基础设施（左栏 / 主区 / 右栏、上下分屏、聚焦区、右栏快捷按钮）只做布局与偏好：快捷按钮列表存 `data/settings.json` 的 `quickbar`，右栏收缩状态存 localStorage；插件仍按原契约渲染到 `#tool-view`，宿主按聚焦区切换该 id，不改任何插件代码。
+分层约定：`ui/` 通过 `/api/plugin/<id>/*` 动态分发到各插件 backend；宿主不再有 `core/`，全部 SQL 在插件内（model_usage/pixel_art/finance/bg_library/book_reader/russian/project_manager）；`db/schema/` 为空，新增表只写 `plugins/<id>/schema.sql` 并由 manifest 的 `db` 声明，`db/connection.py` 启动时扫描执行；`data/settings.json` 的 `modules.enabled` 控制按模块建表，默认全启用。宿主视图基础设施（左栏 / 主区 / 右栏、上下分屏、聚焦区、右栏快捷按钮）只做布局与偏好：快捷按钮列表存 `data/settings.json` 的 `quickbar`，右栏收缩状态存 localStorage；插件入口 `render(container)` 使用传入容器（上下两区各自独立），宿主不再设置或切换 `#tool-view`。
 
 插件可有/无业务表：无表插件不声明 `db` 或声明 `"db": null`。当前 24 个插件目录中 **15 个有 `schema.sql`、9 个无表**（cobuild、expdata、filejudge、netexp、pdf、rivet、sim、tts、webchat）；`sim` 已回归 `plugins/sim/`。
 
@@ -179,7 +179,7 @@ Traveling_Tree/
 10. **克隆后登录态为空**：`webchat_profile` 已被 `.gitignore` 排除，克隆项目后网页会话通道需重新扫码登录；`data/` 下其他文件（DB、keys、settings）同样不随 Git 同步。
 11. **css_exp 为同源弱沙箱**：`plugins/css_exp` 的 iframe 使用 `allow-scripts allow-same-origin`（抓取详情页 DOM 所需），**不是严格隔离**；外部 AWA UI 为已审阅的 MIT 开源代码，若替换外部项目须重新审阅。收藏按钮依赖外部详情页 DOM（`pre.language-css` / `pre.language-html`、`article [class*="content__title"]`）与 `{type}/{slug}` 路由，外部升级可能导致抓取失败（会提示并拒绝写入空数据）。
 12. **`.gitignore` 例外需复核后再 push**：`.gitignore` 为 css_exp 的 `_next/data/` 加了精确例外（`!plugins/css_exp/static/app/_next/data/`），push 前应确认 `data/`、`data/ai_keys.json`、`data/webchat_sessions.json`、`data/plugins/webchat/webchat_profile/` 仍被忽略，且例外未放宽为 `!data/` 等宽规则。
-13. **分屏/右栏是宿主视图基础设施**：只做布局与偏好（上下分屏、聚焦区、右栏快捷按钮），不含业务逻辑；快捷按钮列表是宿主偏好（`data/settings.json` 的 `quickbar`），不是插件业务数据。**已知限制（#tool-view 单 id 机制）**：插件契约未变（`render()` 读取 `#tool-view`，宿主按聚焦区切换该 id）。20 个有卡片插件全部直接使用 `#tool-view`：`ai`、`aidebug`、`bg_library`、`book_reader`、`css_exp`、`expdata`、`filejudge`、`finance`（含 finquant）、`model_usage`、`netexp`、`pdf`（含 batch）、`pixel_art`、`project_manager`、`promptgen`、`rivet`、`russian`、`schedule`、`screeps`、`sim`、`urlarch`。其中**异步整体重绘**会在回调里重新取 `#tool-view`：`filejudge`（扫描、目录树刷新与统计的 `.then` 回调 `/` 事件里调用 `fjRenderJudge/fjRenderTree($('#tool-view'))`）、`finance`（首载 `finFetchState().then(renderFinanceTool)` 二次进入重新取容器；量化子视图同理）。其余插件多在入口缓存容器或使用唯一子 id（`screeps` 的 `renderScreepsSasPage` 在 `await` 前缓存 `box`；`russian`/`bg_library`/`project_manager` 缓存根或子 id），异步期间切换聚焦区一般不受影响。**触发场景**：在上区启动 `filejudge` 扫描或 `finance` 首载/刷新，完成前点下区空白切到下半区且下半区已加载另一插件；回调重绘会写入当前聚焦区、覆盖该区视图（**只影响视图，不丢数据**）。**恢复**：先点该区『清空』（下半区）或『← 返回工具』（上半区），再点快捷按钮/卡片重开该插件即可重新渲染（数据未丢；下区标题可能仍显示原插件名，重开后一致）。
+13. **分屏/右栏是宿主视图基础设施**：只做布局与偏好（上下分屏、聚焦区、右栏快捷按钮），不含业务逻辑；快捷按钮列表是宿主偏好（`data/settings.json` 的 `quickbar`），不是插件业务数据。插件前端入口统一为 `render(container)`：宿主给上下两区各传独立容器，插件必须使用传入容器（`container.querySelector` 等），**禁止直接取 `#tool-view`**；`smoke_plugins` 会静态检查并阻断回归。因此后台插件异步重绘只影响自己所在区，不会再覆盖另一区；若某插件漏迁，`smoke_plugins` 直接 FAIL 并列出插件 id:行号。
 
 ## 8. 多 AI 共建与打卡
 
@@ -251,12 +251,13 @@ python tests/smoke_pm.py
 - 白皮书附录：[A backend-only](docs/appendix/A-backend-only.md) · [B 根路由](docs/appendix/B-root-routing.md) · [C 二进制格式](docs/appendix/C-binary-format.md) · [D 其他约定](docs/appendix/D-conventions.md)
 - 说明性文件：[file_navigation.json](docs/appendix/file_navigation.json) · [file_navigation.md](docs/appendix/file_navigation.md) · [files_manifest.json](docs/appendix/files_manifest.json)
 
-## 12. 项目状态与交接（2026-11-03，round 115 后）
+## 12. 项目状态与交接（2026-11-03，round 117 后）
 
+- **round 117 渲染契约**：宿主分屏改为两区独立容器，不再设置/切换 `#tool-view`；20 个插件入口统一 `render(container)` 并使用传入容器（`filejudge`/`finance` 的异步回调、`model_usage` 的作用域查询一并迁移）；`smoke_plugins` 新增静态检查，直接引用 `#tool-view` 即 FAIL。全量 15 项 smoke **1045/1046**（仅 TTS 502）。
 - **round 115 宿主视图**：新增可收缩右栏快捷按钮与上下分屏（`ui/web/static/index.html`、`app.js`、`app.css`、`modules/settings_store.py`、`ui/web/server.py` 的 `/api/settings/quickbar`）。快捷按钮列表存 `data/settings.json` 的 `quickbar.pinned`（宿主偏好，非业务数据）；右栏收缩存 localStorage；分屏开关、上下区插件、聚焦区为内存态，刷新回单视图。未改任何插件代码、未建表、未向 `plugins/` 写运行时数据。已知限制见 §7 第 13 条。
 - **插件**：24 个插件目录——21 个有前端卡片（ai、aidebug、bg_library、book_reader、css_exp、expdata、filejudge、finance、market、model_usage、netexp、pdf、pixel_art、project_manager、promptgen、rivet、russian、schedule、screeps、sim、urlarch）+ 3 个 backend-only（webchat、cobuild、tts）；23 个 entry。
 - **插件市场（round 91）**：左侧栏「插件市场」；双索引 remote（覆盖）+ local（INFO 组装），展示四源合并 INFO > remote > local；三类：预置 5、公共库 2（finance/promptgen，Release 安装）、本地开发 17（无按钮）。**Release 为唯一分发源**，`market/packages/` 为空目录；安装下载到 `downloads/`，卸载默认保留 `data/plugins/<id>/`。
-- **15 项 smoke 基线**：round 115 全量复跑 **1044/1045**（唯一 FAIL：`smoke_web` 的 TTS 502 外部网络问题）；`validate` 24/24 插件 `ok: true`。分项：smoke_plugins 189/189、smoke_startup_once 34/34、smoke_web 74/75、smoke_plugin_decoupling 500/500、smoke_finance 34/34、smoke_model_usage 49/49、smoke_reader_range 25/25、smoke_pm 23/23、smoke_books 11/11、smoke_file_preview 17/17、smoke_pdf 17/17、smoke_plugin_data_dirs 13/13、smoke_plugin_module_off 10/10、smoke_market 37/37、smoke_info_cards 11/11。
+- **15 项 smoke 基线**：round 117 全量复跑 **1045/1046**（唯一 FAIL：`smoke_web` 的 TTS 502 外部网络问题）；`validate` 24/24 插件 `ok: true`。分项：smoke_plugins 190/190、smoke_startup_once 34/34、smoke_web 74/75、smoke_plugin_decoupling 500/500、smoke_finance 34/34、smoke_model_usage 49/49、smoke_reader_range 25/25、smoke_pm 23/23、smoke_books 11/11、smoke_file_preview 17/17、smoke_pdf 17/17、smoke_plugin_data_dirs 13/13、smoke_plugin_module_off 10/10、smoke_market 37/37、smoke_info_cards 11/11。
 - **Git**：`main` 领先 `origin/main`（round 115 提交后 21 个），**未 push**（push 前需用户确认，并复核 `.gitignore` 例外）。
 - **剩余待办**：以交接文档三项必做为上（本轮未改其内容）；css_exp 后续（跨插件读取收藏接口、创建器、外链图片本地化）留待后续轮。
 - **剩余 pending**：无（`Server.start` 已在 round 80 修复并连续 20 次通过）。

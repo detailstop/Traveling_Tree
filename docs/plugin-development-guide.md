@@ -55,6 +55,7 @@ plugins/<id>/
 - [ ] `shared_features` 只引用宿主共享脚本；注入时机标注“需执行 Agent 核实”（附录 D）
 - [ ] `provides` 写能力名（能力描述、不参与依赖检查）；`consumes` 写插件 id、只表直接调用，宿主中介不算（§二、§十）
 - [ ] 解耦：删除/改名插件后宿主零 Traceback（§六）
+- [ ] 前端入口 `render(container)` 使用传入容器（`container.querySelector` 等），禁止直接取 `#tool-view`；`smoke_plugins` 会静态检查（命中即 FAIL）
 - [ ] 测试：`smoke_plugins` + 相关 smoke 通过（§六）
 - [ ] 文档：README/白皮书/附件已同步，规则不重复（§八、§十一）
 - [ ] 插件 `README.md` 存在且含固定小节：职责 / 入口与路由 / 数据表 / 依赖 / 注意事项（§4.1；白皮书 §十一）

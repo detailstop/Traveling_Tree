@@ -1,6 +1,7 @@
 'use strict';
 /* 项目管理器：仅存储手填提示词、导入文本结果并保存上下文快照。 */
 (function () {
+  let ROOT = null;
 const PM_STATUS = {
   empty: ['未开始', 'empty'],
   prompt_ready: ['提示词就绪', 'prompt_ready'],
@@ -114,8 +115,9 @@ async function pmCopy(content, label) {
   catch (_) { pmError(new Error('复制失败，请检查浏览器剪贴板权限。')); }
 }
 
-function renderProjectManager() {
-  const host = $('#tool-view');
+function renderProjectManager(container) {
+  ROOT = container;
+  const host = ROOT;
   if (!host) return;
   if (!$('#pm-view')) host.innerHTML = '<div id="pm-view"></div>';
   const root = $('#pm-view');

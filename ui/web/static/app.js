@@ -887,7 +887,7 @@ function loadToolFeature(file) {
 }
 
 async function loadAndRenderTool(toolId, box, paneName) {
-  box = box || $('#tool-view');
+  if (!box) return;   // 分屏两区各自独立容器，必须由调用方传入
   paneName = paneName || 'top';
   const plugin = PLUGIN_TOOLS.find(t => t.id === toolId) || null;
   const file = TOOL_FEATURE_FILES[toolId];
@@ -910,9 +910,8 @@ async function loadAndRenderTool(toolId, box, paneName) {
     if (S.page !== 'tools' || RT_SPLIT.tool[paneName] !== toolId) return;
     const render = window.__toolRenderers[toolId];
     if (typeof render !== 'function') throw new Error('功能入口未注册：' + toolId);
-    // 插件 render() 约定读取 #tool-view：渲染前把 id 放到目标区，避免上下区串写。
-    setToolViewId(paneName);
-    render();
+    // 插件契约：入口 render(container) 使用传入容器，禁止直接取 #tool-view。
+    render(box);
   } catch (e) {
     if (S.page === 'tools' && RT_SPLIT.tool[paneName] === toolId) {
       box.innerHTML = emptyHTML('⚠️', '功能加载失败', esc(e.message));
@@ -934,18 +933,13 @@ function toolsSplitHTML() {
   return `<div class="tool-split" id="tool-split">
     <section class="tool-pane focused" data-pane="top" aria-label="上半区">
       <div class="tool-pane-head" data-head="top"></div>
-      <div class="tool-pane-body" id="tool-view"></div>
+      <div class="tool-pane-body"></div>
     </section>
     <section class="tool-pane" data-pane="bottom" aria-label="下半区" hidden>
       <div class="tool-pane-head" data-head="bottom"></div>
       <div class="tool-pane-body"></div>
     </section>
   </div>`;
-}
-function setToolViewId(name) {
-  $$('.tool-pane-body').forEach(b => { if (b.id === 'tool-view') b.removeAttribute('id'); });
-  const body = paneBody(name);
-  if (body) body.id = 'tool-view';
 }
 function paneEmptyHTML() {
   return '<div class="pane-empty">点击右栏快捷按钮，把插件加载到当前聚焦区</div>';
@@ -982,7 +976,6 @@ function updateSplitUI() {
 function focusPane(name) {
   if (!RT_SPLIT.on || RT_SPLIT.focused === name) return;
   RT_SPLIT.focused = name;
-  setToolViewId(name);
   updateSplitUI();
 }
 function renderToolIntoPane(name, toolId) {
@@ -1002,7 +995,6 @@ function renderToolIntoPane(name, toolId) {
     if (clear) clear.onclick = () => clearBottomPane(true);
   }
   body.innerHTML = '<div class="gcard" style="padding:24px;color:var(--text-dim);">正在加载功能…</div>';
-  setToolViewId(name);
   loadAndRenderTool(toolId, body, name);
 }
 function clearBottomPane(notify) {
@@ -1010,7 +1002,6 @@ function clearBottomPane(notify) {
   if (body) body.innerHTML = paneEmptyHTML();
   clearPaneHead('bottom');
   RT_SPLIT.tool.bottom = null;
-  setToolViewId(RT_SPLIT.on ? RT_SPLIT.focused : 'top');
   updateSplitUI();
   if (notify) toast('已清空下半区视图', 'info');
 }
@@ -1021,7 +1012,6 @@ function closeSplit() {
   const body = paneBody('bottom');
   if (body) body.innerHTML = '';
   clearPaneHead('bottom');
-  setToolViewId('top');
   updateSplitUI();
   toast('已关闭分屏，保留上半区', 'info');
 }
@@ -1029,7 +1019,6 @@ function toggleSplit() {
   if (RT_SPLIT.on) { closeSplit(); return; }
   RT_SPLIT.on = true;
   RT_SPLIT.focused = 'top';
-  setToolViewId('top');
   updateSplitUI();
   toast('已开启上下分屏：点下半区空白可切换聚焦区', 'success');
 }
@@ -1046,7 +1035,6 @@ function openToolInFocused(toolId) {
   if (RT_SPLIT.tool[target] === toolId) { toast('该插件已在当前聚焦区', 'info'); return; }
   if (RT_SPLIT.tool[other] === toolId) { toast('同一插件不能同时占用上下区', 'warn'); return; }
   if (target === 'top') S.tool = toolId;
-  setToolViewId(target);
   renderToolIntoPane(target, toolId);
 }
 
@@ -1169,21 +1157,15 @@ function wireRail() {
   };
 }
 function wirePaneFocus() {
-  // pointerdown 发生在插件处理器之前：先把 #tool-view 放到被点的区，插件内部再查询时不会串区。
   document.addEventListener('pointerdown', e => {
     const pane = e.target.closest && e.target.closest('.tool-pane');
     if (!pane) return;
     const name = pane.dataset.pane;
     if (name === 'bottom' && !RT_SPLIT.on) return;
     const body = pane.querySelector('.tool-pane-body');
-    if (body && body.id !== 'tool-view') setToolViewId(name);
     // 只有“非交互空白处”（区背景/空态提示）才切换聚焦；按钮、输入框、卡片都不抢聚焦。
     const blank = e.target === body || e.target === pane || e.target.classList.contains('pane-empty');
     if (blank) focusPane(name);
-  }, true);
-  document.addEventListener('keydown', e => {
-    const pane = e.target.closest && e.target.closest('.tool-pane');
-    if (pane && (pane.dataset.pane !== 'bottom' || RT_SPLIT.on)) setToolViewId(pane.dataset.pane);
   }, true);
 }
 

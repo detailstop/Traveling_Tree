@@ -1137,6 +1137,25 @@ def main() -> int:
             raw = css_file.read_text(encoding="utf-8").splitlines()
             print(f"  {pid}: {len(raw)} 行 / {css_file.stat().st_size}B")
 
+    # 插件前端渲染契约：入口 render(container) 必须使用传入容器，禁止直接取 #tool-view。
+    # 注释行（// 、* 、/* 开头）视为历史说明，不计入；白名单默认空。
+    TOOL_VIEW_RE = re.compile(
+        r"getElementById\(\s*['\"]tool-view['\"]\s*\)"
+        r"|querySelector(?:All)?\(\s*['\"]#tool-view"
+        r"|\$\(\s*['\"]#tool-view"
+        r"|\$\$\(\s*['\"]#tool-view"
+        r"|['\"]#tool-view['\"]"
+    )
+    tool_view_hits: list[str] = []
+    for feat in sorted(PLUGINS.glob("*/feature*.js")):
+        for idx, line in enumerate(feat.read_text(encoding="utf-8").splitlines(), 1):
+            if line.lstrip().startswith(("//", "*", "/*")):
+                continue
+            if TOOL_VIEW_RE.search(line):
+                tool_view_hits.append(f"{feat.parent.name}:{idx}")
+    check("插件 render 使用传入容器（无 #tool-view 直接引用）",
+          not tool_view_hits, " | ".join(tool_view_hits[:8]))
+
     print(f"\nRESULT: {ok.count(True)}/{len(ok)} PASS")
     return 0 if all(ok) else 1
 

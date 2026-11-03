@@ -1,6 +1,7 @@
 'use strict';
 /* 按需加载的功能模块：sim */
 (function () {
+  let ROOT = null;
 /* ============================================================
    随机模拟器（蒙特卡洛 · 条件多叉树）
    L1 模拟问题 → L2 初始条件 → 动画模拟 → 统计可视化
@@ -563,14 +564,15 @@ function saveSimCfg() {
   localStorage.setItem(SIM_KEY, JSON.stringify({ model: S.sim.model, cfg: S.sim.cfg }));
 }
 
-function renderSimTool() {
+function renderSimTool(container) {
+  ROOT = container;
   if (S.sim && S.sim.raf) { cancelAnimationFrame(S.sim.raf); S.sim.raf = null; }
   const dd = loadJSON(SIM_KEY, null) || {};
   const model = dd.model && SIM_MODELS[dd.model] ? dd.model : 'drunk';
   const M = SIM_MODELS[model];
   const defs = simAllDefs(M);
   const cfg = Object.assign(defs, dd.cfg || {});
-  const box = $('#tool-view');
+  const box = ROOT;
   box.innerHTML = `
     <div class="sim-wrap">
       <div class="sim-left">
@@ -649,7 +651,7 @@ function renderSimTool() {
     nm.fields.forEach(f => { nd[f.k] = f.def; });
     S.sim.cfg = nd;
     saveSimCfg();
-    renderSimTool();
+    renderSimTool(ROOT);
   };
   box.querySelector('.sim-fields').onchange = e => {
     const inp = e.target.closest('.sim-in');
@@ -659,7 +661,7 @@ function renderSimTool() {
     S.sim.running = false; cancelAnimationFrame(S.sim.raf); S.sim.raf = null;
     const run = $('#sim-run'); if (run) run.textContent = '▶ 开始';
     if (['dirMode', 'boundary', 'cliffMode', 'wallShape', 'cliffShape'].includes(inp.dataset.k)) {
-      renderSimTool();   // 条件联动：重建条件化字段
+      renderSimTool(ROOT);   // 条件联动：重建条件化字段
       return;
     }
     reset();

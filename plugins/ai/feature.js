@@ -1,6 +1,7 @@
 'use strict';
 /* 按需加载的功能模块：ai */
 (function () {
+  let ROOT = null;
 /* ============================================================
    AI 工作台（多平台对话：DeepSeek · Kimi · 豆包待接入）
    ============================================================ */
@@ -36,8 +37,9 @@ async function aiRestoreState() {
   } catch (e) { /* 后端不可用时保持默认 */ }
 }
 function aiTab() { return S.ai ? S.ai.tab : 'deepseek'; }
-async function renderAITool() {
-  const box = $('#tool-view');
+async function renderAITool(container) {
+  ROOT = container;
+  const box = ROOT;
   await aiRestoreState();
   const isWeb = aiTab() === 'web';
   box.innerHTML = `
@@ -77,12 +79,12 @@ async function renderAITool() {
   if (aiAbortBtn) aiAbortBtn.onclick = () => fqAbortNow('AI 工作台对话');
   $('#ai-setkey').onclick = () => aiSetKey();
   $('#ai-web-login').onclick = () => webLogin();
-  document.querySelectorAll('#tool-view [data-ai-pid]').forEach(b => {
+  ROOT.querySelectorAll('[data-ai-pid]').forEach(b => {
     b.onclick = () => {
       if (b.dataset.aiPid === aiTab()) return;
       S.ai.tab = b.dataset.aiPid;
       aiSaveState();
-      renderAITool();
+      renderAITool(ROOT);
     };
   });
 }

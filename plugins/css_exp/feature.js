@@ -3,6 +3,7 @@
    /api/plugin/css_exp/app/... 兜底（子资源不受 Content-Disposition 影响）。
    同源读取 iframe DOM：外部项目为可信 MIT 开源代码，未做严格沙箱隔离（见 README）。 */
 (function () {
+  let ROOT = null;
   'use strict';
 
   const TOOL_ID = 'css_exp';
@@ -267,8 +268,9 @@
     if (S.view === 'mine') loadList();
   }
 
-  function render() {
-    const box = document.querySelector('#tool-view');
+  function render(container) {
+  ROOT = container;
+    const box = ROOT;
     if (!box) return;
     box.innerHTML = `<div class="cx-shell">
       <div class="cx-bar">

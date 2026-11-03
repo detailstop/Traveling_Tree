@@ -2,6 +2,7 @@
 /* 像素画与插件绘制：单帧单图层像素编辑器 + 作品库 + 通篇视图资产引用。
    数据存 SQLite（pixel_artworks / pixel_asset_refs），不调用任何 AI。 */
 (function () {
+  let ROOT = null;
   const $ = (s, p = document) => p.querySelector(s);
   const $$ = (s, p = document) => Array.from(p.querySelectorAll(s));
   const DEFAULT_PALETTE = [
@@ -668,8 +669,9 @@
     }
   }
 
-  async function renderTool() {
-    PX.root = document.querySelector('#tool-view');
+  async function renderTool(container) {
+  ROOT = container;
+    PX.root = ROOT;
     if (!PX.root) return;
     try {
       await Promise.all([loadWorks(), loadAssets()]);

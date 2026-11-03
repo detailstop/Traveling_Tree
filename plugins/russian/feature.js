@@ -1,6 +1,7 @@
 'use strict';
 /* 按需加载的旅行之木模块 */
 (function () {
+  let ROOT = null;
 /* ---------------- 闪卡（三区域 + 喇叭） ---------------- */
 function flashCardHTML(item) {
   return `
@@ -254,8 +255,9 @@ async function ruRefreshTop() {
   } catch (e) { /* 静默 */ }
 }
 
-async function renderRussianHub() {
-  const box = $('#tool-view');
+async function renderRussianHub(container) {
+  ROOT = container;
+  const box = ROOT;
   box.innerHTML = '<div class="gcard" style="padding:24px;color:var(--text-dim);">正在加载学习核心…</div>';
   try {
     await ruLoadBootstrap();

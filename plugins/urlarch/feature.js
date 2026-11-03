@@ -1,6 +1,7 @@
 'use strict';
 /* 按需加载的功能模块：urlarch（站点统筹 · 显示名） */
 (function () {
+  let ROOT = null;
 let uaState = null;
 // 单组折叠状态：只存在页面会话内存（刷新后恢复默认展开），不写 localStorage。
 const uaCollapsedGroups = new Set();
@@ -171,8 +172,9 @@ function uaSave(state) {
   api('/api/plugin/urlarch/state', { method: 'PUT', body: { state } }).catch(() => {});
 }
 
-async function renderUrlArchTool() {
-  const box = $('#tool-view');
+async function renderUrlArchTool(container) {
+  ROOT = container;
+  const box = ROOT;
   try { uaState = await uaFetch(); }
   catch (e) { box.innerHTML = emptyHTML('⚠️', '网址库加载失败', esc(e.message)); return; }
   box.innerHTML = `

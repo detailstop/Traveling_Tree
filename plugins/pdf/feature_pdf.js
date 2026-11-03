@@ -1,6 +1,7 @@
 'use strict';
 /* 按需加载的功能模块：pdf */
 (function () {
+  let ROOT = null;
 /* ============================================================
    PDF 工具（合并 / 分割 / 压缩 / 图片转 PDF）
    ============================================================ */
@@ -8,9 +9,10 @@ const PDF_TABS = [
   ['merge', '🔗 合并'], ['split', '✂️ 分割'], ['compress', '🗜️ 压缩'], ['images', '🖼️ 图片转 PDF'],
 ];
 
-function renderPDFTool() {
+function renderPDFTool(container) {
+  ROOT = container;
   S.pdf = S.pdf || { tab: 'merge', cMode: 'pdf', merge: [], split: [], compress: [], compressImg: [], images: [] };
-  const box = $('#tool-view');
+  const box = ROOT;
   box.innerHTML = `
     <div class="gcard">
       <div class="section-title"><span class="st-emoji">📄</span>PDF 工具
@@ -19,7 +21,7 @@ function renderPDFTool() {
         `<button class="pdf-tab${S.pdf.tab === id ? ' on' : ''}" data-tab="${id}">${lb}</button>`).join('')}</div>
       <div id="pdf-body"></div>
     </div>`;
-  $$('.pdf-tab').forEach(b => b.onclick = () => { S.pdf.tab = b.dataset.tab; renderPDFTool(); });
+  $$('.pdf-tab').forEach(b => b.onclick = () => { S.pdf.tab = b.dataset.tab; renderPDFTool(ROOT); });
   pdfRenderTab();
 }
 

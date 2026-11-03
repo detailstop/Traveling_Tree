@@ -1,17 +1,19 @@
 'use strict';
 /* 按需加载的功能模块：batch */
 (function () {
+  let ROOT = null;
 /* ============================================================
    批量压缩（按路径扫描 → 原位替换）
    ============================================================ */
 const BATCH_PATH_KEY = 'rt_batch_path';
 
-function renderBatchTool() {
+function renderBatchTool(container) {
+  ROOT = container;
   S.batch = S.batch || {
     path: localStorage.getItem(BATCH_PATH_KEY) || '',
     minKb: 200, iq: 70, plv: 1, target: 0, files: null, results: null,
   };
-  const box = $('#tool-view');
+  const box = ROOT;
   const b = S.batch;
   box.innerHTML = `
     <div class="gcard">

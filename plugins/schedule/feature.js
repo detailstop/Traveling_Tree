@@ -1,6 +1,7 @@
 'use strict';
 /* 按需加载的功能模块：schedule */
 (function () {
+  let ROOT = null;
 const SCHEDULE_YEAR = new Date().getFullYear();
 let weekStore = {};
 let weekLoaded = false;
@@ -223,8 +224,9 @@ function killRollChain(id) {
 }
 
 /* ---------------- 计划表（通用 · 自由增删 · 逐条打卡） ---------------- */
-async function renderScheduleView() {
-  const box = $('#tool-view');
+async function renderScheduleView(container) {
+  ROOT = container;
+  const box = ROOT;
   try { await ensureWeekStore(); }
   catch (e) { box.innerHTML = emptyHTML('⚠️', '计划表加载失败', esc(e.message)); return; }
   box.innerHTML = `

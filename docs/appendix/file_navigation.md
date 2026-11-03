@@ -2,9 +2,9 @@
 
 > 只读摘要，勿手改。本文件由 docs/appendix/file_navigation.json 生成；结构与去留决定以 JSON 为准。
 
-- 生成时间：2026-11-03T17:05:34+03:00
-- 轮次：115
-- 待办：1 条；已决定：790 条
+- 生成时间：2026-11-03T21:50:34+03:00
+- 轮次：117
+- 待办：1 条；已决定：818 条
 
 ## 待办
 
@@ -16,6 +16,34 @@
 
 | 路径 | 决定 | 原因 | 状态 | 轮次 | 时间 | 备份路径 |
 | --- | --- | --- | --- | --- | --- | --- |
+| plugins/ai/feature.js | 前端入口迁移到 render(container)（round 117） | 入口改为 render(container) 并在首行 ROOT = container；内部 #tool-view 直接引用改为 ROOT 或 ROOT.querySelector(All)，异步回调使用入口容器，不再依赖全局 id；配合宿主两区独立容器修复后台异步重绘覆盖另一区的问题。 | done | 117 | 2026-11-03T21:50:34+03:00 |  |
+| plugins/aidebug/feature.js | 前端入口迁移到 render(container)（round 117） | 入口改为 render(container) 并在首行 ROOT = container；内部 #tool-view 直接引用改为 ROOT 或 ROOT.querySelector(All)，异步回调使用入口容器，不再依赖全局 id；配合宿主两区独立容器修复后台异步重绘覆盖另一区的问题。 | done | 117 | 2026-11-03T21:50:34+03:00 |  |
+| plugins/bg_library/feature.js | 前端入口迁移到 render(container)（round 117） | 入口改为 render(container) 并在首行 ROOT = container；内部 #tool-view 直接引用改为 ROOT 或 ROOT.querySelector(All)，异步回调使用入口容器，不再依赖全局 id；配合宿主两区独立容器修复后台异步重绘覆盖另一区的问题。 | done | 117 | 2026-11-03T21:50:34+03:00 |  |
+| plugins/book_reader/feature.js | 前端入口迁移到 render(container)（round 117） | 入口改为 render(container) 并在首行 ROOT = container；内部 #tool-view 直接引用改为 ROOT 或 ROOT.querySelector(All)，异步回调使用入口容器，不再依赖全局 id；配合宿主两区独立容器修复后台异步重绘覆盖另一区的问题。 | done | 117 | 2026-11-03T21:50:34+03:00 |  |
+| plugins/css_exp/feature.js | 前端入口迁移到 render(container)（round 117） | 入口改为 render(container) 并在首行 ROOT = container；内部 #tool-view 直接引用改为 ROOT 或 ROOT.querySelector(All)，异步回调使用入口容器，不再依赖全局 id；配合宿主两区独立容器修复后台异步重绘覆盖另一区的问题。 | done | 117 | 2026-11-03T21:50:34+03:00 |  |
+| plugins/expdata/feature.js | 前端入口迁移到 render(container)（round 117） | 入口改为 render(container) 并在首行 ROOT = container；内部 #tool-view 直接引用改为 ROOT 或 ROOT.querySelector(All)，异步回调使用入口容器，不再依赖全局 id；配合宿主两区独立容器修复后台异步重绘覆盖另一区的问题。 | done | 117 | 2026-11-03T21:50:34+03:00 |  |
+| plugins/filejudge/feature.js | 前端入口迁移到 render(container)（round 117） | 入口改为 render(container) 并在首行 ROOT = container；内部 #tool-view 直接引用改为 ROOT 或 ROOT.querySelector(All)，异步回调使用入口容器，不再依赖全局 id；配合宿主两区独立容器修复后台异步重绘覆盖另一区的问题。 | done | 117 | 2026-11-03T21:50:34+03:00 |  |
+| plugins/finance/feature_finance.js | 前端入口迁移到 render(container)（round 117） | 入口改为 render(container) 并在首行 ROOT = container；内部 #tool-view 直接引用改为 ROOT 或 ROOT.querySelector(All)，异步回调使用入口容器，不再依赖全局 id；配合宿主两区独立容器修复后台异步重绘覆盖另一区的问题。 | done | 117 | 2026-11-03T21:50:34+03:00 |  |
+| plugins/finance/feature_finquant.js | 前端入口迁移到 render(container)（round 117） | 入口改为 render(container) 并在首行 ROOT = container；内部 #tool-view 直接引用改为 ROOT 或 ROOT.querySelector(All)，异步回调使用入口容器，不再依赖全局 id；配合宿主两区独立容器修复后台异步重绘覆盖另一区的问题。 | done | 117 | 2026-11-03T21:50:34+03:00 |  |
+| plugins/model_usage/feature.js | 前端入口迁移到 render(container)（round 117） | 入口改为 render(container) 并在首行 ROOT = container；内部 #tool-view 直接引用改为 ROOT 或 ROOT.querySelector(All)，异步回调使用入口容器，不再依赖全局 id；配合宿主两区独立容器修复后台异步重绘覆盖另一区的问题。 | done | 117 | 2026-11-03T21:50:34+03:00 |  |
+| plugins/netexp/feature.js | 前端入口迁移到 render(container)（round 117） | 入口改为 render(container) 并在首行 ROOT = container；内部 #tool-view 直接引用改为 ROOT 或 ROOT.querySelector(All)，异步回调使用入口容器，不再依赖全局 id；配合宿主两区独立容器修复后台异步重绘覆盖另一区的问题。 | done | 117 | 2026-11-03T21:50:34+03:00 |  |
+| plugins/pdf/feature_batch.js | 前端入口迁移到 render(container)（round 117） | 入口改为 render(container) 并在首行 ROOT = container；内部 #tool-view 直接引用改为 ROOT 或 ROOT.querySelector(All)，异步回调使用入口容器，不再依赖全局 id；配合宿主两区独立容器修复后台异步重绘覆盖另一区的问题。 | done | 117 | 2026-11-03T21:50:34+03:00 |  |
+| plugins/pdf/feature_pdf.js | 前端入口迁移到 render(container)（round 117） | 入口改为 render(container) 并在首行 ROOT = container；内部 #tool-view 直接引用改为 ROOT 或 ROOT.querySelector(All)，异步回调使用入口容器，不再依赖全局 id；配合宿主两区独立容器修复后台异步重绘覆盖另一区的问题。 | done | 117 | 2026-11-03T21:50:34+03:00 |  |
+| plugins/pixel_art/feature.js | 前端入口迁移到 render(container)（round 117） | 入口改为 render(container) 并在首行 ROOT = container；内部 #tool-view 直接引用改为 ROOT 或 ROOT.querySelector(All)，异步回调使用入口容器，不再依赖全局 id；配合宿主两区独立容器修复后台异步重绘覆盖另一区的问题。 | done | 117 | 2026-11-03T21:50:34+03:00 |  |
+| plugins/project_manager/feature.js | 前端入口迁移到 render(container)（round 117） | 入口改为 render(container) 并在首行 ROOT = container；内部 #tool-view 直接引用改为 ROOT 或 ROOT.querySelector(All)，异步回调使用入口容器，不再依赖全局 id；配合宿主两区独立容器修复后台异步重绘覆盖另一区的问题。 | done | 117 | 2026-11-03T21:50:34+03:00 |  |
+| plugins/promptgen/feature.js | 前端入口迁移到 render(container)（round 117） | 入口改为 render(container) 并在首行 ROOT = container；内部 #tool-view 直接引用改为 ROOT 或 ROOT.querySelector(All)，异步回调使用入口容器，不再依赖全局 id；配合宿主两区独立容器修复后台异步重绘覆盖另一区的问题。 | done | 117 | 2026-11-03T21:50:34+03:00 |  |
+| plugins/rivet/feature.js | 前端入口迁移到 render(container)（round 117） | 入口改为 render(container) 并在首行 ROOT = container；内部 #tool-view 直接引用改为 ROOT 或 ROOT.querySelector(All)，异步回调使用入口容器，不再依赖全局 id；配合宿主两区独立容器修复后台异步重绘覆盖另一区的问题。 | done | 117 | 2026-11-03T21:50:34+03:00 |  |
+| plugins/russian/feature.js | 前端入口迁移到 render(container)（round 117） | 入口改为 render(container) 并在首行 ROOT = container；内部 #tool-view 直接引用改为 ROOT 或 ROOT.querySelector(All)，异步回调使用入口容器，不再依赖全局 id；配合宿主两区独立容器修复后台异步重绘覆盖另一区的问题。 | done | 117 | 2026-11-03T21:50:34+03:00 |  |
+| plugins/schedule/feature.js | 前端入口迁移到 render(container)（round 117） | 入口改为 render(container) 并在首行 ROOT = container；内部 #tool-view 直接引用改为 ROOT 或 ROOT.querySelector(All)，异步回调使用入口容器，不再依赖全局 id；配合宿主两区独立容器修复后台异步重绘覆盖另一区的问题。 | done | 117 | 2026-11-03T21:50:34+03:00 |  |
+| plugins/screeps/feature.js | 前端入口迁移到 render(container)（round 117） | 入口改为 render(container) 并在首行 ROOT = container；内部 #tool-view 直接引用改为 ROOT 或 ROOT.querySelector(All)，异步回调使用入口容器，不再依赖全局 id；配合宿主两区独立容器修复后台异步重绘覆盖另一区的问题。 | done | 117 | 2026-11-03T21:50:34+03:00 |  |
+| plugins/sim/feature.js | 前端入口迁移到 render(container)（round 117） | 入口改为 render(container) 并在首行 ROOT = container；内部 #tool-view 直接引用改为 ROOT 或 ROOT.querySelector(All)，异步回调使用入口容器，不再依赖全局 id；配合宿主两区独立容器修复后台异步重绘覆盖另一区的问题。 | done | 117 | 2026-11-03T21:50:34+03:00 |  |
+| plugins/urlarch/feature.js | 前端入口迁移到 render(container)（round 117） | 入口改为 render(container) 并在首行 ROOT = container；内部 #tool-view 直接引用改为 ROOT 或 ROOT.querySelector(All)，异步回调使用入口容器，不再依赖全局 id；配合宿主两区独立容器修复后台异步重绘覆盖另一区的问题。 | done | 117 | 2026-11-03T21:50:34+03:00 |  |
+| ui/web/static/app.js | 分屏改为两区独立容器，移除 #tool-view id 切换（round 117） | 删除 setToolViewId 及所有调用；toolsSplitHTML 两个 .tool-pane-body 均不设 id；loadAndRenderTool 必须接收容器并调用 render(box)；聚焦逻辑只保留高亮/落点判定，不再切 id。 | done | 117 | 2026-11-03T21:50:34+03:00 |  |
+| tests/smoke_plugins.py | 新增 render 容器契约静态检查（round 117） | 扫描 plugins/*/feature*.js，命中 getElementById('tool-view') / querySelector(All)('#tool-view…') / $('#tool-view…') / $$('#tool-view…') / 裸 '#tool-view' 即 FAIL 并列出 插件:行号；注释行豁免、白名单默认空；断言总数 189→190。 | done | 117 | 2026-11-03T21:50:34+03:00 |  |
+| docs/plugin-development-whitepaper.md | §三 render(container) 从约定升级为必须使用传入容器（round 117） | 写明入口签名与 window.__toolRenderers 注册、必须用传入 container、禁止直接取 #tool-view、smoke 静态检查；§7.2 smoke_plugins 基线 190/190，合计 1045/1046。规则本体未改。 | done | 117 | 2026-11-03T21:50:34+03:00 |  |
+| docs/plugin-development-guide.md | §4 检查清单增加 render(container) 容器要求（round 117） | 新增一条：入口使用传入容器（container.querySelector 等），禁止直接取 #tool-view，smoke_plugins 会检查。 | done | 117 | 2026-11-03T21:50:34+03:00 |  |
+| README.md | 同步渲染契约、风险与状态（round 117） | §4 分层约定去掉 id 切换说法；§7 第 13 条改写为容器契约与静态防回归；§12 新增 round 117 条目、smoke 基线 1045/1046。 | done | 117 | 2026-11-03T21:50:34+03:00 |  |
+| docs/appendix/file_navigation.json | 登记 round 117（render(container) 迁移） | 追加 28 条 decided 并 round→117；pending 保留既有 1 条（非本轮事项）；resolved 45 条不动；md 由生成器重生成。验证：走查 5/5（22 entry 逐个加载、4 重点插件、异步隔离）、全量 smoke 1045/1046（仅 TTS 502）、node --check/py_compile 通过。 | done | 117 | 2026-11-03T21:50:34+03:00 |  |
 | ui/web/static/index.html | 新增右栏容器（round 115） | `.app` 内主区右侧新增 `aside#quickrail`：上区 `#split-toggle` 分屏开关（按钮组容器留扩展位、不渲染占位），下区 `#quick-add` 加号 + `#quick-list` 快捷按钮列表，`#rail-toggle` 收缩/展开；纯 DOM 骨架，无业务数据。 | done | 115 | 2026-11-03T17:05:34+03:00 |  |
 | ui/web/static/app.js | 宿主视图基础设施：右栏、收缩记忆、上下分屏、聚焦区、快捷按钮（round 115） | `RT_SPLIT` 内存态（分屏开关/聚焦区/上下区所选插件）；`renderTools` 改为 `#tool-split` 上下两区，`#tool-view` id 按聚焦区切换（插件仍渲染到 `#tool-view`，不改插件契约）；`pointerdown` 捕获时切 id、仅“非交互空白处”切聚焦；快捷按钮增删走 `/api/settings/quickbar`，列表存 `data/settings.json.quickbar`；右栏收缩只 `localStorage.setItem('rt_quickrail_collapsed')`；关闭分屏清空下半区 DOM、聚焦回上区；互斥/重复加载轻提示。 | done | 115 | 2026-11-03T17:05:34+03:00 |  |
 | ui/web/static/app.css | 右栏与分屏样式（round 115） | `.quickrail`/`.rail-*`/`.quick-*`/`.qf-*` 右栏样式；`.tool-split`/`.tool-pane`/`.pane-empty` 分屏样式（上下 50/50、`min-height:420px`、聚焦高亮、窄屏适配）；只新增，不改既有布局类语义。 | done | 115 | 2026-11-03T17:05:34+03:00 |  |

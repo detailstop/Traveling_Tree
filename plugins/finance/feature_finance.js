@@ -2,6 +2,7 @@
 import * as FIN_SHARED from './shared.js';
 /* 按需加载的功能模块：finance */
 (function () {
+  let ROOT = null;
 const AI_PROVIDERS = [
   { id: 'deepseek', icon: '🪷', label: 'DeepSeek', defaultModel: 'deepseek-chat', hint: 'platform.deepseek.com 注册，sk- 开头' },
   { id: 'kimi', icon: '🧠', label: 'Kimi', defaultModel: 'kimi-k2.6', hint: 'platform.moonshot.cn 注册，sk- 开头；可用模型以账户授权为准（如 kimi-k2.6 / kimi-k2.7-code）' },
@@ -474,7 +475,7 @@ function finqBaseVal(h) {
   return h.value || 0;
 }
 function renderFinQuantTool() {
-  const box = $('#tool-view');
+  const box = ROOT;
   box.innerHTML = `<div class="gcard" style="padding:28px;line-height:1.9;">
     <div class="section-title"><span class="st-emoji">📊</span>理财量化</div>
     <div style="font-size:14px;color:var(--text-dim);">
@@ -1552,7 +1553,7 @@ function fqFlowRender(gid, st) {
   if (ab) ab.onclick = () => fqAbortNow('一键信息流');
   /* 已纳取数据库分布：每轮清洗完成后同步刷新（读已保存的 base 采纳源 + 清洗成功结果） */
   try {
-    const psel = document.querySelector('#tool-view .fq-lsel[data-gid="' + gid + '"]');
+    const psel = ROOT.querySelector('.fq-lsel[data-gid="' + gid + '"]');
     const pcode = psel && psel.value;
     const poolEl = document.getElementById('fq-flow-pool-' + gid);
     if (poolEl && pcode) poolEl.innerHTML = fqFlowPoolHTML(gid);
@@ -1567,7 +1568,7 @@ function fqFlowRender(gid, st) {
 function fqFlowPoolHTML(gid, code) {
   /* 已纳取数据库分布：从 base 采纳源（含 category）+ 清洗成功结果（rt_fq_crawl_clean）统计，
      每轮清洗完成后由 fqFlowRender 自动刷新；按 公司新闻 / 产业新闻 / 投资舆情 三列展示 */
-  const sel = code ? null : document.querySelector('#tool-view .fq-lsel[data-gid="' + gid + '"]');
+  const sel = code ? null : ROOT.querySelector('.fq-lsel[data-gid="' + gid + '"]');
   code = code || (sel && sel.value);
   if (!code) return '';
   const b = fqLayerGet(gid, 'base', code);
@@ -2039,13 +2040,13 @@ function fqFlowRun(gid, btn) {
 function fqFlowRunAsync(gid, btn) {
   /* ⚡ 一键输出有效信息流（返回 promise，供「一键全流程」串联）：校验产品 / 时间窗口 / L1 基础信息；
      检测上次遗留的断点状态 → 询问续跑（保留已抓取 / 已清洗数据）或全新开始（清空该产品爬虫与清洗数据） */
-  const sel = document.querySelector('#tool-view .fq-lsel[data-gid="' + gid + '"]');
+  const sel = ROOT.querySelector('.fq-lsel[data-gid="' + gid + '"]');
   const code = sel && sel.value;
   const p = code && fnLoad().products.find(x => x.code === code);
   if (!p) { toast('请先选择产品', 'warn'); return Promise.resolve({ ok: false, reason: 'no product' }); }
   const l1 = fqLayerGet('L1', 'base', code);
   if (!l1 || !l1.result) { toast('请先运行 长期价值类 · 第 1 层（基础锚定数据层）获取该产品基础信息', 'warn'); return Promise.resolve({ ok: false, reason: 'no L1 base' }); }
-  const twSel = document.querySelector('#tool-view .fq-twin[data-gid="' + gid + '"]');
+  const twSel = ROOT.querySelector('.fq-twin[data-gid="' + gid + '"]');
   const tw = (twSel && twSel.value) || (S.fq.tw && S.fq.tw[gid]) || '一个月';
   const prev = fqFlowStateGet(gid, code);
   /* 进入信息流（全新或续跑）一律清除该产品历史失败排除记录 —— 轮次内数据仅为本地量，不继承过往 */
@@ -2209,13 +2210,13 @@ function fqDsExecOnceWeb(gid, p, tw, states, promptOverride) {
 }
 function fqDsRun(gid, btn) {
   /* 单层按钮版数据源推荐（带结果审查，最多 3 次） */
-  const sel = document.querySelector('#tool-view .fq-lsel[data-gid="' + gid + '"]');
+  const sel = ROOT.querySelector('.fq-lsel[data-gid="' + gid + '"]');
   const code = sel && sel.value;
   const p = code && fnLoad().products.find(x => x.code === code);
   if (!p) { toast('请先选择产品', 'warn'); return; }
   const l1 = fqLayerGet('L1', 'base', code);
   if (!l1 || !l1.result) { toast('请先运行 长期价值类 · 第 1 层（基础锚定数据层）获取该产品基础信息', 'warn'); return; }
-  const twSel = document.querySelector('#tool-view .fq-twin[data-gid="' + gid + '"]');
+  const twSel = ROOT.querySelector('.fq-twin[data-gid="' + gid + '"]');
   const tw = (twSel && twSel.value) || (S.fq.tw && S.fq.tw[gid]) || '一个月';
   const existed = fqLayerGet(gid, 'base', code);
   if (existed && !confirm('该产品已有数据源推荐结果（' + (existed.product || existed.code || '') + ' · ' + existed.ts + '），是否覆盖？')) return;
@@ -2436,13 +2437,13 @@ function fqDsAddModal(g, preInd) {
   ]});
 }
 function fqDsBind(g) {
-  document.querySelectorAll('#tool-view .fq-dsrun').forEach(btn => {
+  ROOT.querySelectorAll('.fq-dsrun').forEach(btn => {
     btn.onclick = () => fqDsRun(btn.dataset.gid, btn);
   });
-  document.querySelectorAll('#tool-view .fq-flowrun').forEach(btn => {
+  ROOT.querySelectorAll('.fq-flowrun').forEach(btn => {
     btn.onclick = () => fqFlowRun(btn.dataset.gid, btn);
   });
-  document.querySelectorAll('#tool-view .fq-twin').forEach(sel => {
+  ROOT.querySelectorAll('.fq-twin').forEach(sel => {
     sel.onchange = () => {
       if (!S.fq.tw) S.fq.tw = {};
       S.fq.tw[sel.dataset.gid] = sel.value;
@@ -2454,21 +2455,21 @@ function fqDsBind(g) {
       fqDsRefreshRef(gid);
     };
   });
-  document.querySelectorAll('#tool-view .fq-twstart, #tool-view .fq-twend').forEach(inp => {
+  ROOT.querySelectorAll('.fq-twstart, .fq-twend').forEach(inp => {
     inp.onchange = () => {
       const gid = inp.dataset.gid;
       if (!S.fq.twRange) S.fq.twRange = {};
       if (!S.fq.twRange[gid]) S.fq.twRange[gid] = {};
-      S.fq.twRange[gid].start = (document.querySelector('#tool-view .fq-twstart[data-gid="' + gid + '"]') || {}).value || '';
-      S.fq.twRange[gid].end = (document.querySelector('#tool-view .fq-twend[data-gid="' + gid + '"]') || {}).value || '';
+      S.fq.twRange[gid].start = (ROOT.querySelector('.fq-twstart[data-gid="' + gid + '"]') || {}).value || '';
+      S.fq.twRange[gid].end = (ROOT.querySelector('.fq-twend[data-gid="' + gid + '"]') || {}).value || '';
       const note = document.getElementById('fq-twnote-' + gid);
       if (note) note.textContent = fqTwText(gid, 'custom');
     };
   });
-  document.querySelectorAll('#tool-view .fq-dsadd1').forEach(btn => {
+  ROOT.querySelectorAll('.fq-dsadd1').forEach(btn => {
     btn.onclick = () => fqDsAddModal(btn.dataset.gid, '');
   });
-  document.querySelectorAll('#tool-view .fq-ds-del').forEach(btn => {
+  ROOT.querySelectorAll('.fq-ds-del').forEach(btn => {
     btn.onclick = () => {
       const lib = fqDsLoad();
       if (!lib[btn.dataset.name]) return;
@@ -2635,7 +2636,7 @@ function fqCrawlHTML(gid, code) {
 }
 function fqCrawlRender(gid) {
   /* 进度可视化：重渲染爬虫层主体并恢复已展开条目 */
-  const body = document.querySelector('#tool-view #fq-crawlbody-' + gid);
+  const body = ROOT.querySelector('#fq-crawlbody-' + gid);
   if (!body) return;
   const openUrls = [];
   body.querySelectorAll('details[open]').forEach(d => { const k = d.getAttribute('data-url'); if (k) openUrls.push(k); });
@@ -3820,7 +3821,7 @@ async function fqMidLayer3Run(gid, code, p, tw, states, st) {
 function fqRunAll(gid, btn) {
   /* 一键分析入口：L1 五层全跑；L2 / L3（中期 / 短期预期类）仅第 3→5 层（第 1-2 层由信息流完成） */
   const layers = FQ_DS_MODE[gid] ? FQ_LAYERS.slice(2) : FQ_LAYERS;
-  const sel = document.querySelector('#tool-view .fq-lsel[data-gid="' + gid + '"]');
+  const sel = ROOT.querySelector('.fq-lsel[data-gid="' + gid + '"]');
   const code = sel && sel.value;
   const p = code && fnLoad().products.find(x => x.code === code);
   if (!p) { toast('请先选择产品', 'warn'); return; }
@@ -4024,7 +4025,7 @@ function fqLayersBind(g) {
     }
     /* 清空 A 组会话缓存，使后续运行立即采用自定义网址池 */
     if (S.fq.webSess) delete S.fq.webSess.A;
-    document.querySelectorAll('#tool-view .fq-lwebnote').forEach(n => {
+    ROOT.querySelectorAll('.fq-lwebnote').forEach(n => {
       n.innerHTML = fqWebSessLabel(g, FQ_LAYERS[0]);
     });
   };
@@ -4044,7 +4045,7 @@ function fqLayersBind(g) {
     refreshDsUrlUI();
     toast('已清空会话池（恢复默认会话）', '');
   };
-  document.querySelectorAll('#tool-view [data-fql]').forEach(hd => {
+  ROOT.querySelectorAll('[data-fql]').forEach(hd => {
     hd.onclick = () => {
       const id = hd.dataset.fql;
       const bd = hd.nextElementSibling;
@@ -4054,27 +4055,27 @@ function fqLayersBind(g) {
       if (isOpen) S.fq.lOpen.delete(id); else S.fq.lOpen.add(id);
     };
   });
-  document.querySelectorAll('#tool-view .fq-lsel').forEach(sel => {
+  ROOT.querySelectorAll('.fq-lsel').forEach(sel => {
     sel.onchange = () => fqBaseShow(sel.dataset.gid, sel.dataset.lid, sel.value);
     if (sel.value) fqBaseShow(sel.dataset.gid, sel.dataset.lid, sel.value);
   });
-  const modeSel = document.querySelector('#tool-view .fq-lmode');
+  const modeSel = ROOT.querySelector('.fq-lmode');
   if (modeSel) {
     modeSel.onchange = () => { S.fq.lmode = modeSel.value; };
   }
-  document.querySelectorAll('#tool-view .fq-lrun').forEach(btn => {
+  ROOT.querySelectorAll('.fq-lrun').forEach(btn => {
     btn.onclick = () => fqLayerRun(btn.dataset.gid, btn.dataset.lid, btn);
   });
-  document.querySelectorAll('#tool-view .fq-lcopy').forEach(btn => {
+  ROOT.querySelectorAll('.fq-lcopy').forEach(btn => {
     btn.onclick = () => fqLayerCopy(btn.dataset.gid, btn.dataset.lid);
   });
-  document.querySelectorAll('#tool-view .fq-lpaste').forEach(btn => {
+  ROOT.querySelectorAll('.fq-lpaste').forEach(btn => {
     btn.onclick = () => fqLayerPaste(btn.dataset.gid, btn.dataset.lid);
   });
-  document.querySelectorAll('#tool-view .fq-lall').forEach(btn => {
+  ROOT.querySelectorAll('.fq-lall').forEach(btn => {
     btn.onclick = () => fqRunAll(btn.dataset.gid, btn);
   });
-  document.querySelectorAll('#tool-view .fq-lfull').forEach(btn => {
+  ROOT.querySelectorAll('.fq-lfull').forEach(btn => {
     btn.onclick = () => fqFlowFullRun(btn.dataset.gid, btn);
   });
   if (FQ_DS_MODE[g.id]) fqDsBind(g);
@@ -4099,7 +4100,7 @@ function fqFlowFullRun(gid, btn) {
         return;
       }
       /* 阶段二：第 3→5 层评分（先校验第 2 层总览已就绪，缺失时给出诊断而不盲目进入评分） */
-      const sel = document.querySelector('#tool-view .fq-lsel[data-gid="' + gid + '"]');
+      const sel = ROOT.querySelector('.fq-lsel[data-gid="' + gid + '"]');
       const code = sel && sel.value;
       const p = code && fnLoad().products.find(x => x.code === code);
       if (!p) { toast('产品信息读取失败，评分阶段已跳过', 'warn'); return; }
@@ -4127,7 +4128,7 @@ function fqLayerCopy(gid, lid) {
   const layer = FQ_LAYERS.find(x => x.id === lid);
   const lidx = FQ_LAYERS.findIndex(x => x.id === lid);
   if (!layer || !layer.prompt) { toast('该层提示词待配置', 'warn'); return; }
-  const sel = document.querySelector('#tool-view .fq-lsel[data-lid="' + FQ_LAYERS[0].id + '"]');
+  const sel = ROOT.querySelector('.fq-lsel[data-lid="' + FQ_LAYERS[0].id + '"]');
   const code = sel && sel.value;
   const p = code && fnLoad().products.find(x => x.code === code);
   if (!p) { toast('请先选择产品', 'warn'); return; }
@@ -4149,7 +4150,7 @@ function fqLayerPaste(gid, lid) {
   const layer = FQ_LAYERS.find(x => x.id === lid);
   const lidx = FQ_LAYERS.findIndex(x => x.id === lid);
   if (!layer || !layer.prompt) { toast('该层提示词待配置', 'warn'); return; }
-  const sel = document.querySelector('#tool-view .fq-lsel[data-lid="' + FQ_LAYERS[0].id + '"]');
+  const sel = ROOT.querySelector('.fq-lsel[data-lid="' + FQ_LAYERS[0].id + '"]');
   const code = sel && sel.value;
   const p = code && fnLoad().products.find(x => x.code === code);
   if (!p) { toast('请先选择产品', 'warn'); return; }
@@ -4402,7 +4403,7 @@ function fqLayerRun(gid, lid, btn) {
   const layer = FQ_LAYERS.find(x => x.id === lid);
   const lidx = FQ_LAYERS.findIndex(x => x.id === lid);
   if (!layer || !layer.prompt) { toast('该层提示词待配置', 'warn'); return; }
-  const sel = document.querySelector('#tool-view .fq-lsel[data-lid="' + FQ_LAYERS[0].id + '"]');
+  const sel = ROOT.querySelector('.fq-lsel[data-lid="' + FQ_LAYERS[0].id + '"]');
   const code = sel && sel.value;
   const p = code && fnLoad().products.find(x => x.code === code);
   if (!p) { toast('请先选择产品', 'warn'); return; }
@@ -4466,7 +4467,7 @@ function fqRunWithAudit(gid, lid, btn, ctx) {
   });
 }
 function renderFactorTool(box) {
-  if (!box) box = $('#tool-view');
+  if (!box) box = ROOT;
   const g = FQ_FACTORS.find(x => x.id === S.fq.factorGroup) || FQ_FACTORS[0];
   const isFlow = g.id !== 'L4';
   box.innerHTML = `
@@ -4497,7 +4498,7 @@ function renderFactorTool(box) {
   if (isFlow) fqLayersBind(g);
 }
 function renderFundNavTool(box) {
-  if (!box) box = $('#tool-view');
+  if (!box) box = ROOT;
   if (!S.fq) S.fq = { view: 'fund', expanded: null, list: null };
   const prod = fnLoad().products;
   if (!S.fq.list) {
@@ -4573,11 +4574,12 @@ function renderFundNavTool(box) {
 }
 
 /* ---------- 主视图 ---------- */
-function renderFinanceTool() {
-  const box = $('#tool-view');
+function renderFinanceTool(container) {
+  ROOT = container;
+  const box = ROOT;
   if (!FIN_CACHE) {
     box.innerHTML = '<div class="gcard" style="padding:24px;color:var(--text-dim);">正在从数据库读取记账数据…</div>';
-    finFetchState().then(renderFinanceTool).catch(e => {
+    finFetchState().then(() => renderFinanceTool(ROOT)).catch(e => {
       box.innerHTML = '<div class="gcard" style="padding:24px;color:#b42318;">记账数据读取失败：' + esc(e.message) + '</div>';
     });
     return;
@@ -4593,7 +4595,7 @@ function renderFinanceTool() {
     const b = e.target.closest('.fin-tab');
     if (!b) return;
     S.fin.tab = b.dataset.tab;
-    renderFinanceTool();
+    renderFinanceTool(ROOT);
   };
   finRender();
 }
@@ -5753,7 +5755,7 @@ function finSnapPage(body, d) {
     });
     saveFin(dd);
     finSaveSnap(dd, 'detail', 0, 0, note, whys, vals);
-    renderFinanceTool(); toast('今日快照已保存 ✓', 'success');
+    renderFinanceTool(ROOT); toast('今日快照已保存 ✓', 'success');
   };
 }
 
@@ -5813,7 +5815,7 @@ function finAcctsPage(body, d) {
       const dd = loadFin();
       const t = finEnsureType(dd, o.type);
       dd.accounts.push({ id: 'a' + Date.now(), name: o.name, type: t, group: o.group || 'ungrouped', cur: o.cur, balance: parseFloat(o.balance) || 0, date: o.date, include: !!o.include });
-      saveFin(dd); renderFinanceTool(); toast('账户已添加 ✓', 'success');
+      saveFin(dd); renderFinanceTool(ROOT); toast('账户已添加 ✓', 'success');
     });
   };
   $('#ac-grp').onclick = () => finFormModal('新增分组', [
@@ -5821,7 +5823,7 @@ function finAcctsPage(body, d) {
   ], null, o => {
     const dd = loadFin();
     dd.acctGroups.push({ id: 'g' + Date.now(), name: o.name });
-    saveFin(dd); renderFinanceTool(); toast('分组已创建 ✓', 'success');
+    saveFin(dd); renderFinanceTool(ROOT); toast('分组已创建 ✓', 'success');
   });
   $('#ac-groups').onclick = e => {
     const b = e.target.closest('[data-gg]');
@@ -5830,14 +5832,14 @@ function finAcctsPage(body, d) {
     if (b.dataset.gg === 'ren') {
       finFormModal('重命名分组', [{ k: 'name', label: '组名' }], g, o => {
         const dd = loadFin(); const it = dd.acctGroups.find(x => x.id === g.id);
-        if (it) it.name = o.name; saveFin(dd); renderFinanceTool(); toast('已保存 ✓', 'success');
+        if (it) it.name = o.name; saveFin(dd); renderFinanceTool(ROOT); toast('已保存 ✓', 'success');
       });
     } else {
       if (!confirm(`删除分组「${g.name}」？组内账户将移至「未分组」`)) return;
       const dd = loadFin();
       dd.acctGroups = dd.acctGroups.filter(x => x.id !== g.id);
       dd.accounts.forEach(a => { if (a.group === g.id) a.group = 'ungrouped'; });
-      saveFin(dd); renderFinanceTool(); toast('分组已删除，账户已移至未分组 ✓', 'success');
+      saveFin(dd); renderFinanceTool(ROOT); toast('分组已删除，账户已移至未分组 ✓', 'success');
     }
   };
   $('#ac-groups').onclick = e => {
@@ -5847,7 +5849,7 @@ function finAcctsPage(body, d) {
     if (!a) return;
     if (b.dataset.act === 'del') {
       if (!confirm(`删除账户「${a.name}」？`)) return;
-      const dd = loadFin(); dd.accounts = dd.accounts.filter(x => x.id !== a.id); saveFin(dd); renderFinanceTool();
+      const dd = loadFin(); dd.accounts = dd.accounts.filter(x => x.id !== a.id); saveFin(dd); renderFinanceTool(ROOT);
     } else {
       const aIsInv = finAcctHoldings(d, a.id).length > 0;
       const aF = [
@@ -5865,7 +5867,7 @@ function finAcctsPage(body, d) {
         const upd = { name: o.name, type: t, group: o.group || 'ungrouped', cur: o.cur, date: o.date, include: !!o.include };
         if (!aIsInv) upd.balance = parseFloat(o.balance) || 0;
         Object.assign(it, upd);
-        saveFin(dd); renderFinanceTool(); toast('已保存 ✓', 'success');
+        saveFin(dd); renderFinanceTool(ROOT); toast('已保存 ✓', 'success');
       });
     }
   };
@@ -5904,7 +5906,7 @@ function finAcctsPage(body, d) {
     const ng = grp.dataset.g;
     if (it.group === ng) return;
     it.group = ng;
-    saveFin(dd); renderFinanceTool(); toast(`已移至「${grp.querySelector('.ag-name').textContent}」✓`, 'success');
+    saveFin(dd); renderFinanceTool(ROOT); toast(`已移至「${grp.querySelector('.ag-name').textContent}」✓`, 'success');
   });
 }
 
@@ -5950,7 +5952,7 @@ function finLiabsPage(body, d) {
   ], null, o => {
     const dd = loadFin();
     dd.liabs.push({ id: 'l' + Date.now(), name: o.name, kind: o.kind, cur: o.cur, principal: parseFloat(o.principal) || 0, remain: parseFloat(o.remain) || 0, rate: parseFloat(o.rate) || 0, due: o.due, note: o.note });
-    saveFin(dd); renderFinanceTool(); toast('负债已添加 ✓', 'success');
+    saveFin(dd); renderFinanceTool(ROOT); toast('负债已添加 ✓', 'success');
   });
   body.querySelector('.fin-table').onclick = e => {
     const b = e.target.closest('[data-act]');
@@ -5958,7 +5960,7 @@ function finLiabsPage(body, d) {
     const i = +b.dataset.i, l = list[i];
     if (b.dataset.act === 'del') {
       if (!confirm(`删除负债「${l.name}」？`)) return;
-      const dd = loadFin(); dd.liabs.splice(i, 1); saveFin(dd); renderFinanceTool();
+      const dd = loadFin(); dd.liabs.splice(i, 1); saveFin(dd); renderFinanceTool(ROOT);
     } else {
       finFormModal('编辑负债', [
         { k: 'name', label: '名称' }, { k: 'kind', label: '类型', type: 'sel', opts: FIN_LIAB_KINDS },
@@ -5968,7 +5970,7 @@ function finLiabsPage(body, d) {
       ], l, o => {
         const dd = loadFin(); const it = dd.liabs.find(x => x.id === l.id);
         Object.assign(it, { name: o.name, kind: o.kind, cur: o.cur, principal: parseFloat(o.principal) || 0, remain: parseFloat(o.remain) || 0, rate: parseFloat(o.rate) || 0, due: o.due, note: o.note });
-        saveFin(dd); renderFinanceTool(); toast('已保存 ✓', 'success');
+        saveFin(dd); renderFinanceTool(ROOT); toast('已保存 ✓', 'success');
       });
     }
   };
@@ -6008,7 +6010,7 @@ function finRealsPage(body, d) {
   ], null, o => {
     const dd = loadFin();
     dd.reals.push({ id: 'r' + Date.now(), name: o.name, cat: o.cat, cur: o.cur, cost: parseFloat(o.cost) || 0, value: parseFloat(o.value) || 0, date: o.date, note: o.note });
-    saveFin(dd); renderFinanceTool(); toast('已添加 ✓', 'success');
+    saveFin(dd); renderFinanceTool(ROOT); toast('已添加 ✓', 'success');
   });
   body.querySelector('.fin-table').onclick = e => {
     const b = e.target.closest('[data-act]');
@@ -6017,7 +6019,7 @@ function finRealsPage(body, d) {
     const dd0 = loadFin();
     if (b.dataset.act === 'del') {
       if (!confirm(`删除「${a.name}」？`)) return;
-      dd0.reals.splice(i, 1); saveFin(dd0); renderFinanceTool();
+      dd0.reals.splice(i, 1); saveFin(dd0); renderFinanceTool(ROOT);
     } else if (b.dataset.act === 'val') {
       finFormModal(`更新「${a.name}」估值`, [
         { k: 'value', label: '当前估值（' + a.cur + '）', def: a.value },
@@ -6025,7 +6027,7 @@ function finRealsPage(body, d) {
       ], null, o => {
         const dd = loadFin(); const it = dd.reals.find(x => x.id === a.id);
         it.value = parseFloat(o.value) || 0; it.date = o.date;
-        saveFin(dd); renderFinanceTool(); toast('估值已更新 ✓', 'success');
+        saveFin(dd); renderFinanceTool(ROOT); toast('估值已更新 ✓', 'success');
       });
     } else {
       finFormModal('编辑实物资产', [
@@ -6036,7 +6038,7 @@ function finRealsPage(body, d) {
       ], a, o => {
         const dd = loadFin(); const it = dd.reals.find(x => x.id === a.id);
         Object.assign(it, { name: o.name, cat: o.cat, cur: o.cur, cost: parseFloat(o.cost) || 0, value: parseFloat(o.value) || 0, date: o.date, note: o.note });
-        saveFin(dd); renderFinanceTool(); toast('已保存 ✓', 'success');
+        saveFin(dd); renderFinanceTool(ROOT); toast('已保存 ✓', 'success');
       });
     }
   };
@@ -6082,7 +6084,7 @@ function finLotTotal(d, h) {
     it.vals = it.vals || [];
     it.vals.push({ date: o.date, value: it.value });
     finSyncHolding(it);
-    saveFin(dd); renderFinanceTool(); toast('总值已更新 ✓（' + o.date + '）', 'success');
+    saveFin(dd); renderFinanceTool(ROOT); toast('总值已更新 ✓（' + o.date + '）', 'success');
   });
 }
 function finLotModal(d, h) {
@@ -6145,7 +6147,7 @@ function finLotAdd(d, h) {
     it.lots = it.lots || [];
     it.lots.push({ id: 'l' + Date.now(), date: o.date, qty: r.qty, cost: r.cost, px: r.price || (r.qty > 0 ? r.cost / r.qty : 0) });
     finSyncHolding(it);
-    saveFin(dd); renderFinanceTool(); toast('已追加买入 ✓', 'success');
+    saveFin(dd); renderFinanceTool(ROOT); toast('已追加买入 ✓', 'success');
   });
 }
 function finLotSell(d, h) {
@@ -6168,18 +6170,18 @@ function finLotSell(d, h) {
     });
     it.lots = kept;
     if (finLotQty(it) <= 1e-6) {
-      if (!confirm('已全部卖完，删除该持仓？')) { finSyncHolding(it); saveFin(dd); renderFinanceTool(); return; }
+      if (!confirm('已全部卖完，删除该持仓？')) { finSyncHolding(it); saveFin(dd); renderFinanceTool(ROOT); return; }
       dd.inv.holdings = dd.inv.holdings.filter(x => x.id !== it.id);
-      saveFin(dd); renderFinanceTool(); toast('持仓已平仓 ✓', 'success'); return;
+      saveFin(dd); renderFinanceTool(ROOT); toast('持仓已平仓 ✓', 'success'); return;
     }
     finSyncHolding(it);
-    saveFin(dd); renderFinanceTool(); toast('已卖出 ' + finNum(n) + ' 份 ✓', 'success');
+    saveFin(dd); renderFinanceTool(ROOT); toast('已卖出 ' + finNum(n) + ' 份 ✓', 'success');
   });
 }
 function finLotClose(d, h) {
   if (!confirm('确认全部平仓「' + h.name + '」？将删除该持仓记录。')) return;
   const dd = loadFin(); dd.inv.holdings = dd.inv.holdings.filter(x => x.id !== h.id);
-  saveFin(dd); renderFinanceTool(); toast('已全部平仓 ✓', 'success');
+  saveFin(dd); renderFinanceTool(ROOT); toast('已全部平仓 ✓', 'success');
 }
 function finLotPrice(d, h) {
   finFormModal('更新当日单价 · ' + h.name, [
@@ -6195,7 +6197,7 @@ function finLotPrice(d, h) {
     it.vals = it.vals || [];
     it.vals.push({ date: o.date, price: it.price, value: finLotQty(it) * it.price });   // 序列存储，不覆盖
     finSyncHolding(it);
-    saveFin(dd); renderFinanceTool(); toast('单价已更新 ✓（' + o.date + '）', 'success');
+    saveFin(dd); renderFinanceTool(ROOT); toast('单价已更新 ✓（' + o.date + '）', 'success');
   });
 }
 function finInvPage(body, d) {
@@ -6280,7 +6282,7 @@ function finInvPage(body, d) {
           </div>`).join('');
       })()}</div>
     </div>`;
-  $('#iv-acct').onchange = e => { S.fin.invAcct = e.target.value; renderFinanceTool(); };
+  $('#iv-acct').onchange = e => { S.fin.invAcct = e.target.value; renderFinanceTool(ROOT); };
   const acctOpts = [['__none__', '暂不挂靠（独立记账）'], ...accts.map(a => [a.id, a.name]), ['__new__', '✏️ 新建对应账户…']];
   $('#iv-add').onclick = () => finFormModal('新增持仓', [
     { k: 'name', label: '产品 / 分类名称', placeholder: '如：余利宝 / 月利宝 / 沪深300ETF' },
@@ -6312,7 +6314,7 @@ function finInvPage(body, d) {
       const nh = { id: id0, name: o.name, type: o.type, acctId, cur: o.cur, date: o.date, price: h0.price, lots: (h0.qty > 0 || h0.cost > 0) ? [{ id: 'l' + Date.now(), date: o.date, qty: h0.qty, cost: h0.cost, px: h0.price }] : [] };
       finSyncHolding(nh); dd.inv.holdings.push(nh);
     }
-    saveFin(dd); renderFinanceTool(); toast('持仓已添加 ✓', 'success');
+    saveFin(dd); renderFinanceTool(ROOT); toast('持仓已添加 ✓', 'success');
   });
   $('#iv-note').onclick = () => finFormModal('投资笔记', [
     { k: 'title', label: '标题', placeholder: '如：为什么买入这只基金' },
@@ -6321,21 +6323,21 @@ function finInvPage(body, d) {
   ], null, o => {
     const dd = loadFin();
     dd.inv.notes.push({ id: 'n' + Date.now(), title: o.title, body: o.body, date: fmtDate(new Date()), gid: o.gid || '' });
-    saveFin(dd); renderFinanceTool(); toast('笔记已保存 ✓', 'success');
+    saveFin(dd); renderFinanceTool(ROOT); toast('笔记已保存 ✓', 'success');
   });
   $('#iv-ngrp').onclick = () => finFormModal('新建笔记架', [
     { k: 'name', label: '架名', placeholder: '如：短线策略 / 长期持有' },
   ], null, o => {
     const dd = loadFin();
     dd.inv.noteGroups.push({ id: 'g' + Date.now(), name: o.name });
-    saveFin(dd); renderFinanceTool(); toast('笔记架已创建 ✓', 'success');
+    saveFin(dd); renderFinanceTool(ROOT); toast('笔记架已创建 ✓', 'success');
   });
   const nv = $('#nv-groups');
   nv.onclick = e => {
     const b = e.target.closest('[data-act],[data-ng]');
     if (!b) return;
     if (b.dataset.act === 'ndel') {
-      const dd = loadFin(); dd.inv.notes = dd.inv.notes.filter(x => x.id !== b.dataset.id); saveFin(dd); renderFinanceTool();
+      const dd = loadFin(); dd.inv.notes = dd.inv.notes.filter(x => x.id !== b.dataset.id); saveFin(dd); renderFinanceTool(ROOT);
       return;
     }
     const gidx = +b.dataset.gi - 1;
@@ -6344,14 +6346,14 @@ function finInvPage(body, d) {
     if (b.dataset.ng === 'ren') {
       finFormModal('重命名笔记架', [{ k: 'name', label: '架名' }], g, o => {
         const dd = loadFin(); const it = (dd.inv.noteGroups || []).find(x => x.id === g.id);
-        if (it) it.name = o.name; saveFin(dd); renderFinanceTool(); toast('已保存 ✓', 'success');
+        if (it) it.name = o.name; saveFin(dd); renderFinanceTool(ROOT); toast('已保存 ✓', 'success');
       });
     } else {
       if (!confirm(`删除笔记架「${g.name}」？架内笔记将移回「未分组」`)) return;
       const dd = loadFin();
       dd.inv.noteGroups = (dd.inv.noteGroups || []).filter(x => x.id !== g.id);
       (dd.inv.notes || []).forEach(n => { if (n.gid === g.id) n.gid = ''; });
-      saveFin(dd); renderFinanceTool(); toast('笔记架已删除 ✓', 'success');
+      saveFin(dd); renderFinanceTool(ROOT); toast('笔记架已删除 ✓', 'success');
     }
   };
   nv.addEventListener('dragstart', e => {
@@ -6388,7 +6390,7 @@ function finInvPage(body, d) {
     const ng = grp.dataset.g;
     if ((it.gid || '') === ng) return;
     it.gid = ng;
-    saveFin(dd); renderFinanceTool(); toast(`笔记已移至「${grp.querySelector('.ag-name').textContent}」✓`, 'success');
+    saveFin(dd); renderFinanceTool(ROOT); toast(`笔记已移至「${grp.querySelector('.ag-name').textContent}」✓`, 'success');
   });
   body.querySelector('.fin-table').onclick = e => {
     const b = e.target.closest('[data-act]');
@@ -6398,7 +6400,7 @@ function finInvPage(body, d) {
     if (b.dataset.act === 'lot') { const dd = loadFin(); const hh = dd.inv.holdings.find(x => x.id === h.id); if (hh) finLotModal(dd, hh); return; }
     if (b.dataset.act === 'del') {
       if (!confirm(`删除持仓「${h.name}」？`)) return;
-      const dd = loadFin(); dd.inv.holdings = dd.inv.holdings.filter(x => x.id !== h.id); saveFin(dd); renderFinanceTool();
+      const dd = loadFin(); dd.inv.holdings = dd.inv.holdings.filter(x => x.id !== h.id); saveFin(dd); renderFinanceTool(ROOT);
     } else {
       finFormModal('编辑持仓', [
         { k: 'name', label: '产品 / 分类名称' }, { k: 'type', label: '类型' },
@@ -6430,7 +6432,7 @@ function finInvPage(body, d) {
         if (h0.price > 0) { it.vals = it.vals || []; it.vals.push({ date: o.date, price: it.price, value: finLotQty(it) * it.price }); }
         }
         finSyncHolding(it);
-        saveFin(dd); renderFinanceTool(); toast('已保存 ✓', 'success');
+        saveFin(dd); renderFinanceTool(ROOT); toast('已保存 ✓', 'success');
       });
     }
   };
@@ -6782,21 +6784,21 @@ function finSettingsPage(body, d) {
       <div class="fin-note" style="margin-top:8px;">导出文件：travel_tree_preferences.json · 导入后自动刷新页面</div>
     </div>`;
   $('#set-base').onchange = e => {
-    const dd = loadFin(); dd.base = e.target.value; saveFin(dd); renderFinanceTool(); toast('本位币已切换 ✓', 'success');
+    const dd = loadFin(); dd.base = e.target.value; saveFin(dd); renderFinanceTool(ROOT); toast('本位币已切换 ✓', 'success');
   };
   $('#fx-table').onchange = e => {
     const dd = loadFin(); const c = e.target.dataset.fx; const v = parseFloat(e.target.value);
     if (!v) return;
     const dir = S.fin.fxDir && S.fin.fxDir[c] || (dd.fx[c] >= 1 ? 'fwd' : 'rev');
     dd.fx[c] = dir === 'fwd' ? v : 1 / v;
-    saveFin(dd); renderFinanceTool(); toast(`${c} 汇率已更新 ✓`, 'success');
+    saveFin(dd); renderFinanceTool(ROOT); toast(`${c} 汇率已更新 ✓`, 'success');
   };
   $('#fx-table').onclick = e => {
     const b = e.target.closest('[data-ff]');
     if (!b) return;
     if (!S.fin.fxDir) S.fin.fxDir = {};
     S.fin.fxDir[b.dataset.c] = S.fin.fxDir[b.dataset.c] === 'fwd' ? 'rev' : 'fwd';
-    renderFinanceTool();
+    renderFinanceTool(ROOT);
   };
   $('#fx-fetch').onclick = async () => {
     const btn = $('#fx-fetch'); btn.disabled = true; btn.textContent = '⏳ 正在获取…';
@@ -6804,13 +6806,13 @@ function finSettingsPage(body, d) {
       const r = await finFetchRates();
       toast(`已更新 ${r.updated} 种现有币种汇率 · 官方另有 ${r.avail} 种可选添加 ✓`, 'success');
     } catch (err) { toast('汇率获取失败：' + err.message + '（请检查网络后重试）', 'error'); }
-    finally { renderFinanceTool(); }
+    finally { renderFinanceTool(ROOT); }
   };
   $('#fx-clear').onclick = () => {
     const dd = loadFin();
     const removed = finClearUnusedFx(dd);
     if (!removed) return toast('没有可删去的未使用币种', 'warn');
-    saveFin(dd); renderFinanceTool(); toast(`已删去 ${removed} 个未使用币种 ✓`, 'success');
+    saveFin(dd); renderFinanceTool(ROOT); toast(`已删去 ${removed} 个未使用币种 ✓`, 'success');
   };
   $('#fx-pick-add').onclick = () => {
     const code = $('#fx-pick').value;
@@ -6818,13 +6820,13 @@ function finSettingsPage(body, d) {
     const dd = loadFin();
     if (dd.fx[code] != null) return toast('该币种已存在', 'warn');
     dd.fx[code] = S.fin.apiRates[code];
-    saveFin(dd); renderFinanceTool(); toast(`${code} 已添加（1 ${code} = ${S.fin.apiRates[code].toFixed(4)} ${dd.base}）✓`, 'success');
+    saveFin(dd); renderFinanceTool(ROOT); toast(`${code} 已添加（1 ${code} = ${S.fin.apiRates[code].toFixed(4)} ${dd.base}）✓`, 'success');
   };
   $('#fx-add').onclick = () => {
     const code = $('#fx-new').value.trim().toUpperCase(), rate = parseFloat($('#fx-rate').value);
     if (!code || !rate) return toast('请填写币种与汇率', 'warn');
     if (d.fx[code] != null) return toast('该币种已存在', 'warn');
-    const dd = loadFin(); dd.fx[code] = rate; saveFin(dd); renderFinanceTool(); toast('币种已添加 ✓', 'success');
+    const dd = loadFin(); dd.fx[code] = rate; saveFin(dd); renderFinanceTool(ROOT); toast('币种已添加 ✓', 'success');
   };
   $('#set-save').onclick = () => {
     const dd = loadFin(); dd.goals = parseFloat($('#set-goal').value) || 0; saveFin(dd); toast('设置已保存 ✓', 'success');
@@ -6872,7 +6874,7 @@ function finSettingsPage(body, d) {
     try {
       const o = JSON.parse($('#fin-imp').value);
       if (!Array.isArray(o.accounts)) throw new Error('缺少 accounts 字段');
-      saveFin(o); renderFinanceTool(); toast('导入成功 ✓', 'success');
+      saveFin(o); renderFinanceTool(ROOT); toast('导入成功 ✓', 'success');
     } catch (e) { toast('导入失败：' + e.message, 'error'); }
   };
   $('#pref-export').onclick = () => {

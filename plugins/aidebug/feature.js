@@ -1,6 +1,7 @@
 'use strict';
 /* 按需加载的功能模块：aidebug */
 (function () {
+  let ROOT = null;
 /* ---------- 外部接口调试器（网页 DS 对接：发送 → 抓取原文 → JSON 解码） ---------- */
 const AI_DEBUG_PROMPT = '【角色】你是网页正文清洗专员，严格输出纯JSON，禁止任何额外文本。\n'
   + '【任务】对给定三个信息组中的每条信息进行清洗：判断该条是否包含有效正文。\n'
@@ -15,8 +16,9 @@ const AI_DEBUG_PROMPT = '【角色】你是网页正文清洗专员，严格输�
   + '2. 对明显无正文的条目必须返回 "failed"，不得编造内容\n'
   + '3. 正文保持原样，仅筛除非正文成分，不做摘要、改写、翻译\n'
   + '4. 仅输出JSON对象，无任何其他字符';
-async function renderAIDebugTool() {
-  const box = $('#tool-view');
+async function renderAIDebugTool(container) {
+  ROOT = container;
+  const box = ROOT;
   let saved = {};
   try { const d = await api('/api/plugin/aidebug/state'); saved = (d && d.state) || {}; } catch (e) { saved = {}; }
   box.innerHTML = `

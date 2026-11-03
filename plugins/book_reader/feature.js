@@ -1,6 +1,7 @@
 'use strict';
 /* 俄语书籍阅读：导入、阅读、标记和清洗任务管理。 */
 (function () {
+  let ROOT = null;
   const R = { root: null, books: [], book: null, section: null, sectionId: null, showAll: false,
     revealed: new Set(), selected: new Map(), mode: 'hierarchy', vocab: 'words', pending: [], error: '', sectionCache: new Map(),
     fullSentences: [], singleIndex: 0, selectedSentences: new Set(), selectedMarks:new Set(), scopeBookId:'', scopeSectionId:'', markFilter:'', maskColor:'#d8d3df',
@@ -1001,8 +1002,9 @@ examples：长度固定 3 的字符串数组、必填；每项用 || 分隔俄�
     }
   }
 
-  function renderTool() {
-    R.root=document.querySelector('#tool-view');if(!R.root)return;
+  function renderTool(container) {
+  ROOT = container;
+    R.root=ROOT;if(!R.root)return;
     R.vocabShuffle=null;
     if(!R.root.dataset.bookReaderBound){
       R.root.dataset.bookReaderBound='1';R.root.addEventListener('click',onClick);R.root.addEventListener('submit',onSubmit);

@@ -1,6 +1,7 @@
 'use strict';
 /* 按需加载的功能模块：rivet */
 (function () {
+  let ROOT = null;
 /* ============================================================
    铆钉点（长期任务打卡 · 数据统计 / 循序渐进 / 模式记录 / 强激励）
    调研 2026-10：GitHub 高星（Habitica 13.9K RPG化 / uHabits 9.6K 习惯强度衰减）
@@ -15,8 +16,9 @@ const RV_MILESTONE = { 7: '七日之锚', 30: '月铆', 100: '百日铆', 365: '
 let RV = null;                 // 后端数据缓存
 let rvHeatOpen = {};           // { habitId: true } 展开单习惯热力图
 
-function renderRivetTool() {
-  const box = $('#tool-view');
+function renderRivetTool(container) {
+  ROOT = container;
+  const box = ROOT;
   box.innerHTML = `
     <div class="gcard" style="margin-bottom:14px;">
       <div class="section-title"><span class="st-emoji">🔩</span>铆钉点

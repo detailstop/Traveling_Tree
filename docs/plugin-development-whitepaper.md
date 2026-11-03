@@ -71,7 +71,7 @@
 
 ## 三、 前端开发规范 (feature.js)
 
-- **ESM 动态加载**：插件前端必须是 ES Module，导出 `render(container)` 函数。宿主会在用户点击卡片时通过 `import('/plugins/<id>/feature.js')` 动态加载。
+- **ESM 动态加载与容器契约**：插件前端必须是 ES Module，入口函数签名为 `render(container)`，并注册到 `window.__toolRenderers.<entry id>`；宿主在用户点击卡片/快捷按钮时通过 `import('/plugins/<id>/feature.js')` 动态加载。**必须使用传入的 `container`（或其作用域内查询，如 `container.querySelector`），禁止直接取 `#tool-view`**；分屏两区各自传入独立容器，异步回调同样以该容器或其闭包为根。`tests/smoke_plugins.py` 会静态检查 `#tool-view` 直接引用（命中即 FAIL，默认空白名单）。
 - **样式自包含**：所有专属 CSS 必须写在 `plugin.css` 中，禁止污染主程序的 `app.css`。禁止直接写全局 DOM 样式。
 - **API 请求前缀**：所有后端请求必须走 `/api/plugin/<id>/*`。
 - **UI 防闪烁与偏好存储**：
@@ -131,12 +131,12 @@ live_json TEXT NOT NULL DEFAULT '' -- 当前编辑状态
 | smoke_plugin_data_dirs.py | 插件 data_dirs | 13/13 |
 | smoke_plugin_decoupling.py | 21 卡片插件改名/重启解耦 | 500/500 |
 | smoke_plugin_module_off.py | 模块关闭 503/不建表 | 10/10 |
-| smoke_plugins.py | manifest/清单/静态资源/后端 | 189/189 |
+| smoke_plugins.py | manifest/清单/静态资源/后端/render 容器契约 | 190/190 |
 | smoke_startup_once.py | 首次启动建表/API | 34/34 |
 | smoke_market.py | 市场双索引/安装/拉取/校验打包 | 37/37 |
 | smoke_info_cards.py | 24 份 INFO.md 字段/一致性 | 11/11 |
 
-合计 **1044/1045**（round 115 全量复跑；`smoke_web` 74/75，TTS 502 为唯一允许 FAIL），`validate` 24/24 插件 `ok: true`。旧 15 项基线合计为 1010/1011，新增 `css_exp` 后各计数见上表。
+合计 **1045/1046**（round 117 全量复跑；`smoke_web` 74/75，TTS 502 为唯一允许 FAIL），`validate` 24/24 插件 `ok: true`。旧 15 项基线合计为 1010/1011，新增 `css_exp` 后各计数见上表。
 
 已知 FAIL：`smoke_web` 的 TTS 502 来自 edge-tts 外部网络不可用，不阻塞其他断言；出现非 TTS 的 FAIL 按回滚规则处理。
 
