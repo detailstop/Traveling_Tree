@@ -135,7 +135,8 @@ Traveling_Tree/
 - **快捷按钮**：列表存宿主 `data/settings.json` 的 `quickbar.pinned`（`[{id, order}]`，只存有卡片插件的 entry id 与顺序；backend-only 插件不出现）。加号从 `/api/plugins/list` 的有卡片插件中选择，叉号删除；插件被禁用/删除后按钮置灰并提示，不产生 Traceback，也不自动改写列表。
 - **上下分屏**：开启后上区保留当前视图（工具总览或插件），下区为空并提示「点击右栏快捷按钮，把插件加载到当前聚焦区」；上下区高度 50/50 固定，本轮不做拖动分隔条。点击某区**非交互空白处**切换聚焦（按钮/输入框/卡片不抢聚焦），聚焦区有高亮；分屏开启默认上区聚焦。
 - **聚焦区加载**：快捷按钮与「所有功能」卡片都把插件加载到当前聚焦区（分屏关闭时即唯一主视图）；同一插件不能同时占用上下区，重复放入会轻提示。关闭分屏时清空下半区 DOM、保留上半区并聚焦回上区。
-- **状态**：分屏开关、上下区所选插件、聚焦区都是内存态，刷新恢复单视图；右栏收缩状态与快捷按钮列表会保留（分别存 localStorage 与 `data/settings.json`）。
+- **全屏视图**：右栏上区与分屏开关并列新增「全屏」按钮（图标 `⤢`/`⤡` 两态）。进入后工具内容区（单视图主区域，或分屏上下两区整体）以 CSS 覆盖铺满视口（`position: fixed` 覆盖层），左栏/上栏/右栏隐藏；分屏保持 50/50。**ESC 一律退出**（输入框内也退出），非全屏态不监听 ESC；退出恢复进入前的单视图/分屏布局、上下区插件与聚焦区，不改变分屏开关、右栏收缩与快捷按钮。全屏中 hub 仍铺满、卡片仍按聚焦区加载；分屏下半区为空时提示改为「按 ESC 退出全屏后，从右栏快捷按钮加载插件」。全屏状态是内存态，刷新即退出；不用浏览器 Fullscreen API。
+- **状态**：分屏开关、上下区所选插件、聚焦区、全屏状态都是内存态，刷新恢复单视图；右栏收缩状态与快捷按钮列表会保留（分别存 localStorage 与 `data/settings.json`）。
 
 ## 6. 数据保存与备份
 
@@ -180,6 +181,7 @@ Traveling_Tree/
 11. **css_exp 为同源弱沙箱**：`plugins/css_exp` 的 iframe 使用 `allow-scripts allow-same-origin`（抓取详情页 DOM 所需），**不是严格隔离**；外部 AWA UI 为已审阅的 MIT 开源代码，若替换外部项目须重新审阅。收藏按钮依赖外部详情页 DOM（`pre.language-css` / `pre.language-html`、`article [class*="content__title"]`）与 `{type}/{slug}` 路由，外部升级可能导致抓取失败（会提示并拒绝写入空数据）。
 12. **`.gitignore` 例外需复核后再 push**：`.gitignore` 为 css_exp 的 `_next/data/` 加了精确例外（`!plugins/css_exp/static/app/_next/data/`），push 前应确认 `data/`、`data/ai_keys.json`、`data/webchat_sessions.json`、`data/plugins/webchat/webchat_profile/` 仍被忽略，且例外未放宽为 `!data/` 等宽规则。
 13. **分屏/右栏是宿主视图基础设施**：只做布局与偏好（上下分屏、聚焦区、右栏快捷按钮），不含业务逻辑；快捷按钮列表是宿主偏好（`data/settings.json` 的 `quickbar`），不是插件业务数据。插件前端入口统一为 `render(container)`：宿主给上下两区各传独立容器，插件必须使用传入容器（`container.querySelector` 等），**禁止直接取 `#tool-view`**；`smoke_plugins` 会静态检查并阻断回归。因此后台插件异步重绘只影响自己所在区，不会再覆盖另一区；**已知边界**：插件入口把传入容器缓存为模块级 `ROOT`，关闭该区后重开同一插件时，若旧回调尚未返回，可能渲染到新容器（仍是同一插件，数据不丢；重开或刷新即可）。若某插件漏迁，`smoke_plugins` 直接 FAIL 并列出插件 id:行号。
+14. **全屏为 CSS 覆盖而非浏览器真全屏**：全屏只覆盖工具内容区（`position: fixed` 覆盖层）并隐藏左栏/上栏/右栏，不调用 Fullscreen API、不改变系统窗口；ESC 由宿主监听退出（全屏态捕获、非全屏态不绑定），输入框内 ESC 也会退出。全屏状态不持久化、刷新即退出，不影响分屏开关/上下区插件/聚焦区/快捷按钮列表；覆盖层内若插件自身有 ESC 语义（如关闭弹窗），会被宿主先拦截用于退出全屏。
 
 ## 8. 多 AI 共建与打卡
 
@@ -217,7 +219,7 @@ result = cobuild.checkin(
 - 共享主程序前端模块：`manifest.json` 声明 `"shared_features": ["webchat"]`；`app.js` 会先从主程序 `features/` 加载这些经典脚本，再 `import()` 插件 feature。当前 `ai` / `aidebug` 共享 `webchat.js`，该文件仍留在主程序。
 - 插件依赖声明：`manifest.dependencies` **只保留 `python` 子键**（第三方 PyPI 包；可写字符串或 `{name, version}` 约束），只声明不安装；`python` 之外的历史子键（`plugins`/`plugin`/`shared`/`js`）均不再采用。跨插件关系只用既有 `provides`（能力名，能力描述、不参与依赖检查）与 `consumes`（插件 id，只表直接调用；宿主中介不算）；语义见白皮书 §二。`packaging` 缺失时市场依赖检测降级为只判存在性，不阻断加载。
 - 插件后端（可选）：`manifest.json` 声明 `"backend": "backend.py"`，在 `backend.py` 暴露 `handle(method, subpath, query, body)`；只通过 `/api/plugin/<id>/*` 调用，源码不会经 `/plugins/*` 静态暴露。插件私有数据放 `data/plugins/<id>/`。返回二进制时用 `{"__binary__": true, "body": bytes, "mime": "...", "filename": "...", "headers": {...}}`。
-- 宿主视图基础设施（本轮 round 115）：布局/分屏/聚焦/右栏属宿主职责，业务内容仍不得进宿主；右栏快捷按钮列表存 `data/settings.json` 的 `quickbar.pinned`（经 `modules/settings_store.py` 浅合并写入，只存有卡片插件 entry id 与顺序），右栏收缩状态存 localStorage（`rt_quickrail_collapsed`，只 `setItem`）；分屏开关、上下区所选插件、聚焦区不持久化；新增 `/api/settings/quickbar`（GET/POST）只做设置读写，不写业务 SQL。
+- 宿主视图基础设施（round 115/118）：布局/分屏/全屏/聚焦/右栏属宿主职责，业务内容仍不得进宿主；右栏快捷按钮列表存 `data/settings.json` 的 `quickbar.pinned`（经 `modules/settings_store.py` 浅合并写入，只存有卡片插件 entry id 与顺序），右栏收缩状态存 localStorage（`rt_quickrail_collapsed`，只 `setItem`）；分屏开关、上下区所选插件、聚焦区不持久化；新增 `/api/settings/quickbar`（GET/POST）只做设置读写，不写业务 SQL。全屏实现固定为「CSS 覆盖类 + 宿主 ESC 监听」：给工具内容区加 `.app.fullscreen` 覆盖层、隐藏三栏，ESC 仅在进入时注册 `keydown`（capture）、退出即解绑，禁止调用 `requestFullscreen`/`exitFullscreen`；全屏状态存内存（不写 localStorage/settings）。
 - 插件建表（可选）：`manifest.json` 声明 `"db": {"module_key": "model_usage", "schema": "schema.sql", "migrate": "migrate.py"}`；schema 在 `plugins/<id>/schema.sql`，migrate 暴露 `migrate(conn)`；`modules.enabled.<module_key>=false` 时两者都跳过。无表插件写 `"db": null`。
 - 插件数据目录（可选）：`manifest.json` 声明 `"data_dirs": ["rivet"]`；主程序启动时创建 `data/plugins/rivet/`，后端用 `config.plugin_data_dir()` 读写，不再自行拼接绝对路径。
 - finance 的 rt_fin 一次性迁移逻辑在 `plugins/finance/migrate_localstorage.py`；旧 `tools/migrate_finance_localstorage.py` 兼容入口已删除。
@@ -251,8 +253,9 @@ python tests/smoke_pm.py
 - 白皮书附录：[A backend-only](docs/appendix/A-backend-only.md) · [B 根路由](docs/appendix/B-root-routing.md) · [C 二进制格式](docs/appendix/C-binary-format.md) · [D 其他约定](docs/appendix/D-conventions.md)
 - 说明性文件：[file_navigation.json](docs/appendix/file_navigation.json) · [file_navigation.md](docs/appendix/file_navigation.md) · [files_manifest.json](docs/appendix/files_manifest.json)
 
-## 12. 项目状态与交接（2026-11-03，round 117 后）
+## 12. 项目状态与交接（2026-11-03，round 118 后）
 
+- **round 118 全屏视图**：右栏上区新增全屏按钮（`⤢`/`⤡` 两态）；工具内容区 CSS 覆盖铺满视口、三栏隐藏、分屏保持 50/50；ESC 全屏态一律退出（含输入框），非全屏不绑定；退出恢复原布局/插件/聚焦，状态存内存、刷新退出；空区提示按全屏态切换。未改插件、未改 settings 结构、未建表。全量 15 项 smoke 仍为 **1045/1046**（仅 TTS 502）。
 - **round 117 渲染契约**：宿主分屏改为两区独立容器，不再设置/切换 `#tool-view`；20 个插件入口统一 `render(container)` 并使用传入容器（`filejudge`/`finance` 的异步回调、`model_usage` 的作用域查询一并迁移）；`smoke_plugins` 新增静态检查，直接引用 `#tool-view` 即 FAIL。全量 15 项 smoke **1045/1046**（仅 TTS 502）。
 - **round 115 宿主视图**：新增可收缩右栏快捷按钮与上下分屏（`ui/web/static/index.html`、`app.js`、`app.css`、`modules/settings_store.py`、`ui/web/server.py` 的 `/api/settings/quickbar`）。快捷按钮列表存 `data/settings.json` 的 `quickbar.pinned`（宿主偏好，非业务数据）；右栏收缩存 localStorage；分屏开关、上下区插件、聚焦区为内存态，刷新回单视图。未改任何插件代码、未建表、未向 `plugins/` 写运行时数据。已知限制见 §7 第 13 条。
 - **插件**：24 个插件目录——21 个有前端卡片（ai、aidebug、bg_library、book_reader、css_exp、expdata、filejudge、finance、market、model_usage、netexp、pdf、pixel_art、project_manager、promptgen、rivet、russian、schedule、screeps、sim、urlarch）+ 3 个 backend-only（webchat、cobuild、tts）；23 个 entry。

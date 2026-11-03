@@ -452,6 +452,7 @@ const PLUGIN_STYLE_LOADS = new Map();
 /* ---------- 右栏快捷按钮 + 上下分屏（宿主视图基础设施；快捷按钮列表存宿主 settings） ---------- */
 const RAIL_COLLAPSED_KEY = 'rt_quickrail_collapsed';
 const RT_SPLIT = { on: false, focused: 'top', tool: { top: null, bottom: null } };
+const RT_FULL = { on: false };   // 全屏视图：内存态，不持久化
 let QUICKBAR = [];
 
 function pluginDisabledIds() {
@@ -942,6 +943,9 @@ function toolsSplitHTML() {
   </div>`;
 }
 function paneEmptyHTML() {
+  if (RT_FULL.on) {
+    return '<div class="pane-empty">按 ESC 退出全屏后，从右栏快捷按钮加载插件</div>';
+  }
   return '<div class="pane-empty">点击右栏快捷按钮，把插件加载到当前聚焦区</div>';
 }
 function clearPaneHead(name) {
@@ -968,7 +972,7 @@ function updateSplitUI() {
   }
   if (RT_SPLIT.on && !RT_SPLIT.tool.bottom) {
     const body = bottom.querySelector('.tool-pane-body');
-    if (body && !body.querySelector('.pane-empty')) body.innerHTML = paneEmptyHTML();
+    if (body) body.innerHTML = paneEmptyHTML();
     const head = bottom.querySelector('[data-head]');
     if (head) head.innerHTML = '<span class="pane-name">下区 · 空</span>';
   }
@@ -1022,6 +1026,39 @@ function toggleSplit() {
   updateSplitUI();
   toast('已开启上下分屏：点下半区空白可切换聚焦区', 'success');
 }
+function onFullscreenKeydown(e) {
+  if (!RT_FULL.on) return;
+  if (e.key === 'Escape' || e.key === 'Esc') {
+    e.preventDefault();
+    e.stopPropagation();
+    applyFullscreen(false);
+  }
+}
+function updateFullscreenUI() {
+  const btn = $('#fullscreen-toggle');
+  if (!btn) return;
+  btn.setAttribute('aria-pressed', RT_FULL.on ? 'true' : 'false');
+  btn.classList.toggle('on', RT_FULL.on);
+  btn.title = RT_FULL.on ? '退出全屏（ESC）' : '全屏视图';
+  const ico = btn.querySelector('.rail-ico');
+  if (ico) ico.textContent = RT_FULL.on ? '⤡' : '⤢';
+  const lb = btn.querySelector('.rail-lb');
+  if (lb) lb.textContent = RT_FULL.on ? '退出全屏' : '全屏';
+}
+function applyFullscreen(on) {
+  const next = !!on;
+  RT_FULL.on = next;
+  const app = document.querySelector('.app');
+  if (app) app.classList.toggle('fullscreen', next);
+  // ESC 监听仅在全屏态注册，退出即解绑；非全屏态不拦截 ESC。
+  document.removeEventListener('keydown', onFullscreenKeydown, true);
+  if (next) document.addEventListener('keydown', onFullscreenKeydown, true);
+  updateFullscreenUI();
+  updateSplitUI();
+  toast(next ? '已进入全屏视图（ESC 退出）' : '已退出全屏', 'info');
+}
+function toggleFullscreen() { applyFullscreen(!RT_FULL.on); }
+
 function openToolInFocused(toolId) {
   const tool = allTools().find(t => t.id === toolId);
   if (!tool) { toast('该插件已不存在或已被禁用', 'warn'); return; }
@@ -1142,6 +1179,8 @@ function wireRail() {
     toggleRail();
   });
   $('#split-toggle').onclick = () => toggleSplit();
+  $('#fullscreen-toggle').onclick = () => toggleFullscreen();
+  updateFullscreenUI();
   $('#quick-add').onclick = () => openQuickAdd();
   $('#quick-list').onclick = e => {
     const del = e.target.closest('[data-quick-del]');
@@ -1622,6 +1661,7 @@ function switchPage(name) {
     })();
     return;
   }
+  if (RT_FULL.on && name !== 'tools') applyFullscreen(false);
   const page = $('#page-' + name);
   page.classList.remove('hidden');
   page.classList.remove('page-in');

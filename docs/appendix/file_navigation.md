@@ -2,9 +2,9 @@
 
 > 只读摘要，勿手改。本文件由 docs/appendix/file_navigation.json 生成；结构与去留决定以 JSON 为准。
 
-- 生成时间：2026-11-03T21:58:00+03:00
-- 轮次：117
-- 待办：1 条；已决定：819 条
+- 生成时间：2026-11-03T22:11:19+03:00
+- 轮次：118
+- 待办：1 条；已决定：825 条
 
 ## 待办
 
@@ -16,6 +16,12 @@
 
 | 路径 | 决定 | 原因 | 状态 | 轮次 | 时间 | 备份路径 |
 | --- | --- | --- | --- | --- | --- | --- |
+| ui/web/static/index.html | 右栏上区新增全屏按钮（round 118） | `#quickrail .rail-top` 在 `#split-toggle` 旁新增 `#fullscreen-toggle`（图标 ⤢/⤡ 两态、aria-pressed、title），沿用上区容器扩展位，不新增其他按钮。 | done | 118 | 2026-11-03T22:11:19+03:00 |  |
+| ui/web/static/app.js | 全屏视图状态与 ESC 退出（round 118） | 新增内存态 `RT_FULL`；`applyFullscreen/toggleFullscreen/updateFullscreenUI` 给 `.app` 加 `fullscreen` 类（工具内容区 `.tool-split` 固定覆盖、三栏隐藏）；ESC 仅在进入时注册 capture `keydown`、退出即解绑（输入框内也退出），非全屏不拦截；退出不改变 `RT_SPLIT`/上下区插件/聚焦；`paneEmptyHTML` 在全屏时改为「按 ESC 退出全屏后，从右栏快捷按钮加载插件」，`updateSplitUI` 随全屏态重写空区提示；切离工具页防御性退出全屏。 | done | 118 | 2026-11-03T22:11:19+03:00 |  |
+| ui/web/static/app.css | 全屏 CSS 覆盖层样式（round 118） | `.app.fullscreen` 隐藏 sidebar/topbar/quickrail；`.app.fullscreen .tool-split` 用 `position:fixed; inset:0; z-index:90` 铺满视口、主题渐变背景、overflow auto；单视图 pane 自适应，分屏 `.split` 保持上下 50/50；不改既有分屏/右栏/聚焦样式语义。 | done | 118 | 2026-11-03T22:11:19+03:00 |  |
+| README.md | 文档同步全屏视图（round 118） | §5 新增「全屏视图」要点；§7 第 14 条写明 CSS 覆盖非浏览器真全屏、ESC 退出、输入框内也退出、状态不持久化、插件 ESC 会被优先拦截；§9 宿主视图基础设施条目补全屏实现约定（禁止 Fullscreen API、ESC 仅进入时注册）；§12 新增 round 118 与 smoke 1045/1046。 | done | 118 | 2026-11-03T22:11:19+03:00 |  |
+| docs/plugin-development-whitepaper.md | 白皮书房主视图基础设施补全屏口径（round 118） | §一第 1 条宿主视图基础设施列表加入“全屏视图”，并注明全屏为 CSS 覆盖 + 宿主监听 ESC 退出（不使用浏览器 Fullscreen API）、状态不持久化；规则本体未改。 | done | 118 | 2026-11-03T22:11:19+03:00 |  |
+| docs/appendix/file_navigation.json | 登记 round 118（全屏视图） | 追加 6 条 decided 并 round→118；pending 保留既有 1 条（非本轮事项）；resolved 45 条不动；md 由生成器重生成。验证：走查 12/12（单视图/分屏/hub/空区文案/输入框 ESC/连续进出/刷新/异步隔离）、全量 smoke 1045/1046（仅 TTS 502）、node --check 通过、plugins/ 无改动。 | done | 118 | 2026-11-03T22:11:19+03:00 |  |
 | ui/web/static/app.js | 总括：宿主分屏改两区独立容器 + 20 插件 render(container) 迁移 + 移除 #tool-view（round 117） | 宿主删除 setToolViewId 与 id 切换，两区 .tool-pane-body 各自独立；20 个插件（22 个 feature 文件）入口改为 render(container) 并使用传入容器（异步回调经模块级 ROOT 或作用域查询）；grep 插件代码 #tool-view 归零，smoke_plugins 新增静态检查防回归；index.html/app.css 无 #tool-view 引用。 | done | 117 | 2026-11-03T21:58:00+03:00 |  |
 | plugins/ai/feature.js | 前端入口迁移到 render(container)（round 117） | 入口改为 render(container) 并在首行 ROOT = container；内部 #tool-view 直接引用改为 ROOT 或 ROOT.querySelector(All)，异步回调使用入口容器，不再依赖全局 id；配合宿主两区独立容器修复后台异步重绘覆盖另一区的问题。 | done | 117 | 2026-11-03T21:50:34+03:00 |  |
 | plugins/aidebug/feature.js | 前端入口迁移到 render(container)（round 117） | 入口改为 render(container) 并在首行 ROOT = container；内部 #tool-view 直接引用改为 ROOT 或 ROOT.querySelector(All)，异步回调使用入口容器，不再依赖全局 id；配合宿主两区独立容器修复后台异步重绘覆盖另一区的问题。 | done | 117 | 2026-11-03T21:50:34+03:00 |  |

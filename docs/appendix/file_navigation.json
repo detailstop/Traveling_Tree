@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-03T21:58:00+03:00",
-  "round": 117,
+  "generated_at": "2026-11-03T22:11:19+03:00",
+  "round": 118,
   "pending": [
     {
       "path": "docs/appendix/file_navigation.json",
@@ -16,6 +16,54 @@
     }
   ],
   "decided": [
+    {
+      "path": "ui/web/static/index.html",
+      "decision": "右栏上区新增全屏按钮（round 118）",
+      "reason": "`#quickrail .rail-top` 在 `#split-toggle` 旁新增 `#fullscreen-toggle`（图标 ⤢/⤡ 两态、aria-pressed、title），沿用上区容器扩展位，不新增其他按钮。",
+      "status": "done",
+      "round": 118,
+      "at": "2026-11-03T22:11:19+03:00"
+    },
+    {
+      "path": "ui/web/static/app.js",
+      "decision": "全屏视图状态与 ESC 退出（round 118）",
+      "reason": "新增内存态 `RT_FULL`；`applyFullscreen/toggleFullscreen/updateFullscreenUI` 给 `.app` 加 `fullscreen` 类（工具内容区 `.tool-split` 固定覆盖、三栏隐藏）；ESC 仅在进入时注册 capture `keydown`、退出即解绑（输入框内也退出），非全屏不拦截；退出不改变 `RT_SPLIT`/上下区插件/聚焦；`paneEmptyHTML` 在全屏时改为「按 ESC 退出全屏后，从右栏快捷按钮加载插件」，`updateSplitUI` 随全屏态重写空区提示；切离工具页防御性退出全屏。",
+      "status": "done",
+      "round": 118,
+      "at": "2026-11-03T22:11:19+03:00"
+    },
+    {
+      "path": "ui/web/static/app.css",
+      "decision": "全屏 CSS 覆盖层样式（round 118）",
+      "reason": "`.app.fullscreen` 隐藏 sidebar/topbar/quickrail；`.app.fullscreen .tool-split` 用 `position:fixed; inset:0; z-index:90` 铺满视口、主题渐变背景、overflow auto；单视图 pane 自适应，分屏 `.split` 保持上下 50/50；不改既有分屏/右栏/聚焦样式语义。",
+      "status": "done",
+      "round": 118,
+      "at": "2026-11-03T22:11:19+03:00"
+    },
+    {
+      "path": "README.md",
+      "decision": "文档同步全屏视图（round 118）",
+      "reason": "§5 新增「全屏视图」要点；§7 第 14 条写明 CSS 覆盖非浏览器真全屏、ESC 退出、输入框内也退出、状态不持久化、插件 ESC 会被优先拦截；§9 宿主视图基础设施条目补全屏实现约定（禁止 Fullscreen API、ESC 仅进入时注册）；§12 新增 round 118 与 smoke 1045/1046。",
+      "status": "done",
+      "round": 118,
+      "at": "2026-11-03T22:11:19+03:00"
+    },
+    {
+      "path": "docs/plugin-development-whitepaper.md",
+      "decision": "白皮书房主视图基础设施补全屏口径（round 118）",
+      "reason": "§一第 1 条宿主视图基础设施列表加入“全屏视图”，并注明全屏为 CSS 覆盖 + 宿主监听 ESC 退出（不使用浏览器 Fullscreen API）、状态不持久化；规则本体未改。",
+      "status": "done",
+      "round": 118,
+      "at": "2026-11-03T22:11:19+03:00"
+    },
+    {
+      "path": "docs/appendix/file_navigation.json",
+      "decision": "登记 round 118（全屏视图）",
+      "reason": "追加 6 条 decided 并 round→118；pending 保留既有 1 条（非本轮事项）；resolved 45 条不动；md 由生成器重生成。验证：走查 12/12（单视图/分屏/hub/空区文案/输入框 ESC/连续进出/刷新/异步隔离）、全量 smoke 1045/1046（仅 TTS 502）、node --check 通过、plugins/ 无改动。",
+      "status": "done",
+      "round": 118,
+      "at": "2026-11-03T22:11:19+03:00"
+    },
     {
       "path": "ui/web/static/app.js",
       "decision": "总括：宿主分屏改两区独立容器 + 20 插件 render(container) 迁移 + 移除 #tool-view（round 117）",

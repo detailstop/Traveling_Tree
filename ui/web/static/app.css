@@ -710,3 +710,20 @@ select.mini-sel {
   .quickrail { flex-basis: 176px; width: 176px; }
   .app.rail-collapsed .quickrail { width: 46px; flex-basis: 46px; }
 }
+
+/* ---------- 全屏视图（CSS 覆盖，非浏览器 Fullscreen API；ESC 由宿主监听退出） ---------- */
+.app.fullscreen { padding: 0; gap: 0; }
+.app.fullscreen .sidebar,
+.app.fullscreen .topbar,
+.app.fullscreen .quickrail { display: none !important; }
+.app.fullscreen .main { gap: 0; }
+.app.fullscreen .tool-split {
+  position: fixed; inset: 0; z-index: 90;
+  height: auto; min-height: 0;
+  padding: 14px; gap: 10px;
+  background: linear-gradient(135deg, var(--bg1) 0%, var(--bg2) 60%, var(--bg3) 100%);
+  overflow: auto;
+}
+.app.fullscreen .tool-split > .tool-pane { flex: 1 1 auto; }
+.app.fullscreen .tool-split.split > .tool-pane { flex: 1 1 50%; }
+.app.fullscreen .tool-split.split { height: auto; min-height: 0; }
