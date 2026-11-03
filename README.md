@@ -147,7 +147,7 @@ Traveling_Tree/
 
 市场分发：**GitHub Release 为唯一分发源**；`market/packages/` 仅保留空目录，不再作为默认产物（原 18 个本地 zip 已清空，脚本保留备用、勿随意运行）。远程 index（`data/plugins/market/remote_index.json`）的 `download_url` 指向 Release；安装时下载到 `downloads/`，校验后删 zip。
 
-插件市场双索引：`remote_index.json`（拉取覆盖，公共库包字段）+ `local_index.json`（扫描 `plugins/*/INFO.md` 组装）；展示合并优先级 INFO > remote > local；`downloads/` 存放下载 zip。三类：预置 5（不可卸载）、公共库 2（finance/promptgen，可从 Release 安装）、本地开发 17（无安装/卸载按钮）。
+插件市场双索引：`remote_index.json`（拉取覆盖，公共库包字段）+ `local_index.json`（扫描 `plugins/*/INFO.md` 组装）；展示合并优先级 INFO > remote > local；`downloads/` 存放下载 zip。三类：预置 5（不可卸载）、公共库 2（finance/promptgen，可从 Release 安装）、本地开发 17（无安装/卸载按钮）。注：`data/plugins/market/local_index.json` 本轮只读实测落盘 **21 条**（生成于 `css_exp` 之前，未复核），展示数以市场 API 实际返回为准。
 
 插件市场运行态：`data/plugins/market/remote_index.json`（覆盖式，拉取写入）+ `local_index.json`（扫描 INFO 组装；首次请求生成；旧单文件已迁移删除）。远程源配置在 `data/plugins/market/settings.json` 的 `market_source_url`（https raw index；为空时「拉取最新插件」置灰）；拉取成功只覆盖 remote，失败不动本地。
 
@@ -245,7 +245,7 @@ python tests/smoke_pm.py
 
 - **插件**：24 个插件目录——21 个有前端卡片（ai、aidebug、bg_library、book_reader、css_exp、expdata、filejudge、finance、market、model_usage、netexp、pdf、pixel_art、project_manager、promptgen、rivet、russian、schedule、screeps、sim、urlarch）+ 3 个 backend-only（webchat、cobuild、tts）；23 个 entry。
 - **插件市场（round 91）**：左侧栏「插件市场」；双索引 remote（覆盖）+ local（INFO 组装），展示四源合并 INFO > remote > local；三类：预置 5、公共库 2（finance/promptgen，Release 安装）、本地开发 17（无按钮）。**Release 为唯一分发源**，`market/packages/` 为空目录；安装下载到 `downloads/`，卸载默认保留 `data/plugins/<id>/`。
-- **15 项 smoke 基线**：round 113 交接记录全量 **1044/1045**（唯一 FAIL：`smoke_web` 的 TTS 502 外部网络问题）；`validate` 24/24 插件 `ok: true`。分项：smoke_plugins 189/189、smoke_startup_once 34/34、smoke_web 74/75、smoke_plugin_decoupling 500/500、smoke_finance 34/34、smoke_model_usage 49/49、smoke_reader_range 25/25、smoke_pm 23/23、smoke_books 11/11、smoke_file_preview 17/17、smoke_pdf 17/17、smoke_plugin_data_dirs 13/13、smoke_plugin_module_off 10/10、smoke_market 37/37、smoke_info_cards 11/11。
+- **15 项 smoke 基线**：round 113 交接记录全量 **1044/1045**（唯一 FAIL：`smoke_web` 的 TTS 502 外部网络问题）；`validate` 24/24 插件 `ok: true`。**本轮（round 114）未全量复跑，1044/1045 为交接记录**，仅复跑 `smoke_plugins`（189/189）与 `smoke_info_cards`（11/11）。分项：smoke_plugins 189/189、smoke_startup_once 34/34、smoke_web 74/75、smoke_plugin_decoupling 500/500、smoke_finance 34/34、smoke_model_usage 49/49、smoke_reader_range 25/25、smoke_pm 23/23、smoke_books 11/11、smoke_file_preview 17/17、smoke_pdf 17/17、smoke_plugin_data_dirs 13/13、smoke_plugin_module_off 10/10、smoke_market 37/37、smoke_info_cards 11/11。
 - **Git**：`main` 领先 `origin/main` 18 个提交，**未 push**（push 前需用户确认，并复核 `.gitignore` 例外）。
 - **剩余待办**：以交接文档三项必做为上（本轮未改其内容）；css_exp 后续（跨插件读取收藏接口、创建器、外链图片本地化）留待后续轮。
 - **剩余 pending**：无（`Server.start` 已在 round 80 修复并连续 20 次通过）。

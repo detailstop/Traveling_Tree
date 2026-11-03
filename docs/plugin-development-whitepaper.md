@@ -129,14 +129,14 @@ live_json TEXT NOT NULL DEFAULT '' -- 当前编辑状态
 | smoke_file_preview.py | 文件预览 | 17/17 |
 | smoke_pdf.py | PDF 与二进制响应 | 17/17 |
 | smoke_plugin_data_dirs.py | 插件 data_dirs | 13/13 |
-| smoke_plugin_decoupling.py | 21 卡片插件改名/重启解耦 | 500/500 |
+| smoke_plugin_decoupling.py | 21 卡片插件改名/重启解耦 | 500/500（沿用 round 113 交接记录，本轮未复跑） |
 | smoke_plugin_module_off.py | 模块关闭 503/不建表 | 10/10 |
 | smoke_plugins.py | manifest/清单/静态资源/后端 | 189/189 |
 | smoke_startup_once.py | 首次启动建表/API | 34/34 |
-| smoke_market.py | 市场双索引/安装/拉取/校验打包 | 37/37 |
+| smoke_market.py | 市场双索引/安装/拉取/校验打包 | 37/37（沿用 round 113 交接记录，本轮未复跑） |
 | smoke_info_cards.py | 24 份 INFO.md 字段/一致性 | 11/11 |
 
-合计 **1010/1011**（旧 15 项基线；`smoke_web` 74/75，TTS 502 为唯一允许 FAIL）。**round 113 后交接记录全量 1044/1045**（同上唯一 FAIL），`validate` 24/24 插件 `ok: true`；新增 `css_exp` 断言未在本表单列，待全量输出归档。
+合计 **1010/1011**（旧 15 项基线；`smoke_web` 74/75，TTS 502 为唯一允许 FAIL）。**round 113 后交接记录全量 1044/1045**（同上唯一 FAIL），`validate` 24/24 插件 `ok: true`；新增 `css_exp` 断言未在本表单列，待全量输出归档。**本轮（round 114）仅复跑 `smoke_plugins`（189/189）与 `smoke_info_cards`（11/11）**；其余各项（含 decoupling、market）沿用 round 113 交接记录，未复跑。
 
 已知 FAIL：`smoke_web` 的 TTS 502 来自 edge-tts 外部网络不可用，不阻塞其他断言；出现非 TTS 的 FAIL 按回滚规则处理。
 
@@ -159,7 +159,7 @@ live_json TEXT NOT NULL DEFAULT '' -- 当前编辑状态
 - `data/settings.json`：`download_groups` + `modules.enabled`；插件 settings 在 `data/plugins/<id>/settings.json`。
 - 敏感文件：`data/ai_keys.json`、`data/webchat_sessions.json`、`data/plugins/webchat/webchat_profile/`、`data/plugins/finance/fixtures/rt_fin.json`；只按路径处理，不读正文、不进 Git。
 - 市场双索引：`remote_index.json`（覆盖式，拉取写入，公共库包字段）+ `local_index.json`（组装式，扫描 INFO）；旧 `index.json` 迁移后删除；`downloads/` 存下载 zip。
-- 市场运行态：`remote_index.json`（覆盖式，拉取写入）+ `local_index.json`（扫描 INFO 组装，22 条展示）；旧单文件已迁移删除；不进 Git。
+- 市场运行态：`remote_index.json`（覆盖式，拉取写入）+ `local_index.json`（扫描 INFO 组装；round 114 只读实测落盘 **21 条**，生成于 `css_exp` 之前，本轮未复核，展示数以市场 API 实际返回为准）；旧单文件已迁移删除；不进 Git。
 - 市场源：`data/plugins/market/settings.json` 的 `market_source_url`（https raw；空则拉取按钮置灰）。
 - 市场分发：**Release 为唯一源**；`market/packages/` 为空目录（脚本备用、勿随意运行）；`remote_index.json` 的 `download_url` 指向 Release。
 - 市场资产：`market/index.json`（5 预置模板，进 Git）、`market/packages/`（空目录，脚本备用）、`data/plugins/market/{remote,local}_index.json`（运行态）、`market/.trash/`（卸载备份）；安装记录在 `market_installed` 表。
