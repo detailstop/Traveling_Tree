@@ -2,9 +2,9 @@
 
 > 只读摘要，勿手改。本文件由 docs/appendix/file_navigation.json 生成；结构与去留决定以 JSON 为准。
 
-- 生成时间：2026-11-03T15:42:42+03:00
-- 轮次：114
-- 待办：1 条；已决定：782 条
+- 生成时间：2026-11-03T17:05:34+03:00
+- 轮次：115
+- 待办：1 条；已决定：790 条
 
 ## 待办
 
@@ -16,6 +16,14 @@
 
 | 路径 | 决定 | 原因 | 状态 | 轮次 | 时间 | 备份路径 |
 | --- | --- | --- | --- | --- | --- | --- |
+| ui/web/static/index.html | 新增右栏容器（round 115） | `.app` 内主区右侧新增 `aside#quickrail`：上区 `#split-toggle` 分屏开关（按钮组容器留扩展位、不渲染占位），下区 `#quick-add` 加号 + `#quick-list` 快捷按钮列表，`#rail-toggle` 收缩/展开；纯 DOM 骨架，无业务数据。 | done | 115 | 2026-11-03T17:05:34+03:00 |  |
+| ui/web/static/app.js | 宿主视图基础设施：右栏、收缩记忆、上下分屏、聚焦区、快捷按钮（round 115） | `RT_SPLIT` 内存态（分屏开关/聚焦区/上下区所选插件）；`renderTools` 改为 `#tool-split` 上下两区，`#tool-view` id 按聚焦区切换（插件仍渲染到 `#tool-view`，不改插件契约）；`pointerdown` 捕获时切 id、仅“非交互空白处”切聚焦；快捷按钮增删走 `/api/settings/quickbar`，列表存 `data/settings.json.quickbar`；右栏收缩只 `localStorage.setItem('rt_quickrail_collapsed')`；关闭分屏清空下半区 DOM、聚焦回上区；互斥/重复加载轻提示。 | done | 115 | 2026-11-03T17:05:34+03:00 |  |
+| ui/web/static/app.css | 右栏与分屏样式（round 115） | `.quickrail`/`.rail-*`/`.quick-*`/`.qf-*` 右栏样式；`.tool-split`/`.tool-pane`/`.pane-empty` 分屏样式（上下 50/50、`min-height:420px`、聚焦高亮、窄屏适配）；只新增，不改既有布局类语义。 | done | 115 | 2026-11-03T17:05:34+03:00 |  |
+| modules/settings_store.py | 宿主设置新增 quickbar 读写（round 115） | `quickbar()` / `save_quickbar()`：默认 `{pinned:[]}`，元素 `{id,order}`；清洗去重、保留输入顺序；`save_quickbar` 用 `update()` 浅合并且不覆盖其他字段（实测保留 custom_probe/modules/download_groups）；不建表、不写插件目录。 | done | 115 | 2026-11-03T17:05:34+03:00 |  |
+| ui/web/server.py | 新增 /api/settings/quickbar（GET/POST）（round 115） | GET 返回 `settings_store.quickbar()`；POST 校验 `pinned` 为数组、最多 64 项、只保留有卡片插件 entry id（`_plugin_list()` 校验）后交 `settings_store.save_quickbar()`；不写业务 SQL、不改既有 /api/settings 语义。 | done | 115 | 2026-11-03T17:05:34+03:00 |  |
+| README.md | 文档同步：宿主分屏/右栏/数据落点/风险（round 115） | §4 分层约定补宿主视图基础设施边界；§5 新增「宿主视图：右栏快捷按钮与上下分屏」；§6 settings 行补 `quickbar.pinned`、localStorage 行补 `rt_quickrail_collapsed`；§7 第 13 条补分屏/右栏属宿主基础设施与后台异步渲染的已知限制；§9 补宿主视图基础设施落点约定；§12 补 round 115 与 15 项 smoke 复跑 1044/1045。 | done | 115 | 2026-11-03T17:05:34+03:00 |  |
+| docs/plugin-development-whitepaper.md | 白皮书补宿主视图边界与数据口径（round 115） | §一 第 1 条补「宿主视图基础设施（布局/偏好）属宿主职责，业务内容仍不得进宿主」；§7.5 补 `data/settings.json.quickbar` 与 localStorage 键（`rt_theme`/`rt_sidebar_collapsed`/`rt_quickrail_collapsed` 等，只存 UI 偏好、禁止 removeItem）；§7.2 按 round 115 全量复跑更新合计 1044/1045。规则本体未改。 | done | 115 | 2026-11-03T17:05:34+03:00 |  |
+| docs/appendix/file_navigation.json | 登记 round 115（宿主分屏 + 右栏快捷按钮） | 追加 8 条 decided 并 round→115；pending 保留既有 1 条；resolved 45 条不动；md 由生成器重生成。验证：走查 16/16、全量 smoke 1044/1045（仅 TTS 502）、node --check/py_compile 通过、settings 浅合并保留其他字段、plugins/ 与 data/ 无新增跟踪改动；未 push。 | done | 115 | 2026-11-03T17:05:34+03:00 |  |
 | README.md | 文档口径同步到 24 插件 / css_exp / 依赖管理 / smoke 基线（round 114） | 按 manifest 扫描事实更新：§2 技术栈补 packaging（市场版本比较，缺失降级）；§4 目录树 24 目录（21 有卡片 + 3 backend-only）、有表 15/无表 9、lib.json 24 条；§5 卡片 23 张、urlarch 补图片上传/点击启动/组别折叠/拖拽改组/组名去重、新增 css_exp 简述；§6 主库行补 css_exp 收藏、本地开发 16→17；§7 新增 css_exp 弱沙箱与同源抓取耦合、gitignore 例外 push 前复核两条风险；§9 补 dependencies.python 唯一子键/只声明不安装/packaging 降级与 provides/consumes 语义引用；§12 改为 2026-11-03（round 113 后）、24/21/23 entry、smoke 1044/1045、validate 24/24、ahead 18 未 push，并在末尾追加本轮核查记录。 | done | 114 | 2026-11-03T15:42:42+03:00 |  |
 | docs/plugin-development-whitepaper.md | §7 与附录 E 的状态/计数同步（round 114） | §7.1：24 目录、21 有卡片（含 css_exp）、23 entry、24 份 INFO；§7.2：decoupling 500/500、plugins 189/189、market 37/37、info_cards 24 份，合计行注明旧基线 1010/1011 与 round 113 后交接 1044/1045（TTS 502）、validate 24/24；§7.4 补 css_exp 两段式静态/弱沙箱/抓取耦合与 push 前 gitignore 复核；§7.5 补 css_exp_favorites 与 static/app 路径、local 22 条；附录 E.1 lib.json 24 条、E.2 其余 20 个、E.5 当前 24/第 25 个。规则本体未改。 | done | 114 | 2026-11-03T15:42:42+03:00 |  |
 | plugins/lib.json | 条目口径与 manifest 对齐（round 114） | 24 条与 24 个插件目录一致（无缺/多）；css_exp 的 kind/has_ui/called_by 来自 manifest 与 README；urlarch notes 补“站点统筹 + 图片上传/点击启动/组别折叠/拖拽改组/组名去重”。 | done | 114 | 2026-11-03T15:42:42+03:00 |  |

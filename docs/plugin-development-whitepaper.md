@@ -8,7 +8,7 @@
 
 “旅行之木”采用极端的**微内核（Microkernel）**架构：
 
-1. **宿主（Host）是白纸**：主程序仅负责启动 Web 服务、扫描插件目录、挂载 API 路由、执行 SQL 初始化以及提供静态服务。主程序内**没有任何业务逻辑**（`TOOLS = []`）。
+1. **宿主（Host）是白纸**：主程序仅负责启动 Web 服务、扫描插件目录、挂载 API 路由、执行 SQL 初始化以及提供静态服务。主程序内**没有任何业务逻辑**（`TOOLS = []`）。**宿主视图基础设施**（页面布局、上下分屏、聚焦区、右栏快捷按钮等纯 UI 布局与偏好）属宿主职责；业务内容仍不得进宿主。
 2. **插件（Plugin）是器官**：所有业务功能（学习、记账、阅读等）均是独立插件。插件必须高度自包含，拔掉任何一个插件文件夹，宿主依然能零报错正常运行。
 3. **完全脱离浏览器绑架**：用户的业务内容资产 100% 存放在 SQLite 数据库，界面偏好同步落盘至本地 JSON 文件。浏览器仅作为无状态的渲染器与一级缓存。
 
@@ -129,14 +129,14 @@ live_json TEXT NOT NULL DEFAULT '' -- 当前编辑状态
 | smoke_file_preview.py | 文件预览 | 17/17 |
 | smoke_pdf.py | PDF 与二进制响应 | 17/17 |
 | smoke_plugin_data_dirs.py | 插件 data_dirs | 13/13 |
-| smoke_plugin_decoupling.py | 21 卡片插件改名/重启解耦 | 500/500（沿用 round 113 交接记录，本轮未复跑） |
+| smoke_plugin_decoupling.py | 21 卡片插件改名/重启解耦 | 500/500 |
 | smoke_plugin_module_off.py | 模块关闭 503/不建表 | 10/10 |
 | smoke_plugins.py | manifest/清单/静态资源/后端 | 189/189 |
 | smoke_startup_once.py | 首次启动建表/API | 34/34 |
-| smoke_market.py | 市场双索引/安装/拉取/校验打包 | 37/37（沿用 round 113 交接记录，本轮未复跑） |
+| smoke_market.py | 市场双索引/安装/拉取/校验打包 | 37/37 |
 | smoke_info_cards.py | 24 份 INFO.md 字段/一致性 | 11/11 |
 
-合计 **1010/1011**（旧 15 项基线；`smoke_web` 74/75，TTS 502 为唯一允许 FAIL）。**round 113 后交接记录全量 1044/1045**（同上唯一 FAIL），`validate` 24/24 插件 `ok: true`；新增 `css_exp` 断言未在本表单列，待全量输出归档。**本轮（round 114）仅复跑 `smoke_plugins`（189/189）与 `smoke_info_cards`（11/11）**；其余各项（含 decoupling、market）沿用 round 113 交接记录，未复跑。
+合计 **1044/1045**（round 115 全量复跑；`smoke_web` 74/75，TTS 502 为唯一允许 FAIL），`validate` 24/24 插件 `ok: true`。旧 15 项基线合计为 1010/1011，新增 `css_exp` 后各计数见上表。
 
 已知 FAIL：`smoke_web` 的 TTS 502 来自 edge-tts 外部网络不可用，不阻塞其他断言；出现非 TTS 的 FAIL 按回滚规则处理。
 
@@ -156,7 +156,8 @@ live_json TEXT NOT NULL DEFAULT '' -- 当前编辑状态
 ### 7.5 数据资产
 - 主库 `data/russian_tutor.db`（唯一业务主库；文件名与项目目录名解耦，不改）；含 `css_exp_favorites`（css_exp 收藏条目，raw/live 双列）。
 - css_exp 静态产物：`plugins/css_exp/static/app/`（外部 AWA UI 导出产物，进 Git；`_next/data/` 由 `.gitignore` 精确例外放行）。
-- `data/settings.json`：`download_groups` + `modules.enabled`；插件 settings 在 `data/plugins/<id>/settings.json`。
+- `data/settings.json`：`download_groups` + `modules.enabled` + 宿主视图偏好 `quickbar`（`{"pinned":[{"id","order"}]}`，右栏快捷按钮列表；只存有卡片插件 entry id 与顺序，经 `modules/settings_store.py` 浅合并写入）；插件 settings 在 `data/plugins/<id>/settings.json`。
+- 浏览器 localStorage：纯 UI 偏好，当前包括主题 `rt_theme`、左栏折叠 `rt_sidebar_collapsed`、右栏折叠 `rt_quickrail_collapsed`、插件禁用 `rt_plugins_disabled`、工具架子 `rt_tool_shelves` 等；只存 UI 偏好，不存业务内容，禁止 `removeItem`。
 - 敏感文件：`data/ai_keys.json`、`data/webchat_sessions.json`、`data/plugins/webchat/webchat_profile/`、`data/plugins/finance/fixtures/rt_fin.json`；只按路径处理，不读正文、不进 Git。
 - 市场双索引：`remote_index.json`（覆盖式，拉取写入，公共库包字段）+ `local_index.json`（组装式，扫描 INFO）；旧 `index.json` 迁移后删除；`downloads/` 存下载 zip。
 - 市场运行态：`remote_index.json`（覆盖式，拉取写入）+ `local_index.json`（扫描 INFO 组装；round 114 只读实测落盘 **21 条**，生成于 `css_exp` 之前，本轮未复核，展示数以市场 API 实际返回为准）；旧单文件已迁移删除；不进 Git。

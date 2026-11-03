@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-03T15:42:42+03:00",
-  "round": 114,
+  "generated_at": "2026-11-03T17:05:34+03:00",
+  "round": 115,
   "pending": [
     {
       "path": "docs/appendix/file_navigation.json",
@@ -16,6 +16,70 @@
     }
   ],
   "decided": [
+    {
+      "path": "ui/web/static/index.html",
+      "decision": "新增右栏容器（round 115）",
+      "reason": "`.app` 内主区右侧新增 `aside#quickrail`：上区 `#split-toggle` 分屏开关（按钮组容器留扩展位、不渲染占位），下区 `#quick-add` 加号 + `#quick-list` 快捷按钮列表，`#rail-toggle` 收缩/展开；纯 DOM 骨架，无业务数据。",
+      "status": "done",
+      "round": 115,
+      "at": "2026-11-03T17:05:34+03:00"
+    },
+    {
+      "path": "ui/web/static/app.js",
+      "decision": "宿主视图基础设施：右栏、收缩记忆、上下分屏、聚焦区、快捷按钮（round 115）",
+      "reason": "`RT_SPLIT` 内存态（分屏开关/聚焦区/上下区所选插件）；`renderTools` 改为 `#tool-split` 上下两区，`#tool-view` id 按聚焦区切换（插件仍渲染到 `#tool-view`，不改插件契约）；`pointerdown` 捕获时切 id、仅“非交互空白处”切聚焦；快捷按钮增删走 `/api/settings/quickbar`，列表存 `data/settings.json.quickbar`；右栏收缩只 `localStorage.setItem('rt_quickrail_collapsed')`；关闭分屏清空下半区 DOM、聚焦回上区；互斥/重复加载轻提示。",
+      "status": "done",
+      "round": 115,
+      "at": "2026-11-03T17:05:34+03:00"
+    },
+    {
+      "path": "ui/web/static/app.css",
+      "decision": "右栏与分屏样式（round 115）",
+      "reason": "`.quickrail`/`.rail-*`/`.quick-*`/`.qf-*` 右栏样式；`.tool-split`/`.tool-pane`/`.pane-empty` 分屏样式（上下 50/50、`min-height:420px`、聚焦高亮、窄屏适配）；只新增，不改既有布局类语义。",
+      "status": "done",
+      "round": 115,
+      "at": "2026-11-03T17:05:34+03:00"
+    },
+    {
+      "path": "modules/settings_store.py",
+      "decision": "宿主设置新增 quickbar 读写（round 115）",
+      "reason": "`quickbar()` / `save_quickbar()`：默认 `{pinned:[]}`，元素 `{id,order}`；清洗去重、保留输入顺序；`save_quickbar` 用 `update()` 浅合并且不覆盖其他字段（实测保留 custom_probe/modules/download_groups）；不建表、不写插件目录。",
+      "status": "done",
+      "round": 115,
+      "at": "2026-11-03T17:05:34+03:00"
+    },
+    {
+      "path": "ui/web/server.py",
+      "decision": "新增 /api/settings/quickbar（GET/POST）（round 115）",
+      "reason": "GET 返回 `settings_store.quickbar()`；POST 校验 `pinned` 为数组、最多 64 项、只保留有卡片插件 entry id（`_plugin_list()` 校验）后交 `settings_store.save_quickbar()`；不写业务 SQL、不改既有 /api/settings 语义。",
+      "status": "done",
+      "round": 115,
+      "at": "2026-11-03T17:05:34+03:00"
+    },
+    {
+      "path": "README.md",
+      "decision": "文档同步：宿主分屏/右栏/数据落点/风险（round 115）",
+      "reason": "§4 分层约定补宿主视图基础设施边界；§5 新增「宿主视图：右栏快捷按钮与上下分屏」；§6 settings 行补 `quickbar.pinned`、localStorage 行补 `rt_quickrail_collapsed`；§7 第 13 条补分屏/右栏属宿主基础设施与后台异步渲染的已知限制；§9 补宿主视图基础设施落点约定；§12 补 round 115 与 15 项 smoke 复跑 1044/1045。",
+      "status": "done",
+      "round": 115,
+      "at": "2026-11-03T17:05:34+03:00"
+    },
+    {
+      "path": "docs/plugin-development-whitepaper.md",
+      "decision": "白皮书补宿主视图边界与数据口径（round 115）",
+      "reason": "§一 第 1 条补「宿主视图基础设施（布局/偏好）属宿主职责，业务内容仍不得进宿主」；§7.5 补 `data/settings.json.quickbar` 与 localStorage 键（`rt_theme`/`rt_sidebar_collapsed`/`rt_quickrail_collapsed` 等，只存 UI 偏好、禁止 removeItem）；§7.2 按 round 115 全量复跑更新合计 1044/1045。规则本体未改。",
+      "status": "done",
+      "round": 115,
+      "at": "2026-11-03T17:05:34+03:00"
+    },
+    {
+      "path": "docs/appendix/file_navigation.json",
+      "decision": "登记 round 115（宿主分屏 + 右栏快捷按钮）",
+      "reason": "追加 8 条 decided 并 round→115；pending 保留既有 1 条；resolved 45 条不动；md 由生成器重生成。验证：走查 16/16、全量 smoke 1044/1045（仅 TTS 502）、node --check/py_compile 通过、settings 浅合并保留其他字段、plugins/ 与 data/ 无新增跟踪改动；未 push。",
+      "status": "done",
+      "round": 115,
+      "at": "2026-11-03T17:05:34+03:00"
+    },
     {
       "path": "README.md",
       "decision": "文档口径同步到 24 插件 / css_exp / 依赖管理 / smoke 基线（round 114）",

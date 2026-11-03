@@ -83,7 +83,7 @@ Traveling_Tree/
 └── tests/                   冒烟测试（多数使用临时数据库）
 ```
 
-分层约定：`ui/` 通过 `/api/plugin/<id>/*` 动态分发到各插件 backend；宿主不再有 `core/`，全部 SQL 在插件内（model_usage/pixel_art/finance/bg_library/book_reader/russian/project_manager）；`db/schema/` 为空，新增表只写 `plugins/<id>/schema.sql` 并由 manifest 的 `db` 声明，`db/connection.py` 启动时扫描执行；`data/settings.json` 的 `modules.enabled` 控制按模块建表，默认全启用。
+分层约定：`ui/` 通过 `/api/plugin/<id>/*` 动态分发到各插件 backend；宿主不再有 `core/`，全部 SQL 在插件内（model_usage/pixel_art/finance/bg_library/book_reader/russian/project_manager）；`db/schema/` 为空，新增表只写 `plugins/<id>/schema.sql` 并由 manifest 的 `db` 声明，`db/connection.py` 启动时扫描执行；`data/settings.json` 的 `modules.enabled` 控制按模块建表，默认全启用。宿主视图基础设施（左栏 / 主区 / 右栏、上下分屏、聚焦区、右栏快捷按钮）只做布局与偏好：快捷按钮列表存 `data/settings.json` 的 `quickbar`，右栏收缩状态存 localStorage；插件仍按原契约渲染到 `#tool-view`，宿主按聚焦区切换该 id，不改任何插件代码。
 
 插件可有/无业务表：无表插件不声明 `db` 或声明 `"db": null`。当前 24 个插件目录中 **15 个有 `schema.sql`、9 个无表**（cobuild、expdata、filejudge、netexp、pdf、rivet、sim、tts、webchat）；`sim` 已回归 `plugins/sim/`。
 
@@ -129,19 +129,27 @@ Traveling_Tree/
 - **CSS 动效组件库**（插件 id `css_exp`，round 113 新增）以 iframe 托管 AWA UI（MIT）静态导出产物（`plugins/css_exp/static/app/`），可把当前详情页的标题/作者/CSS/HTML 收藏到 `css_exp_favorites` 表并在「我的收藏」查看、预览（严格沙箱）与删除；外部项目只读、不重新构建。
 - **项目优化与当前综述**提供树形背景库、导入/导出、历史归档与手动变更留痕；其「文件预览与说明卡片」可浏览工作区文件树、标注数据库文件、维护 `file_notes` / `db_rules`，并导出 `docs/appendix/files_manifest.json`。文件预览只写说明元数据，不改源码。
 
+### 宿主视图：右栏快捷按钮与上下分屏
+
+- **右栏**：主区右侧新增窄右栏，分上下两区；上区是分屏开关（按钮组容器留扩展位），下区是「＋ 添加快捷按钮 + 快捷按钮列表」。右栏可收缩为窄边，点击窄边展开；收缩状态存 localStorage（键 `rt_quickrail_collapsed`，只 `setItem`）。
+- **快捷按钮**：列表存宿主 `data/settings.json` 的 `quickbar.pinned`（`[{id, order}]`，只存有卡片插件的 entry id 与顺序；backend-only 插件不出现）。加号从 `/api/plugins/list` 的有卡片插件中选择，叉号删除；插件被禁用/删除后按钮置灰并提示，不产生 Traceback，也不自动改写列表。
+- **上下分屏**：开启后上区保留当前视图（工具总览或插件），下区为空并提示「点击右栏快捷按钮，把插件加载到当前聚焦区」；上下区高度 50/50 固定，本轮不做拖动分隔条。点击某区**非交互空白处**切换聚焦（按钮/输入框/卡片不抢聚焦），聚焦区有高亮；分屏开启默认上区聚焦。
+- **聚焦区加载**：快捷按钮与「所有功能」卡片都把插件加载到当前聚焦区（分屏关闭时即唯一主视图）；同一插件不能同时占用上下区，重复放入会轻提示。关闭分屏时清空下半区 DOM、保留上半区并聚焦回上区。
+- **状态**：分屏开关、上下区所选插件、聚焦区都是内存态，刷新恢复单视图；右栏收缩状态与快捷按钮列表会保留（分别存 localStorage 与 `data/settings.json`）。
+
 ## 6. 数据保存与备份
 
 | 内容 | 位置 |
 | --- | --- |
 | 俄语条目、SRS、复习流水、主题、阅读、项目管理、背景库、文件说明、css_exp 收藏 | `data/russian_tutor.db` |
-| 配额、字体、模型价目、下载分组、路径覆盖 | `data/settings.json` |
+| 配额、字体、模型价目、下载分组、路径覆盖、右栏快捷按钮（`quickbar.pinned`） | `data/settings.json` |
 | API Key / 模型设置 | `data/ai_keys.json`（明文） |
 | 语音缓存 | `data/voice_cache/` |
 | Web Chat 会话列表 / 登录态 | `data/webchat_sessions.json`、`data/plugins/webchat/webchat_profile/`（round 59 从项目根迁入；备份 `data/` 现在会包含约 14MB profile，round 58 之前口径不同） |
 | 文件判官保留标记 | `data/plugins/filejudge/keep.json`（旧 `data/filejudge_keep.json` 只读保留） |
 | 基金缓存等 | `data/` 下对应 JSON/缓存 |
 | 铆钉点打卡数据 | `data/plugins/rivet/rivet.json`（旧 `data/rivet.json` 只读保留） |
-| 前端 UI 偏好 | 浏览器 localStorage（仅主题、折叠、视图位置等）；内容资产在 SQLite |
+| 前端 UI 偏好 | 浏览器 localStorage（主题 `rt_theme`、左右侧栏折叠 `rt_sidebar_collapsed` / `rt_quickrail_collapsed`、工具架子等纯 UI 偏好）；内容资产在 SQLite |
 
 首次启动：若 `data/` 不存在，`config.py` 自动创建；`db/connection.py` 的 `init_db()` 扫描 `plugins/*/manifest.json` 的 `db` 声明，执行 `schema.sql` 建表、`seed.py` 播种、`migrate.py` 迁移；`manifest.data_dirs` 声明的目录自动创建。克隆本项目后直接 `python main.py` 即可，无需手动建库。`data/` 不进 Git（见 `.gitignore`），备份需单独保存。
 
@@ -171,6 +179,7 @@ Traveling_Tree/
 10. **克隆后登录态为空**：`webchat_profile` 已被 `.gitignore` 排除，克隆项目后网页会话通道需重新扫码登录；`data/` 下其他文件（DB、keys、settings）同样不随 Git 同步。
 11. **css_exp 为同源弱沙箱**：`plugins/css_exp` 的 iframe 使用 `allow-scripts allow-same-origin`（抓取详情页 DOM 所需），**不是严格隔离**；外部 AWA UI 为已审阅的 MIT 开源代码，若替换外部项目须重新审阅。收藏按钮依赖外部详情页 DOM（`pre.language-css` / `pre.language-html`、`article [class*="content__title"]`）与 `{type}/{slug}` 路由，外部升级可能导致抓取失败（会提示并拒绝写入空数据）。
 12. **`.gitignore` 例外需复核后再 push**：`.gitignore` 为 css_exp 的 `_next/data/` 加了精确例外（`!plugins/css_exp/static/app/_next/data/`），push 前应确认 `data/`、`data/ai_keys.json`、`data/webchat_sessions.json`、`data/plugins/webchat/webchat_profile/` 仍被忽略，且例外未放宽为 `!data/` 等宽规则。
+13. **分屏/右栏是宿主视图基础设施**：只做布局与偏好（上下分屏、聚焦区、右栏快捷按钮），不含业务逻辑；快捷按钮列表是宿主偏好（`data/settings.json` 的 `quickbar`），不是插件业务数据。已知限制：插件仍按原契约渲染到 `#tool-view`，宿主按聚焦区切换该 id；若某插件在后台异步渲染期间用户切换了聚焦区，其后续整体重绘可能落到当前聚焦区（宿主已用 pointerdown 捕获尽量降低概率），遇到时重开该插件即可。
 
 ## 8. 多 AI 共建与打卡
 
@@ -208,6 +217,7 @@ result = cobuild.checkin(
 - 共享主程序前端模块：`manifest.json` 声明 `"shared_features": ["webchat"]`；`app.js` 会先从主程序 `features/` 加载这些经典脚本，再 `import()` 插件 feature。当前 `ai` / `aidebug` 共享 `webchat.js`，该文件仍留在主程序。
 - 插件依赖声明：`manifest.dependencies` **只保留 `python` 子键**（第三方 PyPI 包；可写字符串或 `{name, version}` 约束），只声明不安装；`python` 之外的历史子键（`plugins`/`plugin`/`shared`/`js`）均不再采用。跨插件关系只用既有 `provides`（能力名，能力描述、不参与依赖检查）与 `consumes`（插件 id，只表直接调用；宿主中介不算）；语义见白皮书 §二。`packaging` 缺失时市场依赖检测降级为只判存在性，不阻断加载。
 - 插件后端（可选）：`manifest.json` 声明 `"backend": "backend.py"`，在 `backend.py` 暴露 `handle(method, subpath, query, body)`；只通过 `/api/plugin/<id>/*` 调用，源码不会经 `/plugins/*` 静态暴露。插件私有数据放 `data/plugins/<id>/`。返回二进制时用 `{"__binary__": true, "body": bytes, "mime": "...", "filename": "...", "headers": {...}}`。
+- 宿主视图基础设施（本轮 round 115）：布局/分屏/聚焦/右栏属宿主职责，业务内容仍不得进宿主；右栏快捷按钮列表存 `data/settings.json` 的 `quickbar.pinned`（经 `modules/settings_store.py` 浅合并写入，只存有卡片插件 entry id 与顺序），右栏收缩状态存 localStorage（`rt_quickrail_collapsed`，只 `setItem`）；分屏开关、上下区所选插件、聚焦区不持久化；新增 `/api/settings/quickbar`（GET/POST）只做设置读写，不写业务 SQL。
 - 插件建表（可选）：`manifest.json` 声明 `"db": {"module_key": "model_usage", "schema": "schema.sql", "migrate": "migrate.py"}`；schema 在 `plugins/<id>/schema.sql`，migrate 暴露 `migrate(conn)`；`modules.enabled.<module_key>=false` 时两者都跳过。无表插件写 `"db": null`。
 - 插件数据目录（可选）：`manifest.json` 声明 `"data_dirs": ["rivet"]`；主程序启动时创建 `data/plugins/rivet/`，后端用 `config.plugin_data_dir()` 读写，不再自行拼接绝对路径。
 - finance 的 rt_fin 一次性迁移逻辑在 `plugins/finance/migrate_localstorage.py`；旧 `tools/migrate_finance_localstorage.py` 兼容入口已删除。
@@ -241,12 +251,13 @@ python tests/smoke_pm.py
 - 白皮书附录：[A backend-only](docs/appendix/A-backend-only.md) · [B 根路由](docs/appendix/B-root-routing.md) · [C 二进制格式](docs/appendix/C-binary-format.md) · [D 其他约定](docs/appendix/D-conventions.md)
 - 说明性文件：[file_navigation.json](docs/appendix/file_navigation.json) · [file_navigation.md](docs/appendix/file_navigation.md) · [files_manifest.json](docs/appendix/files_manifest.json)
 
-## 12. 项目状态与交接（2026-11-03，round 113 后）
+## 12. 项目状态与交接（2026-11-03，round 115 后）
 
+- **round 115 宿主视图**：新增可收缩右栏快捷按钮与上下分屏（`ui/web/static/index.html`、`app.js`、`app.css`、`modules/settings_store.py`、`ui/web/server.py` 的 `/api/settings/quickbar`）。快捷按钮列表存 `data/settings.json` 的 `quickbar.pinned`（宿主偏好，非业务数据）；右栏收缩存 localStorage；分屏开关、上下区插件、聚焦区为内存态，刷新回单视图。未改任何插件代码、未建表、未向 `plugins/` 写运行时数据。已知限制见 §7 第 13 条。
 - **插件**：24 个插件目录——21 个有前端卡片（ai、aidebug、bg_library、book_reader、css_exp、expdata、filejudge、finance、market、model_usage、netexp、pdf、pixel_art、project_manager、promptgen、rivet、russian、schedule、screeps、sim、urlarch）+ 3 个 backend-only（webchat、cobuild、tts）；23 个 entry。
 - **插件市场（round 91）**：左侧栏「插件市场」；双索引 remote（覆盖）+ local（INFO 组装），展示四源合并 INFO > remote > local；三类：预置 5、公共库 2（finance/promptgen，Release 安装）、本地开发 17（无按钮）。**Release 为唯一分发源**，`market/packages/` 为空目录；安装下载到 `downloads/`，卸载默认保留 `data/plugins/<id>/`。
-- **15 项 smoke 基线**：round 113 交接记录全量 **1044/1045**（唯一 FAIL：`smoke_web` 的 TTS 502 外部网络问题）；`validate` 24/24 插件 `ok: true`。**本轮（round 114）未全量复跑，1044/1045 为交接记录**，仅复跑 `smoke_plugins`（189/189）与 `smoke_info_cards`（11/11）。分项：smoke_plugins 189/189、smoke_startup_once 34/34、smoke_web 74/75、smoke_plugin_decoupling 500/500、smoke_finance 34/34、smoke_model_usage 49/49、smoke_reader_range 25/25、smoke_pm 23/23、smoke_books 11/11、smoke_file_preview 17/17、smoke_pdf 17/17、smoke_plugin_data_dirs 13/13、smoke_plugin_module_off 10/10、smoke_market 37/37、smoke_info_cards 11/11。
-- **Git**：`main` 领先 `origin/main` 18 个提交，**未 push**（push 前需用户确认，并复核 `.gitignore` 例外）。
+- **15 项 smoke 基线**：round 115 全量复跑 **1044/1045**（唯一 FAIL：`smoke_web` 的 TTS 502 外部网络问题）；`validate` 24/24 插件 `ok: true`。分项：smoke_plugins 189/189、smoke_startup_once 34/34、smoke_web 74/75、smoke_plugin_decoupling 500/500、smoke_finance 34/34、smoke_model_usage 49/49、smoke_reader_range 25/25、smoke_pm 23/23、smoke_books 11/11、smoke_file_preview 17/17、smoke_pdf 17/17、smoke_plugin_data_dirs 13/13、smoke_plugin_module_off 10/10、smoke_market 37/37、smoke_info_cards 11/11。
+- **Git**：`main` 领先 `origin/main`（round 115 提交后 21 个），**未 push**（push 前需用户确认，并复核 `.gitignore` 例外）。
 - **剩余待办**：以交接文档三项必做为上（本轮未改其内容）；css_exp 后续（跨插件读取收藏接口、创建器、外链图片本地化）留待后续轮。
 - **剩余 pending**：无（`Server.start` 已在 round 80 修复并连续 20 次通过）。
 - **交接建议**：新功能进 `plugins/<id>/`，不碰宿主；改现有功能直接改对应插件；每轮下沉、改 settings 或改 API 后跑全量 15 个 smoke；`/api/plugin/<id>/*` 必须用语义子路径；二进制响应按附录 C。

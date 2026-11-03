@@ -449,6 +449,11 @@ let PLUGIN_NAV = [];
 const PLUGIN_FEATURE_LOADS = new Map();
 const PLUGIN_STYLE_LOADS = new Map();
 
+/* ---------- 右栏快捷按钮 + 上下分屏（宿主视图基础设施；快捷按钮列表存宿主 settings） ---------- */
+const RAIL_COLLAPSED_KEY = 'rt_quickrail_collapsed';
+const RT_SPLIT = { on: false, focused: 'top', tool: { top: null, bottom: null } };
+let QUICKBAR = [];
+
 function pluginDisabledIds() {
   const raw = loadJSON(PLUGIN_DISABLED_KEY, []);
   const ids = Array.isArray(raw)
@@ -881,8 +886,9 @@ function loadToolFeature(file) {
   return promise;
 }
 
-async function loadAndRenderTool(toolId) {
-  const box = $('#tool-view');
+async function loadAndRenderTool(toolId, box, paneName) {
+  box = box || $('#tool-view');
+  paneName = paneName || 'top';
   const plugin = PLUGIN_TOOLS.find(t => t.id === toolId) || null;
   const file = TOOL_FEATURE_FILES[toolId];
   if (!file && !plugin) {
@@ -901,15 +907,284 @@ async function loadAndRenderTool(toolId) {
       for (const dep of TOOL_FEATURE_DEPENDENCIES[toolId] || []) await loadToolFeature(dep);
       await loadToolFeature(file);
     }
-    if (S.page !== 'tools' || S.tool !== toolId) return;
+    if (S.page !== 'tools' || RT_SPLIT.tool[paneName] !== toolId) return;
     const render = window.__toolRenderers[toolId];
     if (typeof render !== 'function') throw new Error('功能入口未注册：' + toolId);
+    // 插件 render() 约定读取 #tool-view：渲染前把 id 放到目标区，避免上下区串写。
+    setToolViewId(paneName);
     render();
   } catch (e) {
-    if (S.page === 'tools' && S.tool === toolId) {
+    if (S.page === 'tools' && RT_SPLIT.tool[paneName] === toolId) {
       box.innerHTML = emptyHTML('⚠️', '功能加载失败', esc(e.message));
     }
   }
+}
+
+/* ============================================================
+   宿主视图基础设施：上下分屏 + 右栏快捷按钮
+   —— 分屏/聚焦为内存态；快捷按钮列表存 data/settings.json（settings_store.quickbar）；
+      右栏收缩状态只存 localStorage（仅 setItem）。
+   ============================================================ */
+function paneEl(name) { return document.querySelector('.tool-pane[data-pane="' + name + '"]'); }
+function paneBody(name) {
+  const pane = paneEl(name);
+  return pane ? pane.querySelector('.tool-pane-body') : null;
+}
+function toolsSplitHTML() {
+  return `<div class="tool-split" id="tool-split">
+    <section class="tool-pane focused" data-pane="top" aria-label="上半区">
+      <div class="tool-pane-head" data-head="top"></div>
+      <div class="tool-pane-body" id="tool-view"></div>
+    </section>
+    <section class="tool-pane" data-pane="bottom" aria-label="下半区" hidden>
+      <div class="tool-pane-head" data-head="bottom"></div>
+      <div class="tool-pane-body"></div>
+    </section>
+  </div>`;
+}
+function setToolViewId(name) {
+  $$('.tool-pane-body').forEach(b => { if (b.id === 'tool-view') b.removeAttribute('id'); });
+  const body = paneBody(name);
+  if (body) body.id = 'tool-view';
+}
+function paneEmptyHTML() {
+  return '<div class="pane-empty">点击右栏快捷按钮，把插件加载到当前聚焦区</div>';
+}
+function clearPaneHead(name) {
+  const pane = paneEl(name);
+  const head = pane && pane.querySelector('[data-head]');
+  if (head) head.innerHTML = '';
+}
+function updateSplitUI() {
+  const split = $('#tool-split');
+  const top = paneEl('top');
+  const bottom = paneEl('bottom');
+  if (!split || !top || !bottom) return;
+  split.classList.toggle('split', RT_SPLIT.on);
+  bottom.hidden = !RT_SPLIT.on;
+  top.classList.toggle('focused', RT_SPLIT.focused === 'top');
+  bottom.classList.toggle('focused', RT_SPLIT.focused === 'bottom');
+  const btn = $('#split-toggle');
+  if (btn) {
+    btn.setAttribute('aria-pressed', RT_SPLIT.on ? 'true' : 'false');
+    btn.classList.toggle('on', RT_SPLIT.on);
+    btn.title = RT_SPLIT.on ? '关闭分屏（下半区视图会被清空）' : '开启上下分屏';
+    const lb = btn.querySelector('.rail-lb');
+    if (lb) lb.textContent = RT_SPLIT.on ? '关闭分屏' : '上下分屏';
+  }
+  if (RT_SPLIT.on && !RT_SPLIT.tool.bottom) {
+    const body = bottom.querySelector('.tool-pane-body');
+    if (body && !body.querySelector('.pane-empty')) body.innerHTML = paneEmptyHTML();
+    const head = bottom.querySelector('[data-head]');
+    if (head) head.innerHTML = '<span class="pane-name">下区 · 空</span>';
+  }
+}
+function focusPane(name) {
+  if (!RT_SPLIT.on || RT_SPLIT.focused === name) return;
+  RT_SPLIT.focused = name;
+  setToolViewId(name);
+  updateSplitUI();
+}
+function renderToolIntoPane(name, toolId) {
+  const pane = paneEl(name);
+  if (!pane) return;
+  const body = pane.querySelector('.tool-pane-body');
+  const head = pane.querySelector('[data-head]');
+  const tool = allTools().find(t => t.id === toolId) || {};
+  RT_SPLIT.tool[name] = toolId;
+  if (head) {
+    head.innerHTML = name === 'top'
+      ? `<button class="btn soft sm" data-pane-back="top">← 返回工具</button><span class="pane-name">${esc(tool.name || toolId)}</span>`
+      : `<span class="pane-name">下区 · ${esc(tool.name || toolId)}</span><button class="btn soft sm" data-pane-clear="bottom">清空</button>`;
+    const back = head.querySelector('[data-pane-back]');
+    if (back) back.onclick = () => goToolsHub();
+    const clear = head.querySelector('[data-pane-clear]');
+    if (clear) clear.onclick = () => clearBottomPane(true);
+  }
+  body.innerHTML = '<div class="gcard" style="padding:24px;color:var(--text-dim);">正在加载功能…</div>';
+  setToolViewId(name);
+  loadAndRenderTool(toolId, body, name);
+}
+function clearBottomPane(notify) {
+  const body = paneBody('bottom');
+  if (body) body.innerHTML = paneEmptyHTML();
+  clearPaneHead('bottom');
+  RT_SPLIT.tool.bottom = null;
+  setToolViewId(RT_SPLIT.on ? RT_SPLIT.focused : 'top');
+  updateSplitUI();
+  if (notify) toast('已清空下半区视图', 'info');
+}
+function closeSplit() {
+  RT_SPLIT.on = false;
+  RT_SPLIT.focused = 'top';
+  RT_SPLIT.tool.bottom = null;
+  const body = paneBody('bottom');
+  if (body) body.innerHTML = '';
+  clearPaneHead('bottom');
+  setToolViewId('top');
+  updateSplitUI();
+  toast('已关闭分屏，保留上半区', 'info');
+}
+function toggleSplit() {
+  if (RT_SPLIT.on) { closeSplit(); return; }
+  RT_SPLIT.on = true;
+  RT_SPLIT.focused = 'top';
+  setToolViewId('top');
+  updateSplitUI();
+  toast('已开启上下分屏：点下半区空白可切换聚焦区', 'success');
+}
+function openToolInFocused(toolId) {
+  const tool = allTools().find(t => t.id === toolId);
+  if (!tool) { toast('该插件已不存在或已被禁用', 'warn'); return; }
+  if (!RT_SPLIT.on) {
+    S.tool = toolId;
+    renderTools();
+    return;
+  }
+  const target = RT_SPLIT.focused === 'bottom' ? 'bottom' : 'top';
+  const other = target === 'top' ? 'bottom' : 'top';
+  if (RT_SPLIT.tool[target] === toolId) { toast('该插件已在当前聚焦区', 'info'); return; }
+  if (RT_SPLIT.tool[other] === toolId) { toast('同一插件不能同时占用上下区', 'warn'); return; }
+  if (target === 'top') S.tool = toolId;
+  setToolViewId(target);
+  renderToolIntoPane(target, toolId);
+}
+
+/* ---------- 右栏收缩（localStorage 纯 UI 偏好，只 setItem） ---------- */
+function applyRailCollapsed(collapsed) {
+  const app = document.querySelector('.app');
+  if (app) app.classList.toggle('rail-collapsed', !!collapsed);
+  const btn = $('#rail-toggle');
+  if (btn) {
+    btn.title = collapsed ? '展开快捷栏' : '收起快捷栏';
+    btn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+    btn.textContent = collapsed ? '⟨' : '⟩';
+  }
+}
+function toggleRail() {
+  const collapsed = !document.querySelector('.app')?.classList.contains('rail-collapsed');
+  applyRailCollapsed(collapsed);
+  localStorage.setItem(RAIL_COLLAPSED_KEY, collapsed ? '1' : '0');
+}
+
+/* ---------- 快捷按钮（settings.json → quickbar.pinned） ---------- */
+function normalizeQuickbar(raw) {
+  const src = raw && Array.isArray(raw.pinned) ? raw.pinned : [];
+  const out = [];
+  const seen = new Set();
+  src.forEach((it, i) => {
+    const id = String((typeof it === 'string' ? it : (it && it.id)) || '').trim();
+    if (!id || seen.has(id)) return;
+    seen.add(id);
+    const n = Number(it && it.order);
+    out.push({ id, order: Number.isFinite(n) ? n : i });
+  });
+  return out.sort((a, b) => a.order - b.order).map((it, i) => ({ id: it.id, order: i }));
+}
+async function loadQuickbar() {
+  try {
+    const r = await api('/api/settings/quickbar');
+    QUICKBAR = normalizeQuickbar(r && r.quickbar);
+  } catch (e) {
+    QUICKBAR = [];
+    console.warn('快捷按钮加载失败：' + e.message);
+  }
+  renderQuickbar();
+}
+async function saveQuickbar() {
+  try {
+    const r = await api('/api/settings/quickbar', { body: { pinned: QUICKBAR } });
+    QUICKBAR = normalizeQuickbar(r && r.quickbar);
+    renderQuickbar();
+    return true;
+  } catch (e) {
+    toast('快捷按钮保存失败：' + e.message, 'error');
+    return false;
+  }
+}
+function renderQuickbar() {
+  const list = $('#quick-list');
+  if (!list) return;
+  if (!QUICKBAR.length) {
+    list.innerHTML = '<div class="quick-empty">点 ＋ 添加快捷按钮</div>';
+    return;
+  }
+  const tools = allTools();
+  list.innerHTML = QUICKBAR.map(it => {
+    const tool = tools.find(t => t.id === it.id) || null;
+    const label = tool ? tool.name : it.id;
+    return `<div class="quick-item ${tool ? '' : 'missing'}" data-quick="${esc(it.id)}">
+      <button class="quick-open" data-quick-open="${esc(it.id)}" title="${tool ? '加载到当前聚焦区' : '该插件已不存在或已禁用'}">
+        <span class="quick-ico">${tool ? tool.icon : '❔'}</span><span class="quick-name">${esc(label)}</span>
+      </button>
+      <button class="quick-del" data-quick-del="${esc(it.id)}" title="移除快捷按钮">✕</button>
+    </div>`;
+  }).join('');
+}
+function openQuickAdd() {
+  const used = new Set(QUICKBAR.map(x => x.id));
+  const body = `<div class="qf-list">${allTools().map(t => `
+    <div class="qf-row">
+      <span class="qf-ico">${t.icon}</span>
+      <span class="qf-name">${esc(t.name)}<i>${esc(t.desc || '')}</i></span>
+      <button class="btn sm ${used.has(t.id) ? 'soft' : ''}" data-qf-add="${esc(t.id)}" ${used.has(t.id) ? 'disabled' : ''}>${used.has(t.id) ? '已添加' : '＋ 添加'}</button>
+    </div>`).join('')}</div>`;
+  const m = modal({ title: '＋ 添加快捷按钮', body, actions: [
+    { label: '完成', cls: 'soft', onClick: mask => mask.remove() },
+  ] });
+  m.body.onclick = async e => {
+    const b = e.target.closest('[data-qf-add]');
+    if (!b || b.disabled) return;
+    const id = b.dataset.qfAdd;
+    if (QUICKBAR.some(x => x.id === id)) return;
+    QUICKBAR.push({ id, order: QUICKBAR.length });
+    b.disabled = true;
+    b.textContent = '已添加';
+    if (await saveQuickbar()) toast('已添加快捷按钮', 'success');
+  };
+}
+function wireRail() {
+  const rail = $('#quickrail');
+  if (!rail || rail.dataset.wired === '1') return;
+  rail.dataset.wired = '1';
+  $('#rail-toggle').onclick = e => { e.stopPropagation(); toggleRail(); };
+  rail.addEventListener('click', e => {
+    if (!document.querySelector('.app')?.classList.contains('rail-collapsed')) return;
+    if (e.target.closest('#rail-toggle')) return;
+    toggleRail();
+  });
+  $('#split-toggle').onclick = () => toggleSplit();
+  $('#quick-add').onclick = () => openQuickAdd();
+  $('#quick-list').onclick = e => {
+    const del = e.target.closest('[data-quick-del]');
+    if (del) {
+      const id = del.dataset.quickDel;
+      QUICKBAR = QUICKBAR.filter(x => x.id !== id).map((x, i) => ({ id: x.id, order: i }));
+      saveQuickbar().then(() => toast('已移除快捷按钮', 'info'));
+      renderQuickbar();
+      return;
+    }
+    const open = e.target.closest('[data-quick-open]');
+    if (open) openToolInFocused(open.dataset.quickOpen);
+  };
+}
+function wirePaneFocus() {
+  // pointerdown 发生在插件处理器之前：先把 #tool-view 放到被点的区，插件内部再查询时不会串区。
+  document.addEventListener('pointerdown', e => {
+    const pane = e.target.closest && e.target.closest('.tool-pane');
+    if (!pane) return;
+    const name = pane.dataset.pane;
+    if (name === 'bottom' && !RT_SPLIT.on) return;
+    const body = pane.querySelector('.tool-pane-body');
+    if (body && body.id !== 'tool-view') setToolViewId(name);
+    // 只有“非交互空白处”（区背景/空态提示）才切换聚焦；按钮、输入框、卡片都不抢聚焦。
+    const blank = e.target === body || e.target === pane || e.target.classList.contains('pane-empty');
+    if (blank) focusPane(name);
+  }, true);
+  document.addEventListener('keydown', e => {
+    const pane = e.target.closest && e.target.closest('.tool-pane');
+    if (pane && (pane.dataset.pane !== 'bottom' || RT_SPLIT.on)) setToolViewId(pane.dataset.pane);
+  }, true);
 }
 
 /* ============================================================
@@ -1136,13 +1411,10 @@ async function submitCobuild(m, mask) {
   toast('打卡成功 ✓ 本次改动已留痕', 'success');
 }
 
-function renderTools() {
-  const page = $('#tools-shell') || $('#page-tools');
-  if (!S.tool || S.tool === 'hub') {
-    S.tool = 'hub';
-    S.toolConf = loadToolShelves();
-    const d = S.toolConf;
-    page.innerHTML = `
+function renderHubInto(body) {
+  const d = S.toolConf;
+  clearPaneHead('top');
+  body.innerHTML = `
       <div class="gcard" style="margin-bottom:14px;">
         <div class="section-title"><span class="st-emoji">🧰</span>通用工具</div>
         <div class="tool-topbar">
@@ -1167,92 +1439,99 @@ function renderTools() {
       <div class="shelf-grid" id="shelf-grid">
         ${d.shelves.map(sh => shelfHTML(sh, d)).join('')}
       </div>`;
-    $('#afn-btn').onclick = () => openAllFnsModal();
-    $('#cb-open').onclick = () => switchPage('cobuild');
-    $('#tool-filter-toggle').onclick = () => {
-      d.ratingFilters.open = !d.ratingFilters.open;
-      $('#tool-filter-panel').classList.toggle('hidden', !d.ratingFilters.open);
-      saveToolShelves(d);
-    };
-    $('#tool-filter-add').onclick = addToolRatingFilter;
-    $('#tool-filter-reset').onclick = () => {
-      d.ratingFilters.conditions = [];
-      saveToolShelves(d);
-      $('#tool-rating-filters').innerHTML = toolRatingFilterHTML(d);
-      refreshToolShelfGrid(); updateToolFilterCount();
-    };
-    $('#tool-filter-match').onchange = e => {
-      d.ratingFilters.match = e.target.value; saveToolShelves(d); refreshToolShelfGrid();
-    };
-    $('#tool-rating-filters').onchange = e => {
-      const i = Number(e.target.dataset.filterIndex), key = e.target.dataset.filterKey;
-      if (!Number.isInteger(i) || !key || !d.ratingFilters.conditions[i]) return;
-      d.ratingFilters.conditions[i][key] = key === 'value' ? Number(e.target.value) : e.target.value;
+  $('#afn-btn').onclick = () => openAllFnsModal();
+  $('#cb-open').onclick = () => switchPage('cobuild');
+  $('#tool-filter-toggle').onclick = () => {
+    d.ratingFilters.open = !d.ratingFilters.open;
+    $('#tool-filter-panel').classList.toggle('hidden', !d.ratingFilters.open);
+    saveToolShelves(d);
+  };
+  $('#tool-filter-add').onclick = addToolRatingFilter;
+  $('#tool-filter-reset').onclick = () => {
+    d.ratingFilters.conditions = [];
+    saveToolShelves(d);
+    $('#tool-rating-filters').innerHTML = toolRatingFilterHTML(d);
+    refreshToolShelfGrid(); updateToolFilterCount();
+  };
+  $('#tool-filter-match').onchange = e => {
+    d.ratingFilters.match = e.target.value; saveToolShelves(d); refreshToolShelfGrid();
+  };
+  $('#tool-rating-filters').onchange = e => {
+    const i = Number(e.target.dataset.filterIndex), key = e.target.dataset.filterKey;
+    if (!Number.isInteger(i) || !key || !d.ratingFilters.conditions[i]) return;
+    d.ratingFilters.conditions[i][key] = key === 'value' ? Number(e.target.value) : e.target.value;
+    saveToolShelves(d); refreshToolShelfGrid();
+  };
+  $('#tool-rating-filters').onclick = e => {
+    const b = e.target.closest('[data-filter-del]');
+    if (!b) return;
+    d.ratingFilters.conditions.splice(Number(b.dataset.filterDel), 1);
+    saveToolShelves(d); $('#tool-rating-filters').innerHTML = toolRatingFilterHTML(d);
+    refreshToolShelfGrid(); updateToolFilterCount();
+  };
+  $('#shelf-add').onclick = () => {
+    const name = $('#shelf-new').value.trim();
+    if (!name) return toast('请输入架子名', 'warn');
+    d.shelves.push({ id: 'sh' + Date.now(), name, fixed: false });
+    saveToolShelves(d);
+    renderTools();
+    toast('架子「' + name + '」已创建 ✓', 'success');
+  };
+  body.onclick = e => {
+    const star = e.target.closest('[data-rate-field], [data-rate-clear]');
+    if (star) {
+      e.preventDefault(); e.stopPropagation();
+      const tid = star.closest('[data-rating-tool]').dataset.ratingTool;
+      const field = star.dataset.rateField || star.dataset.rateClear;
+      if (!d.ratings[tid]) d.ratings[tid] = {};
+      if (star.dataset.rateClear) delete d.ratings[tid][field];
+      else d.ratings[tid][field] = Number(star.dataset.rateValue);
       saveToolShelves(d); refreshToolShelfGrid();
-    };
-    $('#tool-rating-filters').onclick = e => {
-      const b = e.target.closest('[data-filter-del]');
-      if (!b) return;
-      d.ratingFilters.conditions.splice(Number(b.dataset.filterDel), 1);
-      saveToolShelves(d); $('#tool-rating-filters').innerHTML = toolRatingFilterHTML(d);
-      refreshToolShelfGrid(); updateToolFilterCount();
-    };
-    $('#shelf-add').onclick = () => {
-      const name = $('#shelf-new').value.trim();
-      if (!name) return toast('请输入架子名', 'warn');
-      d.shelves.push({ id: 'sh' + Date.now(), name, fixed: false });
-      saveToolShelves(d);
-      renderTools();
-      toast('架子「' + name + '」已创建 ✓', 'success');
-    };
-    page.onclick = e => {
-      const star = e.target.closest('[data-rate-field], [data-rate-clear]');
-      if (star) {
-        e.preventDefault(); e.stopPropagation();
-        const tid = star.closest('[data-rating-tool]').dataset.ratingTool;
-        const field = star.dataset.rateField || star.dataset.rateClear;
-        if (!d.ratings[tid]) d.ratings[tid] = {};
-        if (star.dataset.rateClear) delete d.ratings[tid][field];
-        else d.ratings[tid][field] = Number(star.dataset.rateValue);
-        saveToolShelves(d); refreshToolShelfGrid();
-        return;
-      }
-      const b = e.target.closest('.tool-card');
-      if (b) { S.tool = b.dataset.tool; renderTools(); }
-    };
-    page.onkeydown = e => {
-      if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('.tool-card')) {
-        e.preventDefault(); S.tool = e.target.dataset.tool; renderTools();
-      }
-    };
-    $('#shelf-grid').onclick = e => {
-      const op = e.target.closest('[data-op]');
-      if (!op) return;
-      const shId = op.closest('.shelf-card').dataset.shelf;
-      const shelf = d.shelves.find(x => x.id === shId);
-      if (op.dataset.op === 'rename') {
-        const v = prompt('重命名架子：', shelf.name);
-        if (v && v.trim()) { shelf.name = v.trim(); saveToolShelves(d); renderTools(); toast('已重命名 ✓', 'success'); }
-      } else if (op.dataset.op === 'del') {
-        if (shelf.fixed) return;
-        if (!confirm(`删除架子「${shelf.name}」？其上的功能将移回「通用」。`)) return;
-        d.shelves = d.shelves.filter(x => x.id !== shId);
-        allTools().forEach(t => { if (d.placement[t.id] === shId) d.placement[t.id] = 'gen'; });
-        saveToolShelves(d); renderTools();
-        toast('架子已删除，功能移回「通用」', 'info');
-      }
-    };
-    wireShelfDrag();
-    return;
+      return;
+    }
+    const b = e.target.closest('.tool-card');
+    if (b) openToolInFocused(b.dataset.tool);
+  };
+  body.onkeydown = e => {
+    if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('.tool-card')) {
+      e.preventDefault(); openToolInFocused(e.target.dataset.tool);
+    }
+  };
+  $('#shelf-grid').onclick = e => {
+    const op = e.target.closest('[data-op]');
+    if (!op) return;
+    const shId = op.closest('.shelf-card').dataset.shelf;
+    const shelf = d.shelves.find(x => x.id === shId);
+    if (op.dataset.op === 'rename') {
+      const v = prompt('重命名架子：', shelf.name);
+      if (v && v.trim()) { shelf.name = v.trim(); saveToolShelves(d); renderTools(); toast('已重命名 ✓', 'success'); }
+    } else if (op.dataset.op === 'del') {
+      if (shelf.fixed) return;
+      if (!confirm(`删除架子「${shelf.name}」？其上的功能将移回「通用」。`)) return;
+      d.shelves = d.shelves.filter(x => x.id !== shId);
+      allTools().forEach(t => { if (d.placement[t.id] === shId) d.placement[t.id] = 'gen'; });
+      saveToolShelves(d); renderTools();
+      toast('架子已删除，功能移回「通用」', 'info');
+    }
+  };
+  wireShelfDrag();
+}
+
+function renderTools() {
+  const page = $('#tools-shell') || $('#page-tools');
+  if (!page) return;
+  if (!page.querySelector('#tool-split')) page.innerHTML = toolsSplitHTML();
+  const topBody = paneBody('top');
+  if (!S.tool || S.tool === 'hub') {
+    S.tool = 'hub';
+    S.toolConf = loadToolShelves();
+    RT_SPLIT.tool.top = 'hub';
+    renderHubInto(topBody);
+  } else {
+    RT_SPLIT.tool.top = S.tool;
+    renderToolIntoPane('top', S.tool);
   }
-  page.innerHTML = `
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
-      <button class="btn soft sm" id="tool-back">← 返回工具</button>
-      <div style="font-size:15px;font-weight:700;">${(allTools().find(t => t.id === S.tool) || {}).name || ''}</div>
-    </div>
-    <div id="tool-view"></div>`;
-  $('#tool-back').onclick = goToolsHub;
-  loadAndRenderTool(S.tool);
+  updateSplitUI();
 }
 
 /* ---------- 通用工具 Hub 跳转（同步标题/高亮/状态） ---------- */
@@ -1527,7 +1806,11 @@ function wireNav() {
     S.settings = await api('/api/settings');   // 宿主设置（下载分组）；学习设置由插件加载
     await loadPlugins();
     renderNav();
+    applyRailCollapsed(localStorage.getItem(RAIL_COLLAPSED_KEY) === '1');
+    wireRail();
+    wirePaneFocus();
     switchPage('tools');   // 主界面 = 通用工具
+    loadQuickbar();        // 快捷按钮列表来自宿主 settings.json（异步，不阻塞首屏）
     prefSyncFromServer();  // 本地先渲染，后端配置异步对齐
     // 页面数据由对应页面首次打开时按需请求，避免首屏后的请求突发和数据库排队。
   } catch (e) {

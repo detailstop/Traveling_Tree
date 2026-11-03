@@ -54,6 +54,25 @@
     <section class="page hidden" id="page-all"></section>
     <section class="page hidden" id="page-plugin"></section>
   </main>
+
+  <!-- ============ 右栏快捷按钮 ============ -->
+  <aside class="quickrail glass" id="quickrail" aria-label="快捷按钮栏">
+    <button class="rail-toggle" id="rail-toggle" title="收起快捷栏" aria-expanded="true" aria-controls="rail-body">⟩</button>
+    <div class="rail-body" id="rail-body">
+      <div class="rail-top">
+        <button class="rail-btn" id="split-toggle" aria-pressed="false" title="开启/关闭上下分屏">
+          <span class="rail-ico">▤</span><span class="rail-lb">上下分屏</span>
+        </button>
+      </div>
+      <div class="rail-bottom">
+        <div class="rail-quick-head">
+          <span>快捷</span>
+          <button class="rail-add" id="quick-add" title="添加快捷按钮" aria-label="添加快捷按钮">＋</button>
+        </div>
+        <div class="quick-list" id="quick-list"></div>
+      </div>
+    </div>
+  </aside>
 </div>
 
 <!-- ============ 全局浮层 ============ -->

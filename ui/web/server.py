@@ -484,6 +484,53 @@ def api_settings_save(data: dict) -> dict:
 
 
 # ============================================================
+# 宿主视图偏好：右栏快捷按钮（data/settings.json 的 quickbar 字段）
+# ============================================================
+
+def _card_entry_ids() -> set[str]:
+    """全部有卡片插件 entry id；用于限制快捷按钮只存可加载的插件。"""
+    ids: set[str] = set()
+    for plugin in _plugin_list():
+        for entry in (plugin.get("entries") or []):
+            eid = str(entry.get("id") or "").strip()
+            if eid:
+                ids.add(eid)
+    return ids
+
+
+def api_quickbar_get() -> dict:
+    return {"ok": True, "quickbar": settings_store.quickbar()}
+
+
+def api_quickbar_save(data: dict) -> dict:
+    pinned = data.get("pinned") if isinstance(data, dict) else None
+    if not isinstance(pinned, list):
+        return {"ok": False, "error": "pinned 必须是数组"}
+    if len(pinned) > settings_store.QUICKBAR_PINNED_MAX:
+        return {"ok": False, "error": "快捷按钮过多（最多 %d 个）" % settings_store.QUICKBAR_PINNED_MAX}
+    valid = _card_entry_ids()
+    clean: list[dict] = []
+    seen: set[str] = set()
+    for item in pinned:
+        if isinstance(item, str):
+            eid = item.strip()
+        elif isinstance(item, dict):
+            eid = str(item.get("id") or "").strip()
+        else:
+            continue
+        if not eid or eid in seen:
+            continue
+        if valid and eid not in valid:
+            continue   # 不存在/已删除/无卡片的 entry 不写入
+        seen.add(eid)
+        clean.append({"id": eid, "order": len(clean)})
+    quickbar, ok = settings_store.save_quickbar(clean)
+    if not ok:
+        return {"ok": False, "error": "快捷按钮保存失败：无法写入 data/settings.json"}
+    return {"ok": True, "quickbar": quickbar}
+
+
+# ============================================================
 # HTTP Handler
 # ============================================================
 
@@ -613,9 +660,13 @@ class Handler(BaseHTTPRequestHandler):
                 result = {"ok": True, "plugins": _plugin_list()}
             elif path == "/api/settings":
                 result = {"ok": True, **api_settings()}
+            elif path == "/api/settings/quickbar":
+                result = api_quickbar_get()
         elif method == "POST":
             if path == "/api/settings":
                 result = api_settings_save(data)
+            elif path == "/api/settings/quickbar":
+                result = api_quickbar_save(data)
             elif path == "/api/preferences":
                 result = api_preferences_save(data)
             elif path == "/api/preferences/import":

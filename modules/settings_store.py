@@ -98,3 +98,47 @@ def write(data: dict) -> bool:
 def update(patch: dict) -> tuple[dict, bool]:
     """按默认路径浅合并后写入，返回 (合并后数据, 是否成功)。"""
     return update_at(DEFAULT_SETTINGS_PATH, patch)
+
+
+# ---------------- 宿主视图偏好：右栏快捷按钮 ----------------
+# 结构：{"pinned": [{"id": "<entry id>", "order": 0}, ...]}
+# 只存有卡片插件的 entry id 与顺序；属宿主视图偏好，不是业务内容。
+QUICKBAR_PINNED_MAX = 64
+
+
+def _clean_quickbar(pinned) -> list[dict]:
+    """去重、丢弃非法项、重排 order；容忍字符串/对象混写与缺字段。"""
+    clean: list[dict] = []
+    seen: set[str] = set()
+    for item in (pinned if isinstance(pinned, list) else []):
+        if isinstance(item, str):
+            entry_id = item.strip()
+        elif isinstance(item, dict):
+            entry_id = str(item.get("id") or "").strip()
+        else:
+            continue
+        if not entry_id or entry_id in seen:
+            continue
+        seen.add(entry_id)
+        clean.append({"id": entry_id, "order": len(clean)})
+        if len(clean) >= QUICKBAR_PINNED_MAX:
+            break
+    return clean
+
+
+def quickbar() -> dict:
+    """读取快捷按钮列表；缺失/损坏时返回空列表（不写盘）。"""
+    data = read()
+    raw = data.get("quickbar")
+    pinned = raw.get("pinned") if isinstance(raw, dict) else None
+    return {"pinned": _clean_quickbar(pinned)}
+
+
+def save_quickbar(pinned) -> tuple[dict, bool]:
+    """写入 quickbar.pinned（浅合并，不动其他设置字段）。"""
+    clean = _clean_quickbar(pinned)
+    data, ok = update({"quickbar": {"pinned": clean}})
+    if not ok:
+        return {"pinned": clean}, False
+    raw = data.get("quickbar")
+    return {"pinned": _clean_quickbar(raw.get("pinned") if isinstance(raw, dict) else None)}, True
