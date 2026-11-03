@@ -113,7 +113,7 @@ live_json TEXT NOT NULL DEFAULT '' -- 当前编辑状态
 ## 七、项目状态与交接（2026-10-30）
 
 ### 7.1 插件清单
-- **23 个插件目录**：20 个有前端卡片的插件（ai、aidebug、bg_library、book_reader、expdata、filejudge、finance、market、model_usage、netexp、pdf、pixel_art、project_manager、promptgen、rivet、russian、schedule、screeps、sim、urlarch）；3 个 backend-only 插件（webchat、cobuild、tts，`entries: []`，`/api/plugin/<id>/*` 正常分发）。每个插件目录含 **`INFO.md`** 市场信息卡（共 23 份）；规则见 [plugin-info-card-template.md](appendix/plugin-info-card-template.md)。
+- **24 个插件目录**：21 个有前端卡片的插件（ai、aidebug、bg_library、book_reader、css_exp、expdata、filejudge、finance、market、model_usage、netexp、pdf、pixel_art、project_manager、promptgen、rivet、russian、schedule、screeps、sim、urlarch；共 23 个 entry）；3 个 backend-only 插件（webchat、cobuild、tts，`entries: []`，`/api/plugin/<id>/*` 正常分发）。每个插件目录含 **`INFO.md`** 市场信息卡（共 24 份）；规则见 [plugin-info-card-template.md](appendix/plugin-info-card-template.md)。
 - **russian 定位**：`russian` 是普通功能插件（非预置、可卸载），不是宿主主体或默认必装核心。
 - **宿主剩余**：`modules/__init__.py`、`modules/settings_store.py`、`ui/web/server.py`、`ui/web/static/app.js`。原 `core/` 与 `db/schema/` 业务 DDL 已清除。
 
@@ -129,14 +129,14 @@ live_json TEXT NOT NULL DEFAULT '' -- 当前编辑状态
 | smoke_file_preview.py | 文件预览 | 17/17 |
 | smoke_pdf.py | PDF 与二进制响应 | 17/17 |
 | smoke_plugin_data_dirs.py | 插件 data_dirs | 13/13 |
-| smoke_plugin_decoupling.py | 20 卡片插件改名/重启解耦 | 476/476 |
+| smoke_plugin_decoupling.py | 21 卡片插件改名/重启解耦 | 500/500 |
 | smoke_plugin_module_off.py | 模块关闭 503/不建表 | 10/10 |
-| smoke_plugins.py | manifest/清单/静态资源/后端 | 185/185 |
+| smoke_plugins.py | manifest/清单/静态资源/后端 | 189/189 |
 | smoke_startup_once.py | 首次启动建表/API | 34/34 |
-| smoke_market.py | 市场双索引/安装/拉取/校验打包 | 31/31 |
-| smoke_info_cards.py | 23 份 INFO.md 字段/一致性 | 11/11 |
+| smoke_market.py | 市场双索引/安装/拉取/校验打包 | 37/37 |
+| smoke_info_cards.py | 24 份 INFO.md 字段/一致性 | 11/11 |
 
-合计 **1010/1011**（14 项全 PASS；`smoke_web` 74/75，TTS 502 为唯一允许 FAIL）。
+合计 **1010/1011**（旧 15 项基线；`smoke_web` 74/75，TTS 502 为唯一允许 FAIL）。**round 113 后交接记录全量 1044/1045**（同上唯一 FAIL），`validate` 24/24 插件 `ok: true`；新增 `css_exp` 断言未在本表单列，待全量输出归档。
 
 已知 FAIL：`smoke_web` 的 TTS 502 来自 edge-tts 外部网络不可用，不阻塞其他断言；出现非 TTS 的 FAIL 按回滚规则处理。
 
@@ -146,17 +146,20 @@ live_json TEXT NOT NULL DEFAULT '' -- 当前编辑状态
 ### 7.4 交接建议
 - 新功能：在 `plugins/` 下新建插件，写 `manifest.json` + `backend.py`；有业务表加 `schema.sql`，参照附录 A–D。
 - 改现有功能：直接改对应插件目录，不碰宿主。
-- 每轮下沉、改 settings 或改 API 后运行全量 13 个 smoke。
+- 每轮下沉、改 settings 或改 API 后运行全量 15 个 smoke。
 - `/api/plugin/<id>/*` 必须有语义子路径，按附录 B 命名。
 - 二进制响应用 `__binary__: True` + `body`/`mime`/`filename`/`headers`，不要用旧版 bytes 直传。
 - TTS 502 是已知外部网络问题；出现其他 FAIL 先回滚再定位。
+- css_exp（round 113）：静态导出产物采用**两段式**——页面文档走宿主 `/plugins/css_exp/static/app/...`，资源走 `/api/plugin/css_exp/app/...` 兜底（宿主二进制响应固定带 `Content-Disposition: attachment`，顶层文档会被当下载）；iframe 使用弱沙箱 `allow-scripts allow-same-origin`（同源抓取 DOM 所需），**不是严格隔离**，外部项目须可信；收藏抓取依赖外部详情页 DOM 与 `{type}/{slug}` 路由，外部升级需同步选择器。
+- `.gitignore` 为 css_exp 的 `_next/data/` 加了精确例外；**push 前**复核 `data/` 与敏感文件仍被忽略、例外未被放宽。
 
 ### 7.5 数据资产
-- 主库 `data/russian_tutor.db`（唯一业务主库；文件名与项目目录名解耦，不改）。
+- 主库 `data/russian_tutor.db`（唯一业务主库；文件名与项目目录名解耦，不改）；含 `css_exp_favorites`（css_exp 收藏条目，raw/live 双列）。
+- css_exp 静态产物：`plugins/css_exp/static/app/`（外部 AWA UI 导出产物，进 Git；`_next/data/` 由 `.gitignore` 精确例外放行）。
 - `data/settings.json`：`download_groups` + `modules.enabled`；插件 settings 在 `data/plugins/<id>/settings.json`。
 - 敏感文件：`data/ai_keys.json`、`data/webchat_sessions.json`、`data/plugins/webchat/webchat_profile/`、`data/plugins/finance/fixtures/rt_fin.json`；只按路径处理，不读正文、不进 Git。
 - 市场双索引：`remote_index.json`（覆盖式，拉取写入，公共库包字段）+ `local_index.json`（组装式，扫描 INFO）；旧 `index.json` 迁移后删除；`downloads/` 存下载 zip。
-- 市场运行态：`remote_index.json`（覆盖式，拉取写入）+ `local_index.json`（扫描 INFO 组装，21 条展示）；旧单文件已迁移删除；不进 Git。
+- 市场运行态：`remote_index.json`（覆盖式，拉取写入）+ `local_index.json`（扫描 INFO 组装，22 条展示）；旧单文件已迁移删除；不进 Git。
 - 市场源：`data/plugins/market/settings.json` 的 `market_source_url`（https raw；空则拉取按钮置灰）。
 - 市场分发：**Release 为唯一源**；`market/packages/` 为空目录（脚本备用、勿随意运行）；`remote_index.json` 的 `download_url` 指向 Release。
 - 市场资产：`market/index.json`（5 预置模板，进 Git）、`market/packages/`（空目录，脚本备用）、`data/plugins/market/{remote,local}_index.json`（运行态）、`market/.trash/`（卸载备份）；安装记录在 `market_installed` 表。
@@ -268,7 +271,7 @@ round 65 删除 `plugin-development-whitepaper-v2.1-draft.md` 与 `project-closu
 - **functional（功能性）**：`manifest.entries` 非空，渲染前端卡片，用户可直接进入。
 - **library（底层下沉）**：`entries` 为空，不渲染卡片，只通过 `/api/plugin/<id>/*` 被其他插件或宿主前端调用。
 - **例外**：`cobuild` 为 backend-only（无卡片），但用户直接使用「多 AI 共建 → 打卡」入口，归 functional。
-- 机器可读清单：`plugins/lib.json`（22 条，字段 `id`/`kind`/`has_ui`/`called_by`/`notes`）。该文件仅作文档索引，宿主、测试与插件运行时不读取。
+- 机器可读清单：`plugins/lib.json`（24 条，字段 `id`/`kind`/`has_ui`/`called_by`/`notes`）。该文件仅作文档索引，宿主、测试与插件运行时不读取。
 
 ### E.2 当前清单
 | 插件 | kind | has_ui | 直接调用方 | 文档 |
@@ -277,7 +280,7 @@ round 65 删除 `plugin-development-whitepaper-v2.1-draft.md` 与 `project-closu
 | tts | library | 否 | `ui/web/static/app.js`（russian 经此间接使用） | [lib/tts.md](appendix/lib/tts.md) |
 | cobuild | functional（例外） | 否 | 用户打卡入口 | — |
 
-其余 19 个有卡片插件均为 functional。
+其余 20 个有卡片插件均为 functional。
 
 ### E.3 调用关系摘要
 - `webchat`：AI 工作台、接口调试器、记账本/理财量化、提示词生成器与宿主中断逻辑共用；依赖 Playwright 与登录态 profile。
@@ -290,5 +293,5 @@ round 65 删除 `plugin-development-whitepaper-v2.1-draft.md` 与 `project-closu
 
 ### E.5 未来物理移动的风险（仅说明，不执行）
 - 宿主只扫描 `plugins/<目录>/manifest.json` 且要求 `id == 目录名`；把插件移出 `plugins/` 或改变目录名会导致它不再被发现、其 API 404。
-- `tests/smoke_plugins.py` 把 `plugins/` 下**任意目录**计入插件目录数（当前 22）；新增或移动目录会改变该计数，需同步调整测试，否则 smoke 失败。
-- 因此本轮不移动任何插件目录；`plugins/lib.json` 用单文件而非 `plugins/lib/` 子目录，正是为了避免被计为第 23 个插件目录。
+- `tests/smoke_plugins.py` 把 `plugins/` 下**任意目录**计入插件目录数（当前 24）；新增或移动目录会改变该计数，需同步调整测试，否则 smoke 失败。
+- 因此本轮不移动任何插件目录；`plugins/lib.json` 用单文件而非 `plugins/lib/` 子目录，正是为了避免被计为第 25 个插件目录。

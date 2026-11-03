@@ -2,9 +2,9 @@
 
 > 只读摘要，勿手改。本文件由 docs/appendix/file_navigation.json 生成；结构与去留决定以 JSON 为准。
 
-- 生成时间：2026-11-03T01:30:19+03:00
-- 轮次：113
-- 待办：1 条；已决定：777 条
+- 生成时间：2026-11-03T15:42:42+03:00
+- 轮次：114
+- 待办：1 条；已决定：782 条
 
 ## 待办
 
@@ -16,6 +16,11 @@
 
 | 路径 | 决定 | 原因 | 状态 | 轮次 | 时间 | 备份路径 |
 | --- | --- | --- | --- | --- | --- | --- |
+| README.md | 文档口径同步到 24 插件 / css_exp / 依赖管理 / smoke 基线（round 114） | 按 manifest 扫描事实更新：§2 技术栈补 packaging（市场版本比较，缺失降级）；§4 目录树 24 目录（21 有卡片 + 3 backend-only）、有表 15/无表 9、lib.json 24 条；§5 卡片 23 张、urlarch 补图片上传/点击启动/组别折叠/拖拽改组/组名去重、新增 css_exp 简述；§6 主库行补 css_exp 收藏、本地开发 16→17；§7 新增 css_exp 弱沙箱与同源抓取耦合、gitignore 例外 push 前复核两条风险；§9 补 dependencies.python 唯一子键/只声明不安装/packaging 降级与 provides/consumes 语义引用；§12 改为 2026-11-03（round 113 后）、24/21/23 entry、smoke 1044/1045、validate 24/24、ahead 18 未 push，并在末尾追加本轮核查记录。 | done | 114 | 2026-11-03T15:42:42+03:00 |  |
+| docs/plugin-development-whitepaper.md | §7 与附录 E 的状态/计数同步（round 114） | §7.1：24 目录、21 有卡片（含 css_exp）、23 entry、24 份 INFO；§7.2：decoupling 500/500、plugins 189/189、market 37/37、info_cards 24 份，合计行注明旧基线 1010/1011 与 round 113 后交接 1044/1045（TTS 502）、validate 24/24；§7.4 补 css_exp 两段式静态/弱沙箱/抓取耦合与 push 前 gitignore 复核；§7.5 补 css_exp_favorites 与 static/app 路径、local 22 条；附录 E.1 lib.json 24 条、E.2 其余 20 个、E.5 当前 24/第 25 个。规则本体未改。 | done | 114 | 2026-11-03T15:42:42+03:00 |  |
+| plugins/lib.json | 条目口径与 manifest 对齐（round 114） | 24 条与 24 个插件目录一致（无缺/多）；css_exp 的 kind/has_ui/called_by 来自 manifest 与 README；urlarch notes 补“站点统筹 + 图片上传/点击启动/组别折叠/拖拽改组/组名去重”。 | done | 114 | 2026-11-03T15:42:42+03:00 |  |
+| plugins/css_exp/feature.js | parseLocation 改用 URL.pathname 并收紧匹配（round 114） | 原实现用字符串 split 且仅过滤 index.html：带 query/hash 时 slug 会含参数，_next/data 等内部路径会被误判为详情页。改为 new URL(href, location.origin).pathname，去掉末尾 index.html 后只接受 1–2 段且首段不以 _ 开头；兼容静态路由（/plugins/css_exp/static/app/）与旧 API 前缀（/api/plugin/css_exp/app/），带/不带 trailingSlash 均可。node --check 通过；未重启宿主，端到端待人工走查。 | done | 114 | 2026-11-03T15:42:42+03:00 |  |
+| docs/appendix/file_navigation.json | 登记 round 114（文档同步与两项核查） | 追加 5 条 decided 并 round→114；pending 保留既有 1 条；resolved 45 条不动；md 由生成器重生成。核查：`.gitignore` 例外第 39–40 行精确指向 plugins/css_exp/static/app/_next/data/，无宽泛 !data/；data/ 仍忽略 DB/keys/sessions/profile；目标 JSON 未被忽略且 git ls-files=175。验证：smoke_plugins 189/189、smoke_info_cards 11/11；未改业务代码/字段；未 push、未重启。 | done | 114 | 2026-11-03T15:42:42+03:00 |  |
 | plugins/css_exp/manifest.json | 新增第 24 个平级插件（round 113） | id=css_exp、显示名 CSS 动效组件库、entry css-exp → feature.js；backend/backend.py、db.module_key=css_exp、schema.sql + migrate.py；独立目录/路由，不挂任何现有插件。 | done | 113 | 2026-11-03T01:30:19+03:00 |  |
 | plugins/css_exp/schema.sql | 新增收藏表 css_exp_favorites（round 113） | 字段 id/title/category/made_by/css/html/source_url/raw_json/live_json/created_at；索引 idx_css_exp_fav_url(source_url)；全部 IF NOT EXISTS。 | done | 113 | 2026-11-03T01:30:19+03:00 |  |
 | plugins/css_exp/migrate.py | 收藏表迁移与幂等（round 113） | 缺表建表、缺列补列（ALTER 带默认值）、缺 raw/live 回填、确保索引；强制停点 7/7 PASS：真实库备份 data/backup/russian_tutor_before_css_exp_20261103.db，副本两次 migrate 幂等、旧表（urlarch_assets/links/shortcuts、finance_settings）行数与哈希不变、真实库未动。 | done | 113 | 2026-11-03T01:30:19+03:00 |  |

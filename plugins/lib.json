@@ -152,7 +152,7 @@
       "kind": "functional",
       "has_ui": true,
       "called_by": [],
-      "notes": "网址归档；有卡片。"
+      "notes": "站点统筹（原网址归档）；有卡片；组别折叠、图片上传（≤2MB，data/plugins/urlarch/images/）、功能性组点击启动、软件条目拖拽改组、组名事务内去重；数据在 urlarch_* 表。"
     },
     {
       "id": "webchat",

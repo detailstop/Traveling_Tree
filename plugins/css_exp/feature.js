@@ -25,12 +25,23 @@
   }
 
   function parseLocation(href) {
+    let pathname = '';
+    try {
+      pathname = new URL(String(href || ''), location.origin).pathname;
+    } catch (e) {
+      return { type: '', slug: '' };
+    }
     let path = '';
-    if (href.indexOf(APP_STATIC) >= 0) path = href.split(APP_STATIC)[1] || '';
-    else if (href.indexOf(APP_API) >= 0) path = href.split(APP_API)[1] || '';
+    if (pathname.indexOf(APP_STATIC) === 0) path = pathname.slice(APP_STATIC.length);
+    else if (pathname.indexOf(APP_API) === 0) path = pathname.slice(APP_API.length);
     else return { type: '', slug: '' };
-    const parts = path.split('/').filter(Boolean).filter(p => p !== 'index.html');
-    return { type: parts[0] || '', slug: parts[1] || '' };
+    const parts = path.split('/').filter(Boolean);
+    if (parts.length && parts[parts.length - 1] === 'index.html') parts.pop();
+    // 只接受「分类」或「分类/组件」两层；_next 等内部路径不当作详情页
+    if (!parts.length || parts.length > 2 || parts[0].charAt(0) === '_') {
+      return { type: '', slug: '' };
+    }
+    return { type: parts[0], slug: parts[1] || '' };
   }
 
   function appPathToStatic(rest) {
