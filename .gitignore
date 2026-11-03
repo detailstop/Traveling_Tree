@@ -35,6 +35,28 @@ market/.trash/
 # 待归并区：外部项目临时存放，不入 Git（仅供归并流程轮 A 读取）
 _migration/
 
+# 插件库插件（不进主仓库，由市场安装）
+# 白名单见 plugins/lib.json 的 in_main_repo；新增/移出插件需同步本节与 lib.json。
+plugins/ai/
+plugins/aidebug/
+plugins/bg_library/
+plugins/book_reader/
+plugins/css_exp/
+plugins/expdata/
+plugins/filejudge/
+plugins/finance/
+plugins/model_usage/
+plugins/netexp/
+plugins/pdf/
+plugins/project_manager/
+plugins/promptgen/
+plugins/rivet/
+plugins/russian/
+plugins/schedule/
+plugins/screeps/
+plugins/sim/
+plugins/urlarch/
+
 # 例外：css_exp 的 Next 导出产物里 _next/data/ 是静态路由数据（不是项目 data/），需随插件入库
 !plugins/css_exp/static/app/_next/data/
 !plugins/css_exp/static/app/_next/data/**

@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import json
 import http.client
+import json
 import os
 import re
 import shutil
@@ -30,31 +31,56 @@ import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-TARGETS = [
-    {"id": "ai", "api": "/api/plugin/ai/state", "api_ok": 200},
-    {"id": "aidebug", "api": "/api/plugin/aidebug/state", "api_ok": 200},
-    {"id": "bg_library", "api": "/api/plugin/bg_library/bg/tree", "api_ok": 200},
-    {"id": "book_reader", "api": "/api/plugin/book_reader/state", "api_ok": 200},
-    {"id": "expdata", "api": None},
-    {"id": "filejudge", "api": "/api/plugin/filejudge/scan", "api_ok": 405},
-    {"id": "finance", "api": "/api/plugin/finance/content-state", "api_ok": 200,
-     "feature": "feature_finance.js"},
-    {"id": "model_usage", "api": "/api/plugin/model_usage/records", "api_ok": 200},
-    {"id": "netexp", "api": None},
-    {"id": "pdf", "api": "/api/plugin/pdf/batch/scan", "api_ok": 405,
-     "feature": "feature_pdf.js"},
-    {"id": "pixel_art", "api": "/api/plugin/pixel_art/works", "api_ok": 200},
-    {"id": "project_manager", "api": "/api/plugin/project_manager/projects", "api_ok": 200},
-    {"id": "promptgen", "api": "/api/plugin/promptgen/state", "api_ok": 200},
-    {"id": "rivet", "api": "/api/plugin/rivet/data", "api_ok": 200},
-    {"id": "russian", "api": "/api/plugin/russian/items", "api_ok": 200},
-    {"id": "schedule", "api": "/api/plugin/schedule/state", "api_ok": 200},
-    {"id": "screeps", "api": "/api/plugin/screeps/state", "api_ok": 200},
-    {"id": "market", "api": "/api/plugin/market/list", "api_ok": 200},
-    {"id": "sim", "api": None},
-    {"id": "urlarch", "api": "/api/plugin/urlarch/state", "api_ok": 200},
-    {"id": "css_exp", "api": "/api/plugin/css_exp/favorites", "api_ok": 200},
-]
+API_MAP = {
+    "ai": {"api": "/api/plugin/ai/state", "api_ok": 200},
+    "aidebug": {"api": "/api/plugin/aidebug/state", "api_ok": 200},
+    "bg_library": {"api": "/api/plugin/bg_library/bg/tree", "api_ok": 200},
+    "book_reader": {"api": "/api/plugin/book_reader/state", "api_ok": 200},
+    "expdata": {"api": None},
+    "filejudge": {"api": "/api/plugin/filejudge/scan", "api_ok": 405},
+    "finance": {"api": "/api/plugin/finance/content-state", "api_ok": 200},
+    "model_usage": {"api": "/api/plugin/model_usage/records", "api_ok": 200},
+    "netexp": {"api": None},
+    "pdf": {"api": "/api/plugin/pdf/batch/scan", "api_ok": 405},
+    "pixel_art": {"api": "/api/plugin/pixel_art/works", "api_ok": 200},
+    "project_manager": {"api": "/api/plugin/project_manager/projects", "api_ok": 200},
+    "promptgen": {"api": "/api/plugin/promptgen/state", "api_ok": 200},
+    "rivet": {"api": "/api/plugin/rivet/data", "api_ok": 200},
+    "russian": {"api": "/api/plugin/russian/items", "api_ok": 200},
+    "schedule": {"api": "/api/plugin/schedule/state", "api_ok": 200},
+    "screeps": {"api": "/api/plugin/screeps/state", "api_ok": 200},
+    "market": {"api": "/api/plugin/market/list", "api_ok": 200},
+    "sim": {"api": None},
+    "urlarch": {"api": "/api/plugin/urlarch/state", "api_ok": 200},
+    "css_exp": {"api": "/api/plugin/css_exp/favorites", "api_ok": 200},
+}
+
+
+def _discover_targets() -> list[dict]:
+    """按本地实际插件目录动态发现“有卡片”的插件；缺口用默认 feature.js。"""
+    found: list[dict] = []
+    for directory in sorted((ROOT / "plugins").iterdir(), key=lambda d: d.name):
+        manifest = directory / "manifest.json"
+        if not manifest.is_file():
+            continue
+        try:
+            data = json.loads(manifest.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        entries = data.get("entries") or []
+        if not entries:
+            continue
+        spec = API_MAP.get(directory.name, {})
+        found.append({
+            "id": directory.name,
+            "feature": entries[0].get("feature") or "feature.js",
+            "api": spec.get("api"),
+            "api_ok": spec.get("api_ok", 200),
+        })
+    return found
+
+
+TARGETS = _discover_targets()
 TOTAL = len(TARGETS)
 TMP = Path(tempfile.mkdtemp(prefix="rt_decouple_test_"))
 

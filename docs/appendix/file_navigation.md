@@ -2,20 +2,30 @@
 
 > 只读摘要，勿手改。本文件由 docs/appendix/file_navigation.json 生成；结构与去留决定以 JSON 为准。
 
-- 生成时间：2026-11-03T22:11:19+03:00
-- 轮次：118
-- 待办：1 条；已决定：825 条
+- 生成时间：2026-11-03T23:08:06+03:00
+- 轮次：119
+- 待办：2 条；已决定：834 条
 
 ## 待办
 
 | 路径 | 移动计划 | 指南计划 | 摘要 | 轮次 | 创建时间 |
 | --- | --- | --- | --- | --- | --- |
+| _migration/css_exp/ |  |  |  | 119 | 2026-11-03T23:08:06+03:00 |
 | docs/appendix/file_navigation.json | 不移动文件；清理对象是 decided[] 内 28 条非文件占位 path（round 67–94 的 data/bg_import/::roundNN-none），本轮只登记不改动。 | 建议单独一轮统一清理：逐条删除，或在删除时于当轮 decided 写明依据；不改 schema、不改其他历史条目、不编造替代 path。清理完成后再移入 resolved[] 并写 resolution。 | round 67–94 共 28 条 data/bg_import/::roundNN-none 非文件占位待统一清理（:: 前为空目录、无实际文件；round 95 同类占位已于 round 96 删除）。 | 97 | 2026-11-01T17:23:10+03:00 |
 
 ## 已决定去留
 
 | 路径 | 决定 | 原因 | 状态 | 轮次 | 时间 | 备份路径 |
 | --- | --- | --- | --- | --- | --- | --- |
+| .gitignore | 新增“插件库插件”排除节（round 119） | 白名单 5 个（market/cobuild/webchat/tts/pixel_art）不排除，其余 19 个逐目录显式忽略；节首注明白名单见 plugins/lib.json 的 in_main_repo 并需同步；未使用 plugins/*/ 宽泛排除；plugins/lib.json 与 plugins/market/ 仍跟踪。 | done | 119 | 2026-11-03T23:08:06+03:00 |  |
+| plugins/lib.json | 每条新增 in_main_repo 字段（round 119） | 24 条与本地插件目录一致，白名单 5 条 true、其余 19 条 false；不改其他字段与 notes 语义；宿主运行时仍不读。 | done | 119 | 2026-11-03T23:08:06+03:00 |  |
+| tests/smoke_plugins.py | 插件数/entry 数/INFO 相关断言动态化（round 119） | 插件数量、entry 数量、单入口数、卡片总数、恢复数改为 EXPECTED_PLUGIN_IDS/EXPECTED_ENTRY_IDS 运行时扫描；插件专属 API/作品/依赖块按插件存在性跳过；CSS 锚点跳过不存在的插件；本地 24 仍 190/190。 | done | 119 | 2026-11-03T23:08:06+03:00 |  |
+| tests/smoke_plugin_decoupling.py | TARGETS 改为运行时扫描有卡片插件（round 119） | 按本地 plugins/*/manifest.json 的 entries 动态发现；API 用 API_MAP 补充、缺失则跳过；本地 24 为 500/500，白名单 5 环境为 49/49。 | done | 119 | 2026-11-03T23:08:06+03:00 |  |
+| tests/smoke_info_cards.py | INFO 数量断言动态化（round 119） | 由 plugins/*/INFO.md 与 plugins/*/manifest.json 扫描数比较，不再写死 24；本地 11/11，白名单 11/11。 | done | 119 | 2026-11-03T23:08:06+03:00 |  |
+| tests/smoke_market.py | 本地开发索引数与依赖测试改为动态（round 119） | 旧文件迁移断言的本地包数改由 index_store._local_packages(_info_entries()) 计算；依赖子键测试改用本地实际存在的插件（不再固定 urlarch）；本地 37/37，白名单 37/37。 | done | 119 | 2026-11-03T23:08:06+03:00 |  |
+| docs/plugin-development-whitepaper.md | 新增 §十二“主仓库白名单与插件库”并同步基数（round 119） | §十二写明白名单事实源、逐目录排除、环境差异、与预置的关系、首次使用；§7.1 补白名单一句；§7.2 基线改“以本地实际插件目录数为准（本地24/新克隆5）”并保留分项参考；§7.5 补非白名单与 _migration 状态；§十与附录 E.1 的 lib.json 定位改为“文档/.gitignore/生成脚本/测试可读，宿主运行时不读”。 | done | 119 | 2026-11-03T23:08:06+03:00 |  |
+| README.md | 新增首次使用步骤与白名单说明（round 119） | §1.1 新克隆步骤（配置 market_source_url → 拉取 remote → 安装 → 重启）；§4 目录区分跟踪 5 / 本地 24；§6 市场分发补 remote 安装；§7 第 15 条风险（ignored 目录会被 git clean 删除）；§10 基线动态；§12 round 119。 | done | 119 | 2026-11-03T23:08:06+03:00 |  |
+| docs/appendix/file_navigation.json | 登记 round 119（白名单/测试动态化/迁移核实） | 追加 9 条 decided 并 round→119；pending 新增 _migration/css_exp 删除待用户确认；resolved 45 条不动；md 由生成器重生成。验证：本地 24 全量 smoke、模拟新克隆 5（4 个动态 smoke 全绿）、gitignore 检查、lib.json/生成器检查。 | done | 119 | 2026-11-03T23:08:06+03:00 |  |
 | ui/web/static/index.html | 右栏上区新增全屏按钮（round 118） | `#quickrail .rail-top` 在 `#split-toggle` 旁新增 `#fullscreen-toggle`（图标 ⤢/⤡ 两态、aria-pressed、title），沿用上区容器扩展位，不新增其他按钮。 | done | 118 | 2026-11-03T22:11:19+03:00 |  |
 | ui/web/static/app.js | 全屏视图状态与 ESC 退出（round 118） | 新增内存态 `RT_FULL`；`applyFullscreen/toggleFullscreen/updateFullscreenUI` 给 `.app` 加 `fullscreen` 类（工具内容区 `.tool-split` 固定覆盖、三栏隐藏）；ESC 仅在进入时注册 capture `keydown`、退出即解绑（输入框内也退出），非全屏不拦截；退出不改变 `RT_SPLIT`/上下区插件/聚焦；`paneEmptyHTML` 在全屏时改为「按 ESC 退出全屏后，从右栏快捷按钮加载插件」，`updateSplitUI` 随全屏态重写空区提示；切离工具页防御性退出全屏。 | done | 118 | 2026-11-03T22:11:19+03:00 |  |
 | ui/web/static/app.css | 全屏 CSS 覆盖层样式（round 118） | `.app.fullscreen` 隐藏 sidebar/topbar/quickrail；`.app.fullscreen .tool-split` 用 `position:fixed; inset:0; z-index:90` 铺满视口、主题渐变背景、overflow auto；单视图 pane 自适应，分屏 `.split` 保持上下 50/50；不改既有分屏/右栏/聚焦样式语义。 | done | 118 | 2026-11-03T22:11:19+03:00 |  |

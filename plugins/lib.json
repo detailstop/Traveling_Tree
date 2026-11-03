@@ -8,77 +8,88 @@
       "kind": "functional",
       "has_ui": true,
       "called_by": [],
-      "notes": "AI 工作台；有卡片；调用 webchat 插件；API Key 在 data/ai_keys.json（不读正文）。 对外提供能力：provides=[ai]（finance 调用）。"
+      "notes": "AI 工作台；有卡片；调用 webchat 插件；API Key 在 data/ai_keys.json（不读正文）。 对外提供能力：provides=[ai]（finance 调用）。",
+      "in_main_repo": false
     },
     {
       "id": "aidebug",
       "kind": "functional",
       "has_ui": true,
       "called_by": [],
-      "notes": "接口调试器；有卡片；经共享 features/webchat.js 使用网页会话。"
+      "notes": "接口调试器；有卡片；经共享 features/webchat.js 使用网页会话。",
+      "in_main_repo": false
     },
     {
       "id": "bg_library",
       "kind": "functional",
       "has_ui": true,
       "called_by": [],
-      "notes": "项目优化与当前综述（背景库 + 文件预览）；有卡片；背景库当前不可用，本次未导入、未写背景库数据。"
+      "notes": "项目优化与当前综述（背景库 + 文件预览）；有卡片；背景库当前不可用，本次未导入、未写背景库数据。",
+      "in_main_repo": false
     },
     {
       "id": "book_reader",
       "kind": "functional",
       "has_ui": true,
       "called_by": [],
-      "notes": "俄语书籍阅读；有卡片；调用 plugins.pixel_art.service（跨插件 import）。"
+      "notes": "俄语书籍阅读；有卡片；调用 plugins.pixel_art.service（跨插件 import）。",
+      "in_main_repo": false
     },
     {
       "id": "cobuild",
       "kind": "functional",
       "has_ui": false,
       "called_by": [],
-      "notes": "多 AI 共建；backend-only 无卡片；例外归功能性：用户直接使用打卡入口（首页多 AI 共建声明 → 打卡）。 不声明 provides（用户打卡入口，无插件调用）。"
+      "notes": "多 AI 共建；backend-only 无卡片；例外归功能性：用户直接使用打卡入口（首页多 AI 共建声明 → 打卡）。 不声明 provides（用户打卡入口，无插件调用）。",
+      "in_main_repo": true
     },
     {
       "id": "expdata",
       "kind": "functional",
       "has_ui": true,
       "called_by": [],
-      "notes": "实验数据获取；有卡片；无后端。"
+      "notes": "实验数据获取；有卡片；无后端。",
+      "in_main_repo": false
     },
     {
       "id": "filejudge",
       "kind": "functional",
       "has_ui": true,
       "called_by": [],
-      "notes": "文件判官；有卡片；data_dirs=filejudge；可确认删除本地文件，使用前先预览。"
+      "notes": "文件判官；有卡片；data_dirs=filejudge；可确认删除本地文件，使用前先预览。",
+      "in_main_repo": false
     },
     {
       "id": "finance",
       "kind": "functional",
       "has_ui": true,
       "called_by": [],
-      "notes": "记账本与理财量化；有卡片（2 entries）；调用 webchat 插件。"
+      "notes": "记账本与理财量化；有卡片（2 entries）；调用 webchat 插件。",
+      "in_main_repo": false
     },
     {
       "id": "model_usage",
       "kind": "functional",
       "has_ui": true,
       "called_by": [],
-      "notes": "模型用量与消费；有卡片。"
+      "notes": "模型用量与消费；有卡片。",
+      "in_main_repo": false
     },
     {
       "id": "netexp",
       "kind": "functional",
       "has_ui": true,
       "called_by": [],
-      "notes": "网络与互联探索；有卡片；无后端。"
+      "notes": "网络与互联探索；有卡片；无后端。",
+      "in_main_repo": false
     },
     {
       "id": "pdf",
       "kind": "functional",
       "has_ui": true,
       "called_by": [],
-      "notes": "PDF 与压缩；有卡片（2 entries）；二进制响应用 __binary__ 协议。"
+      "notes": "PDF 与压缩；有卡片（2 entries）；二进制响应用 __binary__ 协议。",
+      "in_main_repo": false
     },
     {
       "id": "pixel_art",
@@ -87,56 +98,64 @@
       "called_by": [
         "plugins/book_reader"
       ],
-      "notes": "像素画与插件绘制；有卡片；被 plugins/book_reader 直接 import service。 对外提供能力：provides=[pixel_assets]（book_reader 直接 import）。"
+      "notes": "像素画与插件绘制；有卡片；被 plugins/book_reader 直接 import service。 对外提供能力：provides=[pixel_assets]（book_reader 直接 import）。",
+      "in_main_repo": true
     },
     {
       "id": "project_manager",
       "kind": "functional",
       "has_ui": true,
       "called_by": [],
-      "notes": "项目管理；有卡片。"
+      "notes": "项目管理；有卡片。",
+      "in_main_repo": false
     },
     {
       "id": "promptgen",
       "kind": "functional",
       "has_ui": true,
       "called_by": [],
-      "notes": "提示词生成器；有卡片；shared_features 含 webchat，经共享脚本调用网页会话。"
+      "notes": "提示词生成器；有卡片；shared_features 含 webchat，经共享脚本调用网页会话。",
+      "in_main_repo": false
     },
     {
       "id": "rivet",
       "kind": "functional",
       "has_ui": true,
       "called_by": [],
-      "notes": "铆钉点；有卡片；data_dirs=rivet。"
+      "notes": "铆钉点；有卡片；data_dirs=rivet。",
+      "in_main_repo": false
     },
     {
       "id": "russian",
       "kind": "functional",
       "has_ui": true,
       "called_by": [],
-      "notes": "俄语单词背诵学习核心；有卡片；朗读经宿主 app.js speakBtn 间接使用 tts。"
+      "notes": "俄语单词背诵学习核心；有卡片；朗读经宿主 app.js speakBtn 间接使用 tts。",
+      "in_main_repo": false
     },
     {
       "id": "schedule",
       "kind": "functional",
       "has_ui": true,
       "called_by": [],
-      "notes": "计划表；有卡片。"
+      "notes": "计划表；有卡片。",
+      "in_main_repo": false
     },
     {
       "id": "screeps",
       "kind": "functional",
       "has_ui": true,
       "called_by": [],
-      "notes": "Screeps Arena；有卡片。"
+      "notes": "Screeps Arena；有卡片。",
+      "in_main_repo": false
     },
     {
       "id": "sim",
       "kind": "functional",
       "has_ui": true,
       "called_by": [],
-      "notes": "随机模拟器；有卡片；无后端。"
+      "notes": "随机模拟器；有卡片；无后端。",
+      "in_main_repo": false
     },
     {
       "id": "tts",
@@ -145,14 +164,16 @@
       "called_by": [
         "ui/web/static/app.js"
       ],
-      "notes": "语音朗读（底层下沉）；无卡片；直接调用方为宿主 app.js（speakBtn/clear-cache），russian 经 speakBtn 间接使用；依赖 edge-tts 联网，失败回落系统语音。详见 docs/appendix/lib/tts.md。"
+      "notes": "语音朗读（底层下沉）；无卡片；直接调用方为宿主 app.js（speakBtn/clear-cache），russian 经 speakBtn 间接使用；依赖 edge-tts 联网，失败回落系统语音。详见 docs/appendix/lib/tts.md。",
+      "in_main_repo": true
     },
     {
       "id": "urlarch",
       "kind": "functional",
       "has_ui": true,
       "called_by": [],
-      "notes": "站点统筹（原网址归档）；有卡片；组别折叠、图片上传（≤2MB，data/plugins/urlarch/images/）、功能性组点击启动、软件条目拖拽改组、组名事务内去重；数据在 urlarch_* 表。"
+      "notes": "站点统筹（原网址归档）；有卡片；组别折叠、图片上传（≤2MB，data/plugins/urlarch/images/）、功能性组点击启动、软件条目拖拽改组、组名事务内去重；数据在 urlarch_* 表。",
+      "in_main_repo": false
     },
     {
       "id": "webchat",
@@ -166,21 +187,24 @@
         "ui/web/static/app.js",
         "ui/web/static/features/webchat.js"
       ],
-      "notes": "网页会话（底层下沉）；无卡片；被 ai/aidebug/finance/promptgen 与宿主共享脚本调用；依赖 Playwright 浏览器与登录态 data/plugins/webchat/webchat_profile/（敏感，不读正文）。详见 docs/appendix/lib/webchat.md。 对外提供能力：provides=[webchat]（ai/aidebug/finance/promptgen 与宿主调用）。"
+      "notes": "网页会话（底层下沉）；无卡片；被 ai/aidebug/finance/promptgen 与宿主共享脚本调用；依赖 Playwright 浏览器与登录态 data/plugins/webchat/webchat_profile/（敏感，不读正文）。详见 docs/appendix/lib/webchat.md。 对外提供能力：provides=[webchat]（ai/aidebug/finance/promptgen 与宿主调用）。",
+      "in_main_repo": true
     },
     {
       "id": "market",
       "kind": "functional",
       "has_ui": true,
       "called_by": [],
-      "notes": "插件市场；有导航型卡片入口（nav entry）；读取 market/index.json，安装/卸载本地包；预置 5 个不可卸载；不修改其它插件。"
+      "notes": "插件市场；有导航型卡片入口（nav entry）；读取 market/index.json，安装/卸载本地包；预置 5 个不可卸载；不修改其它插件。",
+      "in_main_repo": true
     },
     {
       "id": "css_exp",
       "kind": "functional",
       "has_ui": true,
       "called_by": [],
-      "notes": "CSS 动效组件库；有卡片；托管 AWA UI（MIT）静态导出产物，iframe 浏览并可收藏组件 CSS/HTML 到 css_exp_favorites；同源抓取依赖外部 DOM，未严格沙箱隔离。"
+      "notes": "CSS 动效组件库；有卡片；托管 AWA UI（MIT）静态导出产物，iframe 浏览并可收藏组件 CSS/HTML 到 css_exp_favorites；同源抓取依赖外部 DOM，未严格沙箱隔离。",
+      "in_main_repo": false
     }
   ]
 }

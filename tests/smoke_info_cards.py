@@ -21,7 +21,9 @@ def check(name: str, cond, extra: str = "") -> None:
 def main() -> int:
     targets = gen._targets()
     kinds = gen._kind_map()
-    check("信息卡数量", len(targets) == 24, str(len(targets)))
+    plugin_dirs = sorted(p.parent.name for p in (ROOT / "plugins").glob("*/manifest.json"))
+    info_dirs = sorted(p.parent.name for p in (ROOT / "plugins").glob("*/INFO.md"))
+    check("信息卡数量", len(targets) == len(info_dirs) == len(plugin_dirs), f"targets={len(targets)} info={len(info_dirs)} manifests={len(plugin_dirs)}")
     missing = [pid for pid, base in targets if not (base / "INFO.md").is_file()]
     check("INFO.md 齐全", not missing, ",".join(missing))
     errors = []

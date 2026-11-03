@@ -16,6 +16,18 @@ Windows 也可双击 `tools\启动旅行之木.cmd`。该脚本用 `%~dp0..` 定
 
 首次启动时创建数据库表、执行插件迁移并导入插件种子；数据库文件已存在时不会因为条目被删空而重新播种。若检测到 8765 已有实例，会提示复用；Web 启动失败会直接报错退出，不再回退旧 GUI。
 
+## 1.1 首次使用（新克隆环境）
+
+主仓库只跟踪白名单 5 个插件（`market`/`cobuild`/`webchat`/`tts`/`pixel_art`），其余插件在独立插件库仓库、靠市场安装（规则见白皮书 §十二）：
+
+1. 运行 `python main.py` 启动本地服务；
+2. 在 `data/plugins/market/settings.json` 配置 `market_source_url` 为插件库仓库的 raw index 地址（为空时「拉取最新插件」置灰）；
+3. 打开左侧栏「插件市场」→「拉取最新插件」，让 `remote_index` 覆盖为插件库清单；
+4. 在市场中安装所需插件（安装到 `plugins/<id>/`），已安装项按提示重启服务后生效；
+5. 重启后插件卡片出现；`local_index` 只扫描本地 `plugins/*/INFO.md`，新克隆下只有白名单。
+
+注意：非白名单插件目录被 `.gitignore` 排除，`git clean -fdx` 会删除它们；恢复需从插件库重新安装。
+
 ## 2. 技术栈与真实依赖
 
 - **语言/运行时**：Python 3；本地 HTTP 服务使用标准库 `ThreadingHTTPServer`；数据库为 SQLite。
@@ -73,7 +85,7 @@ Traveling_Tree/
 ├── ui/
 │   ├── web/server.py        本地 HTTP 静态资源 + 插件分发 + 宿主 API
 │   └── web/static/          原生前端；features/*.js 按需加载
-├── plugins/                 24 个插件目录：21 个有卡片插件（russian/、book_reader/、project_manager/、bg_library/、promptgen/、ai/、aidebug/、market/、expdata/、schedule/、screeps/、urlarch/、netexp/、rivet/、filejudge/、pdf/、model_usage/、pixel_art/、finance/、css_exp/、sim/）+ 3 个 backend-only（webchat/、cobuild/、tts/）；manifest + backend.py，有卡片的另有 feature.js + plugin.css，有表的另有 schema.sql
+├── plugins/                 本地 24 个插件目录（主仓库仅跟踪白名单 5 个：market/cobuild/webchat/tts/pixel_art；其余 19 个进插件库、.gitignore 排除）：21 个有卡片插件（russian/、book_reader/、project_manager/、bg_library/、promptgen/、ai/、aidebug/、market/、expdata/、schedule/、screeps/、urlarch/、netexp/、rivet/、filejudge/、pdf/、model_usage/、pixel_art/、finance/、css_exp/、sim/）+ 3 个 backend-only（webchat/、cobuild/、tts/）；manifest + backend.py，有卡片的另有 feature.js + plugin.css，有表的另有 schema.sql
 ├── data/                    运行时数据：SQLite、settings、缓存、会话、备份
 ├── docs/
 │   ├── plugin-development-whitepaper.md   开发白皮书（最高准则）
@@ -154,7 +166,7 @@ Traveling_Tree/
 
 首次启动：若 `data/` 不存在，`config.py` 自动创建；`db/connection.py` 的 `init_db()` 扫描 `plugins/*/manifest.json` 的 `db` 声明，执行 `schema.sql` 建表、`seed.py` 播种、`migrate.py` 迁移；`manifest.data_dirs` 声明的目录自动创建。克隆本项目后直接 `python main.py` 即可，无需手动建库。`data/` 不进 Git（见 `.gitignore`），备份需单独保存。
 
-市场分发：**GitHub Release 为唯一分发源**；`market/packages/` 仅保留空目录，不再作为默认产物（原 18 个本地 zip 已清空，脚本保留备用、勿随意运行）。远程 index（`data/plugins/market/remote_index.json`）的 `download_url` 指向 Release；安装时下载到 `downloads/`，校验后删 zip。
+市场分发：**GitHub Release 为唯一分发源**；`market/packages/` 仅保留空目录，不再作为默认产物（原 18 个本地 zip 已清空，脚本保留备用、勿随意运行）。非白名单插件不在主仓库，靠 `remote_index` 展示与 Release 安装；新克隆环境 `local_index` 只有白名单 5 个，其余需先拉取 remote。远程 index（`data/plugins/market/remote_index.json`）的 `download_url` 指向 Release；安装时下载到 `downloads/`，校验后删 zip。
 
 插件市场双索引：`remote_index.json`（拉取覆盖，公共库包字段）+ `local_index.json`（扫描 `plugins/*/INFO.md` 组装）；展示合并优先级 INFO > remote > local；`downloads/` 存放下载 zip。三类：预置 5（不可卸载）、公共库 2（finance/promptgen，可从 Release 安装）、本地开发 17（无安装/卸载按钮）。注：`data/plugins/market/local_index.json` 本轮只读实测落盘 **21 条**（生成于 `css_exp` 之前，未复核），展示数以市场 API 实际返回为准。
 
@@ -182,6 +194,7 @@ Traveling_Tree/
 12. **`.gitignore` 例外需复核后再 push**：`.gitignore` 为 css_exp 的 `_next/data/` 加了精确例外（`!plugins/css_exp/static/app/_next/data/`），push 前应确认 `data/`、`data/ai_keys.json`、`data/webchat_sessions.json`、`data/plugins/webchat/webchat_profile/` 仍被忽略，且例外未放宽为 `!data/` 等宽规则。
 13. **分屏/右栏是宿主视图基础设施**：只做布局与偏好（上下分屏、聚焦区、右栏快捷按钮），不含业务逻辑；快捷按钮列表是宿主偏好（`data/settings.json` 的 `quickbar`），不是插件业务数据。插件前端入口统一为 `render(container)`：宿主给上下两区各传独立容器，插件必须使用传入容器（`container.querySelector` 等），**禁止直接取 `#tool-view`**；`smoke_plugins` 会静态检查并阻断回归。因此后台插件异步重绘只影响自己所在区，不会再覆盖另一区；**已知边界**：插件入口把传入容器缓存为模块级 `ROOT`，关闭该区后重开同一插件时，若旧回调尚未返回，可能渲染到新容器（仍是同一插件，数据不丢；重开或刷新即可）。若某插件漏迁，`smoke_plugins` 直接 FAIL 并列出插件 id:行号。
 14. **全屏为 CSS 覆盖而非浏览器真全屏**：全屏只覆盖工具内容区（`position: fixed` 覆盖层）并隐藏左栏/上栏/右栏，不调用 Fullscreen API、不改变系统窗口；ESC 由宿主监听退出（全屏态在 `capture` 阶段监听并 `stopPropagation`、非全屏态不绑定），输入框内 ESC 也会退出。全屏状态不持久化、刷新即退出，不影响分屏开关/上下区插件/聚焦区/快捷按钮列表；因此插件自身的 ESC 语义（如关闭弹窗）在全屏时会被宿主优先拦截用于退出全屏，退出全屏后插件 ESC 恢复正常。
+15. **非白名单插件目录被 `.gitignore` 排除**：它们只存在于本地或插件库仓库；`git clean -fdx`、换机克隆等会删除/缺失，恢复需从插件库重新安装。主仓库提交前确认 `git status` 不包含非白名单插件；白名单调整须同步 `plugins/lib.json` 与 `.gitignore`。
 
 ## 8. 多 AI 共建与打卡
 
@@ -244,7 +257,7 @@ python tests/smoke_books.py
 python tests/smoke_pm.py
 ```
 
-`smoke_web.py` 会启动临时数据库并调用本地 HTTP 服务；若运行 `/api/tts` 需要网络，可能因环境网络失败。其余测试多数使用临时目录，不碰真实数据。`smoke_plugins.py` 校验插件清单/静态资源/扫描容错/CSS 阈值；存在 `node` 时会额外做 ESM 语法检查，无 `node` 自动跳过。
+基线以本地实际插件目录数为准：白名单环境参考 5 个插件，完整开发环境参考 24 个；`smoke_plugins`/`smoke_plugin_decoupling`/`smoke_info_cards`/`smoke_market` 的插件数/INFO 数运行时扫描，不写死。`smoke_web.py` 会启动临时数据库并调用本地 HTTP 服务；若运行 `/api/tts` 需要网络，可能因环境网络失败。其余测试多数使用临时目录，不碰真实数据。`smoke_plugins.py` 校验插件清单/静态资源/扫描容错/CSS 阈值；存在 `node` 时会额外做 ESM 语法检查，无 `node` 自动跳过。
 
 ## 11. 文档
 
@@ -253,8 +266,9 @@ python tests/smoke_pm.py
 - 白皮书附录：[A backend-only](docs/appendix/A-backend-only.md) · [B 根路由](docs/appendix/B-root-routing.md) · [C 二进制格式](docs/appendix/C-binary-format.md) · [D 其他约定](docs/appendix/D-conventions.md)
 - 说明性文件：[file_navigation.json](docs/appendix/file_navigation.json) · [file_navigation.md](docs/appendix/file_navigation.md) · [files_manifest.json](docs/appendix/files_manifest.json)
 
-## 12. 项目状态与交接（2026-11-03，round 118 后）
+## 12. 项目状态与交接（2026-11-03，round 119 后）
 
+- **round 119 主仓库白名单**：`.gitignore` 逐目录排除 19 个非白名单插件（白名单 5 个：market/cobuild/webchat/tts/pixel_art），`plugins/lib.json` 每条加 `in_main_repo`；4 个 smoke 改为按实际插件数动态断言（本地 24 全绿；模拟新克隆 5 个：smoke_plugins 86/86、decoupling 49/49、info_cards 11/11、market 37/37）；白皮书新增 §十二。`_migration/css_exp` 已核实完整（文件数/大小/结构一致，无未归并独有文件），**待用户确认后删除**。
 - **round 118 全屏视图**：右栏上区新增全屏按钮（`⤢`/`⤡` 两态）；工具内容区 CSS 覆盖铺满视口、三栏隐藏、分屏保持 50/50；ESC 全屏态一律退出（含输入框），非全屏不绑定；退出恢复原布局/插件/聚焦，状态存内存、刷新退出；空区提示按全屏态切换。未改插件、未改 settings 结构、未建表。全量 15 项 smoke 仍为 **1045/1046**（仅 TTS 502）。
 - **round 117 渲染契约**：宿主分屏改为两区独立容器，不再设置/切换 `#tool-view`；20 个插件入口统一 `render(container)` 并使用传入容器（`filejudge`/`finance` 的异步回调、`model_usage` 的作用域查询一并迁移）；`smoke_plugins` 新增静态检查，直接引用 `#tool-view` 即 FAIL。全量 15 项 smoke **1045/1046**（仅 TTS 502）。
 - **round 115 宿主视图**：新增可收缩右栏快捷按钮与上下分屏（`ui/web/static/index.html`、`app.js`、`app.css`、`modules/settings_store.py`、`ui/web/server.py` 的 `/api/settings/quickbar`）。快捷按钮列表存 `data/settings.json` 的 `quickbar.pinned`（宿主偏好，非业务数据）；右栏收缩存 localStorage；分屏开关、上下区插件、聚焦区为内存态，刷新回单视图。未改任何插件代码、未建表、未向 `plugins/` 写运行时数据。已知限制见 §7 第 13 条。

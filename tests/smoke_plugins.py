@@ -86,6 +86,12 @@ def _plugin_files(pid):
 
 
 _MANIFESTS = _load_manifests()
+
+
+def _has(pid: str) -> bool:
+    """本地是否存在该插件目录（新克隆环境只含白名单，插件相关断言按存在性跳过）。"""
+    return pid in _MANIFESTS
+
 EXPECTED_V2_PLUGINS = sorted(
     pid for pid, m in _MANIFESTS.items() if m.get("schema_version") == 2)
 BACKEND_ONLY_PLUGINS = {
@@ -550,10 +556,11 @@ def main() -> int:
     check("features/ 无孤儿/无缺失",
           not (actual_feature_files - EXPECTED_FEATURE_FILES)
           and not (EXPECTED_FEATURE_FILES - actual_feature_files))
+    reader_feature = PLUGINS / "book_reader" / "feature.js"
     check("reader_screen 插件内共享",
-          "import('./reader_screen.js')" in
-          (PLUGINS / "book_reader" / "feature.js").read_text(encoding="utf-8")
-          and (PLUGINS / "book_reader" / "reader_screen.js").is_file())
+          "book_reader" not in _MANIFESTS
+          or ("import('./reader_screen.js')" in reader_feature.read_text(encoding="utf-8")
+              and (PLUGINS / "book_reader" / "reader_screen.js").is_file()))
     check("webchat 共享依赖",
           "TOOL_FEATURE_DEPENDENCIES = {}"
           in app_text)
@@ -661,7 +668,7 @@ def main() -> int:
         plugins = data.get("plugins") if isinstance(data, dict) else None
         check("GET /api/plugins/list", status == 200 and data.get("ok") is True,
               f"HTTP {status}")
-        check("插件数量", isinstance(plugins, list) and len(plugins) == 21,
+        check("插件数量", isinstance(plugins, list) and len(plugins) == len(EXPECTED_PLUGIN_IDS),
               f"{len(plugins) if isinstance(plugins, list) else 'N/A'}")
         check("插件 id 集合", isinstance(plugins, list) and
               [p.get("id") for p in plugins] == EXPECTED_PLUGIN_IDS)
@@ -671,7 +678,7 @@ def main() -> int:
             for entry in (plugin.get("entries") or [])
             if isinstance(entry, dict)
         ]
-        check("entry 数量", len(all_entries) == 23, str(len(all_entries)))
+        check("entry 数量", len(all_entries) == len(EXPECTED_ENTRY_IDS), str(len(all_entries)))
         check("entry id 集合",
               sorted(e.get("id") for e in all_entries) == EXPECTED_ENTRY_IDS)
         list_field_errors: list[str] = []
@@ -700,18 +707,16 @@ def main() -> int:
                 api_404_errors.append(f"{pid}:{status}")
         check("无 backend 插件 API 404", not api_404_errors,
               " | ".join(api_404_errors[:5]))
-        status, _, _ = get("/api/plugin/model_usage/records")
-        check("model_usage 插件 API 200", status == 200, f"HTTP {status}")
-        status, _, _ = get("/api/plugin/pdf/batch/scan")
-        check("pdf 插件 API 非 404", status == 405, f"HTTP {status}")
-        status, _, _ = get("/api/plugin/rivet/data")
-        check("rivet 插件 API 200", status == 200, f"HTTP {status}")
-        status, _, _ = get("/api/plugin/filejudge/scan")
-        check("filejudge 插件 API 非 404", status == 405, f"HTTP {status}")
-        status, _, _ = get("/api/plugin/finance/state")
-        check("finance 插件 API 200", status == 200, f"HTTP {status}")
-        status, _, _ = get("/api/plugin/pixel_art/works")
-        check("pixel_art 插件 API 200", status == 200, f"HTTP {status}")
+        for pid, path, want in (("model_usage", "/api/plugin/model_usage/records", 200),
+                                ("pdf", "/api/plugin/pdf/batch/scan", 405),
+                                ("rivet", "/api/plugin/rivet/data", 200),
+                                ("filejudge", "/api/plugin/filejudge/scan", 405),
+                                ("finance", "/api/plugin/finance/state", 200),
+                                ("pixel_art", "/api/plugin/pixel_art/works", 200)):
+            if pid not in _MANIFESTS:
+                continue
+            status, _, _ = get(path)
+            check(f"{pid} 插件 API {want}", status == want, f"HTTP {status}")
 
         for path in ("/api/model-usage", "/api/pixel/works", "/api/godot/scan"):
             status, _, _ = get(path)
@@ -724,25 +729,28 @@ def main() -> int:
             "name": "legacy", "width": 1, "height": 1, "palette": [], "pixels": [-1]})
         check("旧 pixel POST 404", status == 404, f"HTTP {status}")
 
-        status, _, body = post("/api/plugin/pixel_art/works", {
-            "name": "smoke pixel art", "width": 1, "height": 1,
-            "palette": [], "pixels": [-1],
-        })
-        artwork = json.loads(body.decode("utf-8")) if body else {}
-        artwork_id = (artwork.get("work") or {}).get("artwork_id")
-        check("pixel_art 插件作品保存", status == 200 and bool(artwork_id),
-              f"HTTP {status}")
-        if artwork_id:
-            status, _, _ = put("/api/plugin/pixel_art/refs/bookmark", {"artwork_id": artwork_id})
-            check("pixel_art 资产引用绑定", status == 200, f"HTTP {status}")
-        status, _, body = get("/api/plugin/book_reader/reader/assets")
-        asset_payload = json.loads(body.decode("utf-8")) if body else {}
-        check("reader assets 契约保留",
-              status == 200 and isinstance(asset_payload.get("refs"), dict)
-              and isinstance(asset_payload.get("assets"), dict)
-              and isinstance(asset_payload.get("keys"), list)
-              and (not artwork_id or asset_payload.get("assets", {}).get("bookmark", {}).get("artwork_id") == artwork_id),
-              f"HTTP {status}")
+        artwork_id = None
+        if "pixel_art" in _MANIFESTS:
+            status, _, body = post("/api/plugin/pixel_art/works", {
+                "name": "smoke pixel art", "width": 1, "height": 1,
+                "palette": [], "pixels": [-1],
+            })
+            artwork = json.loads(body.decode("utf-8")) if body else {}
+            artwork_id = (artwork.get("work") or {}).get("artwork_id")
+            check("pixel_art 插件作品保存", status == 200 and bool(artwork_id),
+                  f"HTTP {status}")
+            if artwork_id:
+                status, _, _ = put("/api/plugin/pixel_art/refs/bookmark", {"artwork_id": artwork_id})
+                check("pixel_art 资产引用绑定", status == 200, f"HTTP {status}")
+        if "book_reader" in _MANIFESTS:
+            status, _, body = get("/api/plugin/book_reader/reader/assets")
+            asset_payload = json.loads(body.decode("utf-8")) if body else {}
+            check("reader assets 契约保留",
+                  status == 200 and isinstance(asset_payload.get("refs"), dict)
+                  and isinstance(asset_payload.get("assets"), dict)
+                  and isinstance(asset_payload.get("keys"), list)
+                  and (not artwork_id or asset_payload.get("assets", {}).get("bookmark", {}).get("artwork_id") == artwork_id),
+                  f"HTTP {status}")
         if artwork_id:
             request = urllib.request.Request(base + "/api/plugin/pixel_art/works/" + artwork_id,
                                              data=b"{}", method="DELETE",
@@ -758,15 +766,16 @@ def main() -> int:
             for entry in (plugin.get("entries") or [])
             if len(plugin.get("entries") or []) == 1
         ]
-        check("单入口 entry 19 个", len(singles) == 19, str(len(singles)))
+        check("单入口 entry 数", len(singles) == sum(1 for pid in EXPECTED_PLUGIN_IDS if len(V2_ENTRY_IDS.get(pid) or []) == 1), str(len(singles)))
         check("单入口 entry.plugin_id == plugin.id",
               all(entry.get("plugin_id") == plugin.get("id") for plugin, entry in singles))
-        pdf_plugin = next((p for p in (plugins or []) if p.get("id") == "pdf"), None)
-        check("pdf entries 为 pdf/batch",
-              isinstance(pdf_plugin, dict)
-              and [e.get("id") for e in (pdf_plugin.get("entries") or [])] == ["pdf", "batch"])
+        if "pdf" in _MANIFESTS:
+            pdf_plugin = next((p for p in (plugins or []) if p.get("id") == "pdf"), None)
+            check("pdf entries 为 pdf/batch",
+                  isinstance(pdf_plugin, dict)
+                  and [e.get("id") for e in (pdf_plugin.get("entries") or [])] == ["pdf", "batch"])
         check("卡片总数 21", isinstance(plugins, list) and
-              len(builtin_ids) + len(all_entries) == 23,
+              len(builtin_ids) + len(all_entries) == len(EXPECTED_ENTRY_IDS),
               f"{len(builtin_ids)}+{len(all_entries)}")
 
         field_errors: list[str] = []
@@ -852,122 +861,125 @@ def main() -> int:
             check("插件穿越拒绝 " + path, status in (403, 404) and b"class Handler" not in body,
                   f"HTTP {status}")
 
-        # ---- rivet backend（P3 批 1） ----
-        # 前面的清单 API 已触发默认 rivet.json；清掉以模拟首次迁移。
-        (TMP / "plugins" / "rivet" / "rivet.json").unlink(missing_ok=True)
-        legacy = TMP / "rivet.json"
-        legacy.write_text(json.dumps({
-            "habits": [{
-                "id": "h1", "name": "测试铆钉", "icon": "🔩", "color": "#4e8cff",
-                "mode": "daily", "weekly_target": 0, "days": [], "difficulty": "tiny",
-                "note": "", "created": "2026-10-28", "shield": 0, "xp": 0, "records": {},
-            }]
-        }, ensure_ascii=False, indent=1), encoding="utf-8")
+        if _has("rivet"):
+            # ---- rivet backend（P3 批 1） ----
+            # 前面的清单 API 已触发默认 rivet.json；清掉以模拟首次迁移。
+            (TMP / "plugins" / "rivet" / "rivet.json").unlink(missing_ok=True)
+            legacy = TMP / "rivet.json"
+            legacy.write_text(json.dumps({
+                "habits": [{
+                    "id": "h1", "name": "测试铆钉", "icon": "🔩", "color": "#4e8cff",
+                    "mode": "daily", "weekly_target": 0, "days": [], "difficulty": "tiny",
+                    "note": "", "created": "2026-10-28", "shield": 0, "xp": 0, "records": {},
+                }]
+            }, ensure_ascii=False, indent=1), encoding="utf-8")
 
-        status, _, body = post("/api/plugin/rivet/data", {})
-        rivet_data = json.loads(body.decode("utf-8")) if body else {}
-        check("rivet /api/plugin/rivet/data", status == 200 and rivet_data.get("ok") is True,
-              f"HTTP {status}")
-        check("rivet data 返回习惯", len(rivet_data.get("habits") or []) == 1)
+            status, _, body = post("/api/plugin/rivet/data", {})
+            rivet_data = json.loads(body.decode("utf-8")) if body else {}
+            check("rivet /api/plugin/rivet/data", status == 200 and rivet_data.get("ok") is True,
+                  f"HTTP {status}")
+            check("rivet data 返回习惯", len(rivet_data.get("habits") or []) == 1)
 
-        rivet_new = TMP / "plugins" / "rivet" / "rivet.json"
-        check("rivet 首次迁移到 data/plugins/rivet",
-              rivet_new.is_file()
-              and rivet_new.read_text(encoding="utf-8") == legacy.read_text(encoding="utf-8"))
-        check("rivet 旧 data/rivet.json 保留", legacy.is_file())
+            rivet_new = TMP / "plugins" / "rivet" / "rivet.json"
+            check("rivet 首次迁移到 data/plugins/rivet",
+                  rivet_new.is_file()
+                  and rivet_new.read_text(encoding="utf-8") == legacy.read_text(encoding="utf-8"))
+            check("rivet 旧 data/rivet.json 保留", legacy.is_file())
 
-        status, _, _ = post("/api/plugin/rivet/checkin", {"id": "h1"})
-        check("rivet checkin", status == 200)
-        status, _, body = post("/api/plugin/rivet/checkin", {"id": "h1"})
-        undone = json.loads(body.decode("utf-8")) if body else {}
-        check("rivet checkin 撤销", status == 200 and undone.get("undone") is True)
+            status, _, _ = post("/api/plugin/rivet/checkin", {"id": "h1"})
+            check("rivet checkin", status == 200)
+            status, _, body = post("/api/plugin/rivet/checkin", {"id": "h1"})
+            undone = json.loads(body.decode("utf-8")) if body else {}
+            check("rivet checkin 撤销", status == 200 and undone.get("undone") is True)
 
-        status, _, _ = get("/api/rivet/data")
-        check("旧 /api/rivet 路由 404", status == 404, f"HTTP {status}")
-        status, _, _ = get("/api/plugin/rivet/checkin")
-        check("rivet 不支持的方法返回 405", status == 405, f"HTTP {status}")
-        status, _, _ = get("/plugins/rivet/backend.py")
-        check("backend.py 不经静态路由暴露", status == 404, f"HTTP {status}")
+            status, _, _ = get("/api/rivet/data")
+            check("旧 /api/rivet 路由 404", status == 404, f"HTTP {status}")
+            status, _, _ = get("/api/plugin/rivet/checkin")
+            check("rivet 不支持的方法返回 405", status == 405, f"HTTP {status}")
+            status, _, _ = get("/plugins/rivet/backend.py")
+            check("backend.py 不经静态路由暴露", status == 404, f"HTTP {status}")
 
-        # ---- filejudge backend（P3 批 2） ----
-        fj_dir = TMP / "fj"
-        fj_dir.mkdir(parents=True, exist_ok=True)
-        fj_a = fj_dir / "a.txt"
-        fj_b = fj_dir / "b.txt"
-        fj_a.write_text("hello", encoding="utf-8")
-        fj_b.write_text("bye", encoding="utf-8")
-        legacy_keep = TMP / "filejudge_keep.json"
-        legacy_keep.write_text(json.dumps({"paths": []}), encoding="utf-8")
+        if _has("filejudge"):
+            # ---- filejudge backend（P3 批 2） ----
+            fj_dir = TMP / "fj"
+            fj_dir.mkdir(parents=True, exist_ok=True)
+            fj_a = fj_dir / "a.txt"
+            fj_b = fj_dir / "b.txt"
+            fj_a.write_text("hello", encoding="utf-8")
+            fj_b.write_text("bye", encoding="utf-8")
+            legacy_keep = TMP / "filejudge_keep.json"
+            legacy_keep.write_text(json.dumps({"paths": []}), encoding="utf-8")
 
-        status, _, body = post("/api/plugin/filejudge/scan", {
-            "path": str(fj_dir), "types": ["txt"], "size_kb": -1, "cmp": "gt"})
-        fj_scan = json.loads(body.decode("utf-8")) if body else {}
-        check("filejudge /api/plugin/filejudge/scan",
-              status == 200 and fj_scan.get("ok") is True and fj_scan.get("count") == 2,
-              f"HTTP {status} count={fj_scan.get('count')}")
+            status, _, body = post("/api/plugin/filejudge/scan", {
+                "path": str(fj_dir), "types": ["txt"], "size_kb": -1, "cmp": "gt"})
+            fj_scan = json.loads(body.decode("utf-8")) if body else {}
+            check("filejudge /api/plugin/filejudge/scan",
+                  status == 200 and fj_scan.get("ok") is True and fj_scan.get("count") == 2,
+                  f"HTTP {status} count={fj_scan.get('count')}")
 
-        status, _, body = post("/api/plugin/filejudge/preview", {"path": str(fj_a)})
-        fj_preview = json.loads(body.decode("utf-8")) if body else {}
-        check("filejudge preview",
-              status == 200 and fj_preview.get("ok") is True
-              and fj_preview.get("kind") == "text" and "hello" in (fj_preview.get("text") or ""))
+            status, _, body = post("/api/plugin/filejudge/preview", {"path": str(fj_a)})
+            fj_preview = json.loads(body.decode("utf-8")) if body else {}
+            check("filejudge preview",
+                  status == 200 and fj_preview.get("ok") is True
+                  and fj_preview.get("kind") == "text" and "hello" in (fj_preview.get("text") or ""))
 
-        status, _, body = post("/api/plugin/filejudge/keep", {"path": str(fj_a)})
-        fj_keep = json.loads(body.decode("utf-8")) if body else {}
-        fj_new_keep = TMP / "plugins" / "filejudge" / "keep.json"
-        check("filejudge keep 写入",
-              status == 200 and fj_keep.get("ok") is True and fj_new_keep.is_file())
-        check("filejudge 首次迁移 keep.json", legacy_keep.is_file())
+            status, _, body = post("/api/plugin/filejudge/keep", {"path": str(fj_a)})
+            fj_keep = json.loads(body.decode("utf-8")) if body else {}
+            fj_new_keep = TMP / "plugins" / "filejudge" / "keep.json"
+            check("filejudge keep 写入",
+                  status == 200 and fj_keep.get("ok") is True and fj_new_keep.is_file())
+            check("filejudge 首次迁移 keep.json", legacy_keep.is_file())
 
-        status, _, body = post("/api/plugin/filejudge/scan", {
-            "path": str(fj_dir), "types": ["txt"], "size_kb": -1, "cmp": "gt"})
-        fj_scan2 = json.loads(body.decode("utf-8")) if body else {}
-        check("filejudge 保留后扫描跳过",
-              status == 200 and fj_scan2.get("count") == 1 and fj_scan2.get("skipped") == 1,
-              f"count={fj_scan2.get('count')} skipped={fj_scan2.get('skipped')}")
+            status, _, body = post("/api/plugin/filejudge/scan", {
+                "path": str(fj_dir), "types": ["txt"], "size_kb": -1, "cmp": "gt"})
+            fj_scan2 = json.loads(body.decode("utf-8")) if body else {}
+            check("filejudge 保留后扫描跳过",
+                  status == 200 and fj_scan2.get("count") == 1 and fj_scan2.get("skipped") == 1,
+                  f"count={fj_scan2.get('count')} skipped={fj_scan2.get('skipped')}")
 
-        status, _, body = post("/api/plugin/filejudge/delete", {"paths": [str(fj_b)]})
-        fj_del = json.loads(body.decode("utf-8")) if body else {}
-        check("filejudge delete",
-              status == 200 and fj_del.get("count") == 1 and not fj_b.exists())
+            status, _, body = post("/api/plugin/filejudge/delete", {"paths": [str(fj_b)]})
+            fj_del = json.loads(body.decode("utf-8")) if body else {}
+            check("filejudge delete",
+                  status == 200 and fj_del.get("count") == 1 and not fj_b.exists())
 
-        status, _, body = post("/api/plugin/filejudge/tree", {"path": str(fj_dir)})
-        fj_tree = json.loads(body.decode("utf-8")) if body else {}
-        check("filejudge tree", status == 200 and fj_tree.get("ok") is True)
+            status, _, body = post("/api/plugin/filejudge/tree", {"path": str(fj_dir)})
+            fj_tree = json.loads(body.decode("utf-8")) if body else {}
+            check("filejudge tree", status == 200 and fj_tree.get("ok") is True)
 
-        status, _, _ = post("/api/filejudge/scan", {"path": str(fj_dir)})
-        check("旧 /api/filejudge 路由 404", status == 404, f"HTTP {status}")
-        status, _, _ = get("/api/plugin/filejudge/scan")
-        check("filejudge 不支持的方法返回 405", status == 405, f"HTTP {status}")
-        status, _, _ = get("/plugins/filejudge/backend.py")
-        check("filejudge backend.py 不暴露", status == 404, f"HTTP {status}")
+            status, _, _ = post("/api/filejudge/scan", {"path": str(fj_dir)})
+            check("旧 /api/filejudge 路由 404", status == 404, f"HTTP {status}")
+            status, _, _ = get("/api/plugin/filejudge/scan")
+            check("filejudge 不支持的方法返回 405", status == 405, f"HTTP {status}")
+            status, _, _ = get("/plugins/filejudge/backend.py")
+            check("filejudge backend.py 不暴露", status == 404, f"HTTP {status}")
 
-        # ---- pdf/batch 多入口插件（P4 批 1） ----
-        pdf_dir = TMP / "pdf"
-        pdf_dir.mkdir(parents=True, exist_ok=True)
-        (pdf_dir / "dummy.pdf").write_bytes(b"%PDF-1.4\n%%EOF\n")
-        status, _, body = post("/api/plugin/pdf/batch/scan", {
-            "path": str(pdf_dir), "min_kb": 0})
-        pdf_scan = json.loads(body.decode("utf-8")) if body else {}
-        check("pdf batch/scan 不依赖可选库",
-              status == 200 and pdf_scan.get("ok") is True
-              and pdf_scan.get("count") == 1,
-              f"HTTP {status} count={pdf_scan.get('count')}")
+        if _has("pdf"):
+            # ---- pdf/batch 多入口插件（P4 批 1） ----
+            pdf_dir = TMP / "pdf"
+            pdf_dir.mkdir(parents=True, exist_ok=True)
+            (pdf_dir / "dummy.pdf").write_bytes(b"%PDF-1.4\n%%EOF\n")
+            status, _, body = post("/api/plugin/pdf/batch/scan", {
+                "path": str(pdf_dir), "min_kb": 0})
+            pdf_scan = json.loads(body.decode("utf-8")) if body else {}
+            check("pdf batch/scan 不依赖可选库",
+                  status == 200 and pdf_scan.get("ok") is True
+                  and pdf_scan.get("count") == 1,
+                  f"HTTP {status} count={pdf_scan.get('count')}")
 
-        status, _, body = post("/api/plugin/pdf/pdf/merge", {"files": []})
-        pdf_merge = json.loads(body.decode("utf-8")) if body else {}
-        check("pdf merge 错误不冒泡",
-              status in (400, 500)
-              and (status == 400 or pdf_merge.get("error") == "missing_dependency"),
-              f"HTTP {status} error={pdf_merge.get('error')}")
-        status, _, _ = post("/api/pdf/merge", {"files": []})
-        check("旧 /api/pdf 路由 404", status == 404, f"HTTP {status}")
-        status, _, _ = post("/api/batch/scan", {"path": str(pdf_dir)})
-        check("旧 /api/batch 路由 404", status == 404, f"HTTP {status}")
-        status, _, _ = get("/api/plugin/pdf/batch/scan")
-        check("pdf 不支持的方法返回 405", status == 405, f"HTTP {status}")
-        status, _, _ = get("/plugins/pdf/backend.py")
-        check("pdf backend.py 不暴露", status == 404, f"HTTP {status}")
+            status, _, body = post("/api/plugin/pdf/pdf/merge", {"files": []})
+            pdf_merge = json.loads(body.decode("utf-8")) if body else {}
+            check("pdf merge 错误不冒泡",
+                  status in (400, 500)
+                  and (status == 400 or pdf_merge.get("error") == "missing_dependency"),
+                  f"HTTP {status} error={pdf_merge.get('error')}")
+            status, _, _ = post("/api/pdf/merge", {"files": []})
+            check("旧 /api/pdf 路由 404", status == 404, f"HTTP {status}")
+            status, _, _ = post("/api/batch/scan", {"path": str(pdf_dir)})
+            check("旧 /api/batch 路由 404", status == 404, f"HTTP {status}")
+            status, _, _ = get("/api/plugin/pdf/batch/scan")
+            check("pdf 不支持的方法返回 405", status == 405, f"HTTP {status}")
+            status, _, _ = get("/plugins/pdf/backend.py")
+            check("pdf backend.py 不暴露", status == 404, f"HTTP {status}")
 
         # --------------------------------------------------------
         # 5. 扫描容错（临时插件根）
@@ -1068,7 +1080,7 @@ def main() -> int:
         status, _, body = get("/api/plugins/list")
         restored = json.loads(body.decode("utf-8")) if body else {}
         check("恢复真实插件根",
-              status == 200 and len(restored.get("plugins", [])) == 21,
+              status == 200 and len(restored.get("plugins", [])) == len(EXPECTED_PLUGIN_IDS),
               f"{len(restored.get('plugins', []))} 个")
     finally:
         httpd.shutdown()
@@ -1112,6 +1124,8 @@ def main() -> int:
 
     anchor_errors: list[str] = []
     for pid, anchors in PLUGIN_CSS_ANCHORS.items():
+        if pid not in _MANIFESTS:
+            continue
         css_file = PLUGINS / pid / "plugin.css"
         source_lines = (css_file.read_text(encoding="utf-8").splitlines()
                         if css_file.is_file() else [])

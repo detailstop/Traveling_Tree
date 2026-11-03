@@ -114,7 +114,9 @@ def main() -> int:
 
     remotep.unlink()
     listed2 = backend.handle("GET", "/list", {}, {})
-    check("远程缺失本地开发不消失", "ai" in {x["id"] for x in listed2["plugins"]})
+    local_ids = [p["id"] for p in index_store._local_packages(index_store._info_entries())["packages"]]
+    probe_local = local_ids[0] if local_ids else ""
+    check("远程缺失本地开发不消失", bool(probe_local) and probe_local in {x["id"] for x in listed2["plugins"]})
     remotep.write_text(json.dumps({"version": 1, "packages": [
         pkg("pub", True, sha256=good_sha, size=len(good_zip), file="pub.zip",
             download_url="")]}), encoding="utf-8")
@@ -160,8 +162,10 @@ def main() -> int:
     index_store.ensure_runtime()
     lm = json.loads((mig / "local_index.json").read_text(encoding="utf-8"))
     rm = json.loads((mig / "remote_index.json").read_text(encoding="utf-8"))
-    check("旧文件迁移 local21/remote2 并删除旧文件",
-          len(lm["packages"]) == 22 and [p["id"] for p in rm["packages"]] == ["finance", "promptgen"]
+    expected_local = len(index_store._local_packages(index_store._info_entries())["packages"])
+    check("旧文件迁移 local/remote 并删除旧文件",
+          len(lm["packages"]) == expected_local
+          and [p["id"] for p in rm["packages"]] == ["finance", "promptgen"]
           and not legacy.exists())
 
     before_local = (mig / "local_index.json").read_bytes()
@@ -265,8 +269,10 @@ market_package: false
           and Path(http_pack["zip_path"]).is_file())
 
     # ---- dependencies 子键：最终只保留 python（round 109） ----
-    dep_src = tmp / "urlarch"
-    shutil.copytree(ROOT / "plugins" / "urlarch", dep_src)
+    _local_ids = [p["id"] for p in index_store._local_packages(index_store._info_entries())["packages"]]
+    _probe = next((pid for pid in _local_ids if (ROOT / "plugins" / pid / "manifest.json").is_file()), "market")
+    dep_src = tmp / _probe
+    shutil.copytree(ROOT / "plugins" / _probe, dep_src)
     dep_manifest = dep_src / "manifest.json"
     base_manifest = json.loads(dep_manifest.read_text(encoding="utf-8"))
     for key in ("plugins", "plugin", "shared", "js"):

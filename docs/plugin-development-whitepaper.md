@@ -114,10 +114,13 @@ live_json TEXT NOT NULL DEFAULT '' -- 当前编辑状态
 
 ### 7.1 插件清单
 - **24 个插件目录**：21 个有前端卡片的插件（ai、aidebug、bg_library、book_reader、css_exp、expdata、filejudge、finance、market、model_usage、netexp、pdf、pixel_art、project_manager、promptgen、rivet、russian、schedule、screeps、sim、urlarch；共 23 个 entry）；3 个 backend-only 插件（webchat、cobuild、tts，`entries: []`，`/api/plugin/<id>/*` 正常分发）。每个插件目录含 **`INFO.md`** 市场信息卡（共 24 份）；规则见 [plugin-info-card-template.md](appendix/plugin-info-card-template.md)。
+- **主仓库白名单（round 119）**：主仓库只跟踪 5 个预置插件（market、cobuild、webchat、tts、pixel_art），其余 19 个进独立插件库仓库、靠市场安装；本地完整开发环境仍为 24 个。详见 §十二。
 - **russian 定位**：`russian` 是普通功能插件（非预置、可卸载），不是宿主主体或默认必装核心。
 - **宿主剩余**：`modules/__init__.py`、`modules/settings_store.py`、`ui/web/server.py`、`ui/web/static/app.js`。原 `core/` 与 `db/schema/` 业务 DDL 已清除。
 
-### 7.2 15 个 smoke 基线（round 85 更新）
+### 7.2 15 个 smoke 基线（round 119 动态化）
+
+基线**以本地实际插件目录数为准**：完整开发环境参考 24 个插件，新克隆（仅白名单）参考 5 个；`smoke_plugins`/`smoke_plugin_decoupling`/`smoke_info_cards`/`smoke_market` 的插件数、entry 数、INFO 数与断言总数均运行时扫描得出，不再写死。下表分项数字是**本地 24 个环境**的参考值。
 | 测试 | 覆盖 | 基线 |
 |---|---|---|
 | smoke_books.py | 书籍导入/列表 | 11/11 |
@@ -129,14 +132,14 @@ live_json TEXT NOT NULL DEFAULT '' -- 当前编辑状态
 | smoke_file_preview.py | 文件预览 | 17/17 |
 | smoke_pdf.py | PDF 与二进制响应 | 17/17 |
 | smoke_plugin_data_dirs.py | 插件 data_dirs | 13/13 |
-| smoke_plugin_decoupling.py | 21 卡片插件改名/重启解耦 | 500/500 |
+| smoke_plugin_decoupling.py | 本地全部有卡片插件改名/重启解耦 | 500/500（24 环境） |
 | smoke_plugin_module_off.py | 模块关闭 503/不建表 | 10/10 |
-| smoke_plugins.py | manifest/清单/静态资源/后端/render 容器契约 | 190/190 |
+| smoke_plugins.py | manifest/清单/静态资源/后端/render 容器契约（数量动态） | 190/190（24 环境） |
 | smoke_startup_once.py | 首次启动建表/API | 34/34 |
 | smoke_market.py | 市场双索引/安装/拉取/校验打包 | 37/37 |
-| smoke_info_cards.py | 24 份 INFO.md 字段/一致性 | 11/11 |
+| smoke_info_cards.py | 本地 INFO.md 数（动态）字段/一致性 | 11/11 |
 
-合计 **1045/1046**（round 117 全量复跑；`smoke_web` 74/75，TTS 502 为唯一允许 FAIL），`validate` 24/24 插件 `ok: true`。旧 15 项基线合计为 1010/1011，新增 `css_exp` 后各计数见上表。
+合计（本地 24 环境）**1045/1046**（`smoke_web` 74/75，TTS 502 为唯一允许 FAIL）；新克隆 5 个环境见 §十二，4 个动态 smoke 全部通过（smoke_plugins 86/86、smoke_plugin_decoupling 49/49、smoke_info_cards 11/11、smoke_market 37/37）。
 
 已知 FAIL：`smoke_web` 的 TTS 502 来自 edge-tts 外部网络不可用，不阻塞其他断言；出现非 TTS 的 FAIL 按回滚规则处理。
 
@@ -155,6 +158,7 @@ live_json TEXT NOT NULL DEFAULT '' -- 当前编辑状态
 
 ### 7.5 数据资产
 - 主库 `data/russian_tutor.db`（唯一业务主库；文件名与项目目录名解耦，不改）；含 `css_exp_favorites`（css_exp 收藏条目，raw/live 双列）。
+- 非白名单插件不在主仓库，靠 `remote_index` + Release 安装；`_migration/css_exp` 已核实完整、**待用户确认后删除**（`_migration/` 本就不进 Git）。
 - css_exp 静态产物：`plugins/css_exp/static/app/`（外部 AWA UI 导出产物，进 Git；`_next/data/` 由 `.gitignore` 精确例外放行）。
 - `data/settings.json`：`download_groups` + `modules.enabled` + 宿主视图偏好 `quickbar`（`{"pinned":[{"id","order"}]}`，右栏快捷按钮列表；只存有卡片插件 entry id 与顺序，经 `modules/settings_store.py` 浅合并写入）；插件 settings 在 `data/plugins/<id>/settings.json`。
 - 浏览器 localStorage：纯 UI 偏好，当前包括主题 `rt_theme`、左栏折叠 `rt_sidebar_collapsed`、右栏折叠 `rt_quickrail_collapsed`、插件禁用 `rt_plugins_disabled`、工具架子 `rt_tool_shelves` 等；只存 UI 偏好，不存业务内容，禁止 `removeItem`。
@@ -209,7 +213,7 @@ round 65 删除 `plugin-development-whitepaper-v2.1-draft.md` 与 `project-closu
 
 ### 10.2 `plugins/` 目录扫描边界
 - 宿主只扫描 `plugins/<目录>/manifest.json`，并要求 `manifest.id == 目录名`；把插件移出 `plugins/` 或改目录名会导致其不再被发现、API 404。
-- `tests/smoke_plugins.py` 会把 `plugins/` 下**任意子目录**计入插件目录数（当前 22）；因此不要把索引/文档放在 `plugins/lib/` 之类的子目录，统一用单文件 `plugins/lib.json`（宿主与测试不读取该文件）。
+- `tests/smoke_plugins.py` 会把 `plugins/` 下**任意子目录**计入插件目录数（按实际目录数动态断言）；因此不要把索引/文档放在 `plugins/lib/` 之类的子目录，统一用单文件 `plugins/lib.json`（宿主与测试不读取该文件）。
 - 插件目录内可自由增加实现文件，但不要新增会被误认为插件的子目录。
 
 ### 10.3 Windows 批处理必须 CRLF
@@ -248,6 +252,15 @@ round 65 删除 `plugin-development-whitepaper-v2.1-draft.md` 与 `project-closu
 
 规则本体仍以本文 §二–§六、附录 A–E 与 §十 为准；守则与模板只做引用与流程引导，不重复条文。
 
+## 十二、主仓库白名单与插件库
+
+- **跟踪策略**：主仓库只跟踪白名单插件（当前 5 个预置：`market`、`cobuild`、`webchat`、`tts`、`pixel_art`）；其余插件进独立“插件库”仓库，靠市场安装，不进主仓库。
+- **事实源**：白名单以 `plugins/lib.json` 每条记录的 `in_main_repo: true/false` 为准；`.gitignore` 按该字段逐目录显式排除，**不使用 `plugins/*/` 宽泛排除**。
+- **同步责任**：新增/移出白名单插件时，必须同时改 `plugins/lib.json` 与 `.gitignore` 的“插件库插件”一节；不改任何插件业务代码。
+- **环境差异**：新克隆环境只有白名单 5 个插件，插件市场 `local_index` 只含这些；完整开发环境含全部 24 个。测试按本地实际插件目录数动态断言（见 §7.2），两种环境都不因数量不同而失败。
+- **与“预置 5 个不可卸载”的关系**：两者是不同维度——预置是市场分类（安装/卸载策略），白名单是 Git 跟踪策略；当前两者重合，未来可独立演进。
+- **首次使用**：新克隆按 README「首次使用（新克隆环境）」配置 `market_source_url`、拉取 remote index、安装所需插件后重启生效；详见 README §1 与 §6。
+
 ---
 
 ## 附录 A：backend-only 插件规范（v2.1）
@@ -272,7 +285,7 @@ round 65 删除 `plugin-development-whitepaper-v2.1-draft.md` 与 `project-closu
 - **functional（功能性）**：`manifest.entries` 非空，渲染前端卡片，用户可直接进入。
 - **library（底层下沉）**：`entries` 为空，不渲染卡片，只通过 `/api/plugin/<id>/*` 被其他插件或宿主前端调用。
 - **例外**：`cobuild` 为 backend-only（无卡片），但用户直接使用「多 AI 共建 → 打卡」入口，归 functional。
-- 机器可读清单：`plugins/lib.json`（24 条，字段 `id`/`kind`/`has_ui`/`called_by`/`notes`）。该文件仅作文档索引，宿主、测试与插件运行时不读取。
+- 机器可读清单：`plugins/lib.json`（24 条，字段 `id`/`kind`/`has_ui`/`called_by`/`notes` + `in_main_repo`）。该文件供文档、`.gitignore` 维护、文档生成脚本与测试读取；**宿主运行时不读**（启动/路由/建表均不依赖它）。
 
 ### E.2 当前清单
 | 插件 | kind | has_ui | 直接调用方 | 文档 |
