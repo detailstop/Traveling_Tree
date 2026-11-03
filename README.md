@@ -179,7 +179,7 @@ Traveling_Tree/
 10. **克隆后登录态为空**：`webchat_profile` 已被 `.gitignore` 排除，克隆项目后网页会话通道需重新扫码登录；`data/` 下其他文件（DB、keys、settings）同样不随 Git 同步。
 11. **css_exp 为同源弱沙箱**：`plugins/css_exp` 的 iframe 使用 `allow-scripts allow-same-origin`（抓取详情页 DOM 所需），**不是严格隔离**；外部 AWA UI 为已审阅的 MIT 开源代码，若替换外部项目须重新审阅。收藏按钮依赖外部详情页 DOM（`pre.language-css` / `pre.language-html`、`article [class*="content__title"]`）与 `{type}/{slug}` 路由，外部升级可能导致抓取失败（会提示并拒绝写入空数据）。
 12. **`.gitignore` 例外需复核后再 push**：`.gitignore` 为 css_exp 的 `_next/data/` 加了精确例外（`!plugins/css_exp/static/app/_next/data/`），push 前应确认 `data/`、`data/ai_keys.json`、`data/webchat_sessions.json`、`data/plugins/webchat/webchat_profile/` 仍被忽略，且例外未放宽为 `!data/` 等宽规则。
-13. **分屏/右栏是宿主视图基础设施**：只做布局与偏好（上下分屏、聚焦区、右栏快捷按钮），不含业务逻辑；快捷按钮列表是宿主偏好（`data/settings.json` 的 `quickbar`），不是插件业务数据。插件前端入口统一为 `render(container)`：宿主给上下两区各传独立容器，插件必须使用传入容器（`container.querySelector` 等），**禁止直接取 `#tool-view`**；`smoke_plugins` 会静态检查并阻断回归。因此后台插件异步重绘只影响自己所在区，不会再覆盖另一区；若某插件漏迁，`smoke_plugins` 直接 FAIL 并列出插件 id:行号。
+13. **分屏/右栏是宿主视图基础设施**：只做布局与偏好（上下分屏、聚焦区、右栏快捷按钮），不含业务逻辑；快捷按钮列表是宿主偏好（`data/settings.json` 的 `quickbar`），不是插件业务数据。插件前端入口统一为 `render(container)`：宿主给上下两区各传独立容器，插件必须使用传入容器（`container.querySelector` 等），**禁止直接取 `#tool-view`**；`smoke_plugins` 会静态检查并阻断回归。因此后台插件异步重绘只影响自己所在区，不会再覆盖另一区；**已知边界**：插件入口把传入容器缓存为模块级 `ROOT`，关闭该区后重开同一插件时，若旧回调尚未返回，可能渲染到新容器（仍是同一插件，数据不丢；重开或刷新即可）。若某插件漏迁，`smoke_plugins` 直接 FAIL 并列出插件 id:行号。
 
 ## 8. 多 AI 共建与打卡
 

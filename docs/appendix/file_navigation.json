@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-03T21:50:34+03:00",
+  "generated_at": "2026-11-03T21:58:00+03:00",
   "round": 117,
   "pending": [
     {
@@ -16,6 +16,14 @@
     }
   ],
   "decided": [
+    {
+      "path": "ui/web/static/app.js",
+      "decision": "总括：宿主分屏改两区独立容器 + 20 插件 render(container) 迁移 + 移除 #tool-view（round 117）",
+      "reason": "宿主删除 setToolViewId 与 id 切换，两区 .tool-pane-body 各自独立；20 个插件（22 个 feature 文件）入口改为 render(container) 并使用传入容器（异步回调经模块级 ROOT 或作用域查询）；grep 插件代码 #tool-view 归零，smoke_plugins 新增静态检查防回归；index.html/app.css 无 #tool-view 引用。",
+      "status": "done",
+      "round": 117,
+      "at": "2026-11-03T21:58:00+03:00"
+    },
     {
       "path": "plugins/ai/feature.js",
       "decision": "前端入口迁移到 render(container)（round 117）",

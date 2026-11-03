@@ -2,9 +2,9 @@
 
 > 只读摘要，勿手改。本文件由 docs/appendix/file_navigation.json 生成；结构与去留决定以 JSON 为准。
 
-- 生成时间：2026-11-03T21:50:34+03:00
+- 生成时间：2026-11-03T21:58:00+03:00
 - 轮次：117
-- 待办：1 条；已决定：818 条
+- 待办：1 条；已决定：819 条
 
 ## 待办
 
@@ -16,6 +16,7 @@
 
 | 路径 | 决定 | 原因 | 状态 | 轮次 | 时间 | 备份路径 |
 | --- | --- | --- | --- | --- | --- | --- |
+| ui/web/static/app.js | 总括：宿主分屏改两区独立容器 + 20 插件 render(container) 迁移 + 移除 #tool-view（round 117） | 宿主删除 setToolViewId 与 id 切换，两区 .tool-pane-body 各自独立；20 个插件（22 个 feature 文件）入口改为 render(container) 并使用传入容器（异步回调经模块级 ROOT 或作用域查询）；grep 插件代码 #tool-view 归零，smoke_plugins 新增静态检查防回归；index.html/app.css 无 #tool-view 引用。 | done | 117 | 2026-11-03T21:58:00+03:00 |  |
 | plugins/ai/feature.js | 前端入口迁移到 render(container)（round 117） | 入口改为 render(container) 并在首行 ROOT = container；内部 #tool-view 直接引用改为 ROOT 或 ROOT.querySelector(All)，异步回调使用入口容器，不再依赖全局 id；配合宿主两区独立容器修复后台异步重绘覆盖另一区的问题。 | done | 117 | 2026-11-03T21:50:34+03:00 |  |
 | plugins/aidebug/feature.js | 前端入口迁移到 render(container)（round 117） | 入口改为 render(container) 并在首行 ROOT = container；内部 #tool-view 直接引用改为 ROOT 或 ROOT.querySelector(All)，异步回调使用入口容器，不再依赖全局 id；配合宿主两区独立容器修复后台异步重绘覆盖另一区的问题。 | done | 117 | 2026-11-03T21:50:34+03:00 |  |
 | plugins/bg_library/feature.js | 前端入口迁移到 render(container)（round 117） | 入口改为 render(container) 并在首行 ROOT = container；内部 #tool-view 直接引用改为 ROOT 或 ROOT.querySelector(All)，异步回调使用入口容器，不再依赖全局 id；配合宿主两区独立容器修复后台异步重绘覆盖另一区的问题。 | done | 117 | 2026-11-03T21:50:34+03:00 |  |
